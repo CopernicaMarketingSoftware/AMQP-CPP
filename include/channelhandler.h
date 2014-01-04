@@ -23,7 +23,6 @@ class ChannelHandler
 public:
     /**
      *  Method that is called when the channel was succesfully created.
-     *  Only after the channel was created, you can use it for subsequent messages over it
      *  @param  channel
      */
     virtual void onReady(Channel *channel) {}
@@ -37,66 +36,77 @@ public:
 
     /**
      *  Method that is called when the channel was paused
+     *  This is the result of a call to Channel::pause()
      *  @param  channel
      */
     virtual void onPaused(Channel *channel) {}
     
     /**
      *  Method that is called when the channel was resumed
+     *  This is the result of a call to Channel::resume()
      *  @param  channel
      */
     virtual void onResumed(Channel *channel) {}
     
     /**
      *  Method that is called when a channel is closed
+     *  This is the result of a call to Channel::close()
      *  @param  channel
      */
     virtual void onClosed(Channel *channel) {}
     
     /**
      *  Method that is called when a transaction was started
+     *  This is the result of a call to Channel::startTransaction()
      *  @param  channel
      */
     virtual void onTransactionStarted(Channel *channel) {}
     
     /**
      *  Method that is called when a transaction was committed
+     *  This is the result of a call to Channel::commitTransaction()
      *  @param  channel
      */
     virtual void onTransactionCommitted(Channel *channel) {}
     
     /**
      *  Method that is called when a transaction was rolled back
+     *  This is the result of a call to Channel::rollbackTransaction()
      *  @param  channel
      */
     virtual void onTransactionRolledBack(Channel *channel) {}
     
     /**
      *  Method that is called when an exchange is bound
+     *  This is the result of a call to Channel::bindExchange()
      *  @param  channel
      */
     virtual void onExchangeBound(Channel *channel) {}
     
     /**
      *  Method that is called when an exchange is unbound
+     *  This is the result of a call to Channel::unbindExchange()
      *  @param  channel
      */
     virtual void onExchangeUnbound(Channel *channel) {}     
     
     /**
      *  Method that is called when an exchange is deleted
+     *  This is the result of a call to Channel::deleteExchange()
      *  @param  channel
      */
     virtual void onExchangeDeleted(Channel *channel) {}
     
     /**
      *  Mehod that is called when an exchange is declared
+     *  This is the result of a call to Channel::declareExchange()
      *  @param  channel
      */
     virtual void onExchangeDeclared(Channel *channel) {}
     
     /**
      *  Method that is called when a queue is declared
+     *  This is the result of a call to Channel::declareQueue()
      *  @param  channel
      *  @param  name            name of the queue
      *  @param  messageCount    number of messages in queue
@@ -106,6 +116,7 @@ public:
     
     /**
      *  Method that is called when a queue is bound
+     *  This is the result of a call to Channel::bindQueue()
      *  @param  channel
      *  @param  
      */
@@ -113,6 +124,7 @@ public:
     
     /**
      *  Method that is called when a queue is deleted
+     *  This is the result of a call to Channel::deleteQueue()
      *  @param  channel
      *  @param  messageCount    number of messages deleted along with the queue
      */
@@ -120,12 +132,14 @@ public:
     
     /**
      *  Method that is called when a queue is unbound
+     *  This is the result of a call to Channel::unbindQueue()
      *  @param  channel
      */
     virtual void onQueueUnbound(Channel *channel) {}
     
     /**
      *  Method that is called when a queue is purged
+     *  This is the result of a call to Channel::purgeQueue()
      *  @param  messageCount        number of message purged
      */
     virtual void onQueuePurged(Channel *channel, uint32_t messageCount) {}

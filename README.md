@@ -93,25 +93,26 @@ channel.declareQueue("my-queue");
 channel.bindQueue("my-exchange", "my-queue");
 ````
 
-A number of remarks about the above example. First you may have noticed that we've
+A number of remarks about the example above. First you may have noticed that we've
 created all objects on the stack. You are of course also free to create them
 on the heap with the C++ operator 'new'. That works just as good.
 
-But more importantly, you see that in the example above we have created the 
-channel object directly after we created the connection object, and we did also 
-start declaring exchanges and queues right away. It would have been better to 
-first wait for the connection to be ready (and the onConnected() method is called
-in your handler object), before you create channel objects and start calling
-methods. But if you insist, you do not have to wait, and you are free to call 
-the additional methods right away.
+But more importantly, you can see in the example above that we have created the 
+channel object directly after we made the connection object, and we also 
+started declaring exchanges and queues right away. It would have been better if
+we had waited for the connection to be ready, and create the channel object
+inside the onConnected() method in the MyConnectionHandler class. But this is 
+not strictly necessary. The methods that are called before the connection is
+ready are cached by the AMQP library and will be executed the moment the 
+connection becomes ready for use.
 
 As we've explained above, the AMQP library does not do any IO by itself and when it
-needs to send data to RabbitMQ, it will call the onData() method in your handler
-object. But it is of course also not possible for the library to receive data from 
+needs to send data to RabbitMQ, it will call the onData() method in the handler
+object. It is of course also not possible for the library to receive data from 
 the server. It is again up to you to to this. If, for example, you notice in your 
 event loop that the socket that is connected with the RabbitMQ server becomes 
-readable, you should read out that data (for example by calling the recv() system 
-call), and pass the received bytes to the AMQP library. This can be done by
+readable, you should read out that data (for example by using the recv() system 
+call), and pass the received bytes to the AMQP library. This is done by
 calling the parse() method in the Connection object.
 
 The Connection::parse() method gets two parameters, a pointer to a buffer of
@@ -141,4 +142,107 @@ size_t parse(char *buffer, size_t size)
 }
 ````
 
+The channel object has many methods to declare queues and exchanges, to bind
+and unbind them, to publish and consume messages - and more. You can best take a 
+look in the channel.h C++ header file for a list of all available methods. Every 
+method in it is well documented.
+
+The constructor of the Channel object gets two parameters: the connection object,
+and a pointer to a ChannelHandler object. In the first example that we gave we have 
+not yet used this ChannelHandler object. However, in normal circumstances when you 
+construct a Channel object, you should also pass a pointer to a ChannelHandler object. 
+
+Just like the ConnectionHandler class, the ChannelHandler class is a base class that 
+you should extend and override the virtual methods that you need. The AMQP library 
+will call these methods to inform you that an operation has succeeded or has failed.
+For example, if you call the channel.declareQueue() method, the AMQP library will
+internally send a message to the RabbitMQ message broker to ask it to declare the
+queue. If the method returns true it only means that the message has succesfully
+been sent, but not that the queue has really been declared. This is only known
+after the server has sent back a message to the client to report whether the
+queue was succesfully created or not. When this answer is received, the AMQP library 
+will call the method ChannelHandler::onQueueDeclared() method - which you can
+implement in the ChannelHandler object.
+
+All methods in the base ChannelHandler class have a default empty implementation,
+so you do not have to implement all of them - only the ones that you are interested
+in.
+
+````c++
+#include <amqp.h>
+
+class MyChannelHandler : public AMQP::ChannelHandler
+{
+public:
+    /**
+     *  Method that is called when an error occurs on the channel, and
+     *  the channel ends up in an error state
+     *  @param  channel     the channel on which the error occured
+     *  @param  message     human readable error message
+     */
+    virtual void onError(AMQP::Channel *channel, const std::string &message)
+    {
+        // @todo
+        //  do something with the error message (like reporting it to the end-user)
+        //  and destruct the channel object because it now no longer is usable
+    }
+
+    /**
+     *  Method that is called when a queue has been declared
+     *  @param  channel         the channel via which the queue was declared
+     *  @param  name            name of the queue
+     *  @param  messageCount    number of messages in queue
+     *  @param  consumerCount   number of active consumers
+     */
+    virtual void onQueueDeclared(AMQP::Channel *channel, const std::string &name, uint32_t messageCount, uint32_t consumerCount)
+    {
+        // @todo
+        //  do something with the information that cam back, or start using the queue
+    }
+};
+````
+
+Let's take a closer look at one of the methods in the Channel object to explain
+two other concepts of this AMQP library: flags and tables. The method that we
+will be looking at is the Channel::declareQueue() method:
+
+````c++
+/**
+ *  Declare a queue
+ * 
+ *  If you do not supply a name, a name will be assigned by the server.
+ * 
+ *  The flags can be a combination of the following values:
+ * 
+ *      -   durable     queue survives a broker restart
+ *      -   autodelete  queue is automatically removed when all connected consumers are gone
+ *      -   passive     only check if the queue exist
+ *      -   exclusive   the queue only exists for this connection, and is automatically removed when connection is gone
+ *    
+ *  @param  name        name of the queue
+ *  @param  flags       combination of flags
+ *  @param  arguments   optional arguments
+ */
+bool declareQueue(const std::string &name, int flags, const Table &arguments) { return _implementation.declareQueue(name, flags, arguments); }
+````
+
+Many methods in the Channel class support have a parameter named 'flags'. This
+is a variable in which you can enable a number of options. If you for example
+want to create a durable, auto-deleted queue, you should pass in the value
+AMQP::durable + AMQP::autodelete.
+
+The declareQueue() method also accepts a arguments parameter, which is of type
+Table. The Table object can be used as an associative array to send additional
+options to RabbitMQ, that are often custom RabbitMQ extensions to the AMQP 
+standard:
+
+````c++
+// custom options that are passed to the declareQueue call
+Table customOptions;
+customOptions["x-message-ttl"] = 3600 * 1000;
+customOptions["x-expires"] = 7200 * 1000;
+
+// declare the queue
+channel.declareQueue("my-queue-name", AMQP::durable + AMQP::autodelete, customOptions);
+````
 

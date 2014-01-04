@@ -103,9 +103,9 @@ public:
      * 
      *  The following flags can be used for the exchange:
      *  
-     *      -   amqp_durable        exchange survives a broker restart
-     *      -   amqp_autodelete     exchange is automatically removed when all connected queues are removed
-     *      -   amqp_passive        only check if the exchange exist
+     *      -   durable     exchange survives a broker restart
+     *      -   autodelete  exchange is automatically removed when all connected queues are removed
+     *      -   passive     only check if the exchange exist
      * 
      *  @param  name        name of the exchange
      *  @param  type        exchange type
@@ -125,7 +125,7 @@ public:
      * 
      *  The following flags can be used for the exchange:
      *  
-     *      -   amqp_ifunused       only delete if no queues are connected
+     *      -   ifunused    only delete if no queues are connected
 
      *  @param  name        name of the exchange to remove
      *  @param  flags       optional flags
@@ -138,7 +138,7 @@ public:
      * 
      *  The following flags can be used for the exchange
      * 
-     *      -   amqp_nowait     do not wait on response
+     *      -   nowait      do not wait on response
      * 
      *  @param  source      the source exchange
      *  @param  target      the target exchange
@@ -156,7 +156,7 @@ public:
      * 
      *  The following flags can be used for the exchange
      * 
-     *      -   amqp_nowait     do not wait on response
+     *      -   nowait      do not wait on response
      * 
      *  @param  target      the target exchange
      *  @param  source      the source exchange
@@ -176,10 +176,10 @@ public:
      * 
      *  The flags can be a combination of the following values:
      * 
-     *      -   amqp_durable        queue survives a broker restart
-     *      -   amqp_autodelete     queue is automatically removed when all connected consumers are gone
-     *      -   amqp_passive        only check if the queue exist
-     *      -   amqp_exclusive      the queue only exists for this connection, and is automatically removed when connection is gone
+     *      -   durable     queue survives a broker restart
+     *      -   autodelete  queue is automatically removed when all connected consumers are gone
+     *      -   passive     only check if the queue exist
+     *      -   exclusive   the queue only exists for this connection, and is automatically removed when connection is gone
      *    
      *  @param  name        name of the queue
      *  @param  flags       combination of flags
@@ -197,7 +197,7 @@ public:
      *  
      *  The following flags can be used for the exchange
      * 
-     *      -   amqp_noWait     do not wait on response
+     *      -   nowait      do not wait on response
      * 
      *  @param  queue       the target queue
      *  @param  exchange    the source exchange
@@ -226,7 +226,7 @@ public:
      * 
      *  The following flags can be used for the exchange
      * 
-     *      -   amqp_noWait     do not wait on response
+     *      -   nowait      do not wait on response
      * 
      *  @param  name        name of the queue
      *  @param  flags       additional flags
@@ -239,8 +239,8 @@ public:
      * 
      *  The following flags can be used for the exchange:
      *  
-     *      -   amqp_ifunused       only delete if no consumers are connected
-     *      -   amqp_ifempty        only delete if the queue is empty
+     *      -   ifunused    only delete if no consumers are connected
+     *      -   ifempty     only delete if the queue is empty
      *
      *  @param  name        name of the queue to remove
      *  @param  flags       optional flags
