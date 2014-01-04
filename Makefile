@@ -1,7 +1,6 @@
 PREFIX                  = /usr
 INCLUDE_DIR             = ${PREFIX}/include
 LIBRARY_DIR             = ${PREFIX}/lib
-COPERNICA_INCLUDE_DIR   = ${INCLUDE_DIR}/copernica
 
 all:
 		$(MAKE) -C src all
@@ -10,9 +9,9 @@ clean:
 		$(MAKE) -C src clean
 
 install:
-		mkdir -p ${COPERNICA_INCLUDE_DIR}/amqp
+		mkdir -p ${INCLUDE_DIR}/libamqp
 		mkdir -p ${LIBRARY_DIR}
-		cp -f amqp.h ${COPERNICA_INCLUDE_DIR}
-		cp -f include/*.h ${COPERNICA_INCLUDE_DIR}/amqp
-		cp -f src/libcopernica_amqp.so ${LIBRARY_DIR}
-		cp -f src/libcopernica_amqp.a ${LIBRARY_DIR}
+		cp -f libamqp.h ${INCLUDE_DIR}
+		cp -f include/*.h ${INCLUDE_DIR}/amqp
+		cp -f src/libamqp.so ${LIBRARY_DIR}
+		cp -f src/libamqp.a ${LIBRARY_DIR}
