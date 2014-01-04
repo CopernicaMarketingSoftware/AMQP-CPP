@@ -13,7 +13,16 @@ AMQP library and that the library will use for IO operations.
 
 This architecture makes the library extremely flexible: it does not rely on
 operating system specific IO calls, and it can be easily integrated into any
-event loop.
+event loop. It also does not do any blocking system calls, so it can be used
+in high performance applications without the need for threads.
+
+
+ABOUT
+=====
+
+This library is created and maintained by Copernica (www.copernica.com), and is 
+used inside the MailerQ (www.mailerq.com) application, MailerQ is a tool for 
+sending large volumes of email, using AMQP message queues.
 
 
 HOW TO USE
@@ -156,13 +165,13 @@ Just like the ConnectionHandler class, the ChannelHandler class is a base class 
 you should extend and override the virtual methods that you need. The AMQP library 
 will call these methods to inform you that an operation has succeeded or has failed.
 For example, if you call the channel.declareQueue() method, the AMQP library will
-internally send a message to the RabbitMQ message broker to ask it to declare the
-queue. If the method returns true it only means that the message has succesfully
-been sent, but not that the queue has really been declared. This is only known
+send a message to the RabbitMQ message broker to ask it to declare the
+queue, and return true to indicate that the message has been sent. However, this
+does not mean that the queue has succesfully been declared. This is only known
 after the server has sent back a message to the client to report whether the
 queue was succesfully created or not. When this answer is received, the AMQP library 
 will call the method ChannelHandler::onQueueDeclared() method - which you can
-implement in the ChannelHandler object.
+override in your ChannelHandler object.
 
 All methods in the base ChannelHandler class have a default empty implementation,
 so you do not have to implement all of them - only the ones that you are interested
@@ -223,11 +232,11 @@ will be looking at is the Channel::declareQueue() method:
  *  @param  flags       combination of flags
  *  @param  arguments   optional arguments
  */
-bool declareQueue(const std::string &name, int flags, const Table &arguments) { return _implementation.declareQueue(name, flags, arguments); }
+bool declareQueue(const std::string &name, int flags, const Table &arguments);
 ````
 
 Many methods in the Channel class support have a parameter named 'flags'. This
-is a variable in which you can enable a number of options. If you for example
+is a variable in which you can set a number of options. If you for example
 want to create a durable, auto-deleted queue, you should pass in the value
 AMQP::durable + AMQP::autodelete.
 
@@ -238,11 +247,17 @@ standard:
 
 ````c++
 // custom options that are passed to the declareQueue call
-Table customOptions;
-customOptions["x-message-ttl"] = 3600 * 1000;
-customOptions["x-expires"] = 7200 * 1000;
+Table arguments;
+arguments["x-message-ttl"] = 3600 * 1000;
+arguments["x-expires"] = 7200 * 1000;
 
 // declare the queue
-channel.declareQueue("my-queue-name", AMQP::durable + AMQP::autodelete, customOptions);
+channel.declareQueue("my-queue-name", AMQP::durable + AMQP::autodelete, arguments);
 ````
+
+WORK IN PROGRESS
+================
+
+It is not yet possible to publish messages, and consume messages with this library.
+These features will soon be added.
 
