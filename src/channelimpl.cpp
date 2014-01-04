@@ -50,7 +50,7 @@ ChannelImpl::ChannelImpl(Channel *parent, Connection *connection, ChannelHandler
         _state = state_closed;
         
         // invalid id, this channel can not exist
-        handler->onChannelError(_parent, "Max number of channels reached");
+        handler->onError(_parent, "Max number of channels reached");
     }
     else
     {

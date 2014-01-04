@@ -16,6 +16,29 @@
 namespace AMQP {
 
 /**
+ *  Construct an AMQP object based on full login data
+ * 
+ *  The first parameter is a handler object. This handler class is
+ *  an interface that should be implemented by the caller.
+ * 
+ *  Note that the constructor is private to ensure that nobody can construct
+ *  this class, only the real Connection class via a friend construct
+ * 
+ *  @param  parent          Parent connection object
+ *  @param  handler         Connection handler
+ *  @param  login           Login data
+ */
+ConnectionImpl::ConnectionImpl(Connection *parent, ConnectionHandler *handler, const Login &login, const std::string &vhost) :
+    _parent(parent), _handler(handler), _login(login), _vhost(vhost)
+{
+    // we need a protocol header
+    ProtocolHeaderFrame header;
+    
+    // send out the protocol header
+    send(header);
+}
+
+/**
  *  Destructor
  */
 ConnectionImpl::~ConnectionImpl()
@@ -25,18 +48,6 @@ ConnectionImpl::~ConnectionImpl()
 
     // still in a connected state - should we send the close frame?
     close();
-}
-
-/**
- *  Initialize the connection
- */
-void ConnectionImpl::initialize()
-{
-    // we need a protocol header
-    ProtocolHeaderFrame header;
-    
-    // send out the protocol header
-    send(header);
 }
 
 /**

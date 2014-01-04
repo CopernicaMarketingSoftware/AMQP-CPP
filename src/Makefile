@@ -1,14 +1,14 @@
-CPP			= g++-4.8
-RM			= rm -f
+CPP			    = g++
+RM			    = rm -f
 CPPFLAGS		= -Wall -c -I. -O2 -flto -std=c++11 -g
-LD			= g++
+LD			    = g++
 LD_FLAGS		= -Wall -shared -O2
-RESULT			= libcopernica_amqp.so
+RESULT			= libamqp++.so
 
 STATIC			= $(RESULT:%.so=%.a)
 SOURCES			= $(wildcard *.cpp)
 OBJECTS			= $(SOURCES:%.cpp=%.o)
-OBJECTS_STATIC		= $(SOURCES:%.cpp=%.s.o)
+OBJECTS_STATIC	= $(SOURCES:%.cpp=%.s.o)
 
 all:	${OBJECTS} ${OBJECTS_STATIC} ${RESULT}
 	$(MAKE) STATIC_LIB

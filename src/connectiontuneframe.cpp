@@ -33,7 +33,7 @@ bool ConnectionTuneFrame::process(ConnectionImpl *connection)
     connection->send(okframe);
     
     // and finally we start to open the frame
-    ConnectionOpenFrame openframe(connection->login().vhost());
+    ConnectionOpenFrame openframe(connection->vhost());
     
     // send the open frame
     connection->send(openframe);
