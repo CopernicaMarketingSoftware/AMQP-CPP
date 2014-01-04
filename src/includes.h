@@ -8,7 +8,7 @@
  */
 
 // include the generic amqp functions
-#include <copernica/amqp.h>
+#include "../libamqp.h"
 
 // classes that are very commonly used
 #include "frame.h"

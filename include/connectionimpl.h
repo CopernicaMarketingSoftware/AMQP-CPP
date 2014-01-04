@@ -79,6 +79,12 @@ protected:
      *  @var    string
      */
     std::string _vhost;
+    
+    /**
+     *  Queued messages that should be sent after the connection has been established
+     *  @var    queue
+     */
+    std::queue<std::string> _queue;
 
 
 private:
@@ -135,14 +141,7 @@ public:
     /**
      *  Mark the connection as connected
      */
-    void setConnected()
-    {
-        // store connected state
-        _state = state_connected;
-        
-        // inform handler
-        _handler->onConnected(_parent);
-    }
+    void setConnected();
     
     /**
      *  Retrieve the login data

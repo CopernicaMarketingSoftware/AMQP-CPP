@@ -43,6 +43,15 @@ public:
     virtual void fill(OutBuffer &buffer) const = 0;
     
     /**
+     *  Is this a frame that is part of the connection setup?
+     *  @return bool
+     */
+    virtual bool partOfHandshake() const
+    {
+        return false;
+    }
+    
+    /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
      *  @return bool            Was it succesfully processed?

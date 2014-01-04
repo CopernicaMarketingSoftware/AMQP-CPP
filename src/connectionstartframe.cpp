@@ -22,8 +22,6 @@ bool ConnectionStartFrame::process(ConnectionImpl *connection)
 {
     // @todo we must still be in protocol handshake mode
     
-    // move connection to handshake mode
-    connection->setProtocolOk();
     
     // the peer properties
     Table properties;
@@ -35,11 +33,11 @@ bool ConnectionStartFrame::process(ConnectionImpl *connection)
     properties["copyright"] = "Copyright 2014 Copernica BV";
     properties["information"] = "";
     
-    // the start ok frame we'd like to send back
-    ConnectionStartOKFrame frame(properties, "PLAIN", connection->login().saslPlain(), "en_US");
+    // move connection to handshake mode
+    connection->setProtocolOk();
     
     // send back a connection start ok frame
-    connection->send(frame);
+    connection->send(ConnectionStartOKFrame(properties, "PLAIN", connection->login().saslPlain(), "en_US"));
     
     // done
     return true;

@@ -116,6 +116,15 @@ public:
     {
         return _heartbeat;
     }
+
+    /**
+     *  Is this a frame that is part of the connection setup?
+     *  @return bool
+     */
+    virtual bool partOfHandshake() const override
+    {
+        return true;
+    }
 };
 
 /**

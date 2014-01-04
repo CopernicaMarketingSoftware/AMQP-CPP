@@ -33,7 +33,7 @@ with a number of methods that are called by the library every time it wants
 to send out data, or when it needs to inform you that an error occured.
 
 ````c++
-#include <amqp.h>
+#include <libamqp.h>
 
 class MyConnectionHandler : public AMQP::ConnectionHandler
 {
@@ -178,7 +178,7 @@ so you do not have to implement all of them - only the ones that you are interes
 in.
 
 ````c++
-#include <amqp.h>
+#include <libamqp.h>
 
 class MyChannelHandler : public AMQP::ChannelHandler
 {

@@ -174,14 +174,48 @@ bool ConnectionImpl::close()
 }
 
 /**
+ *  Mark the connection as connected
+ */
+void ConnectionImpl::setConnected()
+{
+    // store connected state
+    _state = state_connected;
+    
+    // we're going to call the handler, which can destruct the connection,
+    // so we must monitor if the queue object is still valid after calling the
+    // handler
+    Monitor monitor(this);
+    
+    // inform handler
+    _handler->onConnected(_parent);
+    
+    // leap out if the connection no longer exists
+    if (!monitor.valid()) return;
+    
+    // empty the queue of messages
+    while (!_queue.empty())
+    {
+        // get the next message
+        std::string message(_queue.front());
+    
+        // remove it from the queue
+        _queue.pop();
+        
+        // send it
+        _handler->onData(_parent, message.data(), message.size());
+        
+        // leap out if the connection was destructed
+        if (!monitor.valid()) return;
+    }
+}
+
+/**
  *  Send a frame over the connection
  *  @param  frame           The frame to send
  *  @return size_t          Number of bytes sent
  */
 size_t ConnectionImpl::send(const Frame &frame)
 {
-    std::cout << "send frame of " << frame.totalSize() << " bytes" << std::endl;
-    
     // we need an output buffer
     OutBuffer buffer(frame.totalSize());
     
@@ -191,8 +225,17 @@ size_t ConnectionImpl::send(const Frame &frame)
     // append an end of frame byte (but not when still negotiating the protocol)
     if (_state != state_protocol) buffer.add((uint8_t)206);
     
-    // send the buffer
-    _handler->onData(_parent, buffer.data(), buffer.size());
+    // are we still setting up the connection?
+    if ((_state == state_protocol || _state == state_handshake) && !frame.partOfHandshake())
+    {
+        // the connection is still being set up, so we need to delay the message sending
+        _queue.push(std::string(buffer.data(), buffer.size()));
+    }
+    else
+    {
+        // send the buffer
+        _handler->onData(_parent, buffer.data(), buffer.size());
+    }
     
     // done
     return buffer.size();

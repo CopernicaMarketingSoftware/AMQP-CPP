@@ -26,17 +26,17 @@ bool ConnectionTuneFrame::process(ConnectionImpl *connection)
     // remember this in the connection
     connection->setCapacity(channelMax(), frameMax());
     
-    // send a tune-ok frame back
-    ConnectionTuneOKFrame okframe(channelMax(), frameMax(), heartbeat());
+    // theoretically it is possible that the connection object gets destructed between sending the messages
+    Monitor monitor(connection);
     
     // send it back
-    connection->send(okframe);
+    connection->send(ConnectionTuneOKFrame(channelMax(), frameMax(), heartbeat()));
+    
+    // check if the connection object still exists
+    if (!monitor.valid()) return true;
     
     // and finally we start to open the frame
-    ConnectionOpenFrame openframe(connection->vhost());
-    
-    // send the open frame
-    connection->send(openframe);
+    connection->send(ConnectionOpenFrame(connection->vhost()));
     
     // done
     return true;
