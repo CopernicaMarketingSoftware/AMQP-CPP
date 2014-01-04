@@ -121,6 +121,12 @@ public:
      *  @param  size
      */
     Envelope(const char *data, size_t size) : _data(data), _size(size) {}
+    
+    /**
+     *  Constructor based on a string
+     *  @param  message
+     */
+    Envelope(const std::string &data) : _data(data.data()), _size(data.size()) {}
 
     /**
      *  Destructor

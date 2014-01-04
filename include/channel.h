@@ -249,6 +249,30 @@ public:
     bool removeQueue(const std::string &name, int flags = 0) { return _implementation.removeQueue(name, flags); }
     
     /**
+     *  Publish a message to an exchange
+     * 
+     *  The following flags can be used
+     * 
+     *      -   mandatory   if set, an unroutable message will be reported to the channel handler with the onReturned method
+     *      -   immediate   if set, a message that could not immediately be consumed is returned to the onReturned method
+     * 
+     *  @todo   implement to onReturned() method
+     * 
+     *  @param  exchange    the exchange to publish to
+     *  @param  routingkey  the routing key
+     *  @param  flags       optional flags (see above)
+     *  @param  envelope    the full envelope to send
+     *  @param  message     the message to send
+     *  @param  size        size of the message
+     */
+    bool publish(const std::string &exchange, const std::string &routingKey, int flags, const Envelope &envelope) { return _implementation.publish(exchange, routingKey, flags, envelope); }
+    bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope) { return _implementation.publish(exchange, routingKey, 0, envelope); }
+    bool publish(const std::string &exchange, const std::string &routingKey, int flags, const std::string &message) { return _implementation.publish(exchange, routingKey, flags, Envelope(message)); }
+    bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message) { return _implementation.publish(exchange, routingKey, 0, Envelope(message)); }
+    bool publish(const std::string &exchange, const std::string &routingKey, int flags, const char *message, size_t size) { return _implementation.publish(exchange, routingKey, flags, Envelope(message, size)); }
+    bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size) { return _implementation.publish(exchange, routingKey, 0, Envelope(message, size)); }
+    
+    /**
      *  Close the current channel
      *  @return bool
      */

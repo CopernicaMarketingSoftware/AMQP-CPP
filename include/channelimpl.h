@@ -209,6 +209,25 @@ public:
      *  @return bool
      */
     bool removeQueue(const std::string &name, int flags);
+
+    /**
+     *  Publish a message to an exchange
+     * 
+     *  The following flags can be used
+     * 
+     *      -   mandatory   if set, an unroutable message will be reported to the channel handler with the onReturned method
+     *      -   immediate   if set, a message that could not immediately be consumed is returned to the onReturned method
+     * 
+     *  @todo   implement to onReturned() method
+     * 
+     *  @param  exchange    the exchange to publish to
+     *  @param  routingkey  the routing key
+     *  @param  flags       optional flags (see above)
+     *  @param  envelope    the full envelope to send
+     *  @param  message     the message to send
+     *  @param  size        size of the message
+     */
+    bool publish(const std::string &exchange, const std::string &routingKey, int flags, const Envelope &envelope);
     
     /**
      *  Close the current channel
@@ -275,7 +294,7 @@ public:
      *  Report an error message on a channel
      *  @param  message
      */
-    void reportChannelError(const std::string &message)
+    void reportError(const std::string &message)
     {
         // change state
         _state = state_closed;
@@ -289,7 +308,7 @@ public:
      */
     void reportExchangeDeclared()
     {
-        if(_handler) _handler->onExchangeDeclared(_parent);
+        if (_handler) _handler->onExchangeDeclared(_parent);
     }
     
     /**
@@ -297,7 +316,7 @@ public:
      */
     void reportExchangeDeleted()
     {
-        if(_handler) _handler->onExchangeDeleted(_parent);
+        if (_handler) _handler->onExchangeDeleted(_parent);
     }
     
     /**
@@ -305,7 +324,7 @@ public:
      */
     void reportExchangeBound()
     {
-        if(_handler) _handler->onExchangeBound(_parent);
+        if (_handler) _handler->onExchangeBound(_parent);
     }
     
     /**
@@ -313,7 +332,7 @@ public:
      */
     void reportExchangeUnbound()
     {
-        if(_handler) _handler->onExchangeUnbound(_parent);
+        if (_handler) _handler->onExchangeUnbound(_parent);
     }
     
     /**
@@ -324,7 +343,7 @@ public:
      */
     void reportQueueDeclared(const std::string &queueName, uint32_t messageCount, uint32_t consumerCount)
     {
-        if(_handler) _handler->onQueueDeclared(_parent, queueName, messageCount, consumerCount);
+        if (_handler) _handler->onQueueDeclared(_parent, queueName, messageCount, consumerCount);
     }
     
     /**
@@ -332,7 +351,7 @@ public:
      */
     void reportQueueBound()
     {
-        if(_handler) _handler->onQueueBound(_parent);
+        if (_handler) _handler->onQueueBound(_parent);
     }
     
     /**
@@ -340,7 +359,7 @@ public:
      */
     void reportQueueUnbound()
     {
-        if(_handler) _handler->onQueueUnbound(_parent);
+        if (_handler) _handler->onQueueUnbound(_parent);
     }
     
     /**
@@ -349,7 +368,7 @@ public:
      */
     void reportQueueDeleted(uint32_t messageCount)
     {
-        if(_handler) _handler->onQueueDeleted(_parent, messageCount);
+        if (_handler) _handler->onQueueDeleted(_parent, messageCount);
     }
     
     /**
@@ -358,7 +377,7 @@ public:
      */
     void reportQueuePurged(uint32_t messageCount)
     {
-        if(_handler) _handler->onQueuePurged(_parent, messageCount);
+        if (_handler) _handler->onQueuePurged(_parent, messageCount);
     }
     
     /**

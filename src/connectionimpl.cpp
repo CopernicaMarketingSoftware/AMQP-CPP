@@ -138,7 +138,7 @@ size_t ConnectionImpl::parse(char *buffer, size_t size)
         catch (const ProtocolException &exception)
         {
             // something terrible happened on the protocol (like data out of range)
-            reportConnectionError(exception.what());
+            reportError(exception.what());
             
             // done
             return processed;

@@ -19,12 +19,14 @@ namespace AMQP {
  */
 bool ConnectionCloseFrame::process(ConnectionImpl *connection)
 {
+    // @todo    connection could be destructed after frame was sent
+    
     // send back the ok frame
     connection->send(ConnectionCloseOKFrame());
     
     // no need to check for a channel, the error is connection wide
     // report the error on the connection
-    connection->reportConnectionError(text());
+    connection->reportError(text());
     
     // done
     return true;

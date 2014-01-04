@@ -241,9 +241,10 @@ public:
      *  Report an error message
      *  @param  message
      */
-    void reportConnectionError(const std::string &message)
+    void reportError(const std::string &message)
     {
         // close everything
+        //  @todo is this not duplicate?
         close();
 
         // set connection state to closed

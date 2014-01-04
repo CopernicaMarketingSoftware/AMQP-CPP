@@ -29,7 +29,7 @@ bool ChannelCloseFrame::process(ConnectionImpl *connection)
     if (!channel) return false;
     
     // report to the handler
-    channel->reportChannelError(text());
+    channel->reportError(text());
     
     // done
     return true;
