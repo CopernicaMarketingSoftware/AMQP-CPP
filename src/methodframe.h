@@ -1,0 +1,78 @@
+/**
+ *  Class describing an AMQP method frame
+ * 
+ *  @copyright 2014 Copernica BV
+ */
+
+/**
+ *  Set up namespace
+ */
+namespace AMQP {
+
+/**
+ *  Class implementation
+ */
+class MethodFrame : public ExtFrame
+{
+protected:
+    /**
+     *  Constructor for a methodFrame
+     * 
+     *  @param  channel     channel we're working on
+     *  @param  size        size of the frame.
+     */
+    MethodFrame(uint16_t channel, uint32_t size) : ExtFrame(channel, size + 4) {} // size of classID and methodID
+    
+    /**
+     *  Load a method from from a received frame
+     *  @param  frame       The received frame
+     */
+    MethodFrame(ReceivedFrame &frame) : ExtFrame(frame) {}
+    
+    /**
+     *  Fill an output buffer
+     *  @param  buffer
+     */
+    virtual void fill(OutBuffer &buffer) const override
+    {
+        // call base
+        ExtFrame::fill(buffer);
+        
+        // add type
+        buffer.add(classID());
+        buffer.add(methodID());
+    }
+
+public:
+    /**
+     *  Destructor
+     */
+    virtual ~MethodFrame() {}
+
+    /**
+     *  Get the message type
+     *  @return uint8_t
+     */
+    virtual uint8_t type() const override
+    {
+        return 1;
+    }
+
+    /**
+     *  Class id
+     *  @return uint16_t
+     */
+    virtual uint16_t classID() const = 0;
+
+    /**
+     *  Method id
+     *  @return uint16_t
+     */
+    virtual uint16_t methodID() const = 0;
+};
+
+/**
+ *  end namespace
+ */
+}
+

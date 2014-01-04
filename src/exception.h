@@ -1,0 +1,36 @@
+/**
+ *  Exception.h
+ *
+ *  Base class for all AMQP exceptions
+ *
+ *  @copyright 2014 Copernica BV
+ */
+
+/**
+ *  Set up namespace
+ */
+namespace AMQP {
+
+/**
+ *  Base exception class
+ */
+class Exception : public std::runtime_error
+{
+protected:
+    /**
+     *  Constructor
+     *  @param  what
+     */
+    explicit Exception(const std::string &what) : runtime_error(what) {}
+
+public:
+    /**
+     *  Destructor
+     */
+    virtual ~Exception() {}
+};
+    
+/**
+ *  End of namespace
+ */
+}
