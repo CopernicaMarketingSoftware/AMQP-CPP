@@ -33,7 +33,7 @@ public:
      *  @param  channel
      *  @param  message
      */
-    virtual void onChannelError(Channel *channel, const std::string &message) {}
+    virtual void onError(Channel *channel, const std::string &message) {}
 
     /**
      *  Method that is called when the channel was paused

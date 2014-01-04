@@ -95,7 +95,7 @@ private:
      *  @param  connection      The connection that entered the error state
      *  @param  message         Error message
      */
-    virtual void onConnectionError(AMQP::Connection *connection, const std::string &message) override;
+    virtual void onError(AMQP::Connection *connection, const std::string &message) override;
 
     /**
      *  Method that is called when the login attempt succeeded. After this method
@@ -117,7 +117,7 @@ private:
      *  @param  channel
      *  @param  message
      */
-    virtual void onChannelError(AMQP::Channel *channel, const std::string &message) override;
+    virtual void onError(AMQP::Channel *channel, const std::string &message) override;
 
     /**
      *  Method that is called when the channel was paused

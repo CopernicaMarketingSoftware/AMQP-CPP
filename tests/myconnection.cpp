@@ -171,7 +171,7 @@ void MyConnection::onData(AMQP::Connection *connection, const char *buffer, size
  *  @param  connection      The connection that entered the error state
  *  @param  message         Error message
  */
-void MyConnection::onConnectionError(AMQP::Connection *connection, const std::string &message)
+void MyConnection::onError(AMQP::Connection *connection, const std::string &message)
 {
     // report error
     std::cout << "AMQP Connection error: " << message << std::endl;
@@ -216,7 +216,7 @@ void MyConnection::onReady(AMQP::Channel *channel)
  *  @param  message
  */
 
-void MyConnection::onChannelError(AMQP::Channel *channel, const std::string &message)
+void MyConnection::onError(AMQP::Channel *channel, const std::string &message)
 {
     // show
     std::cout << "AMQP channel error, id: " << (int) channel->id() << " - message: " << message << std::endl;

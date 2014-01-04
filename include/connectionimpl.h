@@ -69,15 +69,17 @@ protected:
     uint32_t _maxFrame = 10000;
 
     /**
-     *  The address of the server (vhost, login, password)
-     *  @var    Address
+     *  The login for the server (login, password)
+     *  @var    Login
      */
     Login _login;
-
+    
     /**
-     *  Initialize the connection
+     *  Vhost to connect to
+     *  @var    string
      */
-    void initialize();
+    std::string _vhost;
+
 
 private:
     /**
@@ -93,28 +95,7 @@ private:
      *  @param  handler         Connection handler
      *  @param  login           Login data
      */
-    ConnectionImpl(Connection *parent, ConnectionHandler *handler, const Login &login) : 
-        _parent(parent), _handler(handler), _login(login)
-    {
-        // initialize the connection
-        initialize();
-    }
-
-    /**
-     *  Construct an AMQP object with default login data
-     * 
-     *  Note that the constructor is private to ensure that nobody can construct
-     *  this class, only the real Connection class via a friend construct
-     * 
-     *  @param  parent          Parent connection object
-     *  @param  handler         Connection handler
-     */
-    ConnectionImpl(Connection *parent, ConnectionHandler *handler) : 
-        _parent(parent), _handler(handler)
-    {
-        // initialize the connection
-        initialize();
-    }
+    ConnectionImpl(Connection *parent, ConnectionHandler *handler, const Login &login, const std::string &vhost);
 
 public:
     /**
@@ -170,6 +151,15 @@ public:
     Login &login()
     {
         return _login;
+    }
+    
+    /**
+     *  Retrieve the vhost
+     *  @return string
+     */
+    std::string &vhost()
+    {
+        return _vhost;
     }
 
     /**
@@ -261,7 +251,7 @@ public:
         _state = state_closed;
         
         // inform handler
-        _handler->onConnectionError(_parent, message);
+        _handler->onError(_parent, message);
 
         // @Todo: notify all channels of closed connection
     }

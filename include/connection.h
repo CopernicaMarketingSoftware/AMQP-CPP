@@ -30,14 +30,28 @@ public:
      * 
      *  @param  handler         Connection handler
      *  @param  login           Login data
+     *  @param  vhost           Vhost to use
      */
-    Connection(ConnectionHandler *handler, const Login &login) : _implementation(this, handler, login) {}
+    Connection(ConnectionHandler *handler, const Login &login, const std::string &vhost) : _implementation(this, handler, login, vhost) {}
 
     /**
-     *  Construct an AMQP object with default login data
+     *  Construct with default vhost
+     *  @param  handler         Connection handler
+     *  @param  login           Login data
+     */
+    Connection(ConnectionHandler *handler, const Login &login) : _implementation(this, handler, login, "/") {}
+
+    /**
+     *  Construct an AMQP object with default login data and default vhost
      *  @param  handler         Connection handler
      */
-    Connection(ConnectionHandler *handler) : _implementation(this, handler) {}
+    Connection(ConnectionHandler *handler, const std::string &vhost) : _implementation(this, handler, Login(), vhost) {}
+
+    /**
+     *  Construct an AMQP object with default login data and default vhost
+     *  @param  handler         Connection handler
+     */
+    Connection(ConnectionHandler *handler) : _implementation(this, handler, Login(), "/") {}
 
     /**
      *  Destructor
@@ -45,9 +59,9 @@ public:
     virtual ~Connection() {}
 
     /**
-     *  Parse the buffer into a recognized frame
+     *  Parse data that was recevied from RabbitMQ
      *  
-     *  Every time that data comes in on the connection, you should call this method to parse
+     *  Every time that data comes in from RabbitMQ, you should call this method to parse
      *  the incoming data, and let it handle by the AMQP library. This method returns the number
      *  of bytes that were processed.
      *

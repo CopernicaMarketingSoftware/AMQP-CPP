@@ -281,7 +281,7 @@ public:
         _state = state_closed;
         
         // inform handler
-        if (_handler) _handler->onChannelError(_parent, message);
+        if (_handler) _handler->onError(_parent, message);
     }
 
     /**

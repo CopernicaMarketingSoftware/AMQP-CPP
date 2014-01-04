@@ -74,4 +74,71 @@ class MyConnectionHandler : public AMQP::ConnectionHandler
     }
 };
 ````
+After you've implemented the ConnectionHandler class, you can start using
+the library by creating a Connection object, and one or more Channel objects:
+
+````c++
+// create an instance of your own connection handler
+MyConnectionHandler myHandler;
+
+// create a AMQP connection object
+AMQP::Connection connection(&myHandler, Login("guest","guest"), "/");
+
+// and create a channel
+AMQP::Channel channel(&connection);
+
+// use the channel object to call the AMQP method you like
+channel.declareExchange("my-exchange", AMQP::fanout);
+channel.declareQueue("my-queue");
+channel.bindQueue("my-exchange", "my-queue");
+````
+
+A number of remarks about the above example. First you may have noticed that we've
+created all objects on the stack. You are of course also free to create them
+on the heap with the C++ operator 'new'. That works just as good.
+
+But more importantly, you see that in the example above we have created the 
+channel object directly after we created the connection object, and we did also 
+start declaring exchanges and queues right away. It would have been better to 
+first wait for the connection to be ready (and the onConnected() method is called
+in your handler object), before you create channel objects and start calling
+methods. But if you insist, you do not have to wait, and you are free to call 
+the additional methods right away.
+
+As we've explained above, the AMQP library does not do any IO by itself and when it
+needs to send data to RabbitMQ, it will call the onData() method in your handler
+object. But it is of course also not possible for the library to receive data from 
+the server. It is again up to you to to this. If, for example, you notice in your 
+event loop that the socket that is connected with the RabbitMQ server becomes 
+readable, you should read out that data (for example by calling the recv() system 
+call), and pass the received bytes to the AMQP library. This can be done by
+calling the parse() method in the Connection object.
+
+The Connection::parse() method gets two parameters, a pointer to a buffer of
+data received from RabbitMQ, and a parameter that holds the size of this buffer.
+The code snippet below comes from the Connection.h C++ header file.
+
+````c++
+/**
+ *  Parse data that was recevied from RabbitMQ
+ *  
+ *  Every time that data comes in from RabbitMQ, you should call this method to parse
+ *  the incoming data, and let it handle by the AMQP library. This method returns the number
+ *  of bytes that were processed.
+ *
+ *  If not all bytes could be processed because it only contained a partial frame, you should
+ *  call this same method later on when more data is available. The AMQP library does not do
+ *  any buffering, so it is up to the caller to ensure that the old data is also passed in that
+ *  later call.
+ *
+ *  @param  buffer      buffer to decode
+ *  @param  size        size of the buffer to decode
+ *  @return             number of bytes that were processed
+ */
+size_t parse(char *buffer, size_t size)
+{
+    return _implementation.parse(buffer, size);
+}
+````
+
 

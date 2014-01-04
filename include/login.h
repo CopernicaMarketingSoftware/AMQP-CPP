@@ -18,46 +18,33 @@ class Login
 {
 private:
     /**
-     *  The vhost
-     *  @var string
-     */
-    std::string _vhost;
-    
-    /**
      *  The username
      *  @var string
      */
     std::string _user;
-    
+
     /**
      *  The password
      *  @var string
      */
     std::string _password;
+    
+    
 
 public:
-    /**
-     *  Constructor
-     *  @param  vhost
-     *  @param  user
-     *  @param  password
-     */
-    Login(const std::string &vhost, const std::string &user, const std::string &password) :
-        _vhost(vhost), _user(user), _password(password) {}
-
     /**
      *  Constructor
      *  @param  user
      *  @param  password
      */
     Login(const std::string &user, const std::string &password) :
-        _vhost("/"), _user(user), _password(password) {}
-        
+        _user(user), _password(password) {}
+
     /**
      *  Constructor
      */
     Login() :
-        _vhost("/"), _user("guest"), _password("guest") {}
+        _user("guest"), _password("guest") {}
         
     /**
      *  Destructor
@@ -75,15 +62,6 @@ public:
         
         // append other elements
         return result.append(_user).append("\0",1).append(_password);
-    }
-    
-    /**
-     *  Retrieve the vhost
-     *  @return string
-     */
-    std::string &vhost()
-    {
-        return _vhost;
     }
 };
 

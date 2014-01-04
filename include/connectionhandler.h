@@ -38,14 +38,12 @@ public:
      *  This happens when data comes in that does not match the AMQP protocol
      *  
      *  After this method is called, the connection no longer is in a valid
-     *  state and can be used. In normal circumstances this method is not called.
+     *  state and can no longer be used.
      * 
-     *  @todo   do we need this method, or only in the ChannelHandler class?
-     *
      *  @param  connection      The connection that entered the error state
      *  @param  message         Error message
      */
-    virtual void onConnectionError(Connection *connection, const std::string &message) = 0;
+    virtual void onError(Connection *connection, const std::string &message) = 0;
     
     /**
      *  Method that is called when the login attempt succeeded. After this method
