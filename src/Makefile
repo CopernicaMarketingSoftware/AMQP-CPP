@@ -3,27 +3,30 @@ RM			    = rm -f
 CPPFLAGS		= -Wall -c -I. -O2 -flto -std=c++11 -g
 LD			    = g++
 LD_FLAGS		= -Wall -shared -O2
-RESULT			= liblibamqp.so
-
-STATIC			= $(RESULT:%.so=%.a)
+SHARED_LIB		= liblibamqp.so
+STATIC_LIB		= $(SHARED_LIB:%.so=%.a)
 SOURCES			= $(wildcard *.cpp)
-OBJECTS			= $(SOURCES:%.cpp=%.o)
-OBJECTS_STATIC	= $(SOURCES:%.cpp=%.s.o)
+SHARED_OBJECTS	= $(SOURCES:%.cpp=%.o)
+STATIC_OBJECTS	= $(SOURCES:%.cpp=%.s.o)
 
-all:	${OBJECTS} ${OBJECTS_STATIC} ${RESULT}
-	$(MAKE) STATIC_LIB
+all:	shared static
 
-${RESULT}: ${OBJECTS}
-	${LD} ${LD_FLAGS} -o $@ ${OBJECTS}
+shared:	${SHARED_OBJECTS} ${SHARED_LIB}
+
+static:	${STATIC_OBJECTS} ${STATIC_LIB}
+
+${SHARED_LIB}: ${SHARED_OBJECTS}
+	${LD} ${LD_FLAGS} -o $@ ${SHARED_OBJECTS}
+
+${STATIC_LIB}: ${STATIC_OBJECTS}
+	ar rcs ${STATIC_LIB} ${STATIC_OBJECTS}
 
 clean:
-	${RM} *.obj *~* ${OBJECTS} ${OBJECTS_STATIC} ${RESULT} ${STATIC}
+	${RM} *.obj *~* ${SHARED_OBJECTS} ${STATIC_OBJECTS} ${SHARED_LIB} ${STATIC_LIB}
 
-${OBJECTS}:
+${SHARED_OBJECTS}:
 	${CPP} ${CPPFLAGS} -fpic -o $@ ${@:%.o=%.cpp}
 
-${OBJECTS_STATIC}:
+${STATIC_OBJECTS}:
 	${CPP} ${CPPFLAGS} -o $@ ${@:%.s.o=%.cpp}
 
-STATIC_LIB:
-	ar rcs ${STATIC} ${OBJECTS_STATIC}

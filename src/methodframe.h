@@ -75,7 +75,14 @@ public:
      *  @param  connection      The connection over which it was received
      *  @return bool            Was it succesfully processed?
      */
-    virtual bool process(ConnectionImpl *connection);
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // this is an exception
+        throw ProtocolException("unimplemented frame type " + std::to_string(type()) + " class " + std::to_string(classID()) + " method " + std::to_string(methodID()));
+        
+        // unreachable
+        return false;
+    }
 };
 
 /**

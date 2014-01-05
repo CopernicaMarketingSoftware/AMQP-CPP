@@ -59,7 +59,14 @@ public:
      *  @param  connection      The connection over which it was received
      *  @return bool            Was it succesfully processed?
      */
-    virtual bool process(ConnectionImpl *connection);
+    virtual bool process(ConnectionImpl *connection) 
+    {
+        // this is an exception
+        throw ProtocolException("unimplemented frame");
+        
+        // unreachable
+        return false;
+    }
 };
     
 /**

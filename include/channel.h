@@ -274,6 +274,13 @@ public:
     
     /**
      *  Set the Quality of Service (QOS) for this channel
+     * 
+     *  When you consume messages, every single messages needs to be ack'ed to inform
+     *  the RabbitMQ server that is has been received. The Qos setting specifies the
+     *  number of unacked messages that may exist in the client application. The server
+     *  stops delivering more messages if the number of unack'ed messages has reached
+     *  the prefetchCount
+     * 
      *  @param  prefetchCount       maximum number of messages to prefetch
      *  @return bool                whether the Qos frame is sent.
      */
@@ -281,6 +288,58 @@ public:
     {
         return _implementation.setQos(prefetchCount);
     }
+    
+    /**
+     *  Tell the RabbitMQ server that we're ready to consume messages
+     * 
+     *  After this method is called, RabbitMQ starts delivering messages to the client
+     *  application. The consume tag is a string identifier that will be passed to
+     *  each received message, so that you can associate incoming messages with a 
+     *  consumer. If you do not specify a consumer tag, the server will assign one
+     *  for you.
+     * 
+     *  The following flags are supported:
+     * 
+     *      -   nolocal             if set, messages published on this channel are not also consumed
+     *      -   noack               if set, consumed messages do not have to be acked, this happens automatically
+     *      -   exclusive           request exclusive access, only this consumer can access the queue
+     *      -   nowait              the server does not have to send a response back that consuming is active
+     * 
+     *  The method ChannelHandler::onConsumerStarted() will be called when the 
+     *  consumer has started (unless the nowait option was set, in which case
+     *  no confirmation method is called)
+     * 
+     *  @param  queue               the queue from which you want to consume
+     *  @param  tag                 a consumer tag that will be associated with this consume operation
+     *  @param  flags               additional flags
+     *  @param  arguments           additional arguments
+     *  @return bool
+     */
+    bool consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments) { return _implementation.consume(queue, tag, flags, arguments); }
+    bool consume(const std::string &queue, const std::string &tag, int flags = 0) { return _implementation.consume(queue, tag, flags, Table()); }
+    bool consume(const std::string &queue, const std::string &tag, const Table &arguments) { return _implementation.consume(queue, tag, 0, arguments); }
+    bool consume(const std::string &queue, int flags, const Table &arguments) { return _implementation.consume(queue, std::string(), flags, arguments); }
+    bool consume(const std::string &queue, int flags = 0) { return _implementation.consume(queue, std::string(), flags, Table()); }
+    bool consume(const std::string &queue, const Table &arguments) { return _implementation.consume(queue, std::string(), 0, arguments); }
+    
+    /**
+     *  Cancel a running consume call
+     * 
+     *  If you want to stop a running consumer, you can use this method with the consumer tag
+     * 
+     *  The following flags are supported:
+     * 
+     *      -   nowait              the server does not have to send a response back that the consumer has been cancelled
+     * 
+     *  The method ChannelHandler::onConsumerStopped() will be called when the consumer
+     *  was succesfully stopped (unless the nowait option was used, in which case no
+     *  confirmation method is called)
+     * 
+     *  @param  tag                 the consumer tag
+     *  @param  flags               optional additional flags
+     *  @return bool
+     */
+    bool cancel(const std::string &tag, int flags = 0) { return _implementation.cancel(tag, flags); }
     
     /**
      *  Close the current channel

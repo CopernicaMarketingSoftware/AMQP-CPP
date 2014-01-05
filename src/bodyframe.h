@@ -91,6 +91,35 @@ public:
     {
         return _payload;
     }
+    
+    /**
+     *  Process the frame
+     *  @param  connection      The connection over which it was received
+     *  @return bool            Was it succesfully processed?
+     */
+    virtual bool process(ConnectionImpl *connection)
+    {
+        // we need the appropriate channel
+        ChannelImpl *channel = connection->channel(this->channel());
+        
+        // channel does not exist
+        if (!channel) return false;    
+        
+        // is there a current message?
+        MessageImpl *message = channel->message();
+        if (!message) return false;
+        
+        // store size
+        if (!message->append(_payload, _size)) return true;
+        
+        // the message is complete
+        channel->reportDelivery();
+        
+        // done
+        return true;
+    }
+    
+    
 };
 
 /**

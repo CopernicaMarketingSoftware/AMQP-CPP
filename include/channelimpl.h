@@ -57,6 +57,12 @@ private:
      *  @var bool
      */
     bool _transaction = false;
+    
+    /**
+     *  The message that is now being received
+     *  @var MessageImpl
+     */
+    MessageImpl *_message = nullptr;
 
     /**
      *  Construct a channel object
@@ -237,6 +243,23 @@ public:
     bool setQos(uint16_t prefetchCount);
 
     /**
+     *  Tell the RabbitMQ server that we're ready to consume messages
+     *  @param  queue               the queue from which you want to consume
+     *  @param  tag                 a consumer tag that will be associated with this consume operation
+     *  @param  flags               additional flags
+     *  @param  arguments           additional arguments
+     *  @return bool
+     */
+    bool consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments);
+    
+    /**
+     *  Cancel a running consumer
+     *  @param  tag                 the consumer tag
+     *  @param  flags               optional flags
+     */
+    bool cancel(const std::string &tag, int flags);
+    
+    /**
      *  Close the current channel
      *  @return bool
      */
@@ -393,6 +416,45 @@ public:
     void reportQosSet()
     {
         if (_handler) _handler->onQosSet(_parent);
+    }
+    
+    /**
+     *  Report that a consumer has started
+     *  @param  tag     the consumer tag
+     */
+    void reportConsumerStarted(const std::string &tag)
+    {
+        if (_handler) _handler->onConsumerStarted(_parent, tag);
+    }
+
+    /**
+     *  Report that a consumer has stopped
+     *  @param  tag     the consumer tag
+     */
+    void reportConsumerStopped(const std::string &tag)
+    {
+        if (_handler) _handler->onConsumerStopped(_parent, tag);
+    }
+    
+    /**
+     *  Report the consumed message
+     */
+    void reportDelivery();
+
+    /**
+     *  Create an incoming message
+     *  @param  frame
+     *  @return MessageImpl
+     */
+    MessageImpl *message(const BasicDeliverFrame &frame);
+    
+    /**
+     *  Retrieve the current incoming message
+     *  @return MessageImpl
+     */
+    MessageImpl *message()
+    {
+        return _message;
     }
     
     /**

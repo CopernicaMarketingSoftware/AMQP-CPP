@@ -7,8 +7,6 @@
  */
 #include "includes.h"
 #include "protocolheaderframe.h"
-#include "exception.h"
-#include "protocolexception.h"
 
 /**
  *  set namespace
@@ -109,6 +107,8 @@ void ConnectionImpl::remove(ChannelImpl *channel)
  */
 size_t ConnectionImpl::parse(char *buffer, size_t size)
 {
+    // @todo do not parse if already in an error state
+    
     // number of bytes processed
     size_t processed = 0;
     

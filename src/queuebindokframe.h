@@ -60,8 +60,20 @@ public:
      *  @param  connection      The connection over which it was received
      *  @return bool            Was it succesfully processed?
      */
-    virtual bool process(ConnectionImpl *connection) override;
-
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // check if we have a channel
+        ChannelImpl *channel = connection->channel(this->channel());
+        
+        // channel does not exist
+        if(!channel) return false;
+        
+        // report to handler
+        channel->reportQueueBound();
+        
+        // done
+        return true;
+    }
 };
 
 /**

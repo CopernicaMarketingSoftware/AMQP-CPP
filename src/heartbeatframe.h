@@ -55,8 +55,14 @@ public:
      *  @param  connection      The connection over which it was received
      *  @return bool            Was it succesfully processed?
      */
-    virtual bool process(ConnectionImpl *connection) override;
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // send back the same frame
+        connection->send(*this);
 
+        // done
+        return true;
+    }
 };
 
 /**

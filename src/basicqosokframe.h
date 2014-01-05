@@ -58,8 +58,20 @@ public:
      *  @param  connection      The connection over which it was received
      *  @return bool            Was it succesfully processed?
      */
-    virtual bool process(ConnectionImpl *connection);
-    
+    virtual bool process(ConnectionImpl *connection)
+    {
+        // we need the appropriate channel
+        ChannelImpl *channel = connection->channel(this->channel());
+        
+        // channel does not exist
+        if (!channel) return false;    
+        
+        // report
+        channel->reportQosSet();
+        
+        // done
+        return true;
+    }
 };
 
 /**

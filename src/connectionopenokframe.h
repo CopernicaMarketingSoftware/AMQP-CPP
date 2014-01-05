@@ -77,7 +77,14 @@ public:
      *  @param  connection      The connection over which it was received
      *  @return bool            Was it succesfully processed?
      */
-    virtual bool process(ConnectionImpl *connection) override;
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // all is ok, mark the connection as connected
+        connection->setConnected();
+        
+        // done
+        return true;
+    }
 };
 
 /**

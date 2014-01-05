@@ -6,8 +6,11 @@
  *  @copyright 2014 Copernica BV
  */
 #include "includes.h"
+#include "basicdeliverframe.h"
+#include "messageimpl.h"
 #include "channelopenframe.h"
 #include "channelflowframe.h"
+#include "channelcloseokframe.h"
 #include "channelcloseframe.h"
 #include "transactionselectframe.h"
 #include "transactioncommitframe.h"
@@ -25,8 +28,8 @@
 #include "basicheaderframe.h"
 #include "bodyframe.h"
 #include "basicqosframe.h"
-
-#include <iostream>
+#include "basicconsumeframe.h"
+#include "basiccancelframe.h"
 
 /**
  *  Set up namespace
@@ -71,6 +74,10 @@ ChannelImpl::ChannelImpl(Channel *parent, Connection *connection, ChannelHandler
  */
 ChannelImpl::~ChannelImpl()
 {
+    // remove incoming message 
+    if (_message) delete _message;
+    _message = nullptr;
+    
     // remove this channel from the connection
     _connection->_implementation.remove(this);
     
@@ -78,7 +85,10 @@ ChannelImpl::~ChannelImpl()
     if (!connected()) return;
     
     // close the channel now
+    // @todo is this ok?
     close();
+    
+    // do we have 
 }
 
 /**
@@ -390,6 +400,8 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
 {
     // @todo prevent crash when connection is destructed
     
+    // @todo do not copy the entire buffer to individual frames
+    
     // send the publish frame
     send(BasicPublishFrame(_id, exchange, routingKey, flags & mandatory, flags & immediate));
 
@@ -429,8 +441,39 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
  */
 bool ChannelImpl::setQos(uint16_t prefetchCount)
 {
-    // set for the entire connection
+    // send a qos frame
     send(BasicQosFrame(_id, prefetchCount, false));
+    
+    // done
+    return true;
+}
+
+/**
+ *  Tell the RabbitMQ server that we're ready to consume messages
+ *  @param  queue               the queue from which you want to consume
+ *  @param  tag                 a consumer tag that will be associated with this consume operation
+ *  @param  flags               additional flags
+ *  @param  arguments           additional arguments
+ *  @return bool
+ */
+bool ChannelImpl::consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments)
+{
+    // send a consume frame
+    send(BasicConsumeFrame(_id, queue, tag, flags & nolocal, flags & noack, flags & exclusive, flags & nowait, arguments));
+    
+    // done
+    return true;
+}
+
+/**
+ *  Cancel a running consumer
+ *  @param  tag                 the consumer tag
+ *  @param  flags               optional flags
+ */
+bool ChannelImpl::cancel(const std::string &tag, int flags)
+{
+    // send a cancel frame
+    send(BasicCancelFrame(_id, tag, flags & nowait));
     
     // done
     return true;
@@ -445,6 +488,28 @@ size_t ChannelImpl::send(const Frame &frame)
 {
     // send to tcp connection
     return _connection->_implementation.send(frame);
+}
+
+/**
+ *  Report the consumed message
+ */
+void ChannelImpl::reportDelivery()
+{
+    if (_handler) _handler->onConsumed(_parent, *_message);
+}
+
+/**
+ *  Create an incoming message
+ *  @param  frame
+ *  @return MessageImpl
+ */
+MessageImpl *ChannelImpl::message(const BasicDeliverFrame &frame)
+{
+    // it should not be possible that a message already exists, but lets check it anyhow
+    if (_message) delete _message;
+    
+    // construct a message
+    return _message = new MessageImpl(frame);
 }
 
 /**

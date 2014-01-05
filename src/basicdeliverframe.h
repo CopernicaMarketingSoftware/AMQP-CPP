@@ -155,6 +155,26 @@ public:
     {
         return _redelivered.get(0);
     }
+
+    /**
+     *  Process the frame
+     *  @param  connection      The connection over which it was received
+     *  @return bool            Was it succesfully processed?
+     */
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // we need the appropriate channel
+        ChannelImpl *channel = connection->channel(this->channel());
+        
+        // channel does not exist
+        if (!channel) return false;    
+        
+        // construct the message
+        channel->message(*this);
+        
+        // done
+        return true;
+    }
 };
 
 /**

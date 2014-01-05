@@ -154,6 +154,31 @@ public:
     virtual ~MetaData() {}
 
     /**
+     *  Set all meta data
+     *  @param  data
+     */
+    void set(const MetaData &data)
+    {
+        // simply copy all fields
+        _bools1 = data._bools1;
+        _bools2 = data._bools2;
+        _contentType = data._contentType;
+        _contentEncoding = data._contentEncoding;
+        _headers = data._headers;
+        _deliveryMode = data._deliveryMode;
+        _priority = data._priority;
+        _correlationID = data._correlationID;
+        _replyTo = data._replyTo;
+        _expiration = data._expiration;
+        _messageID = data._messageID;
+        _timestamp = data._timestamp;
+        _typeName = data._typeName;
+        _userID = data._userID;
+        _appID = data._appID;
+        _clusterID = data._clusterID;
+    }
+
+    /**
      *  Check if a certain field is set
      *  @return bool
      */

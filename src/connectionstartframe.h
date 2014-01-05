@@ -171,8 +171,30 @@ public:
      *  @return bool
      *  @internal
      */
-    virtual bool process(ConnectionImpl *connection) override;
-    
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // @todo we must still be in protocol handshake mode
+        
+        
+        // the peer properties
+        Table properties;
+        
+        // fill the peer properties
+        properties["product"] = "Copernica AMQP library";
+        properties["version"] = "0.1";
+        properties["platform"] = "Ubuntu";
+        properties["copyright"] = "Copyright 2014 Copernica BV";
+        properties["information"] = "";
+        
+        // move connection to handshake mode
+        connection->setProtocolOk();
+        
+        // send back a connection start ok frame
+        connection->send(ConnectionStartOKFrame(properties, "PLAIN", connection->login().saslPlain(), "en_US"));
+        
+        // done
+        return true;
+    }
 };
 
 /**

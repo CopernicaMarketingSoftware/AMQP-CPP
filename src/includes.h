@@ -11,6 +11,8 @@
 #include "../libamqp.h"
 
 // classes that are very commonly used
+#include "exception.h"
+#include "protocolexception.h"
 #include "frame.h"
 #include "extframe.h"
 #include "methodframe.h"

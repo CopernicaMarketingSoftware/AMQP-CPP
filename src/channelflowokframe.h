@@ -84,7 +84,21 @@ public:
      *  @param  connection      The connection over which it was received
      *  @return bool            Was it succesfully processed?
      */
-    virtual bool process(ConnectionImpl *connection) override;
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // we need the appropriate channel
+        ChannelImpl *channel = connection->channel(this->channel());
+        
+        // channel does not exist
+        if (!channel) return false;    
+        
+        // is the flow active?
+        if (active()) channel->reportResumed();
+        else channel->reportPaused();
+        
+        // done
+        return true;
+    }
 };
 
 /**

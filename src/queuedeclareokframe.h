@@ -124,7 +124,20 @@ public:
      *  @param  connection      The connection over which it was received
      *  @return bool            Was it succesfully processed?
      */
-    virtual bool process(ConnectionImpl *connection) override;
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // check if we have a channel
+        ChannelImpl *channel = connection->channel(this->channel());
+        
+        // what if channel doesn't exist?
+        if (!channel) return false;
+        
+        // report to the handler
+        channel->reportQueueDeclared(this->name(), this->messageCount(), this->consumerCount());
+        
+        // done
+        return true;
+    }
 };
 
 /**

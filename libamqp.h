@@ -44,6 +44,7 @@
 // envelope for publishing and consuming
 #include <libamqp/metadata.h>
 #include <libamqp/envelope.h>
+#include <libamqp/message.h>
 
 // mid level includes
 #include <libamqp/exchangetype.h>

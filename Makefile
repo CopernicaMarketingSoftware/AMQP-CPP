@@ -5,6 +5,12 @@ LIBRARY_DIR             = ${PREFIX}/lib
 all:
 		$(MAKE) -C src all
 
+static:
+		$(MAKE) -C src static
+
+shared:
+		$(MAKE) -C src shared
+
 clean:
 		$(MAKE) -C src clean
 

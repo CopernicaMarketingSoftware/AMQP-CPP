@@ -355,11 +355,12 @@ void MyConnection::onQueueBound(AMQP::Channel *channel)
     // show
     std::cout << "AMQP Queue bound" << std::endl;
 
-    _connection->setQos(10);
-//    _channel->setQos(10);
+//    _connection->setQos(10);
+    _channel->setQos(1);
 
 
     _channel->publish("my_exchange", "key", "this is the message");
+    _channel->consume("my_queue");
 }
 
 /**
@@ -401,5 +402,40 @@ void MyConnection::onQosSet(AMQP::Channel *channel)
 {
     // show
     std::cout << "AMQP Qos set" << std::endl;
+}
+
+/**
+ *  Method that is called when a consumer was started
+ *  This is the result of a call to Channel::consume()
+ *  @param  channel         the channel on which the consumer was started
+ *  @param  tag             the consumer tag
+ */
+void MyConnection::onConsumerStarted(AMQP::Channel *channel, const std::string &tag)
+{
+    // show
+    std::cout << "AMQP consumer started" << std::endl;
+}
+
+/**
+ *  Method that is called when a message has been consumed
+ *  @param  channel         the channel on which the consumer was started
+ *  @param  message         the consumed message
+ */
+void MyConnection::onConsumed(AMQP::Channel *channel, const AMQP::Message &message)
+{
+    // show
+    std::cout << "AMQP consumed: " << message.message() << std::endl;
+}
+
+/**
+ *  Method that is called when a consumer was stopped
+ *  This is the result of a call to Channel::cancel()
+ *  @param  channel         the channel on which the consumer was stopped
+ *  @param  tag             the consumer tag
+ */
+void MyConnection::onConsumerStopped(AMQP::Channel *channel, const std::string &tag)
+{
+    // show
+    std::cout << "AMQP consumer stopped" << std::endl;
 }
 

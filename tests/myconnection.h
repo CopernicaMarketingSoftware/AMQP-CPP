@@ -157,19 +157,19 @@ private:
      *  Method that is called when an exchange is bound
      *  @param  channel
      */
-    virtual void onExchangeBound(AMQP::Channel *channel);
+    virtual void onExchangeBound(AMQP::Channel *channel) override;
     
     /**
      *  Method that is called when an exchange is unbound
      *  @param  channel
      */
-    virtual void onExchangeUnbound(AMQP::Channel *channel);
+    virtual void onExchangeUnbound(AMQP::Channel *channel) override;
     
     /**
      *  Method that is called when an exchange is deleted
      *  @param  channel
      */
-    virtual void onExchangeDeleted(AMQP::Channel *channel);
+    virtual void onExchangeDeleted(AMQP::Channel *channel) override;
     
     /**
      *  Mehod that is called when an exchange is declared
@@ -184,39 +184,62 @@ private:
      *  @param  messageCount    number of messages in queue
      *  @param  consumerCount   number of active consumers
      */
-    virtual void onQueueDeclared(AMQP::Channel *channel, const std::string &name, uint32_t messageCount, uint32_t consumerCount);
+    virtual void onQueueDeclared(AMQP::Channel *channel, const std::string &name, uint32_t messageCount, uint32_t consumerCount) override;
     
     /**
      *  Method that is called when a queue is bound
      *  @param  channel
      *  @param  
      */
-    virtual void onQueueBound(AMQP::Channel *channel);
+    virtual void onQueueBound(AMQP::Channel *channel) override;
     
     /**
      *  Method that is called when a queue is deleted
      *  @param  channel
      *  @param  messageCount    number of messages deleted along with the queue
      */
-    virtual void onQueueDeleted(AMQP::Channel *channel, uint32_t messageCount);
+    virtual void onQueueDeleted(AMQP::Channel *channel, uint32_t messageCount) override;
     
     /**
      *  Method that is called when a queue is unbound
      *  @param  channel
      */
-    virtual void onQueueUnbound(AMQP::Channel *channel);
+    virtual void onQueueUnbound(AMQP::Channel *channel) override;
     
     /**
      *  Method that is called when a queue is purged
      *  @param  messageCount        number of message purged
      */
-    virtual void onQueuePurged(AMQP::Channel *channel, uint32_t messageCount);
+    virtual void onQueuePurged(AMQP::Channel *channel, uint32_t messageCount) override;
 
     /**
      *  Method that is called when the quality-of-service was changed
      *  This is the result of a call to Channel::setQos()
      */
-    virtual void onQosSet(AMQP::Channel *channel);
+    virtual void onQosSet(AMQP::Channel *channel) override;
+
+    /**
+     *  Method that is called when a consumer was started
+     *  This is the result of a call to Channel::consume()
+     *  @param  channel         the channel on which the consumer was started
+     *  @param  tag             the consumer tag
+     */
+    virtual void onConsumerStarted(AMQP::Channel *channel, const std::string &tag) override;
+    
+    /**
+     *  Method that is called when a message has been consumed
+     *  @param  channel         the channel on which the consumer was started
+     *  @param  message         the consumed message
+     */
+    virtual void onConsumed(AMQP::Channel *channel, const AMQP::Message &message) override;
+
+    /**
+     *  Method that is called when a consumer was stopped
+     *  This is the result of a call to Channel::cancel()
+     *  @param  channel         the channel on which the consumer was stopped
+     *  @param  tag             the consumer tag
+     */
+    virtual void onConsumerStopped(AMQP::Channel *channel, const std::string &tag) override;
 
 
 public:
