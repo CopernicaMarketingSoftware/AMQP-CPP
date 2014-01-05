@@ -26,13 +26,16 @@ using namespace Copernica;
 /**
  *  Constructor
  */
-MyConnection::MyConnection() :
+MyConnection::MyConnection(const std::string &ip) :
     _socket(Event::MainLoop::instance(), this),
     _connection(nullptr),
     _channel(nullptr)
 {
     // start connecting
-    _socket.connect(Network::Ipv4Address("127.0.0.1"), 5672);
+    if (_socket.connect(Network::Ipv4Address(ip), 5672)) return;
+    
+    // failure
+    onFailure(&_socket);
 }
 
 /**
@@ -352,6 +355,9 @@ void MyConnection::onQueueBound(AMQP::Channel *channel)
     // show
     std::cout << "AMQP Queue bound" << std::endl;
 
+    _connection->setQos(10);
+//    _channel->setQos(10);
+
 
     _channel->publish("my_exchange", "key", "this is the message");
 }
@@ -385,6 +391,15 @@ void MyConnection::onQueuePurged(AMQP::Channel *channel, uint32_t messageCount)
 {
     // show
     std::cout << "AMQP Queue purged" << std::endl;
-    channel->removeQueue("testqueue");   
+}
+
+/**
+ *  Method that is called when the quality-of-service was changed
+ *  This is the result of a call to Channel::setQos()
+ */
+void MyConnection::onQosSet(AMQP::Channel *channel)
+{
+    // show
+    std::cout << "AMQP Qos set" << std::endl;
 }
 

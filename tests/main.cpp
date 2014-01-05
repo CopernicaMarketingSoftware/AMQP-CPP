@@ -31,13 +31,25 @@ using namespace Copernica;
  */
 int main(int argc, const char *argv[])
 {   
-    // create connection
-    MyConnection connection;
+    // need an ip
+    if (argc != 2)
+    {
+        // report error
+        std::cerr << "usage: " << argv[0] << " <ip>" << std::endl;
+        
+        // done
+        return -1;
+    }
+    else
+    {
+        // create connection
+        MyConnection connection(argv[1]);
 
-    // start the main event loop
-    Event::MainLoop::instance()->run();
+        // start the main event loop
+        Event::MainLoop::instance()->run();
 
-    // done
-    return 0;
+        // done
+        return 0;
+    }
 }
 

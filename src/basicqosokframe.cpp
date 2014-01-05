@@ -1,10 +1,10 @@
 /**
- *  ChannelFlowOkFrame.cpp
+ *  BasicQosOkFrame.cpp
  *
  *  @copyright 2014 Copernica BV
  */
 #include "includes.h"
-#include "channelflowokframe.h"
+#include "basicqosokframe.h"
 
 /**
  *  Set up namespace
@@ -16,7 +16,7 @@ namespace AMQP {
  *  @param  connection      The connection over which it was received
  *  @return bool            Was it succesfully processed?
  */
-bool ChannelFlowOKFrame::process(ConnectionImpl *connection)
+bool BasicQosOKFrame::process(ConnectionImpl *connection)
 {
     // we need the appropriate channel
     ChannelImpl *channel = connection->channel(this->channel());
@@ -24,12 +24,13 @@ bool ChannelFlowOKFrame::process(ConnectionImpl *connection)
     // channel does not exist
     if (!channel) return false;    
     
-    // is the flow active?
-    if (active()) channel->reportResumed();
-    else channel->reportPaused();
+    // report
+    channel->reportQosSet();
     
     // done
     return true;
+    
+
 }
 
 /**

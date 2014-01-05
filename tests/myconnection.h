@@ -212,13 +212,19 @@ private:
      */
     virtual void onQueuePurged(AMQP::Channel *channel, uint32_t messageCount);
 
+    /**
+     *  Method that is called when the quality-of-service was changed
+     *  This is the result of a call to Channel::setQos()
+     */
+    virtual void onQosSet(AMQP::Channel *channel);
 
 
 public:
     /**
      *  Constructor
+     *  @param  ip
      */
-    MyConnection();
+    MyConnection(const std::string &ip);
     
     /**
      *  Destructor

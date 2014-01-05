@@ -273,6 +273,16 @@ public:
     bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size) { return _implementation.publish(exchange, routingKey, 0, Envelope(message, size)); }
     
     /**
+     *  Set the Quality of Service (QOS) for this channel
+     *  @param  prefetchCount       maximum number of messages to prefetch
+     *  @return bool                whether the Qos frame is sent.
+     */
+    bool setQos(uint16_t prefetchCount)
+    {
+        return _implementation.setQos(prefetchCount);
+    }
+    
+    /**
      *  Close the current channel
      *  @return bool
      */

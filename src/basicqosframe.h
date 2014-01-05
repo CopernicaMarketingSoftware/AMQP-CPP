@@ -15,28 +15,28 @@ namespace AMQP {
 class BasicQosFrame : public BasicFrame
 {
 private:
-        /**
-         *  specifies the size of the prefetch window in octets
-         *  @var int32_t
-         */
-        int32_t _prefetchSize;
+    /**
+     *  specifies the size of the prefetch window in octets
+     *  @var int32_t
+     */
+    int32_t _prefetchSize;
 
-        /**
-         *  specifies a prefetch window in terms of whole messages
-         *  @var int16_t
-         */
-        int16_t _prefetchCount;
+    /**
+     *  specifies a prefetch window in terms of whole messages
+     *  @var int16_t
+     */
+    int16_t _prefetchCount;
 
-        /**
-         *  apply QoS settings to entire connection
-         *  @var BooleanSet
-         */
-        BooleanSet _global;
+    /**
+     *  apply QoS settings to entire connection
+     *  @var BooleanSet
+     */
+    BooleanSet _global;
+
 protected:
     /**
-     * Encode a frame on a string buffer
-     *
-     * @param   buffer  buffer to write frame to
+     *  Encode a frame on a string buffer
+     *  @param   buffer  buffer to write frame to
      */
     virtual void fill(OutBuffer& buffer) const override
     {
@@ -51,32 +51,35 @@ protected:
 
 public:
     /**
-     *  Destructor
-     */
-    virtual ~BasicQosFrame() {}
-    /**
      * Construct a basic qos frame
      *
      * @param   channel         channel we're working on
-     * @param   prefetchSize    specifies the size of the prefetch window in octets
      * @param   prefetchCount   specifies a prefetch window in terms of whole messages
      * @param   global          apply QoS settings to entire connection
      * @default false
      */
-    BasicQosFrame(uint16_t channel, int32_t prefetchSize = 0, int16_t prefetchCount = 0, bool global = false) :
+    BasicQosFrame(uint16_t channel, int16_t prefetchCount = 0, bool global = false) :
         BasicFrame(channel, 7), // 4 (int32) + 2 (int16) + 1 (bool)
-        _prefetchSize(prefetchSize),
+        _prefetchSize(0),
         _prefetchCount(prefetchCount),
         _global(global)
     {}
 
-
+    /**
+     *  Constructor based on incoming frame
+     *  @param  frame
+     */
     BasicQosFrame(ReceivedFrame &frame) :
         BasicFrame(frame),
         _prefetchSize(frame.nextInt32()),
         _prefetchCount(frame.nextInt16()),
         _global(frame)
     {}
+
+    /**
+     *  Destructor
+     */
+    virtual ~BasicQosFrame() {}
 
     /**
      * Return the method ID

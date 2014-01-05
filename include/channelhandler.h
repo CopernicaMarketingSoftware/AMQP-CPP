@@ -144,6 +144,12 @@ public:
      */
     virtual void onQueuePurged(Channel *channel, uint32_t messageCount) {}
 
+    /**
+     *  Method that is called when the quality-of-service was changed
+     *  This is the result of a call to Channel::setQos()
+     */
+    virtual void onQosSet(Channel *channel) {}
+
 };
 
 /**

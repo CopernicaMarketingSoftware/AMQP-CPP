@@ -90,17 +90,6 @@ public:
     }
 
     /**
-     *  Set the Quality of Service (QOS) of the entire connection
-     *  @param  prefetchSize        maximum size (in octets) of messages to be prefetched
-     *  @param  prefetchCount       maximum number of messages to prefetch
-     *  @return bool                whether the Qos frame is sent.
-     */
-    bool setQos(uint32_t prefetchSize, uint16_t prefetchCount)
-    {
-        return _implementation.setQos(prefetchSize, prefetchCount);
-    }
-    
-    /**
      *  Some classes have access to private properties
      */
     friend class ChannelImpl;

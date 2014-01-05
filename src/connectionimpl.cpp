@@ -242,17 +242,7 @@ size_t ConnectionImpl::send(const Frame &frame)
 }
 
 /**
- *  Set the Quality of Service (QOS) of the entire connection
- *  @param  prefetchSize        maximum size (in octets) of messages to be prefetched
- *  @param  prefetchCount       maximum number of messages to prefetch
- *  @return bool                whether the Qos frame is sent.
+ *  End of namspace
  */
-//bool Connection::setQOS(uint32_t prefetchSize = 0, uint16_t prefetchCount = 0)
-//{
-//    BasicQosFrame *frame = new BasicQosFrame(0, prefetchSize, prefetchCount, true);
-//    if(_connection->send(frame->buffer(), frame->totalSize()) != frame->totalSize()) return false;
-//
-//    return true;
-//}
-
 }
+

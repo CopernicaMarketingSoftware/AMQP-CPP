@@ -52,6 +52,14 @@ public:
     {
         return 11;
     }
+    
+    /**
+     *  Process the frame
+     *  @param  connection      The connection over which it was received
+     *  @return bool            Was it succesfully processed?
+     */
+    virtual bool process(ConnectionImpl *connection);
+    
 };
 
 /**

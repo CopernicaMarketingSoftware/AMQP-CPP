@@ -230,6 +230,13 @@ public:
     bool publish(const std::string &exchange, const std::string &routingKey, int flags, const Envelope &envelope);
     
     /**
+     *  Set the Quality of Service (QOS) of the entire connection
+     *  @param  prefetchCount       maximum number of messages to prefetch
+     *  @return bool                whether the Qos frame is sent.
+     */
+    bool setQos(uint16_t prefetchCount);
+
+    /**
      *  Close the current channel
      *  @return bool
      */
@@ -378,6 +385,14 @@ public:
     void reportQueuePurged(uint32_t messageCount)
     {
         if (_handler) _handler->onQueuePurged(_parent, messageCount);
+    }
+    
+    /**
+     *  Report that the qos has been set
+     */
+    void reportQosSet()
+    {
+        if (_handler) _handler->onQosSet(_parent);
     }
     
     /**

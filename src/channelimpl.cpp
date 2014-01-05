@@ -24,6 +24,7 @@
 #include "basicpublishframe.h"
 #include "basicheaderframe.h"
 #include "bodyframe.h"
+#include "basicqosframe.h"
 
 #include <iostream>
 
@@ -416,6 +417,20 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
         bytessent += chunksize;
         bytesleft -= chunksize;
     }
+    
+    // done
+    return true;
+}
+
+/**
+ *  Set the Quality of Service (QOS) for this channel
+ *  @param  prefetchCount       maximum number of messages to prefetch
+ *  @return bool                whether the Qos frame is sent.
+ */
+bool ChannelImpl::setQos(uint16_t prefetchCount)
+{
+    // set for the entire connection
+    send(BasicQosFrame(_id, prefetchCount, false));
     
     // done
     return true;
