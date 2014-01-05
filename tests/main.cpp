@@ -9,7 +9,7 @@
 /**
  *  Global libraries that we need
  */
-#include <copernica/amqp.h>
+#include <libamqp.h>
 #include <copernica/network.h>
 
 /**

@@ -7,7 +7,7 @@
 /**
  *  Required external libraries
  */
-#include <copernica/amqp.h>
+#include <libamqp.h>
 #include <copernica/network.h>
  
 #include <string>
@@ -42,8 +42,6 @@ MyConnection::~MyConnection()
 {
     // do we still have a channel?
     if (_channel)  delete _channel;
-    if (_channel2) delete _channel2;
-    if (_channel3) delete _channel3;
     
     // do we still have a connection?
     if (_connection) delete _connection;
@@ -81,8 +79,14 @@ void MyConnection::onConnected(Network::TcpSocket *socket)
     // we are connected, leap out if there already is a amqp connection
     if (_connection) return;
     
-    // create amqp connection
-    _connection = new AMQP::Connection(this, AMQP::Login("/", "buggie", "buggie"));
+    // create amqp connection, and a new channel
+    _connection = new AMQP::Connection(this, AMQP::Login("guest", "guest"), "/");
+    _channel = new AMQP::Channel(_connection, this);
+    
+    // we declare a queue, an exchange and we publish a message
+    _channel->declareQueue("my_queue");
+    _channel->declareExchange("my_exchange", AMQP::direct);
+    _channel->bindQueue("my_exchange", "my_queue", "key");
 }
 
 /**
@@ -93,10 +97,9 @@ void MyConnection::onClosed(Network::TcpSocket *socket)
 {
     // show
     std::cout << "myconnection closed" << std::endl;
+
     // close the channel and connection
     if (_channel) delete _channel;
-    if (_channel2) delete _channel2;
-    if (_channel3) delete _channel3;
     if (_connection) delete _connection;
     
     // set to null
@@ -115,8 +118,6 @@ void MyConnection::onLost(Network::TcpSocket *socket)
     
     // close the channel and connection
     if (_channel) delete _channel;
-    if (_channel2) delete _channel2;
-    if (_channel3) delete _channel3;
     if (_connection) delete _connection;
     
     // set to null
@@ -157,6 +158,13 @@ void MyConnection::onData(Network::TcpSocket *socket, Network::Buffer *buffer)
  */
 void MyConnection::onData(AMQP::Connection *connection, const char *buffer, size_t size)
 {
+//    // report what is going on
+//    std::cout << "send: " << size << std::endl;
+//    
+//    for (unsigned i=0; i<size; i++) std::cout << (int)buffer[i] << " ";
+//    std::cout << std::endl;
+    
+    
     // send to the socket
     _socket.write(buffer, size);
 }
@@ -185,13 +193,11 @@ void MyConnection::onError(AMQP::Connection *connection, const std::string &mess
  */
 void MyConnection::onConnected(AMQP::Connection *connection)
 {
-    // create multiple channels, to see if the counter works properly.
-    _channel2 = new AMQP::Channel(connection, this);
-    _channel3 = new AMQP::Channel(connection, this);
-    _channel = new AMQP::Channel(connection, this);
-    
     // show
     std::cout << "AMQP login success" << std::endl;
+    
+    // create channel if it does not yet exist
+    if (!_channel) _channel = new AMQP::Channel(connection, this);
 }
 
 /**
@@ -203,11 +209,6 @@ void MyConnection::onReady(AMQP::Channel *channel)
 {
     // show
     std::cout << "AMQP channel ready, id: " << (int) channel->id() << std::endl;
-
-    // declare an exchange with the channel id appended to it. 
-    std::string name = "testexchange";
-    name += std::to_string(channel->id());
-    channel->declareExchange(name);
 }
 
 /**
@@ -221,26 +222,11 @@ void MyConnection::onError(AMQP::Channel *channel, const std::string &message)
     // show
     std::cout << "AMQP channel error, id: " << (int) channel->id() << " - message: " << message << std::endl;
 
-    std::cout << "deleting channel and creating new channel" << std::endl;
-    // does the channel still exist?
-    if (channel == _channel)
-    {
-        // main channel cause an error, get rid of if
-        delete _channel;
+    // main channel cause an error, get rid of if
+    delete _channel;
 
-        // and allocate a new one
-        _channel = new AMQP::Channel(_connection, this);
-    }
-    if (channel == _channel2)
-    {
-        delete _channel2;
-        _channel2 = new AMQP::Channel(_connection, this);
-    }
-    if (channel == _channel3)
-    {
-        delete channel;
-        channel = new AMQP::Channel(_connection, this);
-    }
+    // reset pointer
+    _channel = nullptr;
 }
     
 /**
@@ -251,7 +237,6 @@ void MyConnection::onPaused(AMQP::Channel *channel)
 {
     // show
     std::cout << "AMQP channel paused" << std::endl;
-    channel->resume();
 }
 
 /**
@@ -312,24 +297,6 @@ void MyConnection::onExchangeDeclared(AMQP::Channel *channel)
 {
     // show
     std::cout << "AMQP exchange declared" << std::endl;
-    std::string name = "testexchange";
-    name += std::to_string(channel->id());
-
-    // let's make all channels but 2 and 3 working
-    if(channel->id() != 2 && channel->id() != 3)
-    {
-        channel->bindExchange(name, name, "");
-        channel->declareQueue("testqueue");
-    }
-    if(channel->id() == 2) channel->bindQueue("imaginaryQueue", name, "");
-    if(channel->id() == 3) channel->bindQueue("testqueue", "imaginaryExchange", "");
-    if(channel->id() == 4) channel->close();
-    // ĺet's force a connection error
-    if(channel->id() == 5) 
-    {
-        std::cout << "force connection error" << std::endl;
-        // todo: force a connection error. 
-    }
 }
 
 /**
@@ -340,7 +307,6 @@ void MyConnection::onExchangeBound(AMQP::Channel *channel)
 {
     // show
     std::cout << "AMQP Exchange bound" << std::endl;
-    channel->unbindExchange("myexchange", "myexchange", "");
 }
 
 /**
@@ -374,18 +340,6 @@ void MyConnection::onQueueDeclared(AMQP::Channel *channel, const std::string &na
 {
     // show
     std::cout << "AMQP Queue declared" << std::endl;
-    if(channel->id() == 1)
-    {
-        channel->pause();
-        channel->unbindQueue(name, "testexchange", "");
-        channel->purgeQueue(name);
-    } else 
-    {
-        std::string name = "testexchange";
-        name += std::to_string(channel->id());
-        channel->removeExchange(name);
-    }
-
 }
 
 /**
@@ -397,6 +351,9 @@ void MyConnection::onQueueBound(AMQP::Channel *channel)
 {
     // show
     std::cout << "AMQP Queue bound" << std::endl;
+
+
+    _channel->publish("my_exchange", "key", "this is the message");
 }
 
 /**
@@ -430,3 +387,4 @@ void MyConnection::onQueuePurged(AMQP::Channel *channel, uint32_t messageCount)
     std::cout << "AMQP Queue purged" << std::endl;
     channel->removeQueue("testqueue");   
 }
+

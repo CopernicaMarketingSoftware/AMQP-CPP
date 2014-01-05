@@ -32,8 +32,6 @@ private:
      *  @var    Channel
      */
     AMQP::Channel *_channel;
-    AMQP::Channel *_channel2;
-    AMQP::Channel *_channel3;
 
     /**
      *  Method that is called when the connection failed
