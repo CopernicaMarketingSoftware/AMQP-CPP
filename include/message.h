@@ -75,7 +75,7 @@ public:
      *  The consumer tag over which it was delivered
      *  @return string
      */
-    std::string &consumerTag()
+    const std::string &consumerTag() const
     {
         return _consumerTag;
     }
@@ -84,7 +84,7 @@ public:
      *  Unique delivery tag to identify and ack the mesage
      *  @return uint64_t
      */
-    uint64_t deliveryTag()
+    uint64_t deliveryTag() const
     {
         return _deliveryTag;
     }
@@ -93,7 +93,7 @@ public:
      *  Is this a redelivered message / has it been delivered before?
      *  @var    bool
      */
-    bool redelivered()
+    bool redelivered() const
     {
         return _redelivered;
     }
@@ -102,7 +102,7 @@ public:
      *  The exchange to which it was originally published
      *  @var    string
      */
-    std::string &exchange()
+    const std::string &exchange() const
     {
         return _exchange;
     }
@@ -111,7 +111,7 @@ public:
      *  The routing key that was originally used
      *  @var    string
      */
-    std::string &routingKey()
+    const std::string &routingKey() const
     {
         return _routingKey;
     }

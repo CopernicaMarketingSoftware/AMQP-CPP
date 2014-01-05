@@ -159,14 +159,7 @@ public:
      *  @param  tag             the consumer tag
      */
     virtual void onConsumerStarted(Channel *channel, const std::string &tag) {}
-    
-    /**
-     *  Method that is called when a message has been consumed
-     *  @param  channel         the channel on which the consumer was started
-     *  @param  message         the consumed message
-     */
-    virtual void onConsumed(Channel *channel, const Message &message) {}
-    
+
     /**
      *  Method that is called when a consumer was stopped
      *  This is the result of a call to Channel::cancel()
@@ -174,6 +167,15 @@ public:
      *  @param  tag             the consumer tag
      */
     virtual void onConsumerStopped(Channel *channel, const std::string &tag) {}
+    
+    /**
+     *  Method that is called when a message has been received on a channel
+     *  @param  channel         the channel on which the consumer was started
+     *  @param  message         the consumed message
+     */
+    virtual void onReceived(Channel *channel, const Message &message) {}
+    
+    
 
 };
 

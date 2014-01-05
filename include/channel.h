@@ -342,6 +342,26 @@ public:
     bool cancel(const std::string &tag, int flags = 0) { return _implementation.cancel(tag, flags); }
     
     /**
+     *  Acknoldge a received message
+     * 
+     *  When a message is received in the ChannelHandler::onReceived() method,
+     *  you must acknoledge it so that RabbitMQ removes it from the queue (unless
+     *  you are consuming with the noack option). This method can be used for
+     *  this acknoledging.
+     * 
+     *  The following flags are supported:
+     * 
+     *      -   multiple            acknoledge multiple messages: all messages that were earlier delivered are acknowledged too
+     * 
+     *  @param  deliveryTag         The delivery tag
+     *  @param  message             The message
+     *  @param  flags
+     *  @return bool
+     */
+    bool ack(uint64_t deliveryTag, int flags=0) { return _implementation.ack(deliveryTag, flags); }
+    bool ack(const Message &message, int flags=0) { return _implementation.ack(message.deliveryTag(), flags); }
+    
+    /**
      *  Close the current channel
      *  @return bool
      */

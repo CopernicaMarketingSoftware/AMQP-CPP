@@ -256,8 +256,17 @@ public:
      *  Cancel a running consumer
      *  @param  tag                 the consumer tag
      *  @param  flags               optional flags
+     *  @return bool
      */
     bool cancel(const std::string &tag, int flags);
+
+    /**
+     *  Acknoledge a message
+     *  @param  deliveryTag         the delivery tag
+     *  @param  flags               optional flags
+     *  @return bool
+     */
+    bool ack(uint64_t deliveryTag, int flags);
     
     /**
      *  Close the current channel
@@ -437,9 +446,9 @@ public:
     }
     
     /**
-     *  Report the consumed message
+     *  Report that a message was received
      */
-    void reportDelivery();
+    void reportReceived();
 
     /**
      *  Create an incoming message

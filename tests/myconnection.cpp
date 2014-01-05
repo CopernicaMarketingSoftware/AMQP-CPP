@@ -421,10 +421,13 @@ void MyConnection::onConsumerStarted(AMQP::Channel *channel, const std::string &
  *  @param  channel         the channel on which the consumer was started
  *  @param  message         the consumed message
  */
-void MyConnection::onConsumed(AMQP::Channel *channel, const AMQP::Message &message)
+void MyConnection::onReceived(AMQP::Channel *channel, const AMQP::Message &message)
 {
     // show
     std::cout << "AMQP consumed: " << message.message() << std::endl;
+    
+    // ack the message
+    channel->ack(message);
 }
 
 /**

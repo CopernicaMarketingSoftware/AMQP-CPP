@@ -30,6 +30,7 @@
 #include "basicqosframe.h"
 #include "basicconsumeframe.h"
 #include "basiccancelframe.h"
+#include "basicackframe.h"
 
 /**
  *  Set up namespace
@@ -480,6 +481,21 @@ bool ChannelImpl::cancel(const std::string &tag, int flags)
 }
 
 /**
+ *  Acknoledge a message
+ *  @param  deliveryTag         the delivery tag
+ *  @param  flags               optional flags
+ *  @return bool
+ */
+bool ChannelImpl::ack(uint64_t deliveryTag, int flags)
+{
+    // send an ack frame
+    send(BasicAckFrame(_id, deliveryTag, flags & multiple));
+    
+    // done
+    return true;
+}
+
+/**
  *  Send a frame over the channel
  *  @param  frame       frame to send
  *  @return size_t      number of bytes sent
@@ -491,11 +507,11 @@ size_t ChannelImpl::send(const Frame &frame)
 }
 
 /**
- *  Report the consumed message
+ *  Report the received message
  */
-void ChannelImpl::reportDelivery()
+void ChannelImpl::reportReceived()
 {
-    if (_handler) _handler->onConsumed(_parent, *_message);
+    if (_handler) _handler->onReceived(_parent, *_message);
 }
 
 /**

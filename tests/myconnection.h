@@ -231,7 +231,7 @@ private:
      *  @param  channel         the channel on which the consumer was started
      *  @param  message         the consumed message
      */
-    virtual void onConsumed(AMQP::Channel *channel, const AMQP::Message &message) override;
+    virtual void onReceived(AMQP::Channel *channel, const AMQP::Message &message) override;
 
     /**
      *  Method that is called when a consumer was stopped
