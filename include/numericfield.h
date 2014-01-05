@@ -92,6 +92,7 @@ public:
     NumericField& operator=(T value)
     {
         _value = value;
+        return *this;
     };
 
     /**

@@ -96,10 +96,16 @@ ReceivedFrame::ReceivedFrame(const char *buffer, uint32_t size, uint32_t max) : 
     if (max > 0 && _payloadSize > max - 8) throw ProtocolException("frame size exceeded");
 
     // check if the buffer is big enough to contain all data
-    if (size >= _payloadSize + 8) return;
-    
-    // frame is not yet valid
-    _type = _channel = _payloadSize = 0;
+    if (size >= _payloadSize + 8)
+    {
+        // buffer is big enough, check for a valid end-of-frame marker
+        if ((int)buffer[_payloadSize+7] != -50) throw ProtocolException("invalid end of frame marker");
+    }
+    else
+    {
+        // frame is not yet valid
+        _type = _channel = _payloadSize = 0;
+    }
 }
 
 /**
@@ -290,8 +296,6 @@ const char * ReceivedFrame::nextData(uint32_t size)
  */
 bool ReceivedFrame::process(ConnectionImpl *connection)
 {
-    std::cout << "_type = " << (int)_type << std::endl;
-    
     // check the type
     switch (_type)
     {
@@ -300,8 +304,10 @@ bool ReceivedFrame::process(ConnectionImpl *connection)
         case 3:     return BodyFrame(*this).process(connection);
         case 4:     return HeartbeatFrame(*this).process(connection);
         case 8:     return HeartbeatFrame(*this).process(connection);
-        default:    return false;
     }
+    
+    // this is a problem
+    throw ProtocolException("unrecognized frame type " + std::to_string(_type));
 }
 
 /**
@@ -314,8 +320,6 @@ bool ReceivedFrame::processMethodFrame(ConnectionImpl *connection)
     // read the class id from the method
     uint16_t classID = nextUint16();
     
-    std::cout << "classID = " << (int)classID << std::endl;
-
     // construct frame based on method id
     switch (classID)
     {
@@ -325,8 +329,10 @@ bool ReceivedFrame::processMethodFrame(ConnectionImpl *connection)
         case 50:    return processQueueFrame(connection);
         case 60:    return processBasicFrame(connection);
         case 90:    return processTransactionFrame(connection);
-        default:    return false;
     }
+
+    // this is a problem
+    throw ProtocolException("unrecognized method frame class " + std::to_string(classID));
 }
 
 /**
@@ -339,8 +345,6 @@ bool ReceivedFrame::processConnectionFrame(ConnectionImpl *connection)
     // read the method id from the method
     uint16_t methodID = nextUint16();
     
-    std::cout << "methodID = " << (int)methodID << std::endl;
-
     // construct frame based on method id
     switch (methodID)
     {
@@ -354,8 +358,10 @@ bool ReceivedFrame::processConnectionFrame(ConnectionImpl *connection)
         case 41:    return ConnectionOpenOKFrame(*this).process(connection);
         case 50:    return ConnectionCloseFrame(*this).process(connection);
         case 51:    return ConnectionCloseOKFrame(*this).process(connection);
-        default:    return false;
     }
+
+    // this is a problem
+    throw ProtocolException("unrecognized connection frame method " + std::to_string(methodID));
 }
 
 /**
@@ -368,8 +374,6 @@ bool ReceivedFrame::processChannelFrame(ConnectionImpl *connection)
     // read the method id from the method
     uint16_t methodID = nextUint16();
     
-    std::cout << "methodID = " << methodID << std::endl;
-
     // construct frame based on method id
     switch (methodID)
     {
@@ -379,8 +383,10 @@ bool ReceivedFrame::processChannelFrame(ConnectionImpl *connection)
         case 21:    return ChannelFlowOKFrame(*this).process(connection);
         case 40:    return ChannelCloseFrame(*this).process(connection);
         case 41:    return ChannelCloseOKFrame(*this).process(connection);
-        default:    return false;
     }
+
+    // this is a problem
+    throw ProtocolException("unrecognized channel frame method " + std::to_string(methodID));
 }
 
 /**
@@ -393,8 +399,6 @@ bool ReceivedFrame::processExchangeFrame(ConnectionImpl *connection)
     // read the method id from the method
     uint16_t methodID = nextUint16();
 
-    std::cout << "methodID = " << (int)methodID << std::endl;
-    
     // construct frame based on method id
     switch(methodID)
     {
@@ -409,8 +413,10 @@ bool ReceivedFrame::processExchangeFrame(ConnectionImpl *connection)
                     // has method ID 51, instead of (the expected) 41. This is tested
                     // and it really has ID 51.  
         case 51:    return ExchangeUnbindOKFrame(*this).process(connection);
-        default:    return false;
     }
+
+    // this is a problem
+    throw ProtocolException("unrecognized exchange frame method " + std::to_string(methodID));
 }
 
 /**
@@ -436,8 +442,10 @@ bool ReceivedFrame::processQueueFrame(ConnectionImpl *connection)
         case 41:    return QueueDeleteOKFrame(*this).process(connection);
         case 50:    return QueueUnbindFrame(*this).process(connection);
         case 51:    return QueueUnbindOKFrame(*this).process(connection);
-        default:    return false;
     }
+
+    // this is a problem
+    throw ProtocolException("unrecognized queue frame method " + std::to_string(methodID));
 }
 
 /**
@@ -470,8 +478,10 @@ bool ReceivedFrame::processBasicFrame(ConnectionImpl *connection)
         case 100:   return BasicRecoverAsyncFrame(*this).process(connection);
         case 110:   return BasicRecoverFrame(*this).process(connection);
         case 111:   return BasicRecoverOKFrame(*this).process(connection);
-        default:    return false;
     }
+
+    // this is a problem
+    throw ProtocolException("unrecognized basic frame method " + std::to_string(methodID));
 }
 
 /**
@@ -493,8 +503,10 @@ bool ReceivedFrame::processTransactionFrame(ConnectionImpl *connection)
         case 21:    return TransactionCommitOKFrame(*this).process(connection);
         case 30:    return TransactionRollbackFrame(*this).process(connection);
         case 31:    return TransactionRollbackOKFrame(*this).process(connection);
-        default:    return false;
     }
+
+    // this is a problem
+    throw ProtocolException("unrecognized transaction frame method " + std::to_string(methodID));
 }
 
 /**
@@ -511,8 +523,10 @@ bool ReceivedFrame::processHeaderFrame(ConnectionImpl *connection)
     switch (classID)
     {
         case 60:    return BasicHeaderFrame(*this).process(connection);
-        default:    return false;
     }
+
+    // this is a problem
+    throw ProtocolException("unrecognized header frame class " + std::to_string(classID));
 }
 
 /**

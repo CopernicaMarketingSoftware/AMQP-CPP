@@ -133,6 +133,14 @@ public:
         return true;
     }
 
+    /**
+     *  Does this frame need an end-of-frame seperator?
+     *  @return bool
+     */
+    virtual bool needsSeparator() const override
+    { 
+        return false; 
+    }
 };
 
 /**

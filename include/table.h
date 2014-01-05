@@ -47,9 +47,29 @@ public:
     Table(const Table &table);
 
     /**
+     *  Move constructor
+     *  @param  table
+     */
+    Table(Table &&table) : _fields(std::move(table._fields)) {}
+
+    /**
      *  Destructor
      */
     virtual ~Table() {}
+
+    /**
+     *  Assignment operator
+     *  @param  table
+     *  @return Table
+     */
+    Table &operator=(const Table &table);
+    
+    /**
+     *  Move assignment operator
+     *  @param  table
+     *  @return Table
+     */
+    Table &operator=(Table &&table);
 
     /**
      *  Create a new instance on the heap of this object, identical to the object passed

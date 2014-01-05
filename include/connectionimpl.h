@@ -84,7 +84,7 @@ protected:
      *  Queued messages that should be sent after the connection has been established
      *  @var    queue
      */
-    std::queue<std::string> _queue;
+    std::queue<OutBuffer> _queue;
 
 
 private:
@@ -170,6 +170,25 @@ public:
     {
         _maxChannels = channels;
         _maxFrame = size;
+    }
+    
+    /**
+     *  The max frame size
+     *  @return uint32_t
+     */
+    uint32_t maxFrame()
+    {
+        return _maxFrame;
+    }
+    
+    /**
+     *  The max payload size for body frames
+     *  @return uint32_t
+     */
+    uint32_t maxPayload()
+    {
+        // 8 bytes for header and end-of-frame byte
+        return _maxFrame - 8;
     }
     
     /**

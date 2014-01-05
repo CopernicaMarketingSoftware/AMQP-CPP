@@ -42,7 +42,7 @@
 #include <libamqp/array.h>
 
 // envelope for publishing and consuming
-#include <libamqp/envelopefield.h>
+#include <libamqp/metadata.h>
 #include <libamqp/envelope.h>
 
 // mid level includes

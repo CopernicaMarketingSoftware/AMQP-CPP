@@ -199,27 +199,27 @@ public:
      * 
      *      -   nowait      do not wait on response
      * 
-     *  @param  queue       the target queue
      *  @param  exchange    the source exchange
+     *  @param  queue       the target queue
      *  @param  routingkey  the routing key
      *  @param  flags       additional flags
      *  @param  arguments   additional bind arguments
      *  @return bool
      */
-    bool bindQueue(const std::string &queue, const std::string &exchange, const std::string &routingkey, int flags, const Table &arguments) { return _implementation.bindQueue(exchange, queue, routingkey, flags, arguments); }
-    bool bindQueue(const std::string &queue, const std::string &exchange, const std::string &routingkey, const Table &arguments) { return _implementation.bindQueue(exchange, queue, routingkey, 0, arguments); }
-    bool bindQueue(const std::string &queue, const std::string &exchange, const std::string &routingkey, int flags = 0) { return _implementation.bindQueue(exchange, queue, routingkey, flags, Table()); }
+    bool bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, int flags, const Table &arguments) { return _implementation.bindQueue(exchange, queue, routingkey, flags, arguments); }
+    bool bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments) { return _implementation.bindQueue(exchange, queue, routingkey, 0, arguments); }
+    bool bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, int flags = 0) { return _implementation.bindQueue(exchange, queue, routingkey, flags, Table()); }
     
     /**
      *  Unbind a queue from an exchange
-     *  @param  queue       the target queue
      *  @param  exchange    the source exchange
+     *  @param  queue       the target queue
      *  @param  routingkey  the routing key
      *  @param  arguments   additional bind arguments
      *  @return bool
      */
-    bool unbindQueue(const std::string &queue, const std::string &exchange, const std::string &routingkey, const Table &arguments) {  return _implementation.unbindQueue(exchange, queue, routingkey, arguments); }
-    bool unbindQueue(const std::string &queue, const std::string &exchange, const std::string &routingkey) { return _implementation.unbindQueue(exchange, queue, routingkey, Table()); }
+    bool unbindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments) {  return _implementation.unbindQueue(exchange, queue, routingkey, arguments); }
+    bool unbindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey) { return _implementation.unbindQueue(exchange, queue, routingkey, Table()); }
     
     /**
      *  Purge a queue

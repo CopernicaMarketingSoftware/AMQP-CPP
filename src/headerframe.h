@@ -35,6 +35,7 @@ protected:
      */
     virtual void fill(OutBuffer& buffer) const
     {
+        // call base
         ExtFrame::fill(buffer);
 
         // add type

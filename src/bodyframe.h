@@ -18,9 +18,15 @@ private:
     /**
      *  Payload of the frame
      *  Payload can be any number of octets
-     *  @var vector<uint8_t>
+     *  @var const char *
      */
-    std::string _payload;
+    const char *_payload;
+    
+    /**
+     *  Size of the payload
+     *  @var uint64_t
+     */
+    uint32_t _size;
 
 protected:
     /**
@@ -34,7 +40,7 @@ protected:
         ExtFrame::fill(buffer);
 
         // add payload to buffer
-        buffer.add(_payload);
+        buffer.add(_payload, _size);
     }
 
 public:
@@ -43,10 +49,12 @@ public:
      *
      *  @param  channel     channel identifier
      *  @param  payload     payload of the body
+     *  @param  size        size of the payload
      */
-    BodyFrame(uint16_t channel, const std::string &payload) :
-        ExtFrame(channel, payload.size()),
-        _payload(payload)
+    BodyFrame(uint16_t channel, const char *payload, uint32_t size) :
+        ExtFrame(channel, size),
+        _payload(payload),
+        _size(size)
     {}
 
     /**
@@ -57,7 +65,8 @@ public:
      */
     BodyFrame(ReceivedFrame& frame) : 
         ExtFrame(frame), 
-        _payload(frame.nextData(frame.payloadSize()), frame.payloadSize()) 
+        _payload(frame.nextData(frame.payloadSize())), 
+        _size(frame.payloadSize()) 
     {}
 
     /**
@@ -76,9 +85,9 @@ public:
 
     /**
      *  Return the payload of the body
-     *  @return     vector<UOctet>
+     *  @return     const char *
      */
-    const std::string& payload() const
+    const char *payload() const
     {
         return _payload;
     }

@@ -49,6 +49,47 @@ Table::Table(const Table &table)
 }
 
 /**
+ *  Assignment operator
+ *  @param  table
+ *  @return Table
+ */
+Table &Table::operator=(const Table &table)
+{
+    // skip self assignment
+    if (this == &table) return *this;
+    
+    // empty current fields
+    _fields.clear();
+    
+    // loop through the table records
+    for (auto iter = table._fields.begin(); iter != table._fields.end(); iter++)
+    {
+        // add the field
+        _fields[iter->first] = std::shared_ptr<Field>(iter->second->clone());
+    }
+    
+    // done
+    return *this;
+}
+    
+/**
+ *  Move assignment operator
+ *  @param  table
+ *  @return Table
+ */
+Table &Table::operator=(Table &&table)
+{
+    // skip self assignment
+    if (this == &table) return *this;
+    
+    // copy fields
+    _fields = std::move(table._fields);
+    
+    // done
+    return *this;
+}
+
+/**
  *  Get a field
  * 
  *  If the field does not exist, an empty string field is returned

@@ -21,6 +21,9 @@
 #include "queueunbindframe.h"
 #include "queuepurgeframe.h"
 #include "queuedeleteframe.h"
+#include "basicpublishframe.h"
+#include "basicheaderframe.h"
+#include "bodyframe.h"
 
 #include <iostream>
 
@@ -155,7 +158,6 @@ bool ChannelImpl::commitTransaction()
  */
 bool ChannelImpl::rollbackTransaction()
 {
-    std::cout << "send rollback frame" << std::endl;
     // must be connected
     if (!connected()) return false;
     
@@ -365,7 +367,59 @@ bool ChannelImpl::removeQueue(const std::string &name, int flags)
     // done
     return true;
 }
+
+/**
+ *  Publish a message to an exchange
+ * 
+ *  The following flags can be used
+ * 
+ *      -   mandatory   if set, an unroutable message will be reported to the channel handler with the onReturned method
+ *      -   immediate   if set, a message that could not immediately be consumed is returned to the onReturned method
+ * 
+ *  @todo   implement to onReturned() method
+ * 
+ *  @param  exchange    the exchange to publish to
+ *  @param  routingkey  the routing key
+ *  @param  flags       optional flags (see above)
+ *  @param  envelope    the full envelope to send
+ *  @param  message     the message to send
+ *  @param  size        size of the message
+ */
+bool ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, int flags, const Envelope &envelope)
+{
+    // @todo prevent crash when connection is destructed
     
+    // send the publish frame
+    send(BasicPublishFrame(_id, exchange, routingKey, flags & mandatory, flags & immediate));
+
+    // send header
+    send(BasicHeaderFrame(_id, envelope));
+    
+    // the max payload size is the max frame size minus the bytes for headers and trailer
+    uint32_t maxpayload = _connection->_implementation.maxPayload();
+    uint32_t bytessent = 0;
+    
+    // the buffer
+    const char *data = envelope.body();
+    uint32_t bytesleft = envelope.bodySize();
+    
+    // split up the body in multiple frames depending on the max frame size
+    while (bytesleft > 0)
+    {
+        // size of this chunk
+        uint32_t chunksize = std::min(maxpayload, bytesleft);
+        
+        // send out a body frame
+        send(BodyFrame(_id, data + bytessent, chunksize));
+        
+        // update counters
+        bytessent += chunksize;
+        bytesleft -= chunksize;
+    }
+    
+    // done
+    return true;
+}
 
 /**
  *  Send a frame over the channel

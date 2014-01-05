@@ -42,6 +42,12 @@ public:
     Array(const Array &array);
 
     /**
+     *  Move constructor
+     *  @param  array
+     */
+    Array(Array &&array) : _fields(std::move(array._fields)) {}
+
+    /**
      *  Constructor for an empty Array
      */
     Array() {}

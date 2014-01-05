@@ -46,21 +46,20 @@ public:
      *  Is this a frame that is part of the connection setup?
      *  @return bool
      */
-    virtual bool partOfHandshake() const
-    {
-        return false;
-    }
+    virtual bool partOfHandshake() const { return false; }
+    
+    /**
+     *  Does this frame need an end-of-frame seperator?
+     *  @return bool
+     */
+    virtual bool needsSeparator() const { return true; }
     
     /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
      *  @return bool            Was it succesfully processed?
      */
-    virtual bool process(ConnectionImpl *connection)
-    {
-        // no process was implemented
-        return false;
-    }
+    virtual bool process(ConnectionImpl *connection);
 };
     
 /**

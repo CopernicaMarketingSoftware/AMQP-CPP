@@ -196,13 +196,13 @@ void ConnectionImpl::setConnected()
     while (!_queue.empty())
     {
         // get the next message
-        std::string message(_queue.front());
-    
+        OutBuffer buffer(std::move(_queue.front()));
+
         // remove it from the queue
         _queue.pop();
         
         // send it
-        _handler->onData(_parent, message.data(), message.size());
+        _handler->onData(_parent, buffer.data(), buffer.size());
         
         // leap out if the connection was destructed
         if (!monitor.valid()) return;
@@ -223,13 +223,13 @@ size_t ConnectionImpl::send(const Frame &frame)
     frame.fill(buffer);
     
     // append an end of frame byte (but not when still negotiating the protocol)
-    if (_state != state_protocol) buffer.add((uint8_t)206);
+    if (frame.needsSeparator()) buffer.add((uint8_t)206);
     
     // are we still setting up the connection?
     if ((_state == state_protocol || _state == state_handshake) && !frame.partOfHandshake())
     {
         // the connection is still being set up, so we need to delay the message sending
-        _queue.push(std::string(buffer.data(), buffer.size()));
+        _queue.push(std::move(buffer));
     }
     else
     {

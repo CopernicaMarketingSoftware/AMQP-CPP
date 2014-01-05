@@ -131,6 +131,14 @@ public:
      *  Get the message type
      */
     virtual uint8_t type() const = 0;
+
+    /**
+     *  Process the frame
+     *  @param  connection      The connection over which it was received
+     *  @return bool            Was it succesfully processed?
+     */
+    virtual bool process(ConnectionImpl *connection);
+
 };
 
 /**
