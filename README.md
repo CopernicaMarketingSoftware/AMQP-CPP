@@ -258,6 +258,14 @@ channel.declareQueue("my-queue-name", AMQP::durable + AMQP::autodelete, argument
 WORK IN PROGRESS
 ================
 
-It is not yet possible to publish messages, and consume messages with this library.
-These features will soon be added.
+Almost all AMQP features have been implemented. We only need to add reject/nack support,
+recover support, and support for returned messages. We also need to add more safety
+checks so that strange data from RabbitMQ does not break the library (although
+in reality such strange data does not exist).
+
+It would also be nice to have sample implementations for the ConnectionHandler
+class that can be directly plugged into libev, libevent and libuv event loops.
+
+For performance reasons, we need to investigate if we can limit the number of times
+an incoming or outgoing messages is copied.
 
