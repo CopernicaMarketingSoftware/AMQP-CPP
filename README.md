@@ -240,14 +240,17 @@ is a variable in which you can set a number of options. If you for example
 want to create a durable, auto-deleted queue, you should pass in the value
 AMQP::durable + AMQP::autodelete.
 
-The declareQueue() method also accepts a arguments parameter, which is of type
+The declareQueue() method also accepts an arguments parameter, which is of type
 Table. The Table object can be used as an associative array to send additional
 options to RabbitMQ, that are often custom RabbitMQ extensions to the AMQP 
-standard:
+standard. It even is possible to build complicated, nested, table structures full
+of strings, arrays and other tables. In reality, you probably only need strings
+and integers:
 
 ````c++
 // custom options that are passed to the declareQueue call
 Table arguments;
+arguments["x-dead-letter-exchange"] = "some-exchange";
 arguments["x-message-ttl"] = 3600 * 1000;
 arguments["x-expires"] = 7200 * 1000;
 
