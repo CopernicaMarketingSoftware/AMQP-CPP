@@ -28,7 +28,10 @@ sending large volumes of email, using AMQP message queues.
 HOW TO USE
 ==========
 
-First you need to implement the ConnectionHandler interface. This is a class
+As we mentioned above, the library does not do any IO by itself, and you need
+to pass an object to the library that the library can use for that. So, before
+you can even start using the library, you first you need to create a class that
+extends from the ConnectionHandler base class. This is a class
 with a number of methods that are called by the library every time it wants
 to send out data, or when it needs to inform you that an error occured.
 
