@@ -343,17 +343,16 @@ can all be used for it. The most simple one takes three arguments: the name of t
 exchange to publish to, the routing key to use, and the actual message that
 you're publishing - all these parameters are standard C++ strings.
 
-More extended versions of the publish() method exist too, and take additional
-flags, arguments, and enable you to publish an entire Envelope object -
-which is an object that contains the message to publish plus a list of
-optional meta information like the content-type, content-encoding, priority,
-expire time and more. None of these meta fields are interpreted by this library,
-and also the RabbitMQ ignores most of them, but the AMQP protocol defines them,
-and they are free for you to use. For an extensive list of the fields that are
-supported, take a look at the Envelope.h header file. You should also check
-the RabbitMQ documentation to find out if a envelope header is interpreted by
-the RabbitMQ server (at the time of this writing, only the expire time is being 
-used).
+More extended versions of the publish() method exist that accept additional
+arguments, and that enable you to publish entire Envelope objects, which are
+objects that contain the message plus a list of optional meta information like 
+the content-type, content-encoding, priority, expire time and more. None of these 
+meta fields are interpreted by this library, and also the RabbitMQ ignores most 
+of them, but the AMQP protocol defines them, and they are free for you to use. 
+For an extensive list of the fields that are supported, take a look at the MetaData.h 
+header file. You should also check the RabbitMQ documentation to find out if a 
+envelope header is interpreted by the RabbitMQ server (at the time of this writing, 
+only the expire time is being used).
 
 The following snippet is copied from the Channel.h header file and lists all
 available publish() methods. As you can see, you can call the publish() method
@@ -389,20 +388,22 @@ bool publish(const std::string &exchange, const std::string &routingKey, const c
 
 Published messages are normally not confirmed by the server, hence there is no
 ChannelHandler::onPublished() method that you can implement to find out if
-a message was correctly received by the server. That's the design of the AMQP
-protocol, to not unnecessarily slow down message publishing. As long as no error is 
-reported via the ChannelHandler::onError() method, you can safely assume
-that your messages were delivered.
+a message was correctly received by the server. That's on purpose the design of 
+the AMQP protocol, to not unnecessarily slow down message publishing. As long 
+as no error is reported via the ChannelHandler::onError() method, you can safely 
+assume that your messages were delivered.
 
 If you use the flags parameter to set either the option 'mandatory' or 
-'immediate' however, a message that could not be routed or directly delivered 
-to a consumer is sent back to the client, and ends up in the ChannelHandler::onReturned() 
-method. At the time of this writing, the 'immediate' option does not seem to
-be supported by RabbitMQ by the way.
+'immediate', a message that could not be routed or directly delivered to a consumer 
+is sent back to the client, and ends up in the ChannelHandler::onReturned() 
+method. At the time of this writing however, the 'immediate' option does not 
+seem to be supported by RabbitMQ.
 
 
 CONSUMING MESSAGES
 ==================
+
+
 
 
 WORK IN PROGRESS
