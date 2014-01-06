@@ -170,10 +170,9 @@ size_t parse(char *buffer, size_t size)
 CHANNELS
 ========
 
-In the example above you saw that we created two objects: a Connection object, and
-on top of that object a Channel object. A channel is a sort of virtual connection 
-over a single TCP connection, and you can create many channels that all use the
-same TCP connection.
+In the example you saw that we created a channel object. A channel is a virtual 
+connection over a single TCP connection, and it is possible to create many channels 
+that all use the same TCP connection.
 
 AMQP instructions are always sent over a channel, so before you can send the first 
 command to the RabbitMQ server, you first need a channel object. The channel 
@@ -183,86 +182,62 @@ and to publish and consume messages. You can best take a look at the channel.h
 C++ header file for a list of all available methods. Every method in it is well 
 documented.
 
-The constructor of the Channel object gets two parameters: the connection object,
-and a pointer to a ChannelHandler object. In the example that we gave above we have 
-not yet used this ChannelHandler object. However, in normal circumstances when you 
-construct a Channel object, you should also pass a pointer to a ChannelHandler object. 
+The constructor of the Channel object accepts two parameters: the connection object,
+and a pointer to a ChannelHandler object. In the example we did 
+not use this ChannelHandler object. However, in normal circumstances, you should 
+always pass a pointer to a ChannelHandler object every time you construct a channel. 
 
 Just like the ConnectionHandler class, the ChannelHandler class is a base class that 
-you should extend and override the virtual methods that you need. The AMQP library 
-will call these methods to inform you that an operation has succeeded or has failed.
+you can extend to override the virtual methods you need. The AMQP library 
+will call these methods to inform you that an operation on the channel has succeeded 
+or has failed.
 
 For example, if you call the channel.declareQueue() method, the AMQP library will
 send a message to the RabbitMQ message broker to ask it to declare the
 queue. However, because all operations in the library are asynchronous, the
-declareQueue() method immediately returns 'true', but it is
-then not yet known if the queue was correctly declared. Only after a while,
-when the confirmation from the server was received, your ChannelHandler::onQueueDeclared()
+declareQueue() method immediately returns 'true', although it is at that time
+not yet known whether the queue was correctly declared. Only after a while,
+after the instruction has reached the server, and the confirmation from the server 
+has been sent back to the client, your ChannelHandler::onQueueDeclared()
 method will be called to inform you that the operation was succesful.
 
-Something makes channels a little inconvenient. When an error occurs, the error 
-is reported back to the client and ends up in your ChannelHandler::onError() 
-method (which is nice), and on top of that the entire channel is closed
-(which is not so nice). This means that if you call multiple methods in a row,
+It is important to realize that any error that occurs on a channel, will
+invalidate the entire channel,. including all subsequent instructions that
+were already sent over it. This means that if you call multiple methods in a row,
 and the first method fails, all subsequent methods will not be executed either:
 
 ````c++
 Channel myChannel(connection, &myHandler);
-myChannel.declareQueue("queue-1");
-myChannel.declareQueue("queue-2");
-myChannel.declareQueue("queue-3");
+myChannel.declareQueue("my-queue");
+myChannel.declareExchange("my-exchange");
 ````
 
 If the first declareQueue() call fails in the example above, your ChannelHandler::onError() 
-method will be called once, and the second and third queues would not be created. This can 
-be solved by using multiple channels:
+method will be called after a while to report about this failure. And although the 
+second instruction to declare an exchange has already been sent to the server, it will be 
+ignored because the channel was already in an invalid state after the first failure.
+
+You can overcome this by using multiple channels:
 
 ````c++
 Channel channel1(connection, &myHandler);
 Channel channel2(connection, &myHandler);
-Channel channel3(connection, &myHandler);
-channel1.declareQueue("queue-1");
-channel2.declareQueue("queue-2");
-channel3.declareQueue("queue-3");
+channel1.declareQueue("my-queue");
+channel2.declareQueue("my-exchange");
 ````
 
-Now, if an error occurs with declaring the first queue, it will not have
-consequences for the other two calls. But this workaround comes at a small price:
-setting up the extra channels require extra instructions to be sent to the
-RabbitMQ server, so the network becomes busier (although not much).
-
-Another solution would be to write a handler that only creates the second and
-third queue after the earlier queue was succesfully created:
-
-````c++
-class MyHandler : public AMQP::ChannelHandler
-{
-public:
-    virtual void onQueueDeclared(Channel *channel, const std::string &name, uint32_t messageCount, uint32_t consumerCount) 
-    {
-        if (name == "queue-1") channel->declareQueue("queue-2");
-        if (name == "queue-2") channel->declareQueue("queue-3");
-    }
-};
-
-...
-
-MyHandler myHandler;
-Channel myChannel(connection, &myHandler);
-myChannel.declareQueue("queue-1");
-
-````
-
-But this also has its price: your program now has to wait for the first queue
-to be created, before the second instruction can be sent. This is even slower
-than the first workaround (in which we set up a different channel for each and 
-every instruction).
+Now, if an error occurs with declaring the queue, it will not have
+consequences for the other call. But this comes at a small price:
+setting up the extra channel requires and extra instruction to be sent to the
+RabbitMQ server, so some extra bytes are sent over the network,
+and some additional resources in both the client application and the
+RabbitMQ server are used (although this is all very limited).
 
 Let's get back to the ChannelHandler class. It has many methods that you can all
 implement - but you do not have to that. All methods in it have a default empty implementation,
-so you can only override the ones that you are interested in. When you're writing a
-consumer application for example, you probably are only interested in errors that
-occur, and in incoming messages:
+so you can choose to only override the ones that you are interested in. When you're 
+writing a consumer application for example, you probably are only interested in 
+errors that occur, and in incoming messages:
 
 ````c++
 #include <libamqp.h>
@@ -295,7 +270,7 @@ public:
      *  @param  consumerTag     the consumer identifier that was used to retrieve this message
      *  @param  redelivered     is this a redelivered message?
      */
-    virtual void onReceived(Channel *channel, const Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered) 
+    virtual void onReceived(AMQP::Channel *channel, const AMQP::Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered) 
     {
         // @todo
         //  do something with the incoming message
@@ -306,9 +281,10 @@ public:
 FLAGS AND TABLES
 ================
 
-Let's take a closer look at one of the methods in the Channel object to explain
+Let's take a closer look at one method in the Channel object to explain
 two other concepts of this AMQP library: flags and tables. The method that we
-will be looking at is the Channel::declareQueue() method:
+will be looking at is the Channel::declareQueue() method - but flags and
+tables are used by many other methods in the Channel class as well.
 
 ````c++
 /**
@@ -330,21 +306,26 @@ will be looking at is the Channel::declareQueue() method:
 bool declareQueue(const std::string &name, int flags, const Table &arguments);
 ````
 
-Many methods in the Channel class support have a parameter named 'flags'. This
-is a variable in which you can set a number of options. If you for example
-want to create a durable, auto-deleted queue, you should pass in the value
+Many methods in the Channel class accept an integer parameter named 'flags'.
+This is a variable in which you can set a number of options, by summing up
+all the options that are described in the documentation. If you for example
+want to create a durable, auto-deleted queue, you can pass in the value
 AMQP::durable + AMQP::autodelete.
 
-The declareQueue() method also accepts an arguments parameter, which is of type
+The declareQueue() method also accepts a parameter named 'arguments', which is of type
 Table. This Table object can be used as an associative array to send additional
 options to RabbitMQ, that are often custom RabbitMQ extensions to the AMQP 
-standard. The Table class is so powerful that it is even possible to build 
-complicated, nested structures full of strings, arrays and even other nested 
-tables. In reality, you probably only need strings and integers:
+standard. For a list of all supported arguments, take a look at the documentation
+on the RabbitMQ website. With every new RabbitMQ release more features, and
+supported arguments are added.
+
+The Table class is a very powerful class that enables you to build 
+complicated, deeply nested structures full of strings, arrays and even other 
+tables. In reality, you only need strings and integers.
 
 ````c++
 // custom options that are passed to the declareQueue call
-Table arguments;
+AMQP::Table arguments;
 arguments["x-dead-letter-exchange"] = "some-exchange";
 arguments["x-message-ttl"] = 3600 * 1000;
 arguments["x-expires"] = 7200 * 1000;
@@ -355,6 +336,68 @@ channel.declareQueue("my-queue-name", AMQP::durable + AMQP::autodelete, argument
 
 PUBLISHING MESSAGES
 ===================
+
+Publishing messages is easy, and the Channel class has a list of methods that
+can all be used for it. The most simple one takes three arguments: the name of the
+exchange to publish to, the routing key to use, and the actual message that
+you're publishing - all these parameters are standard C++ strings.
+
+More extended versions of the publish() method exist too, and take additional
+flags, arguments, and enable you to publish an entire Envelope object -
+which is an object that contains the message to publish plus a list of
+optional meta information like the content-type, content-encoding, priority,
+expire time and more. None of these meta fields are interpreted by this library,
+and also the RabbitMQ ignores most of them, but the AMQP protocol defines them,
+and they are free for you to use. For an extensive list of the fields that are
+supported, take a look at the Envelope.h header file. You should also check
+the RabbitMQ documentation to find out if a envelope header is interpreted by
+the RabbitMQ server (at the time of this writing, only the expire time is being 
+used).
+
+The following snippet is copied from the Channel.h header file and lists all
+available publish() methods. As you can see, you can call the publish() method
+in almost any form:
+
+````c++
+/**
+ *  Publish a message to an exchange
+ * 
+ *  The following flags can be used
+ * 
+ *      -   mandatory   if set, an unroutable message will be reported to the channel handler with the onReturned method
+ *      -   immediate   if set, a message that could not immediately be consumed is returned to the onReturned method
+ * 
+ *  If either of the two flags is set, and the message could not immediately
+ *  be published, the message is returned by the server to the client. If you
+ *  want to catch such returned messages, you need to implement the 
+ *  ChannelHandler::onReturned() method.
+ * 
+ *  @param  exchange    the exchange to publish to
+ *  @param  routingkey  the routing key
+ *  @param  flags       optional flags (see above)
+ *  @param  envelope    the full envelope to send
+ *  @param  message     the message to send
+ *  @param  size        size of the message
+ */
+bool publish(const std::string &exchange, const std::string &routingKey, int flags, const AMQP::Envelope &envelope);    bool publish(const std::string &exchange, const std::string &routingKey, const AMQP::Envelope &envelope);
+bool publish(const std::string &exchange, const std::string &routingKey, int flags, const std::string &message);
+bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message);
+bool publish(const std::string &exchange, const std::string &routingKey, int flags, const char *message, size_t size);
+bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size);
+````
+
+Published messages are normally not confirmed by the server, hence there is no
+ChannelHandler::onPublished() method that you can implement to find out if
+a message was correctly received by the server. That's the design of the AMQP
+protocol, to not unnecessarily slow down message publishing. As long as no error is 
+reported via the ChannelHandler::onError() method, you can safely assume
+that your messages were delivered.
+
+If you use the flags parameter to set either the option 'mandatory' or 
+'immediate' however, a message that could not be routed or directly delivered 
+to a consumer is sent back to the client, and ends up in the ChannelHandler::onReturned() 
+method. At the time of this writing, the 'immediate' option does not seem to
+be supported by RabbitMQ by the way.
 
 
 CONSUMING MESSAGES
