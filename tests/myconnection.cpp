@@ -88,6 +88,7 @@ void MyConnection::onConnected(Network::TcpSocket *socket)
     
     // we declare a queue, an exchange and we publish a message
     _channel->declareQueue("my_queue");
+//    _channel->declareQueue("my_queue", AMQP::autodelete);
     _channel->declareExchange("my_exchange", AMQP::direct);
     _channel->bindQueue("my_exchange", "my_queue", "key");
 }

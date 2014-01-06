@@ -29,7 +29,6 @@
 #include <libamqp/receivedframe.h>
 #include <libamqp/outbuffer.h>
 #include <libamqp/watchable.h>
-#include <libamqp/monitor.h>
 
 // amqp types
 #include <libamqp/field.h>

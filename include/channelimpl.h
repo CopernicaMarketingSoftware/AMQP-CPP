@@ -44,12 +44,6 @@ private:
     uint16_t _id;
 
     /**
-     *  Monitor to check if the connection is still alive
-     *  @var    Monitor
-     */
-    Monitor _monitor;
-
-    /**
      *  State of the channel object
      *  @var enum
      */
@@ -89,6 +83,15 @@ public:
      *  Destructor
      */
     virtual ~ChannelImpl();
+
+    /**
+     *  Invalidate the channel
+     *  This method is called when the connection is destructed
+     */
+    void invalidate()
+    {
+        _connection = nullptr;
+    }
 
     /**
      *  Pause deliveries on a channel

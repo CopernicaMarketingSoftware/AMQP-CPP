@@ -51,8 +51,7 @@ namespace AMQP {
 ChannelImpl::ChannelImpl(Channel *parent, Connection *connection, ChannelHandler *handler) :
     _parent(parent),
     _connection(&connection->_implementation),
-    _handler(handler),
-    _monitor(_connection)
+    _handler(handler)
 {
     // add the channel to the connection
     _id = _connection->add(this);
@@ -86,7 +85,7 @@ ChannelImpl::~ChannelImpl()
     _message = nullptr;
     
     // remove this channel from the connection (but not if the connection is already destructed)
-    if (_monitor.valid()) _connection->remove(this);
+    if (_connection) _connection->remove(this);
     
     // close the channel now
     close();
@@ -334,7 +333,7 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
     if (!send(BasicHeaderFrame(_id, envelope))) return false;
     
     // channel and connection still valid?
-    if (!monitor.valid() || !_monitor.valid()) return false;
+    if (!monitor.valid() || !_connection) return false;
     
     // the max payload size is the max frame size minus the bytes for headers and trailer
     uint32_t maxpayload = _connection->maxPayload();
@@ -444,10 +443,10 @@ bool ChannelImpl::recover(int flags)
 bool ChannelImpl::send(const Frame &frame)
 {
     // skip if channel is not connected
-    if (_state != state_connected) return false;
+    if (_state != state_connected || !_connection) return false;
     
-    // send to tcp connection (first check if connection object was not destructed)
-    return _monitor.valid() && _connection->send(frame);
+    // send to tcp connection
+    return _connection->send(frame);
 }
 
 /**
