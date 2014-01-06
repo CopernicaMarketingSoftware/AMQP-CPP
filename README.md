@@ -350,9 +350,9 @@ the content-type, content-encoding, priority, expire time and more. None of thes
 meta fields are interpreted by this library, and also the RabbitMQ ignores most 
 of them, but the AMQP protocol defines them, and they are free for you to use. 
 For an extensive list of the fields that are supported, take a look at the MetaData.h 
-header file. You should also check the RabbitMQ documentation to find out if a 
-envelope header is interpreted by the RabbitMQ server (at the time of this writing, 
-only the expire time is being used).
+header file (MetaData is the base class for Envelope). You should also check the 
+RabbitMQ documentation to find out if an envelope header is interpreted by the 
+RabbitMQ server (at the time of this writing, only the expire time is being used).
 
 The following snippet is copied from the Channel.h header file and lists all
 available publish() methods. As you can see, you can call the publish() method
@@ -379,7 +379,8 @@ in almost any form:
  *  @param  message     the message to send
  *  @param  size        size of the message
  */
-bool publish(const std::string &exchange, const std::string &routingKey, int flags, const AMQP::Envelope &envelope);    bool publish(const std::string &exchange, const std::string &routingKey, const AMQP::Envelope &envelope);
+bool publish(const std::string &exchange, const std::string &routingKey, int flags, const AMQP::Envelope &envelope);
+bool publish(const std::string &exchange, const std::string &routingKey, const AMQP::Envelope &envelope);
 bool publish(const std::string &exchange, const std::string &routingKey, int flags, const std::string &message);
 bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message);
 bool publish(const std::string &exchange, const std::string &routingKey, int flags, const char *message, size_t size);
