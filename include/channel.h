@@ -256,7 +256,10 @@ public:
      *      -   mandatory   if set, an unroutable message will be reported to the channel handler with the onReturned method
      *      -   immediate   if set, a message that could not immediately be consumed is returned to the onReturned method
      * 
-     *  @todo   implement to onReturned() method
+     *  If either of the two flags is set, and the message could not immediately
+     *  be published, the message is returned by the server to the client. If you
+     *  want to catch such returned messages, you need to implement the 
+     *  ChannelHandler::onReturned() method.
      * 
      *  @param  exchange    the exchange to publish to
      *  @param  routingkey  the routing key
@@ -354,12 +357,10 @@ public:
      *      -   multiple            acknoledge multiple messages: all un-acked messages that were earlier delivered are acknowledged too
      * 
      *  @param  deliveryTag         the unique delivery tag of the message
-     *  @param  message             the message
      *  @param  flags               optional flags
      *  @return bool
      */
     bool ack(uint64_t deliveryTag, int flags=0) { return _implementation.ack(deliveryTag, flags); }
-    bool ack(const Message &message, int flags=0) { return _implementation.ack(message.deliveryTag(), flags); }
     
     /**
      *  Reject or nack a message
@@ -374,12 +375,10 @@ public:
      *      -   requeue             if set, the message is put back in the queue, otherwise it is dead-lettered/removed
      * 
      *  @param  deliveryTag         the unique delivery tag of the message
-     *  @param  message             the original message
      *  @param  flags               optional flags
      *  @return bool
      */
     bool reject(uint64_t deliveryTag, int flags=0) { return _implementation.reject(deliveryTag, flags); }
-    bool reject(const Message &message, int flags=0) { return _implementation.reject(message.deliveryTag(), flags); }
 
     /**
      *  Recover all messages that were not yet acked

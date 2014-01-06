@@ -113,7 +113,7 @@ public:
         if (!message->append(_payload, _size)) return true;
         
         // the message is complete
-        channel->reportReceived();
+        channel->reportMessage();
         
         // done
         return true;

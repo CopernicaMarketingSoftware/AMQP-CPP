@@ -22,24 +22,6 @@ class Message : public Envelope
 {
 protected:
     /**
-     *  The consumer tag over which it was delivered
-     *  @var    string
-     */
-    std::string _consumerTag;
-    
-    /**
-     *  Unique delivery tag to identify and ack the mesage
-     *  @var    uint64_t
-     */
-    uint64_t _deliveryTag;
-    
-    /**
-     *  Is this a redelivered message / has it been delivered before?
-     *  @var    bool
-     */
-    bool _redelivered;
-    
-    /**
      *  The exchange to which it was originally published
      *  @var    string
      */
@@ -55,14 +37,11 @@ protected:
     /**
      *  The constructor is protected to ensure that endusers can not
      *  instantiate a message
-     *  @param  consumerTag
-     *  @param  deliveryTag
-     *  @param  redelivered
      *  @param  exchange
      *  @param  routingKey
      */
-    Message(const std::string &consumerTag, uint64_t deliveryTag, bool redelivered, const std::string &exchange, const std::string &routingKey) :
-        Envelope(nullptr, 0), _consumerTag(consumerTag), _deliveryTag(deliveryTag), _redelivered(redelivered), _exchange(exchange), _routingKey(routingKey)
+    Message(const std::string &exchange, const std::string &routingKey) :
+        Envelope(nullptr, 0), _exchange(exchange), _routingKey(routingKey)
     {}
     
 public:
@@ -71,33 +50,6 @@ public:
      */
     virtual ~Message() {}
 
-    /**
-     *  The consumer tag over which it was delivered
-     *  @return string
-     */
-    const std::string &consumerTag() const
-    {
-        return _consumerTag;
-    }
-    
-    /**
-     *  Unique delivery tag to identify and ack the mesage
-     *  @return uint64_t
-     */
-    uint64_t deliveryTag() const
-    {
-        return _deliveryTag;
-    }
-    
-    /**
-     *  Is this a redelivered message / has it been delivered before?
-     *  @var    bool
-     */
-    bool redelivered() const
-    {
-        return _redelivered;
-    }
-    
     /**
      *  The exchange to which it was originally published
      *  @var    string

@@ -1,8 +1,8 @@
 /**
- *  MessageImpl.h
+ *  Base class for a message implementation
  *
- *  Implementation of the message object that is only accessible for the
- *  AMQP library internals
+ *  This is the base class for either the returned message or the consumed
+ *  message.
  *
  *  @copyright 2014 Copernica BV
  */
@@ -30,17 +30,18 @@ private:
      */
     bool _selfAllocated;
 
-
-public:
+protected:
     /**
      *  Constructor
-     *  @param  frame
+     *  @param  exchange
+     *  @param  routingKey
      */
-    MessageImpl(const BasicDeliverFrame &frame) : 
-        Message(frame.consumerTag(), frame.deliveryTag(), frame.redelivered(), frame.exchange(), frame.routingKey()), 
+    MessageImpl(const std::string &exchange, const std::string &routingKey) : 
+        Message(exchange, routingKey), 
         _received(0), _selfAllocated(false)
         {}
-        
+
+public:
     /**
      *  Destructor
      */
@@ -97,6 +98,13 @@ public:
             return _received >= _bodySize;
         }
     }
+    
+    /**
+     *  Report to the handler
+     *  @param  channel
+     *  @param  handler
+     */
+    virtual void report(Channel *channel, ChannelHandler *handler) = 0;
 };
 
 /**

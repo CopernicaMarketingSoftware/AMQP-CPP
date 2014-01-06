@@ -16,7 +16,7 @@ namespace AMQP {
 /**
  *  Class definition
  */
-class ChannelImpl
+class ChannelImpl : public Watchable
 {
 private:
     /**
@@ -463,7 +463,7 @@ public:
     /**
      *  Report that a message was received
      */
-    void reportReceived();
+    void reportMessage();
 
     /**
      *  Report that the recover operation has started
@@ -479,6 +479,7 @@ public:
      *  @return MessageImpl
      */
     MessageImpl *message(const BasicDeliverFrame &frame);
+    MessageImpl *message(const BasicReturnFrame &frame);
     
     /**
      *  Retrieve the current incoming message

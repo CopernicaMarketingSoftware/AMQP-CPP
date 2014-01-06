@@ -356,11 +356,11 @@ void MyConnection::onQueueBound(AMQP::Channel *channel)
     std::cout << "AMQP Queue bound" << std::endl;
 
 //    _connection->setQos(10);
-    _channel->setQos(1);
+//    _channel->setQos(1);
 
 
-    _channel->publish("my_exchange", "key", "this is the message");
-    _channel->consume("my_queue");
+    _channel->publish("my_exchange", "invalid-key", AMQP::mandatory, "this is the message");
+//    _channel->consume("my_queue");
 }
 
 /**
@@ -417,17 +417,35 @@ void MyConnection::onConsumerStarted(AMQP::Channel *channel, const std::string &
 }
 
 /**
- *  Method that is called when a message has been consumed
+ *  Method that is called when a message has been received on a channel
  *  @param  channel         the channel on which the consumer was started
  *  @param  message         the consumed message
+ *  @param  deliveryTag     the delivery tag, you need this to acknowledge the message
+ *  @param  consumerTag     the consumer identifier that was used to retrieve this message
+ *  @param  redelivered     is this a redelivered message?
  */
-void MyConnection::onReceived(AMQP::Channel *channel, const AMQP::Message &message)
+void MyConnection::onReceived(AMQP::Channel *channel, const AMQP::Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered)
 {
     // show
     std::cout << "AMQP consumed: " << message.message() << std::endl;
     
     // ack the message
-    channel->ack(message);
+    channel->ack(deliveryTag);
+}
+
+/**
+ *  Method that is called when a message you tried to publish was returned
+ *  by the server. This only happens when the 'mandatory' or 'immediate' flag
+ *  was set with the Channel::publish() call.
+ *  @param  channel         the channel on which the message was returned
+ *  @param  message         the returned message
+ *  @param  code            the reply code
+ *  @param  text            human readable reply reason
+ */
+void MyConnection::onReturned(AMQP::Channel *channel, const AMQP::Message &message, int16_t code, const std::string &text)
+{
+    // show
+    std::cout << "AMQP message returned: " << text << std::endl;
 }
 
 /**

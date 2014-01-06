@@ -7,7 +7,10 @@
  */
 #include "includes.h"
 #include "basicdeliverframe.h"
+#include "basicreturnframe.h"
 #include "messageimpl.h"
+#include "consumedmessage.h"
+#include "returnedmessage.h"
 #include "channelopenframe.h"
 #include "channelflowframe.h"
 #include "channelcloseokframe.h"
@@ -540,9 +543,23 @@ size_t ChannelImpl::send(const Frame &frame)
 /**
  *  Report the received message
  */
-void ChannelImpl::reportReceived()
+void ChannelImpl::reportMessage()
 {
-    if (_handler) _handler->onReceived(_parent, *_message);
+    // skip if there is no message
+    if (!_message) return;
+    
+    // after the report the channel may be destructed, monitor that
+    Monitor monitor(this);
+    
+    // do we have a handler?
+    if (_handler) _message->report(_parent, _handler);
+    
+    // skip if channel was destructed
+    if (!monitor.valid()) return;
+    
+    // no longer need the message
+    delete _message; 
+    _message = nullptr;
 }
 
 /**
@@ -556,7 +573,21 @@ MessageImpl *ChannelImpl::message(const BasicDeliverFrame &frame)
     if (_message) delete _message;
     
     // construct a message
-    return _message = new MessageImpl(frame);
+    return _message = new ConsumedMessage(frame);
+}
+
+/**
+ *  Create an incoming message
+ *  @param  frame
+ *  @return MessageImpl
+ */
+MessageImpl *ChannelImpl::message(const BasicReturnFrame &frame)
+{
+    // it should not be possible that a message already exists, but lets check it anyhow
+    if (_message) delete _message;
+    
+    // construct a message
+    return _message = new ReturnedMessage(frame);
 }
 
 /**

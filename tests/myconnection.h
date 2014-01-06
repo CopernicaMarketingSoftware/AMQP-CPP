@@ -225,13 +225,6 @@ private:
      *  @param  tag             the consumer tag
      */
     virtual void onConsumerStarted(AMQP::Channel *channel, const std::string &tag) override;
-    
-    /**
-     *  Method that is called when a message has been consumed
-     *  @param  channel         the channel on which the consumer was started
-     *  @param  message         the consumed message
-     */
-    virtual void onReceived(AMQP::Channel *channel, const AMQP::Message &message) override;
 
     /**
      *  Method that is called when a consumer was stopped
@@ -240,6 +233,31 @@ private:
      *  @param  tag             the consumer tag
      */
     virtual void onConsumerStopped(AMQP::Channel *channel, const std::string &tag) override;
+    
+    /**
+     *  Method that is called when a message has been received on a channel
+     *  This message will be called for every message that is received after
+     *  you started consuming. Make sure you acknowledge the messages when its
+     *  safe to remove them from RabbitMQ (unless you set no-ack option when you
+     *  started the consumer)
+     *  @param  channel         the channel on which the consumer was started
+     *  @param  message         the consumed message
+     *  @param  deliveryTag     the delivery tag, you need this to acknowledge the message
+     *  @param  consumerTag     the consumer identifier that was used to retrieve this message
+     *  @param  redelivered     is this a redelivered message?
+     */
+    virtual void onReceived(AMQP::Channel *channel, const AMQP::Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered) override;
+    
+    /**
+     *  Method that is called when a message you tried to publish was returned
+     *  by the server. This only happens when the 'mandatory' or 'immediate' flag
+     *  was set with the Channel::publish() call.
+     *  @param  channel         the channel on which the message was returned
+     *  @param  message         the returned message
+     *  @param  code            the reply code
+     *  @param  text            human readable reply reason
+     */
+    virtual void onReturned(AMQP::Channel *channel, const AMQP::Message &message, int16_t code, const std::string &text) override;
 
 
 public:
