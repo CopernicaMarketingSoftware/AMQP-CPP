@@ -267,6 +267,14 @@ public:
      *  @return bool
      */
     bool ack(uint64_t deliveryTag, int flags);
+
+    /**
+     *  Reject a message
+     *  @param  deliveryTag         the delivery tag
+     *  @param  flags               optional flags
+     *  @return bool
+     */
+    bool reject(uint64_t deliveryTag, int flags);
     
     /**
      *  Close the current channel

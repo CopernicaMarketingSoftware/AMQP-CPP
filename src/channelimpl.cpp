@@ -31,6 +31,7 @@
 #include "basicconsumeframe.h"
 #include "basiccancelframe.h"
 #include "basicackframe.h"
+#include "basicnackframe.h"
 
 /**
  *  Set up namespace
@@ -490,6 +491,21 @@ bool ChannelImpl::ack(uint64_t deliveryTag, int flags)
 {
     // send an ack frame
     send(BasicAckFrame(_id, deliveryTag, flags & multiple));
+    
+    // done
+    return true;
+}
+
+/**
+ *  Reject a message
+ *  @param  deliveryTag         the delivery tag
+ *  @param  flags               optional flags
+ *  @return bool
+ */
+bool ChannelImpl::reject(uint64_t deliveryTag, int flags)
+{
+    // send a nack frame
+    send(BasicNackFrame(_id, deliveryTag, flags & multiple, flags & requeue));
     
     // done
     return true;

@@ -54,6 +54,7 @@
 #include "basicgetokframe.h"
 #include "basicgetemptyframe.h"
 #include "basicackframe.h"
+#include "basicnackframe.h"
 #include "basicrejectframe.h"
 #include "basicrecoverasyncframe.h"
 #include "basicrecoverframe.h"
@@ -477,6 +478,7 @@ bool ReceivedFrame::processBasicFrame(ConnectionImpl *connection)
         case 100:   return BasicRecoverAsyncFrame(*this).process(connection);
         case 110:   return BasicRecoverFrame(*this).process(connection);
         case 111:   return BasicRecoverOKFrame(*this).process(connection);
+        case 120:   return BasicNackFrame(*this).process(connection);
     }
 
     // this is a problem

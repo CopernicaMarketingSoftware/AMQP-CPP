@@ -351,15 +351,35 @@ public:
      * 
      *  The following flags are supported:
      * 
-     *      -   multiple            acknoledge multiple messages: all messages that were earlier delivered are acknowledged too
+     *      -   multiple            acknoledge multiple messages: all un-acked messages that were earlier delivered are acknowledged too
      * 
-     *  @param  deliveryTag         The delivery tag
-     *  @param  message             The message
-     *  @param  flags
+     *  @param  deliveryTag         the unique delivery tag of the message
+     *  @param  message             the message
+     *  @param  flags               optional flags
      *  @return bool
      */
     bool ack(uint64_t deliveryTag, int flags=0) { return _implementation.ack(deliveryTag, flags); }
     bool ack(const Message &message, int flags=0) { return _implementation.ack(message.deliveryTag(), flags); }
+    
+    /**
+     *  Reject or nack a message
+     * 
+     *  When a message was received in the ChannelHandler::onReceived() method,
+     *  and you don't want to acknoledge it, you can also choose to reject it by
+     *  calling this reject method. 
+     * 
+     *  The following flags are supported:
+     * 
+     *      -   multiple            reject multiple messages: all un-acked messages that were earlier delivered are unacked too
+     *      -   requeue             if set, the message is put back in the queue, otherwise it is dead-lettered/removed
+     * 
+     *  @param  deliveryTag         the unique delivery tag of the message
+     *  @param  message             the original message
+     *  @param  flags               optional flags
+     *  @return bool
+     */
+    bool reject(uint64_t deliveryTag, int flags=0) { return _implementation.reject(deliveryTag, flags); }
+    bool reject(const Message &message, int flags=0) { return _implementation.reject(message.deliveryTag(), flags); }
     
     /**
      *  Close the current channel
