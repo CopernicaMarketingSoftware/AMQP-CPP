@@ -283,8 +283,9 @@ FLAGS AND TABLES
 
 Let's take a closer look at one method in the Channel object to explain
 two other concepts of this AMQP library: flags and tables. The method that we
-will be looking at is the Channel::declareQueue() method - but flags and
-tables are used by many other methods in the Channel class as well.
+will be looking at is the Channel::declareQueue() method - but we could've
+picked a different method too because flags and
+tables are used by many methods.
 
 ````c++
 /**
