@@ -13,8 +13,8 @@ AMQP library and that the library will use for IO operations.
 
 This architecture makes the library extremely flexible: it does not rely on
 operating system specific IO calls, and it can be easily integrated into any
-event loop. It also does not do any blocking system calls, so it can be used
-in high performance applications without the need for threads.
+event loop. It is fully asynchronous and does not do any blocking (system) calls, 
+so it can be used in high performance applications without the need for threads.
 
 
 ABOUT
