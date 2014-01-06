@@ -134,7 +134,7 @@ library receive data back from RabbitMQ?
 
 As we've explained above, the AMQP library does not do any IO by itself 
 and it is therefore of course also not possible for the library to receive data from 
-a socket. It is again up to you to to this. If, for example, you notice in your 
+a socket. It is again up to you to do this. If, for example, you notice in your 
 event loop that the socket that is connected with the RabbitMQ server becomes 
 readable, you should read out that data (for example by using the recv() system 
 call), and pass the received bytes to the AMQP library. This is done by
