@@ -380,7 +380,22 @@ public:
      */
     bool reject(uint64_t deliveryTag, int flags=0) { return _implementation.reject(deliveryTag, flags); }
     bool reject(const Message &message, int flags=0) { return _implementation.reject(message.deliveryTag(), flags); }
-    
+
+    /**
+     *  Recover all messages that were not yet acked
+     * 
+     *  This method asks the server to redeliver all unacknowledged messages on a specified 
+     *  channel. Zero or more messages may be redelivered.
+     * 
+     *  The following flags are supported:
+     * 
+     *      -   requeue             if set, the server will requeue the messages, so the could also end up with at different consumer
+     * 
+     *  @param  flags
+     *  @return bool
+     */
+    bool recover(int flags = 0) { return _implementation.recover(flags); }
+
     /**
      *  Close the current channel
      *  @return bool

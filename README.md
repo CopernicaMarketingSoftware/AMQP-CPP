@@ -264,10 +264,10 @@ channel.declareQueue("my-queue-name", AMQP::durable + AMQP::autodelete, argument
 WORK IN PROGRESS
 ================
 
-Almost all AMQP features have been implemented. We only need to add recover support 
-and support for returned messages. We also need to add more safety checks so that 
-strange data from RabbitMQ does not break the library (although in reality RabbitMQ
-only sends valid data).
+Almost all AMQP features have been implemented. We only need to add support for 
+returned messages. We also need to add more safety checks so that strange data 
+from RabbitMQ does not break the library (although in reality RabbitMQ only sends 
+valid data).
 
 It would also be nice to have sample implementations for the ConnectionHandler
 class that can be directly plugged into libev, libevent and libuv event loops.

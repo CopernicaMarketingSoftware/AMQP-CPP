@@ -32,6 +32,7 @@
 #include "basiccancelframe.h"
 #include "basicackframe.h"
 #include "basicnackframe.h"
+#include "basicrecoverframe.h"
 
 /**
  *  Set up namespace
@@ -506,6 +507,20 @@ bool ChannelImpl::reject(uint64_t deliveryTag, int flags)
 {
     // send a nack frame
     send(BasicNackFrame(_id, deliveryTag, flags & multiple, flags & requeue));
+    
+    // done
+    return true;
+}
+
+/**
+ *  Recover un-acked messages
+ *  @param  flags               optional flags
+ *  @return bool
+ */
+bool ChannelImpl::recover(int flags)
+{
+    // send a nack frame
+    send(BasicRecoverFrame(_id, flags & requeue));
     
     // done
     return true;

@@ -277,6 +277,13 @@ public:
     bool reject(uint64_t deliveryTag, int flags);
     
     /**
+     *  Recover messages that were not yet ack'ed
+     *  @param  flags               optional flags
+     *  @return bool
+     */
+    bool recover(int flags);
+    
+    /**
      *  Close the current channel
      *  @return bool
      */
@@ -457,6 +464,14 @@ public:
      *  Report that a message was received
      */
     void reportReceived();
+
+    /**
+     *  Report that the recover operation has started
+     */
+    void reportRecovering()
+    {
+        if (_handler) _handler->onRecovering(_parent);
+    }
 
     /**
      *  Create an incoming message

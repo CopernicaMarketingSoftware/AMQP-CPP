@@ -175,7 +175,12 @@ public:
      */
     virtual void onReceived(Channel *channel, const Message &message) {}
     
-    
+    /**
+     *  Method that is called when the server starts recovering messages
+     *  This is the result of a call to Channel::recover()
+     *  @param  channel         the channel on which the recover method was called
+     */
+    virtual void onRecovering(Channel *channel) {}
 
 };
 
