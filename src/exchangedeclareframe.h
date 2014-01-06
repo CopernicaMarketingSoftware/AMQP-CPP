@@ -111,7 +111,7 @@ public:
      *  Method id
      *  @return uint16_t
      */
-    uint16_t methodID() const
+    virtual uint16_t methodID() const override
     {
         return 10;
     }
@@ -120,7 +120,7 @@ public:
      *  The exchange name
      *  @return string
      */
-    const std::string& name()
+    const std::string& name() const
     {
         return _name;
     }
@@ -129,7 +129,7 @@ public:
      *  The exchange type
      *  @return string
      */
-    const std::string& type()
+    const std::string &exchangeType() const
     {
         return _type;
     }
@@ -138,7 +138,7 @@ public:
      *  Passive declaration, do not create exchange if it does not exist
      *  @return bool
      */
-    bool passive()
+    bool passive() const
     {
         return _bools.get(0);
     }
@@ -147,7 +147,7 @@ public:
      *  Durable exchange
      *  @return bool
      */
-    bool durable()
+    bool durable() const
     {
         return _bools.get(1);
     }
@@ -156,7 +156,7 @@ public:
      *  Do not wait for a response
      *  @return bool
      */
-    bool noWait()
+    bool noWait() const
     {
         return _bools.get(4);
     }
@@ -165,7 +165,7 @@ public:
      *  Additional arguments. Implementation dependent.
      *  @return Table
      */
-    const Table& arguments()
+    const Table& arguments() const
     {
         return _arguments;
     }

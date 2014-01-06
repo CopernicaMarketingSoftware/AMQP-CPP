@@ -44,13 +44,8 @@ public:
         // get the size
         T size(frame);
         
-        // read data
-        const char *data = frame.nextData(size.value());
-        
-        // @todo what if this fails?
-        
         // allocate string
-        _data = std::string((char*) data, (size_t) size.value());
+        _data = std::string(frame.nextData(size.value()), (size_t) size.value());
     }
 
     /**
@@ -61,9 +56,6 @@ public:
     /**
      *  Create a new instance of this object
      *  @return Field*
-     * 
-     *  @todo   can this be protected?
-     *  @todo   check if all clone methods have a override keyword
      */
     virtual Field *clone() const override
     {

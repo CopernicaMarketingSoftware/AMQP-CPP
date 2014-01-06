@@ -54,6 +54,19 @@ public:
     {
         return 51;
     }
+    
+    /**
+     *  Process the frame
+     *  @param  connection
+     */
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // report that it is closed
+        connection->reportClosed();
+        
+        // done
+        return true;
+    }
 };
 
 /**

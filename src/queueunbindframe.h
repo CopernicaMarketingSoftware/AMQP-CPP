@@ -106,7 +106,7 @@ public:
      *  returns the method id
      *  @returns uint16_t
      */
-    uint16_t methodID() const
+    virtual uint16_t methodID() const override
     {
         return 50;
     }
@@ -115,7 +115,7 @@ public:
      *  returns the queue name
      *  @returns string
      */
-    const std::string& name()
+    const std::string& name() const
     {
         return _name;
     }
@@ -124,7 +124,7 @@ public:
      *  returns the exchange name
      *  @returns string
      */
-    const std::string& exchange()
+    const std::string& exchange() const
     {
         return _exchange;
     }
@@ -133,7 +133,7 @@ public:
      *  returns the routingKey
      *  @returns string
      */
-    const std::string& routingKey()
+    const std::string& routingKey() const
     {
         return _routingKey;
     }
@@ -142,7 +142,7 @@ public:
      *  returns the additional arguments
      *  @returns Table
      */
-    const Table& arguments()
+    const Table& arguments() const
     {
         return _arguments;
     }

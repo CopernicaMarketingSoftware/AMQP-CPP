@@ -131,9 +131,6 @@ public:
      */
     virtual bool process(ConnectionImpl *connection) override
     {
-        // @todo this is only allowed when the connection is set up
-        
-        
         // remember this in the connection
         connection->setCapacity(channelMax(), frameMax());
         
@@ -147,10 +144,7 @@ public:
         if (!monitor.valid()) return true;
         
         // and finally we start to open the frame
-        connection->send(ConnectionOpenFrame(connection->vhost()));
-        
-        // done
-        return true;
+        return connection->send(ConnectionOpenFrame(connection->vhost()));
     }
 };
 

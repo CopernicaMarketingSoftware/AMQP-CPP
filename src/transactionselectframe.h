@@ -14,33 +14,21 @@ namespace AMQP {
  */
 class TransactionSelectFrame : public TransactionFrame
 {
-protected:
-    /**
-     *  Encode a frame on a string buffer
-     *
-     *  @param  buffer  buffer to write frame to
-     */
-    virtual void fill(OutBuffer& buffer) const override
-    {
-        // call base
-        TransactionFrame::fill(buffer);
-    }
-
 public:
     /**
-     * Decode a transaction select frame from a received frame
+     *  Decode a transaction select frame from a received frame
      *
-     * @param   frame   received frame to decode
+     *  @param   frame   received frame to decode
      */
     TransactionSelectFrame(ReceivedFrame& frame) :
         TransactionFrame(frame)
     {}
 
     /**
-     * Construct a transaction select frame
+     *  Construct a transaction select frame
      * 
-     * @param   channel     channel identifier
-     * @return  newly created transaction select frame
+     *  @param   channel     channel identifier
+     *  @return  newly created transaction select frame
      */
     TransactionSelectFrame(uint16_t channel) :
         TransactionFrame(channel, 0)
@@ -55,7 +43,7 @@ public:
      * return the method id
      * @return uint16_t
      */
-    uint16_t methodID() const
+    virtual uint16_t methodID() const override
     {
         return 10;
     }    

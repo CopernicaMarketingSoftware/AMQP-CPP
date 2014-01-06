@@ -40,18 +40,40 @@ public:
      *  After this method is called, the connection no longer is in a valid
      *  state and can no longer be used.
      * 
+     *  This method has an empty default implementation, although you are very
+     *  much advised to do implement it. Because when an error occurs, the connection
+     *  is no longer usable, so you probably want to know.
+     * 
      *  @param  connection      The connection that entered the error state
      *  @param  message         Error message
      */
-    virtual void onError(Connection *connection, const std::string &message) = 0;
+    virtual void onError(Connection *connection, const std::string &message) {}
     
     /**
      *  Method that is called when the login attempt succeeded. After this method
-     *  was called, the connection is ready to use
+     *  was called, the connection is ready to use. This is the first method
+     *  that is normally called after you've constructed the connection object.
+     * 
+     *  According to the AMQP protocol, you must wait for the connection to become
+     *  ready (and this onConnected method to be called) before you can start
+     *  using the Connection object. However, this AMQP library will cache all
+     *  methods that you call before the connection is ready, so in reality there
+     *  is no reason to wait.
      *
      *  @param  connection      The connection that can now be used
      */
-    virtual void onConnected(Connection *connection) = 0;
+    virtual void onConnected(Connection *connection) {}
+    
+    /**
+     *  Method that is called when the connection was closed.
+     * 
+     *  This is the counter part of a call to Connection::close() and it confirms
+     *  that the connection was correctly closed.
+     * 
+     *  @param  connection      The connection that was closed and that is now unusable
+     */
+    virtual void onClosed(Connection *connection) {}
+    
 };
 
 /**

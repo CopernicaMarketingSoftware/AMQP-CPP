@@ -55,8 +55,6 @@ public:
      *  Get the type ID that is used to identify this type of
      *  field in a field table
      *  @return char
-     * 
-     *  @todo check if all derived classes use the 'override' keyword
      */
     virtual char typeID() const = 0;
     

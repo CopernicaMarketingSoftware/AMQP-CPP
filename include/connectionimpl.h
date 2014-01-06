@@ -37,10 +37,10 @@ protected:
      *  @var    enum
      */
     enum {
-        state_invalid,              // object is in an invalid state
         state_protocol,             // protocol headers are being passed
         state_handshake,            // busy with the handshake to open the connection
-        state_connected,            // connection is set up and ready for communication         
+        state_connected,            // connection is set up and ready for communication
+        state_closing,              // connection is busy closing (we have sent the close frame)
         state_closed                // connection is closed
     } _state = state_protocol;
 
@@ -236,9 +236,9 @@ public:
      *  This is an internal method that you normally do not have to call yourself
      * 
      *  @param  frame       the frame to send
-     *  @return             number of bytes sent
+     *  @return bool
      */
-    size_t send(const Frame &frame);
+    bool send(const Frame &frame);
 
     /**
      *  Get a channel by its identifier
@@ -262,24 +262,29 @@ public:
      */
     void reportError(const std::string &message)
     {
-        // close everything
-        //  @todo is this not duplicate?
-        close();
-
         // set connection state to closed
         _state = state_closed;
         
         // inform handler
         _handler->onError(_parent, message);
-
-        // @Todo: notify all channels of closed connection
+    }
+    
+    /**
+     *  Report that the connection is closed
+     */
+    void reportClosed()
+    {
+        // change state
+        _state = state_closed;
+        
+        // inform the handler
+        _handler->onClosed(_parent);
     }
 
     /**
      *  The actual connection is a friend and can construct this class
      */
     friend class Connection;
-
 
 };
 

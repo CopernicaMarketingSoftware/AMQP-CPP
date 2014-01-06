@@ -29,7 +29,7 @@ public:
     
     /**
      *  An error has occured on the channel
-     *  The channel is no longer usable after an error has occured on it
+     *  The channel is no longer usable after an error has occured on it.
      *  @param  channel         the channel on which the error occured
      *  @param  message         human readable error message
      */

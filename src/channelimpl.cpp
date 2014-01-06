@@ -50,11 +50,12 @@ namespace AMQP {
  */
 ChannelImpl::ChannelImpl(Channel *parent, Connection *connection, ChannelHandler *handler) :
     _parent(parent),
-    _connection(connection),
-    _handler(handler)
+    _connection(&connection->_implementation),
+    _handler(handler),
+    _monitor(_connection)
 {
     // add the channel to the connection
-    _id = connection->_implementation.add(this);
+    _id = _connection->add(this);
     
     // check if the id is valid
     if (_id == 0)
@@ -84,17 +85,11 @@ ChannelImpl::~ChannelImpl()
     if (_message) delete _message;
     _message = nullptr;
     
-    // remove this channel from the connection
-    _connection->_implementation.remove(this);
-    
-    // leap out if already disconnected
-    if (!connected()) return;
+    // remove this channel from the connection (but not if the connection is already destructed)
+    if (_monitor.valid()) _connection->remove(this);
     
     // close the channel now
-    // @todo is this ok?
     close();
-    
-    // do we have 
 }
 
 /**
@@ -110,14 +105,8 @@ ChannelImpl::~ChannelImpl()
  */
 bool ChannelImpl::pause()
 {
-    // must be connected
-    if (!connected()) return false;
-    
     // send a flow frame
-    send(ChannelFlowFrame(_id, false));
-    
-    // done
-    return true;
+    return send(ChannelFlowFrame(_id, false));
 }
 
 /**
@@ -127,14 +116,8 @@ bool ChannelImpl::pause()
  */
 bool ChannelImpl::resume()
 {
-    // must be connected
-    if (!connected()) return false;
-    
     // send a flow frame
-    send(ChannelFlowFrame(_id, true));
-
-    // done
-    return true;
+    return send(ChannelFlowFrame(_id, true));
 }
 
 /**
@@ -143,14 +126,8 @@ bool ChannelImpl::resume()
  */
 bool ChannelImpl::startTransaction()
 {
-    // must be connected
-    if (!connected()) return false;
-    
     // send a flow frame
-    send(TransactionSelectFrame(_id));
-
-    // done
-    return true;
+    return send(TransactionSelectFrame(_id));
 }    
 
 /**
@@ -159,14 +136,8 @@ bool ChannelImpl::startTransaction()
  */
 bool ChannelImpl::commitTransaction()
 {
-    // must be connected
-    if (!connected()) return false;
-    
     // send a flow frame
-    send(TransactionCommitFrame(_id));
-
-    // done
-    return true;
+    return send(TransactionCommitFrame(_id));
 }
 
 /**
@@ -175,14 +146,8 @@ bool ChannelImpl::commitTransaction()
  */
 bool ChannelImpl::rollbackTransaction()
 {
-    // must be connected
-    if (!connected()) return false;
-    
     // send a flow frame
-    send(TransactionRollbackFrame(_id));
-
-    // done
-    return true;
+    return send(TransactionRollbackFrame(_id));
 }
 
 /**
@@ -191,14 +156,17 @@ bool ChannelImpl::rollbackTransaction()
  */
 bool ChannelImpl::close()
 {
-    // must be connected
-    if (!connected()) return false;
-    
-    // send a flow frame
-    send(ChannelCloseFrame(_id));
+    // channel could be dead after send operation, we need to monitor that
+    Monitor monitor(this);
 
-    // now it is closed
-    _state = state_closed;
+    // send a flow frame
+    if (!send(ChannelCloseFrame(_id))) return false;
+
+    // leap out if channel was destructed
+    if (!monitor.valid()) return true;
+
+    // now it is closing
+    _state = state_closing;
 
     // done
     return true;
@@ -214,19 +182,15 @@ bool ChannelImpl::close()
  */
 bool ChannelImpl::declareExchange(const std::string &name, ExchangeType type, int flags, const Table &arguments)
 {
-    // must be connected
-    if(!connected()) return false;
-    
+    // convert exchange type
     std::string exchangeType;
-    if(type == ExchangeType::fanout) exchangeType = "fanout";
-    if(type == ExchangeType::direct) exchangeType = "direct";
-    if(type == ExchangeType::topic)  exchangeType = "topic";
-    if(type == ExchangeType::headers)exchangeType = "headers";
+    if (type == ExchangeType::fanout) exchangeType = "fanout";
+    if (type == ExchangeType::direct) exchangeType = "direct";
+    if (type == ExchangeType::topic)  exchangeType = "topic";
+    if (type == ExchangeType::headers)exchangeType = "headers";
+
     // send declare exchange frame
-    send(ExchangeDeclareFrame(_id, name, exchangeType, (flags & passive) != 0, (flags & durable) != 0, (flags & nowait) != 0, arguments));
-    
-    // done
-    return true;
+    return send(ExchangeDeclareFrame(_id, name, exchangeType, flags & passive, flags & durable, flags & nowait, arguments));
 }
 
 /**
@@ -240,14 +204,8 @@ bool ChannelImpl::declareExchange(const std::string &name, ExchangeType type, in
  */
 bool ChannelImpl::bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments)
 {
-    // must be connected
-    if(!connected()) return false;
-    
     // send exchange bind frame
-    send(ExchangeBindFrame(_id, target, source, routingkey, (flags & nowait) != 0, arguments));
-    
-    //done
-    return true;
+    return send(ExchangeBindFrame(_id, target, source, routingkey, flags & nowait, arguments));
 }
 
 /**
@@ -261,14 +219,8 @@ bool ChannelImpl::bindExchange(const std::string &source, const std::string &tar
  */
 bool ChannelImpl::unbindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments)
 {
-    // must be connected
-    if (!connected()) return false;
-    
     // send exchange unbind frame
-    send(ExchangeUnbindFrame(_id, target, source, routingkey, (flags & nowait) != 0, arguments));
-    
-    // done
-    return true;
+    return send(ExchangeUnbindFrame(_id, target, source, routingkey, flags & nowait, arguments));
 }
 
 /**
@@ -279,14 +231,8 @@ bool ChannelImpl::unbindExchange(const std::string &source, const std::string &t
  */
 bool ChannelImpl::removeExchange(const std::string &name, int flags)
 {
-    // must be connected
-    if (!connected()) return false;
-    
     // send delete exchange frame
-    send(ExchangeDeleteFrame(_id, name, (flags & ifunused) != 0, (flags & nowait) != 0));
-    
-    // done
-    return true;
+    return send(ExchangeDeleteFrame(_id, name, flags & ifunused, flags & nowait));
 }
 
 /**
@@ -298,14 +244,8 @@ bool ChannelImpl::removeExchange(const std::string &name, int flags)
  */
 bool ChannelImpl::declareQueue(const std::string &name, int flags, const Table &arguments)
 {
-    // must be connected
-    if (!connected()) return false;
-    
     // send the queuedeclareframe
-    send(QueueDeclareFrame(_id, name, (flags & passive) != 0, (flags & durable) != 0, (flags & durable) != 0, (flags & autodelete) != 0, (flags & nowait) != 0, arguments));
-    
-    // done
-    return true;
+    return send(QueueDeclareFrame(_id, name, flags & passive, flags & durable, flags & durable, flags & autodelete, flags & nowait, arguments));
 }
 
 /**
@@ -319,14 +259,8 @@ bool ChannelImpl::declareQueue(const std::string &name, int flags, const Table &
  */
 bool ChannelImpl::bindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, int flags, const Table &arguments)
 {
-    // must be connected
-    if(!connected()) return false;
-    
     // send the bind queue frame
-    send(QueueBindFrame(_id, queueName, exchangeName, routingkey, (flags & nowait) != 0, arguments));
-    
-    // done
-    return true;
+    return send(QueueBindFrame(_id, queueName, exchangeName, routingkey, flags & nowait, arguments));
 }
 
 /**
@@ -339,14 +273,8 @@ bool ChannelImpl::bindQueue(const std::string &exchangeName, const std::string &
  */
 bool ChannelImpl::unbindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments)
 {
-    // must be connected
-    if(!connected()) return false;
-    
     // send the unbind queue frame
-    send(QueueUnbindFrame(_id, queue, exchange, routingkey, arguments));
-    
-    // done
-    return true;
+    return send(QueueUnbindFrame(_id, queue, exchange, routingkey, arguments));
 }
 
 /**
@@ -357,14 +285,8 @@ bool ChannelImpl::unbindQueue(const std::string &exchange, const std::string &qu
  */
 bool ChannelImpl::purgeQueue(const std::string &name, int flags)
 {
-    // must be connected
-    if(!connected()) return false;
-    
     // send the queue purge frame
-    send(QueuePurgeFrame(_id, name, (flags & nowait) != 0));
-    
-    // done
-    return true;
+    return send(QueuePurgeFrame(_id, name, flags & nowait));
 }
 
 /**
@@ -375,14 +297,8 @@ bool ChannelImpl::purgeQueue(const std::string &name, int flags)
  */
 bool ChannelImpl::removeQueue(const std::string &name, int flags)
 {
-    // must be connected
-    if(!connected()) return false;
-    
     // send the remove queue frame
-    send(QueueDeleteFrame(_id, name, (flags & ifunused) != 0,(flags & ifempty) != 0,(flags & nowait) != 0));
-    
-    // done
-    return true;
+    return send(QueueDeleteFrame(_id, name, flags & ifunused, flags & ifempty, flags & nowait));
 }
 
 /**
@@ -393,8 +309,6 @@ bool ChannelImpl::removeQueue(const std::string &name, int flags)
  *      -   mandatory   if set, an unroutable message will be reported to the channel handler with the onReturned method
  *      -   immediate   if set, a message that could not immediately be consumed is returned to the onReturned method
  * 
- *  @todo   implement to onReturned() method
- * 
  *  @param  exchange    the exchange to publish to
  *  @param  routingkey  the routing key
  *  @param  flags       optional flags (see above)
@@ -404,18 +318,26 @@ bool ChannelImpl::removeQueue(const std::string &name, int flags)
  */
 bool ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, int flags, const Envelope &envelope)
 {
-    // @todo prevent crash when connection is destructed
+    // we are going to send out multiple frames, each one will trigger a call to the handler,
+    // which in turn could destruct the channel object, we need to monitor that
+    Monitor monitor(this);
     
     // @todo do not copy the entire buffer to individual frames
     
     // send the publish frame
-    send(BasicPublishFrame(_id, exchange, routingKey, flags & mandatory, flags & immediate));
+    if (!send(BasicPublishFrame(_id, exchange, routingKey, flags & mandatory, flags & immediate))) return false;
+    
+    // channel still valid?
+    if (!monitor.valid()) return false;
 
     // send header
-    send(BasicHeaderFrame(_id, envelope));
+    if (!send(BasicHeaderFrame(_id, envelope))) return false;
+    
+    // channel and connection still valid?
+    if (!monitor.valid() || !_monitor.valid()) return false;
     
     // the max payload size is the max frame size minus the bytes for headers and trailer
-    uint32_t maxpayload = _connection->_implementation.maxPayload();
+    uint32_t maxpayload = _connection->maxPayload();
     uint32_t bytessent = 0;
     
     // the buffer
@@ -429,7 +351,10 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
         uint32_t chunksize = std::min(maxpayload, bytesleft);
         
         // send out a body frame
-        send(BodyFrame(_id, data + bytessent, chunksize));
+        if (!send(BodyFrame(_id, data + bytessent, chunksize))) return false;
+        
+        // channel still valid?
+        if (!monitor.valid()) return false;
         
         // update counters
         bytessent += chunksize;
@@ -448,10 +373,7 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
 bool ChannelImpl::setQos(uint16_t prefetchCount)
 {
     // send a qos frame
-    send(BasicQosFrame(_id, prefetchCount, false));
-    
-    // done
-    return true;
+    return send(BasicQosFrame(_id, prefetchCount, false));
 }
 
 /**
@@ -465,10 +387,7 @@ bool ChannelImpl::setQos(uint16_t prefetchCount)
 bool ChannelImpl::consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments)
 {
     // send a consume frame
-    send(BasicConsumeFrame(_id, queue, tag, flags & nolocal, flags & noack, flags & exclusive, flags & nowait, arguments));
-    
-    // done
-    return true;
+    return send(BasicConsumeFrame(_id, queue, tag, flags & nolocal, flags & noack, flags & exclusive, flags & nowait, arguments));
 }
 
 /**
@@ -479,10 +398,7 @@ bool ChannelImpl::consume(const std::string &queue, const std::string &tag, int 
 bool ChannelImpl::cancel(const std::string &tag, int flags)
 {
     // send a cancel frame
-    send(BasicCancelFrame(_id, tag, flags & nowait));
-    
-    // done
-    return true;
+    return send(BasicCancelFrame(_id, tag, flags & nowait));
 }
 
 /**
@@ -494,10 +410,7 @@ bool ChannelImpl::cancel(const std::string &tag, int flags)
 bool ChannelImpl::ack(uint64_t deliveryTag, int flags)
 {
     // send an ack frame
-    send(BasicAckFrame(_id, deliveryTag, flags & multiple));
-    
-    // done
-    return true;
+    return send(BasicAckFrame(_id, deliveryTag, flags & multiple));
 }
 
 /**
@@ -509,10 +422,7 @@ bool ChannelImpl::ack(uint64_t deliveryTag, int flags)
 bool ChannelImpl::reject(uint64_t deliveryTag, int flags)
 {
     // send a nack frame
-    send(BasicNackFrame(_id, deliveryTag, flags & multiple, flags & requeue));
-    
-    // done
-    return true;
+    return send(BasicNackFrame(_id, deliveryTag, flags & multiple, flags & requeue));
 }
 
 /**
@@ -523,21 +433,21 @@ bool ChannelImpl::reject(uint64_t deliveryTag, int flags)
 bool ChannelImpl::recover(int flags)
 {
     // send a nack frame
-    send(BasicRecoverFrame(_id, flags & requeue));
-    
-    // done
-    return true;
+    return send(BasicRecoverFrame(_id, flags & requeue));
 }
 
 /**
  *  Send a frame over the channel
  *  @param  frame       frame to send
- *  @return size_t      number of bytes sent
+ *  @return bool        was the frame sent?
  */
-size_t ChannelImpl::send(const Frame &frame)
+bool ChannelImpl::send(const Frame &frame)
 {
-    // send to tcp connection
-    return _connection->_implementation.send(frame);
+    // skip if channel is not connected
+    if (_state != state_connected) return false;
+    
+    // send to tcp connection (first check if connection object was not destructed)
+    return _monitor.valid() && _connection->send(frame);
 }
 
 /**

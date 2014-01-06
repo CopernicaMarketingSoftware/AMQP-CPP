@@ -74,8 +74,6 @@ public:
     /**
      *  Return the method ID
      *  @return uint16_t
-     * 
-     *  @todo check if all other implementations use override keyword
      */
     virtual uint16_t methodID() const override
     {

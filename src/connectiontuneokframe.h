@@ -85,7 +85,7 @@ public:
      *  Method id
      *  @return uint16_t
      */
-    uint16_t methodID() const
+    virtual uint16_t methodID() const override
     {
         return 31;
     }

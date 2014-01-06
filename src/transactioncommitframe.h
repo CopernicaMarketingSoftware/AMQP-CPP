@@ -14,18 +14,6 @@ namespace AMQP {
  */
 class TransactionCommitFrame : public TransactionFrame
 {
-protected:
-/**
- *  Encode a frame on a string buffer
- *
- *  @param  buffer  buffer to write frame to
- */
-virtual void fill(OutBuffer& buffer) const override
-{
-    // call base
-    TransactionFrame::fill(buffer);
-}
-
 public:
     /**
      *  Destructor
@@ -51,10 +39,10 @@ public:
     {}
 
     /**
-     * return the method id
-     * @return uint16_t
+     *  return the method id
+     *  @return uint16_t
      */
-    uint16_t methodID() const
+    virtual uint16_t methodID() const override
     {
         return 20;
     }  

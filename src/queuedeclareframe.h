@@ -103,7 +103,7 @@ public:
      *  returns the method id
      *  @return string
      */
-    uint16_t methodID() const
+    virtual uint16_t methodID() const override
     {
         return 10;
     }
@@ -112,7 +112,7 @@ public:
      *  return the queue name
      *  @return string
      */
-    const std::string& name()
+    const std::string& name() const
     {
         return _name;
     }
@@ -121,7 +121,7 @@ public:
      *  returns value of passive declaration, do not create queue if it does not exist
      *  @return bool
      */
-    bool passive()
+    bool passive() const
     {
         return _bools.get(0);
     }
@@ -130,7 +130,7 @@ public:
      *  returns whether the queue is durable
      *  @return bool
      */
-    bool durable()
+    bool durable() const
     {
         return _bools.get(1);
     }
@@ -139,7 +139,7 @@ public:
      *  returns whether the queue is exclusive
      *  @return bool
      */
-    bool exclusive()
+    bool exclusive() const
     {
         return _bools.get(2);
     }
@@ -148,7 +148,7 @@ public:
      *  returns whether the queue is deleted if unused
      *  @return bool
      */
-    bool autoDelete()
+    bool autoDelete() const
     {
         return _bools.get(3);
     }
@@ -166,7 +166,7 @@ public:
      *  returns additional arguments. Implementation dependant.
      *  @return Table
      */
-    const Table& arguments()
+    const Table& arguments() const
     {
         return _arguments;
     }

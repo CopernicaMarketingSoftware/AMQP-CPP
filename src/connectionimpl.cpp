@@ -7,6 +7,8 @@
  */
 #include "includes.h"
 #include "protocolheaderframe.h"
+#include "connectioncloseokframe.h"
+#include "connectioncloseframe.h"
 
 /**
  *  set namespace
@@ -29,11 +31,8 @@ namespace AMQP {
 ConnectionImpl::ConnectionImpl(Connection *parent, ConnectionHandler *handler, const Login &login, const std::string &vhost) :
     _parent(parent), _handler(handler), _login(login), _vhost(vhost)
 {
-    // we need a protocol header
-    ProtocolHeaderFrame header;
-    
-    // send out the protocol header
-    send(header);
+    // we need to send a protocol header
+    send(ProtocolHeaderFrame());
 }
 
 /**
@@ -41,10 +40,7 @@ ConnectionImpl::ConnectionImpl(Connection *parent, ConnectionHandler *handler, c
  */
 ConnectionImpl::~ConnectionImpl()
 {
-    // still connected
-    if (_state == state_invalid) return;
-
-    // still in a connected state - should we send the close frame?
+    // close the connection in a nice fashion
     close();
 }
 
@@ -107,7 +103,8 @@ void ConnectionImpl::remove(ChannelImpl *channel)
  */
 size_t ConnectionImpl::parse(char *buffer, size_t size)
 {
-    // @todo do not parse if already in an error state
+    // do not parse if already in an error state
+    if (_state == state_closed) return 0;
     
     // number of bytes processed
     size_t processed = 0;
@@ -156,18 +153,30 @@ size_t ConnectionImpl::parse(char *buffer, size_t size)
  */
 bool ConnectionImpl::close()
 {
-    // leap out if not yet connected
-    if (_state != state_connected) return false;
+    // leap out if already closed or closing
+    if (_state == state_closed || _state == state_closing) return false;
+
+    // after the send operation the object could be dead
+    Monitor monitor(this);
     
     // loop over all channels
     for (auto iter = _channels.begin(); iter != _channels.end(); iter++)
     {
         // close the channel
         iter->second->close();
+        
+        // we could be dead now
+        if (!monitor.valid()) return true;
     }
     
+    // send the close frame
+    if (!send(ConnectionCloseFrame(0, "shutdown"))) return false;
+    
+    // leap out if object no longer is alive
+    if (!monitor.valid()) return true;
+    
     // we're in a new state
-    _state = state_invalid;
+    _state = state_closing;
     
     // done
     return true;
@@ -212,10 +221,13 @@ void ConnectionImpl::setConnected()
 /**
  *  Send a frame over the connection
  *  @param  frame           The frame to send
- *  @return size_t          Number of bytes sent
+ *  @return bool            Was the frame succesfully sent
  */
-size_t ConnectionImpl::send(const Frame &frame)
+bool ConnectionImpl::send(const Frame &frame)
 {
+    // its not possible to send anything if closed or closing down
+    if (_state == state_closing || _state == state_closed) return false;
+    
     // we need an output buffer
     OutBuffer buffer(frame.totalSize());
     
@@ -226,19 +238,19 @@ size_t ConnectionImpl::send(const Frame &frame)
     if (frame.needsSeparator()) buffer.add((uint8_t)206);
     
     // are we still setting up the connection?
-    if ((_state == state_protocol || _state == state_handshake) && !frame.partOfHandshake())
-    {
-        // the connection is still being set up, so we need to delay the message sending
-        _queue.push(std::move(buffer));
-    }
-    else
+    if (_state == state_connected || frame.partOfHandshake())
     {
         // send the buffer
         _handler->onData(_parent, buffer.data(), buffer.size());
     }
+    else
+    {
+        // the connection is still being set up, so we need to delay the message sending
+        _queue.push(std::move(buffer));
+    }
     
     // done
-    return buffer.size();
+    return true;
 }
 
 /**

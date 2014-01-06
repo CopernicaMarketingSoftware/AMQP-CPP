@@ -38,8 +38,6 @@ public:
     /**
      *  Class id
      *  @return uint16_t
-     * 
-     *  @todo   check if override keyword is used in all places
      */
     virtual uint16_t classID() const override
     {

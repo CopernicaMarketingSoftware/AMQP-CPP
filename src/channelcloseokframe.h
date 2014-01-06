@@ -51,6 +51,7 @@ public:
 
     /**
      *  Method id
+     *  @return uint16_t
      */
     virtual uint16_t methodID() const override
     {
@@ -68,7 +69,7 @@ public:
         ChannelImpl *channel = connection->channel(this->channel());
         
         // channel does not exist
-        if(!channel) return false;    
+        if (!channel) return false;    
         
         // report that the channel is closed
         channel->reportClosed();

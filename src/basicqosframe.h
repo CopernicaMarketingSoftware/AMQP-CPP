@@ -82,17 +82,17 @@ public:
     virtual ~BasicQosFrame() {}
 
     /**
-     * Return the method ID
-     * @return  uint16_t
+     *  Return the method ID
+     *  @return  uint16_t
      */
-    uint16_t methodID() const
+    virtual uint16_t methodID() const override
     {
         return 10;
     }
 
     /**
-     * Return the prefetch count
-     * @return int16_t
+     *  Return the prefetch count
+     *  @return int16_t
      */
     int16_t prefetchCount() const
     {
@@ -100,8 +100,8 @@ public:
     }
 
     /**
-     * returns the value of global
-     * @return  boolean
+     *  returns the value of global
+     *  @return  boolean
      */
     bool global() const
     {

@@ -14,18 +14,6 @@ namespace AMQP {
  */
 class TransactionRollbackFrame : public TransactionFrame
 {
-protected:
-    /**
-     *  Encode a frame on a string buffer
-     *
-     *  @param  buffer  buffer to write frame to
-     */
-    virtual void fill(OutBuffer& buffer) const override
-    {
-        // call base
-        TransactionFrame::fill(buffer);
-    }
-
 public:
     /**
      *  Destructor
@@ -33,29 +21,29 @@ public:
     virtual ~TransactionRollbackFrame() {}
 
     /**
-     * Decode a transaction rollback frame from a received frame
+     *  Decode a transaction rollback frame from a received frame
      *
-     * @param   frame   received frame to decode
+     *  @param   frame   received frame to decode
      */
     TransactionRollbackFrame(ReceivedFrame& frame) :
         TransactionFrame(frame)
     {}
 
     /**
-     * Construct a transaction rollback frame
+     *  Construct a transaction rollback frame
      * 
-     * @param   channel     channel identifier
-     * @return  newly created transaction rollback frame
+     *  @param   channel     channel identifier
+     *  @return  newly created transaction rollback frame
      */
     TransactionRollbackFrame(uint16_t channel) :
         TransactionFrame(channel, 0)
     {}
 
     /**
-     * return the method id
-     * @return uint16_t
+     *  return the method id
+     *  @return uint16_t
      */
-    uint16_t methodID() const
+    virtual uint16_t methodID() const override
     {
         return 30;
     }

@@ -88,7 +88,7 @@ public:
      *  returns the method id
      *  @return uint16_t
      */
-    uint16_t methodID() const
+    virtual uint16_t methodID() const override
     {
         return 20;
     }
@@ -97,7 +97,7 @@ public:
      *  returns the exchange name
      *  @return string
      */
-    const std::string& name()
+    const std::string& name() const
     {
         return _name;
     }
@@ -106,7 +106,7 @@ public:
      *  returns whether to delete if unused
      *  @return bool
      */
-    bool ifUnused()
+    bool ifUnused() const
     {
         return _bools.get(0);
     }
@@ -115,7 +115,7 @@ public:
      *  returns whether to wait for a response
      *  @return bool
      */
-    bool noWait()
+    bool noWait() const
     {
         return _bools.get(1);
     }

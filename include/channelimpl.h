@@ -27,9 +27,9 @@ private:
 
     /**
      *  Pointer to the connection
-     *  @var    Connection
+     *  @var    ConnectionImpl
      */
-    Connection *_connection;
+    ConnectionImpl *_connection;
 
     /**
      *  The handler that is notified about events
@@ -44,11 +44,18 @@ private:
     uint16_t _id;
 
     /**
+     *  Monitor to check if the connection is still alive
+     *  @var    Monitor
+     */
+    Monitor _monitor;
+
+    /**
      *  State of the channel object
      *  @var enum
      */
     enum {
         state_connected,
+        state_closing,
         state_closed
     } _state = state_connected;
     
@@ -224,7 +231,9 @@ public:
      *      -   mandatory   if set, an unroutable message will be reported to the channel handler with the onReturned method
      *      -   immediate   if set, a message that could not immediately be consumed is returned to the onReturned method
      * 
-     *  @todo   implement to onReturned() method
+     *  If the mandatory or immediate flag is set, and the message could not immediately
+     *  be published, the message will be returned to the client, and will eventually
+     *  end up in your ChannelHandler::onReturned() method.
      * 
      *  @param  exchange    the exchange to publish to
      *  @param  routingkey  the routing key
@@ -301,9 +310,9 @@ public:
     /**
      *  Send a frame over the channel
      *  @param  frame       frame to send
-     *  @return size_t      number of bytes sent
+     *  @return bool        was frame succesfully sent?
      */
-    size_t send(const Frame &frame);
+    bool send(const Frame &frame);
     
     /**
      *  Report to the handler that the channel is closed

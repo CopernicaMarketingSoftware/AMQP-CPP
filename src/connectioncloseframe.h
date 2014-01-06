@@ -98,7 +98,7 @@ public:
      *  Method id
      *  @return uint16_t
      */
-    uint16_t methodID() const
+    virtual uint16_t methodID() const override
     {
         return 50;
     }
@@ -146,10 +146,14 @@ public:
      */
     virtual bool process(ConnectionImpl *connection) override
     {
-        // @todo    connection could be destructed after frame was sent
+        // we need the monitor because the connection could be destructed in the meantime
+        Monitor monitor(connection);
         
         // send back the ok frame
         connection->send(ConnectionCloseOKFrame());
+        
+        // check if connection still exists
+        if (!monitor.valid()) return false;
         
         // no need to check for a channel, the error is connection wide
         // report the error on the connection
