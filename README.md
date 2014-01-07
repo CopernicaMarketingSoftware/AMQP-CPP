@@ -304,8 +304,17 @@ tables are used by many methods.
  *  @param  flags       combination of flags
  *  @param  arguments   optional arguments
  */
-bool declareQueue(const std::string &name, int flags, const Table &arguments);
+bool declareQueue(const std::string &name, int flags, const AMQP::Table &arguments);
+bool declareQueue(const std::string &name, const AMQP::Table &arguments);
+bool declareQueue(const std::string &name, int flags = 0);
+bool declareQueue(int flags, const AMQP::Table &arguments);
+bool declareQueue(const AMQP::Table &arguments);
+bool declareQueue(int flags = 0);
 ````
+
+As you can see, the method comes in many forms, and it is up to you to choose
+the one that is most appropriate. We now take a look at the most complete 
+one, the method with three parameters.
 
 Many methods in the Channel class accept an integer parameter named 'flags'.
 This is a variable in which you can set a number of options, by summing up
