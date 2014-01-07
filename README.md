@@ -1,15 +1,15 @@
-AMQP
-====
+AMQP-CPP
+========
 
-AMQP is a C++ library for communicating with a RabbitMQ message broker. The 
+AMQP-CPP is a C++ library for communicating with a RabbitMQ message broker. The 
 library can be used to parse incoming data from a RabbitMQ server, and to 
 generate frames that can be sent to a RabbitMQ server.
 
-Unlike all other AMQP libraries, this AMQP library does not make a connection to
+Unlike all other AMQP libraries, this AMQP-CPP library does not make a connection to
 RabbitMQ by itself, nor does it create sockets and/or performs IO operations. As 
-a user of this library, you therefore first need to set up a socket connection 
+a user of this library, you first need to set up a socket connection 
 to RabbitMQ by yourself, and implement a certain interface that you pass to the 
-AMQP library and that the library will use for IO operations.
+AMQP-CPP library and that the library will use for IO operations.
 
 This architecture makes the library extremely flexible: it does not rely on
 operating system specific IO calls, and it can be easily integrated into any
@@ -36,7 +36,7 @@ with a number of methods that are called by the library every time it wants
 to send out data, or when it needs to inform you that an error occured.
 
 ````c++
-#include <libamqp.h>
+#include <amqpcpp.h>
 
 class MyConnectionHandler : public AMQP::ConnectionHandler
 {
@@ -132,12 +132,12 @@ every time that it wants to send out data. We've explained that it is up to you 
 implement that method. But what about data in the other direction? How does the 
 library receive data back from RabbitMQ?
 
-As we've explained above, the AMQP library does not do any IO by itself 
+As we've explained above, the AMQP-CPP library does not do any IO by itself 
 and it is therefore of course also not possible for the library to receive data from 
 a socket. It is again up to you to do this. If, for example, you notice in your 
 event loop that the socket that is connected with the RabbitMQ server becomes 
 readable, you should read out that data (for example by using the recv() system 
-call), and pass the received bytes to the AMQP library. This is done by
+call), and pass the received bytes to the AMQP-CPP library. This is done by
 calling the parse() method in the Connection object.
 
 The Connection::parse() method gets two parameters, a pointer to a buffer of
@@ -149,11 +149,11 @@ The code snippet below comes from the Connection.h C++ header file.
  *  Parse data that was recevied from RabbitMQ
  *  
  *  Every time that data comes in from RabbitMQ, you should call this method to parse
- *  the incoming data, and let it handle by the AMQP library. This method returns the number
+ *  the incoming data, and let it handle by the AMQP-CPP library. This method returns the number
  *  of bytes that were processed.
  *
  *  If not all bytes could be processed because it only contained a partial frame, you should
- *  call this same method later on when more data is available. The AMQP library does not do
+ *  call this same method later on when more data is available. The AMQP-CPP library does not do
  *  any buffering, so it is up to the caller to ensure that the old data is also passed in that
  *  later call.
  *
@@ -192,7 +192,7 @@ you can extend to override the virtual methods you need. The AMQP library
 will call these methods to inform you that an operation on the channel has succeeded 
 or has failed.
 
-For example, if you call the channel.declareQueue() method, the AMQP library will
+For example, if you call the channel.declareQueue() method, the AMQP-CPP library will
 send a message to the RabbitMQ message broker to ask it to declare the
 queue. However, because all operations in the library are asynchronous, the
 declareQueue() method immediately returns 'true', although it is at that time
@@ -213,7 +213,7 @@ myChannel.declareExchange("my-exchange");
 ````
 
 If the first declareQueue() call fails in the example above, your ChannelHandler::onError() 
-method will be called after a while to report about this failure. And although the 
+method will be called after a while to report this failure. And although the 
 second instruction to declare an exchange has already been sent to the server, it will be 
 ignored because the channel was already in an invalid state after the first failure.
 
@@ -240,7 +240,7 @@ writing a consumer application for example, you probably are only interested in
 errors that occur, and in incoming messages:
 
 ````c++
-#include <libamqp.h>
+#include <amqpcpp.h>
 
 class MyChannelHandler : public AMQP::ChannelHandler
 {
@@ -282,7 +282,7 @@ FLAGS AND TABLES
 ================
 
 Let's take a closer look at one method in the Channel object to explain
-two other concepts of this AMQP library: flags and tables. The method that we
+two other concepts of this AMQP-CPP library: flags and tables. The method that we
 will be looking at is the Channel::declareQueue() method - but we could've
 picked a different method too because flags and
 tables are used by many methods.
@@ -404,7 +404,7 @@ seem to be supported by RabbitMQ.
 CONSUMING MESSAGES
 ==================
 
-
+To be added soon
 
 
 WORK IN PROGRESS
