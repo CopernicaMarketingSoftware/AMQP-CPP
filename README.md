@@ -107,7 +107,7 @@ channel.bindQueue("my-exchange", "my-queue");
 
 A number of remarks about the example above. First you may have noticed that we've
 created all objects on the stack. You are of course also free to create them
-on the heap with the C++ operator 'new'. That works just as good, and is in real
+on the heap with the C++ operator 'new'. That works just as well, and is in real
 life code probably more useful as you normally want to keep your handlers, connection 
 and channel objects around for a much longer time.
 
@@ -233,8 +233,8 @@ RabbitMQ server, so some extra bytes are sent over the network,
 and some additional resources in both the client application and the
 RabbitMQ server are used (although this is all very limited).
 
-Let's get back to the ChannelHandler class. It has many methods that you can all
-implement - but you do not have to that. All methods in it have a default empty implementation,
+Let's get back to the ChannelHandler class. It has many methods that you can 
+implement - all of which are optional. All methods in it have a default empty implementation,
 so you can choose to only override the ones that you are interested in. When you're 
 writing a consumer application for example, you probably are only interested in 
 errors that occur, and in incoming messages:
@@ -389,8 +389,8 @@ bool publish(const std::string &exchange, const std::string &routingKey, const c
 
 Published messages are normally not confirmed by the server, hence there is no
 ChannelHandler::onPublished() method that you can implement to find out if
-a message was correctly received by the server. That's on purpose the design of 
-the AMQP protocol, to not unnecessarily slow down message publishing. As long 
+a message was correctly received by the server. That's by design in the
+AMQP protocol, to not unnecessarily slow down message publishing. As long 
 as no error is reported via the ChannelHandler::onError() method, you can safely 
 assume that your messages were delivered.
 
@@ -409,13 +409,12 @@ the method Channel::consume(). After you've called this method, RabbitMQ starts
 delivering messages to you.
 
 Just like the publish() method that we just described, the consume() method also
-comes in many forms. They all have in common that the first argument should be
-the name of the queue you like to consume from. The subsequent parameters are an
-optional consumer tag, flags and a table with custom arguments. The first additional
-parameter, the consumer tag, is nothing more than a string identifier that will be 
-passed with every consumed message. This can be useful if you call the consume() 
-methods a number of times to consume from multiple queues, and you would like to know
-from which consume call the received messages came.
+comes in many forms. The first parameter is always the name of the queue you like
+to consume from. The subsequent parameters are an optional consumer tag, flags and
+a table with custom arguments. The first additional parameter, the consumer tag,
+is nothing more than a string identifier that will be passed with every consumed message.
+This can be useful if you call the consume() methods a number of times to consume
+from multiple queues, and you would like to know from which consume call the received messages came.
 
 The full documentation from the C++ Channel.h headerfile looks like this:
 
@@ -489,7 +488,7 @@ class MyChannelHandler : public AMQP::ChannelHandler
 
 The Message object holds all information of the delivered message: the actual content, 
 all meta information from the envelope (in fact, the Message class is derived from the Envelope class),
-and even then name of the exchange and the routing key that were used when the message was originally
+and even the name of the exchange and the routing key that were used when the message was originally
 published. For a full list of all information in the Message class, you best have a look at the
 message.h, envelope.h and metadata.h header files.
 
@@ -498,7 +497,7 @@ unique identifier that you need to acknowledge an incoming message. RabbitMQ onl
 message after it has been acknowledged, so that if your application crashes while it was busy 
 processing the message, the message does not get lost but remains in the queue. But this means that
 after you've processed the message, you must inform RabbitMQ about it by calling the Channel:ack()
-method. This method is very simply and takes in its simplest form only one parameter: the
+method. This method is very simple and takes in its simplest form only one parameter: the
 deliveryTag of the message.
 
 The consumerTag that you see in the onReceived method() is the same string identifier that was
@@ -530,7 +529,7 @@ need additional attention:
 We also need to add more safety checks so that strange or invalid data from 
 RabbitMQ does not break the library (although in reality RabbitMQ only sends 
 valid data). Also, when we now receive an answer from RabbitMQ that does not
-match the request that we earlier sent, we do not report an error (this is also 
+match the request that we sent before, we do not report an error (this is also 
 an issue that only occurs in theory).
 
 It would be nice to have sample implementations for the ConnectionHandler
