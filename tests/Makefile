@@ -1,7 +1,7 @@
 CPP			    = g++
 CPPFLAGS		= -Wall -c -I. -O2 -flto -std=c++11 -g
 LD			    = g++
-LDFLAGS			= -llibamqp -lcopernica_event -lcopernica_network -lev
+LDFLAGS			= -lamqpcpp -lcopernica_event -lcopernica_network -lev
 RESULT			= a.out
 SOURCES			= $(wildcard *.cpp)
 OBJECTS			= $(SOURCES:%.cpp=%.o)

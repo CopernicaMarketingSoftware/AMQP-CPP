@@ -8,7 +8,7 @@
  */
 
 // include the generic amqp functions
-#include "../libamqp.h"
+#include "../amqpcpp.h"
 
 // classes that are very commonly used
 #include "monitor.h"

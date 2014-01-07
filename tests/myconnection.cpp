@@ -7,7 +7,7 @@
 /**
  *  Required external libraries
  */
-#include <libamqp.h>
+#include <amqpcpp.h>
 #include <copernica/network.h>
  
 #include <string>

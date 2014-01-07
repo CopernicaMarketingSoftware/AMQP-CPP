@@ -15,9 +15,9 @@ clean:
 		$(MAKE) -C src clean
 
 install:
-		mkdir -p ${INCLUDE_DIR}/libamqp
+		mkdir -p ${INCLUDE_DIR}/amqpcpp
 		mkdir -p ${LIBRARY_DIR}
-		cp -f libamqp.h ${INCLUDE_DIR}
-		cp -f include/*.h ${INCLUDE_DIR}/libamqp
-		cp -f src/liblibamqp.so ${LIBRARY_DIR}
-		cp -f src/liblibamqp.a ${LIBRARY_DIR}
+		cp -f amqpcpp.h ${INCLUDE_DIR}
+		cp -f include/*.h ${INCLUDE_DIR}/amqpcpp
+		cp -f src/libamqpcpp.so ${LIBRARY_DIR}
+		cp -f src/libamqpcpp.a ${LIBRARY_DIR}
