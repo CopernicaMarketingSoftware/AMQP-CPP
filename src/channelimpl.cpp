@@ -244,7 +244,7 @@ bool ChannelImpl::removeExchange(const std::string &name, int flags)
 bool ChannelImpl::declareQueue(const std::string &name, int flags, const Table &arguments)
 {
     // send the queuedeclareframe
-    return send(QueueDeclareFrame(_id, name, flags & passive, flags & durable, flags & durable, flags & autodelete, flags & nowait, arguments));
+    return send(QueueDeclareFrame(_id, name, flags & passive, flags & durable, flags & exclusive, flags & autodelete, flags & nowait, arguments));
 }
 
 /**
