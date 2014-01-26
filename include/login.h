@@ -41,6 +41,13 @@ public:
         _user(user), _password(password) {}
 
     /**
+     *  Copy constructor
+     *  @param  login
+     */
+    Login(const Login &login) :
+        _user(login._user), _password(login._password) {}
+
+    /**
      *  Constructor
      */
     Login() :
