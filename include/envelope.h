@@ -19,6 +19,12 @@ class Envelope : public MetaData
 {
 protected:
     /**
+     *  The body (only used when string object was passed to constructor
+     *  @var    std::string
+     */
+    std::string _str;
+
+    /**
      *  Pointer to the body data (the memory buffer is not managed by the AMQP
      *  library!)
      *  @var    const char *
@@ -47,7 +53,7 @@ public:
      *  Constructor based on a string
      *  @param  body
      */
-    Envelope(const std::string &body) : MetaData(), _body(body.data()), _bodySize(body.size()) {}
+    Envelope(const std::string &body) : MetaData(), _str(body), _body(_str.data()), _bodySize(_str.size()) {}
 
     /**
      *  Destructor
