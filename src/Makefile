@@ -1,4 +1,4 @@
-CPP			    = g++
+CPP			    = g++-4.8
 RM			    = rm -f
 CPPFLAGS		= -Wall -c -I. -O2 -flto -std=c++11 -g
 LD			    = g++

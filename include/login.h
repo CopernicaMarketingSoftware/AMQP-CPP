@@ -59,6 +59,24 @@ public:
     virtual ~Login() {}
     
     /**
+     *  Retrieve the user name
+     *  @return string
+     */
+    const std::string &user() const
+    {
+        return _user;
+    }
+    
+    /**
+     *  Retrieve the password
+     *  @return string
+     */
+    const std::string &password() const
+    {
+        return _password;
+    }
+    
+    /**
      *  String representation in SASL PLAIN mode
      *  @return string
      */
