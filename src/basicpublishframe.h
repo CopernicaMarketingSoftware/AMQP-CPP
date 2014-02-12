@@ -19,7 +19,7 @@ private:
      *  Variable that no longer is in use
      *  @var int16_t
      */
-    int16_t _deprecated;
+    int16_t _deprecated = 0;
 
     /**
      *  the name of the exchange to publish to. An empty exchange name means the default exchange.
@@ -71,7 +71,6 @@ public:
      */
     BasicPublishFrame(uint16_t channel, const std::string& exchange = "", const std::string& routingKey = "", bool mandatory = false, bool immediate = false) :
         BasicFrame(channel, exchange.length() + routingKey.length() + 5), // 1 extra per string (for the size), 1 for bools, 2 for deprecated field
-        _deprecated(0),
         _exchange(exchange),
         _routingKey(routingKey),
         _bools(mandatory, immediate)

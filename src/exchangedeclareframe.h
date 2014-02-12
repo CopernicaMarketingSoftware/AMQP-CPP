@@ -19,7 +19,7 @@ private:
      *  Field that no longer is used
      *  @var uint16_t
      */
-    uint16_t _deprecated;
+    uint16_t _deprecated = 0;
     
     /**
      *  The exchange name
@@ -82,7 +82,6 @@ public:
      */
     ExchangeDeclareFrame(uint16_t channel, const std::string& name, const std::string& type, bool passive, bool durable, bool noWait, const Table& arguments) :
         ExchangeFrame(channel, (name.length() + type.length() + arguments.size() + 5)), // size of name, type and arguments + 1 (all booleans are stored in 1 byte) + 2 (deprecated short) + 2 (string sizes)
-        _deprecated(0),
         _name(name),
         _type(type),
         _bools(passive, durable, false, false, noWait),

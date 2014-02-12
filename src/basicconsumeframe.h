@@ -19,7 +19,7 @@ private:
      *  Field that is no longer used
      *  @var uint16_t
      */
-    uint16_t _deprecated;
+    uint16_t _deprecated = 0;
     
     /**
      *  specifies the name of the queue to consume from
