@@ -43,7 +43,13 @@ protected:
         state_closing,              // connection is busy closing (we have sent the close frame)
         state_closed                // connection is closed
     } _state = state_protocol;
-
+    
+    /**
+     *  Has the close() method been called?
+     *  @var    bool
+     */
+    bool _closed = false;
+    
     /**
      *  All channels that are active
      *  @var    map
@@ -85,6 +91,13 @@ protected:
      *  @var    queue
      */
     std::queue<OutBuffer> _queue;
+    
+    /**
+     *  Helper method to send the close frame
+     *  Return value tells if the connection is still valid
+     *  @return bool
+     */
+    bool sendClose();
 
 
 private:

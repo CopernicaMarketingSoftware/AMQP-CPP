@@ -80,6 +80,7 @@ public:
     /**
      *  Get the size this field will take when
      *  encoded in the AMQP wire-frame format
+     *  @return size_t
      */
     virtual size_t size() const override
     {
