@@ -23,11 +23,6 @@ public:
      *  @param  what
      */
     explicit ProtocolException(const std::string &what) : Exception(what) {}
-    
-    /**
-     *  Destructor
-     */
-    virtual ~ProtocolException() {}
 };
 
 /**
