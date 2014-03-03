@@ -16,6 +16,7 @@
 #include <limits>
 #include <cstddef>
 #include <cstring>
+#include <stdexcept>
 
 // base C include files
 #include <stdint.h>
