@@ -63,7 +63,7 @@ class MyConnectionHandler : public AMQP::ConnectionHandler
      *  to use.
      *  @param  connection      The connection that can now be used
      */
-    virtual void onConnected(Connection *connection)
+    virtual void onConnected(AMQP::Connection *connection)
     {
         // @todo
         //  add your own implementation, for example by creating a channel 
@@ -77,7 +77,7 @@ class MyConnectionHandler : public AMQP::ConnectionHandler
      *  @param  connection      The connection on which the error occured
      *  @param  message         A human readable error message
      */
-    virtual void onError(Connection *connection, const std::string &message)
+    virtual void onError(AMQP::Connection *connection, const std::string &message)
     {
         // @todo
         //  add your own implementation, for example by reporting the error
