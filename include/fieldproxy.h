@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  Field proxy. Returned by the table. Can be casted to the
  *  relevant native type (std::string or numeric)

@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  Decimal field type for AMQP
  * 

@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  AMQP field table
  * 
@@ -109,7 +110,7 @@ public:
      *  @param  name    field name
      *  @return         the field value
      */
-    const Field &get(const std::string &name);
+    const Field &get(const std::string &name) const;
 
     /**
      *  Get a field

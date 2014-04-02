@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  Available field types for AMQP
  * 

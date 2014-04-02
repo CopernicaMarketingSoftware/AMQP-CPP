@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  The login information to access a server
  *
