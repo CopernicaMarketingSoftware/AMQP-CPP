@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  Classes.h
  *

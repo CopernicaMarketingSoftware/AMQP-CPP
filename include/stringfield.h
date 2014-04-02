@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  String field types for amqp
  * 

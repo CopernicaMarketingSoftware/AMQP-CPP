@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  Class describing a (mid-level) AMQP channel implementation
  * 
