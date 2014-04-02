@@ -234,7 +234,7 @@ public:
      *  @param  size        size of the buffer to decode
      *  @return             number of bytes that were processed
      */
-    size_t parse(char *buffer, size_t size);
+    size_t parse(const char *buffer, size_t size);
 
     /**
      *  Close the connection

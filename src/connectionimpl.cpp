@@ -104,7 +104,7 @@ void ConnectionImpl::remove(ChannelImpl *channel)
  *  @param  size        size of the buffer to decode
  *  @return             number of bytes that were processed
  */
-size_t ConnectionImpl::parse(char *buffer, size_t size)
+size_t ConnectionImpl::parse(const char *buffer, size_t size)
 {
     // do not parse if already in an error state
     if (_state == state_closed) return 0;
