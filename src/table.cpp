@@ -97,7 +97,7 @@ Table &Table::operator=(Table &&table)
  *  @param  name    field name
  *  @return         the field value
  */
-const Field &Table::get(const std::string &name)
+const Field &Table::get(const std::string &name) const
 {
     // we need an empty string
     static ShortString empty;

@@ -1,8 +1,8 @@
 /**
  *  Array.cpp
- * 
+ *
  *  Implementation of an array
- * 
+ *
  */
 #include "includes.h"
 
@@ -23,7 +23,7 @@ Array::Array(ReceivedFrame &frame)
     {
         // one byte less for the field type
         charsToRead -= 1;
-        
+
         // read the field type and construct the field
         Field *field = Field::decode(frame);
         if (!field) continue;
@@ -62,12 +62,27 @@ const Field &Array::get(uint8_t index)
 {
     // used if index does not exist
     static ShortString empty;
-    
+
     // check whether we have that many elements
     if (index >= _fields.size()) return empty;
 
     // get value
     return *_fields[index];
+}
+
+uint32_t Array::count() const
+{
+  return _fields.size();
+}
+
+void Array::pop_back()
+{
+    _fields.pop_back();
+}
+
+void Array::push_back(const Field& value)
+{
+    _fields.push_back(std::shared_ptr<Field>(value.clone()));
 }
 
 /**
@@ -92,7 +107,7 @@ size_t Array::size() const
 }
 
 /**
- *  Write encoded payload to the given buffer. 
+ *  Write encoded payload to the given buffer.
  */
 void Array::fill(OutBuffer& buffer) const
 {

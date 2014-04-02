@@ -1,6 +1,6 @@
 /**
  *  AMQP field array
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -20,7 +20,7 @@ private:
      *  @typedef
      */
     typedef std::vector<std::shared_ptr<Field>> FieldArray;
-    
+
     /**
      *  The actual fields
      *  @var FieldArray
@@ -30,7 +30,7 @@ private:
 public:
     /**
      *  Constructor to construct an array from a received frame
-     * 
+     *
      *  @param  frame   received frame
      */
     Array(ReceivedFrame &frame);
@@ -100,6 +100,25 @@ public:
     const Field &get(uint8_t index);
 
     /**
+     *  Get number of elements on this array
+     *
+     *  @return array size
+     */
+    uint32_t count() const;
+
+    /**
+     * Remove last element from array
+     */
+    void pop_back();
+
+    /**
+     * Add field to end of array
+     *
+     * @param value
+     */
+    void push_back(const Field &value);
+
+    /**
      *  Get a field
      *
      *  @param  index   field index
@@ -111,7 +130,7 @@ public:
     }
 
     /**
-     *  Write encoded payload to the given buffer. 
+     *  Write encoded payload to the given buffer.
      *  @param  buffer
      */
     virtual void fill(OutBuffer& buffer) const override;
