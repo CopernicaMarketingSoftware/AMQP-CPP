@@ -112,10 +112,25 @@ public:
      */
     const Field &get(const std::string &name) const;
 
-    std::string getString(const std::string&) const;
+    /**
+     *  Get a string field
+     * @param name field name
+     * @return the string or "" if field is not a string
+     */
+    std::string getString(const std::string& name) const;
 
-    Array getArray(const std::string&) const;
+    /**
+     * Get Array field
+     * @param name field name
+     * @return array or an empty one if field is not an array
+     */
+    Array getArray(const std::string& name) const;
 
+    /**
+     * Get int field
+     * @param name field name
+     * @return int or 0 if field is not an integer
+     */
     template<typename IntegerType>
     IntegerType getInt(const std::string& field_name) const
     {

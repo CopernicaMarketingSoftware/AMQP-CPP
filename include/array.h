@@ -100,8 +100,18 @@ public:
      */
     const Field &get(uint8_t index) const;
 
+    /**
+     * Get a string item
+     * @param index index of item into array
+     * @return the string or an empty one if it's not a string
+     */
     std::string getString(uint8_t index) const;
 
+    /**
+     * Get a table item
+     * @param index index of item into array
+     * @return the table or an empty one if it's not a table
+     */
     AMQP::Table getTable(uint8_t index) const;
 
     /**
