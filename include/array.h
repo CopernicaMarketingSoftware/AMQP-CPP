@@ -98,7 +98,11 @@ public:
      *  @param  index   field index
      *  @return Field
      */
-    const Field &get(uint8_t index);
+    const Field &get(uint8_t index) const;
+
+    std::string getString(uint8_t index) const;
+
+    AMQP::Table getTable(uint8_t index) const;
 
     /**
      *  Get number of elements on this array
@@ -128,6 +132,12 @@ public:
     ArrayFieldProxy operator[](uint8_t index)
     {
         return ArrayFieldProxy(this, index);
+    }
+
+    Array& operator=(const Array& a)
+    {
+        _fields = a._fields;
+        return *this;
     }
 
     /**

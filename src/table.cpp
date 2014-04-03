@@ -10,25 +10,25 @@ namespace AMQP {
  */
 Table::Table(ReceivedFrame &frame)
 {
-    // table buffer begins with the number of bytes to read 
+    // table buffer begins with the number of bytes to read
     uint32_t bytesToRead = frame.nextUint32();
-    
-    // keep going until the correct number of bytes is read. 
+
+    // keep going until the correct number of bytes is read.
     while (bytesToRead > 0)
     {
         // field name and type
         ShortString name(frame);
-        
+
         // subtract number of bytes to read, plus one byte for the decoded type
         bytesToRead -= (name.size() + 1);
-        
+
         // get the field
         Field *field = Field::decode(frame);
         if (!field) continue;
-        
+
         // add field
         _fields[name] = std::shared_ptr<Field>(field);
-        
+
         // subtract size
         bytesToRead -= field->size();
     }
@@ -57,21 +57,21 @@ Table &Table::operator=(const Table &table)
 {
     // skip self assignment
     if (this == &table) return *this;
-    
+
     // empty current fields
     _fields.clear();
-    
+
     // loop through the table records
     for (auto iter = table._fields.begin(); iter != table._fields.end(); iter++)
     {
         // add the field
         _fields[iter->first] = std::shared_ptr<Field>(iter->second->clone());
     }
-    
+
     // done
     return *this;
 }
-    
+
 /**
  *  Move assignment operator
  *  @param  table
@@ -81,17 +81,17 @@ Table &Table::operator=(Table &&table)
 {
     // skip self assignment
     if (this == &table) return *this;
-    
+
     // copy fields
     _fields = std::move(table._fields);
-    
+
     // done
     return *this;
 }
 
 /**
  *  Get a field
- * 
+ *
  *  If the field does not exist, an empty string field is returned
  *
  *  @param  name    field name
@@ -101,7 +101,7 @@ const Field &Table::get(const std::string &name) const
 {
     // we need an empty string
     static ShortString empty;
-    
+
     // locate the element first
     auto iter(_fields.find(name));
 
@@ -110,6 +110,30 @@ const Field &Table::get(const std::string &name) const
 
     // done
     return *iter->second;
+}
+
+std::string Table::getString(const std::string& field_name) const
+{
+    const Field& field = get(field_name);
+    if (field.typeID() == 's')
+    {
+        return dynamic_cast<const ShortString&>(field).value();
+    }
+    if (field.typeID() == 's')
+    {
+        return dynamic_cast<const LongString&>(field).value();
+    }
+    return "";
+}
+
+Array Table::getArray(const std::string& field_name) const
+{
+    const Field& field = get(field_name);
+    if (field.typeID() == 'A')
+    {
+        return dynamic_cast<const Array&>(field);
+    }
+    return Array();
 }
 
 /**
@@ -140,7 +164,7 @@ size_t Table::size() const
 }
 
 /**
- *  Write encoded payload to the given buffer. 
+ *  Write encoded payload to the given buffer.
  */
 void Table::fill(OutBuffer& buffer) const
 {
@@ -153,7 +177,7 @@ void Table::fill(OutBuffer& buffer) const
         // encode the field name
         ShortString name(iter->first);
         name.fill(buffer);
-        
+
         // encode the element type
         buffer.add((uint8_t) iter->second->typeID());
 

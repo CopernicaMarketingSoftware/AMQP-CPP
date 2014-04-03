@@ -58,7 +58,7 @@ Array::Array(const Array &array)
  *  @param  index   field index
  *  @return Field
  */
-const Field &Array::get(uint8_t index)
+const Field &Array::get(uint8_t index) const
 {
     // used if index does not exist
     static ShortString empty;
@@ -68,6 +68,30 @@ const Field &Array::get(uint8_t index)
 
     // get value
     return *_fields[index];
+}
+
+std::string Array::getString(uint8_t index) const
+{
+    const Field& field = get(index);
+    if (field.typeID() == 's')
+    {
+        return dynamic_cast<const ShortString&>(field).value();
+    }
+    if (field.typeID() == 's')
+    {
+        return dynamic_cast<const LongString&>(field).value();
+    }
+    return "";
+}
+
+Table Array::getTable(uint8_t index) const
+{
+    const Field& field = get(index);
+    if (field.typeID() == 'F')
+    {
+        return dynamic_cast<const Table&>(field);
+    }
+    return Table();
 }
 
 uint32_t Array::count() const
