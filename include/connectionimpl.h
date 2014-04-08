@@ -5,7 +5,7 @@
  *  This is the implementation of the connection - a class that can only be
  *  constructed by the connection class itselves and that has all sorts of
  *  methods that are only useful inside the library
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -44,13 +44,13 @@ protected:
         state_closing,              // connection is busy closing (we have sent the close frame)
         state_closed                // connection is closed
     } _state = state_protocol;
-    
+
     /**
      *  Has the close() method been called?
      *  @var    bool
      */
     bool _closed = false;
-    
+
     /**
      *  All channels that are active
      *  @var    map
@@ -62,13 +62,13 @@ protected:
      *  @var    uint16_t
      */
     uint16_t _nextFreeChannel = 1;
-    
+
     /**
      *  Max number of channels (0 for unlimited)
      *  @var    uint16_t
      */
     uint16_t _maxChannels = 0;
-    
+
     /**
      *  Max frame size
      *  @var    uint32_t
@@ -80,19 +80,19 @@ protected:
      *  @var    Login
      */
     Login _login;
-    
+
     /**
      *  Vhost to connect to
      *  @var    string
      */
     std::string _vhost;
-    
+
     /**
      *  Queued messages that should be sent after the connection has been established
      *  @var    queue
      */
     std::queue<OutBuffer> _queue;
-    
+
     /**
      *  Helper method to send the close frame
      *  Return value tells if the connection is still valid
@@ -100,17 +100,16 @@ protected:
      */
     bool sendClose();
 
-
 private:
     /**
      *  Construct an AMQP object based on full login data
-     * 
+     *
      *  The first parameter is a handler object. This handler class is
      *  an interface that should be implemented by the caller.
-     * 
+     *
      *  Note that the constructor is private to ensure that nobody can construct
      *  this class, only the real Connection class via a friend construct
-     * 
+     *
      *  @param  parent          Parent connection object
      *  @param  handler         Connection handler
      *  @param  login           Login data
@@ -132,7 +131,7 @@ public:
         // must be busy doing the connection handshake, or already connected
         return _state == state_handshake || _state == state_connected;
     }
-    
+
     /**
      *  Mark the protocol as being ok
      */
@@ -141,7 +140,7 @@ public:
         // move on to handshake state
         if (_state == state_protocol) _state = state_handshake;
     }
-    
+
     /**
      *  Are we fully connected?
      *  @return bool
@@ -151,12 +150,12 @@ public:
         // state must be connected
         return _state == state_connected;
     }
-    
+
     /**
      *  Mark the connection as connected
      */
     void setConnected();
-    
+
     /**
      *  Retrieve the login data
      *  @return Login
@@ -165,7 +164,7 @@ public:
     {
         return _login;
     }
-    
+
     /**
      *  Retrieve the vhost
      *  @return string
@@ -185,7 +184,7 @@ public:
         _maxChannels = channels;
         _maxFrame = size;
     }
-    
+
     /**
      *  The max frame size
      *  @return uint32_t
@@ -194,7 +193,7 @@ public:
     {
         return _maxFrame;
     }
-    
+
     /**
      *  The max payload size for body frames
      *  @return uint32_t
@@ -204,7 +203,7 @@ public:
         // 8 bytes for header and end-of-frame byte
         return _maxFrame - 8;
     }
-    
+
     /**
      *  Add a channel to the connection, and return the channel ID that it
      *  is allowed to use, or 0 when no more ID's are available
@@ -212,16 +211,16 @@ public:
      *  @return uint16_t
      */
     uint16_t add(ChannelImpl *channel);
-    
+
     /**
      *  Remove a channel
      *  @param  channel
      */
     void remove(ChannelImpl *channel);
-    
+
     /**
      *  Parse the buffer into a recognized frame
-     *  
+     *
      *  Every time that data comes in on the connection, you should call this method to parse
      *  the incoming data, and let it handle by the AMQP library. This method returns the number
      *  of bytes that were processed.
@@ -246,9 +245,9 @@ public:
 
     /**
      *  Send a frame over the connection
-     * 
+     *
      *  This is an internal method that you normally do not have to call yourself
-     * 
+     *
      *  @param  frame       the frame to send
      *  @return bool
      */
@@ -256,11 +255,11 @@ public:
 
     /**
      *  Get a channel by its identifier
-     * 
+     *
      *  This method only works if you had already created the channel before.
      *  This is an internal method that you will not need if you cache the channel
      *  object.
-     * 
+     *
      *  @param  number          channel identifier
      *  @return channel         the channel object, or nullptr if not yet created
      */
@@ -278,11 +277,11 @@ public:
     {
         // set connection state to closed
         _state = state_closed;
-        
+
         // inform handler
         _handler->onError(_parent, message);
     }
-    
+
     /**
      *  Report that the connection is closed
      */
@@ -290,7 +289,7 @@ public:
     {
         // change state
         _state = state_closed;
-        
+
         // inform the handler
         _handler->onClosed(_parent);
     }

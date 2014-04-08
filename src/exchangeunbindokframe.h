@@ -1,5 +1,5 @@
 /**
- *  Exchangeunbindokframe.h  
+ *  Exchangeunbindokframe.h
  *
  *  @copyright 2014 Copernica BV
  */
@@ -9,7 +9,7 @@
  *  Set up namespace
  */
 namespace AMQP {
-    
+
 /**
  *  Class definition
  */
@@ -30,10 +30,10 @@ protected:
 public:
     /**
      *  Constructor based on incoming data
-     * 
+     *
      *  @param  frame   received frame to decode
      */
-    ExchangeUnbindOKFrame(ReceivedFrame &frame) : 
+    ExchangeUnbindOKFrame(ReceivedFrame &frame) :
         ExchangeFrame(frame)
     {}
 
@@ -48,12 +48,12 @@ public:
     ExchangeUnbindOKFrame(uint16_t channel) :
         ExchangeFrame(channel, 0)
     {}
-    
+
     virtual uint16_t methodID() const override
     {
         return 51;
     }
-    
+
     /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
@@ -63,17 +63,17 @@ public:
     {
         // check if we have a channel
         ChannelImpl *channel = connection->channel(this->channel());
-        
+
         // channel does not exist
         if(!channel) return false;
 
         // report to handler
-        channel->reportExchangeUnbound();
-        
+        channel->reportSuccess();
+
         // done
         return true;
     }
 };
-    
+
 // end namespace
 }

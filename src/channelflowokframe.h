@@ -88,14 +88,13 @@ public:
     {
         // we need the appropriate channel
         ChannelImpl *channel = connection->channel(this->channel());
-        
+
         // channel does not exist
-        if (!channel) return false;    
-        
-        // is the flow active?
-        if (active()) channel->reportResumed();
-        else channel->reportPaused();
-        
+        if (!channel) return false;
+
+        // report success for the call
+        channel->reportSuccess();
+
         // done
         return true;
     }

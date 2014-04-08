@@ -1,6 +1,6 @@
 /**
  *  Class describing an AMQP queue unbind ok frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -24,7 +24,7 @@ protected:
     {
         // call base
         QueueFrame::fill(buffer);
-    }    
+    }
 public:
     /**
      * Decode a queueunbindokframe from a received frame
@@ -58,7 +58,7 @@ public:
     {
         return 51;
     }
-    
+
     /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
@@ -68,13 +68,13 @@ public:
     {
         // check if we have a channel
         ChannelImpl *channel = connection->channel(this->channel());
-        
+
         // channel does not exist
         if(!channel) return false;
-        
+
         // report queue unbind success
-        channel->reportQueueUnbound();
-        
+        channel->reportSuccess();
+
         // done
         return true;
     }
