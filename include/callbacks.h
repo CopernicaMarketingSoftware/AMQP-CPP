@@ -90,13 +90,13 @@ public:
      *  @return reference to the inserted deferred
      */
     template <typename... Arguments>
-    Deferred<Arguments...>& push_back(const Deferred<Arguments...>& item)
+    Deferred<Arguments...>& push_back(Deferred<Arguments...>&& item)
     {
         // retrieve the container
         auto &container = get<std::deque<Deferred<Arguments...>>>(_callbacks);
 
         // add the element
-        container.push_back(item);
+        container.push_back(std::move(item));
 
         // return reference to the new item
         return container.back();
@@ -128,7 +128,7 @@ public:
      */
     template <std::size_t N = 0>
     typename std::enable_if<N == std::tuple_size<decltype(_callbacks)>::value>::type
-    reportFailure(const std::string& message)
+    reportError(const std::string& message)
     {}
 
     /**
@@ -138,7 +138,7 @@ public:
      */
     template <std::size_t N = 0>
     typename std::enable_if<N < std::tuple_size<decltype(_callbacks)>::value>::type
-    reportFailure(const std::string& message)
+    reportError(const std::string& message)
     {
         // retrieve the callbacks at current index
         auto &callbacks = std::get<N>(_callbacks);
@@ -147,7 +147,7 @@ public:
         for (auto &callback : callbacks) callback.error(message);
 
         // execute the next type
-        reportFailure<N + 1>(message);
+        reportError<N + 1>(message);
     }
 };
 

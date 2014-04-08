@@ -1,6 +1,6 @@
 /**
  *  Class describing an AMQP queue delete frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -79,7 +79,7 @@ public:
     {
         return _messageCount;
     }
-    
+
     /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
@@ -89,13 +89,13 @@ public:
     {
         // check if we have a channel
         ChannelImpl *channel = connection->channel(this->channel());
-        
+
         // channel does not exist
         if(!channel) return false;
-        
+
         // report queue deletion success
-        channel->reportQueueDeleted(this->messageCount());
-        
+        channel->reportSuccess(this->messageCount());
+
         // done
         return true;
     }
@@ -105,4 +105,4 @@ public:
  *  end namespace
  */
 }
- 
+

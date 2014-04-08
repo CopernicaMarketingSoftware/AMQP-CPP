@@ -15,6 +15,7 @@ namespace AMQP {
 
 // forward declaration
 class ChannelImpl;
+class Callbacks;
 
 /**
  *  Class definition
@@ -53,6 +54,7 @@ private:
      *  private members and construct us
      */
     friend class ChannelImpl;
+    friend class Callbacks;
 
     /**
      *  Indicate success

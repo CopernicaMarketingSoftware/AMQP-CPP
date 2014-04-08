@@ -102,7 +102,7 @@ ChannelImpl::~ChannelImpl()
 Deferred<>& ChannelImpl::pause()
 {
     // send a channel flow frame
-    return send(ChannelFlowFrame(_id, false), "Cannot send channel flow frame");
+    return send<>(ChannelFlowFrame(_id, false), "Cannot send channel flow frame");
 }
 
 /**
@@ -116,7 +116,7 @@ Deferred<>& ChannelImpl::pause()
 Deferred<>& ChannelImpl::resume()
 {
     // send a channel flow frame
-    return send(ChannelFlowFrame(_id, true), "Cannot send channel flow frame");
+    return send<>(ChannelFlowFrame(_id, true), "Cannot send channel flow frame");
 }
 
 /**
@@ -128,7 +128,7 @@ Deferred<>& ChannelImpl::resume()
 Deferred<>& ChannelImpl::startTransaction()
 {
     // send a transaction frame
-    return send(TransactionSelectFrame(_id), "Cannot send transaction start frame");
+    return send<>(TransactionSelectFrame(_id), "Cannot send transaction start frame");
 }
 
 /**
@@ -140,7 +140,7 @@ Deferred<>& ChannelImpl::startTransaction()
 Deferred<>& ChannelImpl::commitTransaction()
 {
     // send a transaction frame
-    return send(TransactionCommitFrame(_id), "Cannot send transaction commit frame");
+    return send<>(TransactionCommitFrame(_id), "Cannot send transaction commit frame");
 }
 
 /**
@@ -152,7 +152,7 @@ Deferred<>& ChannelImpl::commitTransaction()
 Deferred<>& ChannelImpl::rollbackTransaction()
 {
     // send a transaction frame
-    return send(TransactionRollbackFrame(_id), "Cannot send transaction commit frame");
+    return send<>(TransactionRollbackFrame(_id), "Cannot send transaction commit frame");
 }
 
 /**
@@ -167,7 +167,7 @@ Deferred<>& ChannelImpl::close()
     Monitor monitor(this);
 
     // send a channel close frame
-    auto &handler = send(ChannelCloseFrame(_id), "Cannot send channel close frame");
+    auto &handler = send<>(ChannelCloseFrame(_id), "Cannot send channel close frame");
 
     // was the frame sent and are we still alive?
     if (handler && monitor.valid()) _state = state_closing;
@@ -197,7 +197,7 @@ Deferred<>& ChannelImpl::declareExchange(const std::string &name, ExchangeType t
     if (type == ExchangeType::headers)exchangeType = "headers";
 
     // send declare exchange frame
-    return send(ExchangeDeclareFrame(_id, name, exchangeType, flags & passive, flags & durable, flags & nowait, arguments), "Cannot send exchange declare frame");
+    return send<>(ExchangeDeclareFrame(_id, name, exchangeType, flags & passive, flags & durable, flags & nowait, arguments), "Cannot send exchange declare frame");
 }
 
 /**
@@ -215,7 +215,7 @@ Deferred<>& ChannelImpl::declareExchange(const std::string &name, ExchangeType t
 Deferred<>& ChannelImpl::bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments)
 {
     // send exchange bind frame
-    return send(ExchangeBindFrame(_id, target, source, routingkey, flags & nowait, arguments), "Cannot send exchange bind frame");
+    return send<>(ExchangeBindFrame(_id, target, source, routingkey, flags & nowait, arguments), "Cannot send exchange bind frame");
 }
 
 /**
@@ -233,7 +233,7 @@ Deferred<>& ChannelImpl::bindExchange(const std::string &source, const std::stri
 Deferred<>& ChannelImpl::unbindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments)
 {
     // send exchange unbind frame
-    return send(ExchangeUnbindFrame(_id, target, source, routingkey, flags & nowait, arguments), "Cannot send exchange unbind frame");
+    return send<>(ExchangeUnbindFrame(_id, target, source, routingkey, flags & nowait, arguments), "Cannot send exchange unbind frame");
 }
 
 /**
@@ -248,7 +248,7 @@ Deferred<>& ChannelImpl::unbindExchange(const std::string &source, const std::st
 Deferred<>& ChannelImpl::removeExchange(const std::string &name, int flags)
 {
     // send delete exchange frame
-    return send(ExchangeDeleteFrame(_id, name, flags & ifunused, flags & nowait), "Cannot send exchange delete frame");
+    return send<>(ExchangeDeleteFrame(_id, name, flags & ifunused, flags & nowait), "Cannot send exchange delete frame");
 }
 
 /**
@@ -263,7 +263,7 @@ Deferred<>& ChannelImpl::removeExchange(const std::string &name, int flags)
 Deferred<const std::string&, uint32_t, uint32_t>& ChannelImpl::declareQueue(const std::string &name, int flags, const Table &arguments)
 {
     // send the queuedeclareframe
-    return send(QueueDeclareFrame(_id, name, flags & passive, flags & durable, flags & exclusive, flags & autodelete, flags & nowait, arguments), "Cannot send queue declare frame", _queueDeclaredCallbacks);
+    return send<const std::string&, uint32_t, uint32_t>(QueueDeclareFrame(_id, name, flags & passive, flags & durable, flags & exclusive, flags & autodelete, flags & nowait, arguments), "Cannot send queue declare frame");
 }
 
 /**
@@ -281,7 +281,7 @@ Deferred<const std::string&, uint32_t, uint32_t>& ChannelImpl::declareQueue(cons
 Deferred<>& ChannelImpl::bindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, int flags, const Table &arguments)
 {
     // send the bind queue frame
-    return send(QueueBindFrame(_id, queueName, exchangeName, routingkey, flags & nowait, arguments), "Cannot send queue bind frame");
+    return send<>(QueueBindFrame(_id, queueName, exchangeName, routingkey, flags & nowait, arguments), "Cannot send queue bind frame");
 }
 
 /**
@@ -298,7 +298,7 @@ Deferred<>& ChannelImpl::bindQueue(const std::string &exchangeName, const std::s
 Deferred<>& ChannelImpl::unbindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments)
 {
     // send the unbind queue frame
-    return send(QueueUnbindFrame(_id, queue, exchange, routingkey, arguments), "Cannot send queue unbind frame");
+    return send<>(QueueUnbindFrame(_id, queue, exchange, routingkey, arguments), "Cannot send queue unbind frame");
 }
 
 /**
@@ -322,7 +322,7 @@ Deferred<>& ChannelImpl::unbindQueue(const std::string &exchange, const std::str
 Deferred<uint32_t>& ChannelImpl::purgeQueue(const std::string &name, int flags)
 {
     // send the queue purge frame
-    return send(QueuePurgeFrame(_id, name, flags & nowait), "Cannot send queue purge frame", _queueRemovedCallbacks);
+    return send<uint32_t>(QueuePurgeFrame(_id, name, flags & nowait), "Cannot send queue purge frame");
 }
 
 /**
@@ -346,7 +346,7 @@ Deferred<uint32_t>& ChannelImpl::purgeQueue(const std::string &name, int flags)
 Deferred<uint32_t>& ChannelImpl::removeQueue(const std::string &name, int flags)
 {
     // send the remove queue frame
-    return send(QueueDeleteFrame(_id, name, flags & ifunused, flags & ifempty, flags & nowait), "Cannot send remove queue frame", _queueRemovedCallbacks);
+    return send<uint32_t>(QueueDeleteFrame(_id, name, flags & ifunused, flags & ifempty, flags & nowait), "Cannot send remove queue frame");
 }
 
 /**
@@ -503,38 +503,22 @@ bool ChannelImpl::send(const Frame &frame)
 }
 
 /**
- *  Send a frame over the channel and
- *  get a deferred handler for it.
+ *  Send a frame over the channel and get a deferred handler for it.
  *
  *  @param  frame       frame to send
  *  @param  message     the message to trigger if the frame cannot be send at all
- */
-Deferred<>& ChannelImpl::send(const Frame &frame, const char *message)
-{
-    // use the generic implementation
-    return send<>(frame, message, _callbacks);
-}
-
-/**
- *  Send a frame over the channel and
- *  get a deferred handler for it.
- *
- *  @param  frame       frame to send
- *  @param  message     the message to trigger if the frame cannot be send at all
- *  @param  queue       the queue to store the callbacks in
  */
 template <typename... Arguments>
-Deferred<Arguments...>& ChannelImpl::send(const Frame &frame, const char *message, std::deque<Deferred<Arguments...>>& queue)
+Deferred<Arguments...>& ChannelImpl::send(const Frame &frame, const char *message)
 {
     // create a new deferred handler and get a pointer to it
-    queue.push_back(Deferred<Arguments...>(_parent));
-    auto *handler = &queue.back();
+    auto &handler = _callbacks.push_back(Deferred<Arguments...>(_parent));
 
     // send the frame over the channel
     if (!send(frame))
     {
         // we can immediately put the handler in failed state
-        handler->_failed = true;
+        handler._failed = true;
 
         // the frame could not be send
         // we should register an error
@@ -546,7 +530,7 @@ Deferred<Arguments...>& ChannelImpl::send(const Frame &frame, const char *messag
     }
 
     // return the new handler
-    return *handler;
+    return handler;
 }
 
 /**

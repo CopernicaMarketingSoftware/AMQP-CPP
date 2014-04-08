@@ -51,13 +51,7 @@ private:
     /**
      *  The callbacks waiting to be called
      */
-    std::deque<Deferred<>> _callbacks;
-
-    /**
-     *  Callbacks with additional parameters
-     */
-    std::deque<Deferred<const std::string&, uint32_t, uint32_t>> _queueDeclaredCallbacks;
-    std::deque<Deferred<uint32_t>> _queueRemovedCallbacks;
+    Callbacks _callbacks;
 
     /**
      *  The channel number
@@ -399,18 +393,17 @@ public:
      *  @param  frame       frame to send
      *  @param  message     the message to trigger if the frame cannot be send at all
      */
-    Deferred<>& send(const Frame &frame, const char *message);
+    template <typename... Arguments>
+    Deferred<Arguments...>& send(const Frame &frame, const char *message);
 
     /**
-     *  Send a frame over the channel and
-     *  get a deferred handler for it.
-     *
-     *  @param  frame       frame to send
-     *  @param  message     the message to trigger if the frame cannot be send at all
-     *  @param  queue       the queue to store the callbacks in
+     *  Report to the handler that the channel is opened
      */
-    template <typename... Arguments>
-    Deferred<Arguments...>& send(const Frame &frame, const char *message, std::deque<Deferred<Arguments...>>& queue);
+    void reportReady()
+    {
+        // inform handler
+        if (_readyCallback) _readyCallback(_parent);
+    }
 
     /**
      *  Report to the handler that the channel is closed
@@ -430,20 +423,11 @@ public:
      *  This function is called to report success for all
      *  cases where the callback does not receive any parameters
      */
-    void reportSuccess()
+    template <typename... Arguments>
+    void reportSuccess(Arguments ...parameters)
     {
-        // report success for the oldest request
-        _callbacks.front().success();
-        _callbacks.pop_front();
-    }
-
-    /**
-     *  Report to the handler that the channel is opened
-     */
-    void reportReady()
-    {
-        // inform handler
-        if (_readyCallback) _readyCallback(_parent);
+        // report success to the relevant callback
+        _callbacks.reportSuccess<Arguments...>(std::forward<Arguments>(parameters)...);
     }
 
     /**
@@ -458,45 +442,8 @@ public:
         // inform handler
         if (_errorCallback) _errorCallback(_parent, message);
 
-        // and all waiting deferred callbacks
-        for (auto &deferred : _callbacks)               deferred.error(message);
-        for (auto &deferred : _queueDeclaredCallbacks)  deferred.error(message);
-        for (auto &deferred : _queueRemovedCallbacks)   deferred.error(message);
-    }
-
-    /**
-     *  Report that the queue was succesfully declared
-     *  @param  queueName       name of the queue which was declared
-     *  @param  messagecount    number of messages currently in the queue
-     *  @param  consumerCount   number of active consumers in the queue
-     */
-    void reportQueueDeclared(const std::string &queueName, uint32_t messageCount, uint32_t consumerCount)
-    {
-        // report success for the oldest queue declare callbacks
-        _queueDeclaredCallbacks.front().success(queueName, messageCount, consumerCount);
-        _queueDeclaredCallbacks.pop_front();
-    }
-
-    /**
-     *  Report that a queue was succesfully deleted
-     *  @param  messageCount    number of messages left in queue, now deleted
-     */
-    void reportQueueDeleted(uint32_t messageCount)
-    {
-        // report success for the oldest queue remove callbacks
-        _queueRemovedCallbacks.front().success(messageCount);
-        _queueRemovedCallbacks.pop_front();
-    }
-
-    /**
-     *  Report that a queue was succesfully purged
-     *  @param  messageCount    number of messages purged
-     */
-    void reportQueuePurged(uint32_t messageCount)
-    {
-        // report success for the oldest queue remove callbacks
-        _queueRemovedCallbacks.front().success(messageCount);
-        _queueRemovedCallbacks.pop_front();
+        // report to all waiting callbacks too
+        _callbacks.reportError(message);
     }
 
     /**

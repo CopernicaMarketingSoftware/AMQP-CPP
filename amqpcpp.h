@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <cstring>
 #include <stdexcept>
+#include <utility>
 
 // base C include files
 #include <stdint.h>
