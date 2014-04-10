@@ -33,12 +33,6 @@ private:
     ConnectionImpl *_connection;
 
     /**
-     *  The handler that is notified about events
-     *  @var    MyChannelHandler
-     */
-    ChannelHandler *_handler;
-
-    /**
      *  Callback when the channel is ready
      */
     std::function<void(Channel *channel)> _readyCallback;
@@ -47,6 +41,11 @@ private:
      *  Callback when the channel errors out
      */
     std::function<void(Channel *channel, const std::string& message)> _errorCallback;
+
+    /**
+     *  Callback to execute when a message arrives
+     */
+    std::unique_ptr<DeferredConsumer> _consumer;
 
     /**
      *  The callbacks waiting to be called
@@ -70,12 +69,6 @@ private:
     } _state = state_connected;
 
     /**
-     *  Is a transaction now active?
-     *  @var bool
-     */
-    bool _transaction = false;
-
-    /**
      *  The message that is now being received
      *  @var MessageImpl
      */
@@ -90,9 +83,8 @@ private:
      *
      *  @param  parent          the public channel object
      *  @param  connection      pointer to the connection
-     *  @param  handler         handler that is notified on events
      */
-    ChannelImpl(Channel *parent, Connection *connection, ChannelHandler *handler = nullptr);
+    ChannelImpl(Channel *parent, Connection *connection);
 
 public:
     /**
@@ -292,23 +284,17 @@ public:
     /**
      *  Publish a message to an exchange
      *
-     *  The following flags can be used
-     *
-     *      -   mandatory   if set, an unroutable message will be reported to the channel handler with the onReturned method
-     *      -   immediate   if set, a message that could not immediately be consumed is returned to the onReturned method
-     *
      *  If the mandatory or immediate flag is set, and the message could not immediately
      *  be published, the message will be returned to the client, and will eventually
-     *  end up in your ChannelHandler::onReturned() method.
+     *  end up in your onReturned() handler method.
      *
      *  @param  exchange    the exchange to publish to
      *  @param  routingkey  the routing key
-     *  @param  flags       optional flags (see above)
      *  @param  envelope    the full envelope to send
      *  @param  message     the message to send
      *  @param  size        size of the message
      */
-    bool publish(const std::string &exchange, const std::string &routingKey, int flags, const Envelope &envelope);
+    bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope);
 
     /**
      *  Set the Quality of Service (QOS) of the entire connection
@@ -325,20 +311,44 @@ public:
      *  @param  tag                 a consumer tag that will be associated with this consume operation
      *  @param  flags               additional flags
      *  @param  arguments           additional arguments
-     *  @return bool
+     *
+     *  This function returns a deferred handler. Callbacks can be installed
+     *  using onSuccess(), onError() and onFinalize() methods.
+     *
+     *  The onSuccess() callback that you can install should have the following signature:
+     *
+     *      void myCallback(AMQP::Channel *channel, const std::string& tag);
+     *
+     *  For example: channel.declareQueue("myqueue").onSuccess([](AMQP::Channel *channel, const std::string& tag) {
+     *
+     *      std::cout << "Started consuming under tag " << tag << std::endl;
+     *
+     *  });
      */
-    bool consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments);
+    DeferredConsumer& consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments);
 
     /**
      *  Cancel a running consumer
      *  @param  tag                 the consumer tag
      *  @param  flags               optional flags
-     *  @return bool
+     *
+     *  This function returns a deferred handler. Callbacks can be installed
+     *  using onSuccess(), onError() and onFinalize() methods.
+     *
+     *  The onSuccess() callback that you can install should have the following signature:
+     *
+     *      void myCallback(AMQP::Channel *channel, const std::string& tag);
+     *
+     *  For example: channel.declareQueue("myqueue").onSuccess([](AMQP::Channel *channel, const std::string& tag) {
+     *
+     *      std::cout << "Started consuming under tag " << tag << std::endl;
+     *
+     *  });
      */
-    bool cancel(const std::string &tag, int flags);
+    Deferred<const std::string&>& cancel(const std::string &tag, int flags);
 
     /**
-     *  Acknoledge a message
+     *  Acknowledge a message
      *  @param  deliveryTag         the delivery tag
      *  @param  flags               optional flags
      *  @return bool
@@ -447,24 +457,6 @@ public:
     }
 
     /**
-     *  Report that a consumer has started
-     *  @param  tag     the consumer tag
-     */
-    void reportConsumerStarted(const std::string &tag)
-    {
-        if (_handler) _handler->onConsumerStarted(_parent, tag);
-    }
-
-    /**
-     *  Report that a consumer has stopped
-     *  @param  tag     the consumer tag
-     */
-    void reportConsumerStopped(const std::string &tag)
-    {
-        if (_handler) _handler->onConsumerStopped(_parent, tag);
-    }
-
-    /**
      *  Report that a message was received
      */
     void reportMessage();
@@ -475,7 +467,6 @@ public:
      *  @return MessageImpl
      */
     MessageImpl *message(const BasicDeliverFrame &frame);
-    MessageImpl *message(const BasicReturnFrame &frame);
 
     /**
      *  Retrieve the current incoming message
@@ -484,6 +475,20 @@ public:
     MessageImpl *message()
     {
         return _message;
+    }
+
+    /**
+     *  Report that the consumer has started
+     *
+     *  @param  consumerTag the tag under which we are now consuming
+     */
+    void reportConsumerStarted(const std::string& consumerTag)
+    {
+        // if we do not have a consumer, something is very wrong
+        if (!_consumer) reportError("Received basic consume ok frame, but no consumer was found");
+
+        // otherwise, we now report the consumer as started
+        else _consumer->success(consumerTag);
     }
 
     /**

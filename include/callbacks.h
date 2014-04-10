@@ -23,7 +23,8 @@ private:
     std::tuple<
         std::deque<Deferred<>>,
         std::deque<Deferred<const std::string&, uint32_t, uint32_t>>,
-        std::deque<Deferred<uint32_t>>
+        std::deque<Deferred<uint32_t>>,
+        std::deque<Deferred<const std::string&>>
     > _callbacks;
 
     /**

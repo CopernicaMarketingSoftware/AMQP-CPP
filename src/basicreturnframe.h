@@ -144,17 +144,8 @@ public:
      */
     virtual bool process(ConnectionImpl *connection) override
     {
-        // we need the appropriate channel
-        ChannelImpl *channel = connection->channel(this->channel());
-        
-        // channel does not exist
-        if (!channel) return false;    
-        
-        // construct the message
-        channel->message(*this);
-        
-        // done
-        return true;
+        // we no longer support returned messages
+        return false;
     }
 };
 

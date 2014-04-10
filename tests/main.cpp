@@ -30,13 +30,13 @@ using namespace Copernica;
  *  @return int
  */
 int main(int argc, const char *argv[])
-{   
+{
     // need an ip
     if (argc != 2)
     {
         // report error
         std::cerr << "usage: " << argv[0] << " <ip>" << std::endl;
-        
+
         // done
         return -1;
     }

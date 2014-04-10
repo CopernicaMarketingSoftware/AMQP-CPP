@@ -25,16 +25,6 @@ class Deferred
 {
 private:
     /**
-     *  The channel we operate under
-     */
-    Channel *_channel;
-
-    /**
-     *  Do we already know we failed?
-     */
-    bool _failed;
-
-    /**
      *  Callback to execute on success
      */
     std::function<void(Channel *channel, Arguments ...parameters)> _successCallback;
@@ -50,18 +40,11 @@ private:
     std::function<void(Channel *channel, const std::string& error)> _finalizeCallback;
 
     /**
-     *  The channel implementation may call our
-     *  private members and construct us
-     */
-    friend class ChannelImpl;
-    friend class Callbacks;
-
-    /**
      *  Indicate success
      *
      *  @param  parameters...   the extra parameters relevant for this deferred handler
      */
-    void success(Arguments ...parameters)
+    void success(Arguments ...parameters) const
     {
         // execute callbacks if registered
         if (_successCallback)   _successCallback(_channel, parameters...);
@@ -84,7 +67,24 @@ private:
     }
 
     /**
-     *  Private constructor that can only be called
+     *  The channel implementation may call our
+     *  private members and construct us
+     */
+    friend class ChannelImpl;
+    friend class Callbacks;
+protected:
+    /**
+     *  The channel we operate under
+     */
+    Channel *_channel;
+
+    /**
+     *  Do we already know we failed?
+     */
+    bool _failed;
+
+    /**
+     *  Protected constructor that can only be called
      *  from within the channel implementation
      *
      *  @param  channel the channel we operate under

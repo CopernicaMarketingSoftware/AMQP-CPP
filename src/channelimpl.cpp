@@ -48,10 +48,9 @@ namespace AMQP {
  *  @param  connection
  *  @param  handler
  */
-ChannelImpl::ChannelImpl(Channel *parent, Connection *connection, ChannelHandler *handler) :
+ChannelImpl::ChannelImpl(Channel *parent, Connection *connection) :
     _parent(parent),
-    _connection(&connection->_implementation),
-    _handler(handler)
+    _connection(&connection->_implementation)
 {
     // add the channel to the connection
     _id = _connection->add(this);
@@ -61,9 +60,6 @@ ChannelImpl::ChannelImpl(Channel *parent, Connection *connection, ChannelHandler
     {
         // this is invalid
         _state = state_closed;
-
-        // invalid id, this channel can not exist
-        handler->onError(_parent, "Max number of channels reached");
     }
     else
     {
@@ -352,19 +348,13 @@ Deferred<uint32_t>& ChannelImpl::removeQueue(const std::string &name, int flags)
 /**
  *  Publish a message to an exchange
  *
- *  The following flags can be used
- *
- *      -   mandatory   if set, an unroutable message will be reported to the channel handler with the onReturned method
- *      -   immediate   if set, a message that could not immediately be consumed is returned to the onReturned method
- *
  *  @param  exchange    the exchange to publish to
  *  @param  routingkey  the routing key
- *  @param  flags       optional flags (see above)
  *  @param  envelope    the full envelope to send
  *  @param  message     the message to send
  *  @param  size        size of the message
  */
-bool ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, int flags, const Envelope &envelope)
+bool ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope)
 {
     // we are going to send out multiple frames, each one will trigger a call to the handler,
     // which in turn could destruct the channel object, we need to monitor that
@@ -373,7 +363,7 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
     // @todo do not copy the entire buffer to individual frames
 
     // send the publish frame
-    if (!send(BasicPublishFrame(_id, exchange, routingKey, flags & mandatory, flags & immediate))) return false;
+    if (!send(BasicPublishFrame(_id, exchange, routingKey))) return false;
 
     // channel still valid?
     if (!monitor.valid()) return false;
@@ -432,27 +422,65 @@ Deferred<>& ChannelImpl::setQos(uint16_t prefetchCount)
  *  @param  tag                 a consumer tag that will be associated with this consume operation
  *  @param  flags               additional flags
  *  @param  arguments           additional arguments
- *  @return bool
+ *
+ *  This function returns a deferred handler. Callbacks can be installed
+ *  using onSuccess(), onError() and onFinalize() methods.
+ *
+ *  The onSuccess() callback that you can install should have the following signature:
+ *
+ *      void myCallback(AMQP::Channel *channel, const std::string& tag);
+ *
+ *  For example: channel.declareQueue("myqueue").onSuccess([](AMQP::Channel *channel, const std::string& tag) {
+ *
+ *      std::cout << "Started consuming under tag " << tag << std::endl;
+ *
+ *  });
  */
-bool ChannelImpl::consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments)
+DeferredConsumer& ChannelImpl::consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments)
 {
-    // send a consume frame
-    return send(BasicConsumeFrame(_id, queue, tag, flags & nolocal, flags & noack, flags & exclusive, flags & nowait, arguments));
+    // create the deferred consumer
+    _consumer = std::unique_ptr<DeferredConsumer>(new DeferredConsumer(_parent, false));
+
+    // can we send the basic consume frame?
+    if (!send(BasicConsumeFrame(_id, queue, tag, flags & nolocal, flags & noack, flags & exclusive, flags & nowait, arguments)))
+    {
+        // we set the consumer to be failed immediately
+        _consumer->_failed = true;
+
+        // we should call the error function later
+        // TODO
+    }
+
+    // return the consumer
+    return *_consumer;
 }
 
 /**
  *  Cancel a running consumer
  *  @param  tag                 the consumer tag
  *  @param  flags               optional flags
+ *
+ *  This function returns a deferred handler. Callbacks can be installed
+ *  using onSuccess(), onError() and onFinalize() methods.
+ *
+ *  The onSuccess() callback that you can install should have the following signature:
+ *
+ *      void myCallback(AMQP::Channel *channel, const std::string& tag);
+ *
+ *  For example: channel.declareQueue("myqueue").onSuccess([](AMQP::Channel *channel, const std::string& tag) {
+ *
+ *      std::cout << "Started consuming under tag " << tag << std::endl;
+ *
+ *  });
  */
-bool ChannelImpl::cancel(const std::string &tag, int flags)
+Deferred<const std::string&>& ChannelImpl::cancel(const std::string &tag, int flags)
 {
     // send a cancel frame
-    return send(BasicCancelFrame(_id, tag, flags & nowait));
+    return send<const std::string&>(BasicCancelFrame(_id, tag, flags & nowait), "Cannot send basic cancel frame");
 }
 
 /**
- *  Acknoledge a message
+ *  Acknowledge a message
  *  @param  deliveryTag         the delivery tag
  *  @param  flags               optional flags
  *  @return bool
@@ -541,14 +569,23 @@ void ChannelImpl::reportMessage()
     // skip if there is no message
     if (!_message) return;
 
-    // after the report the channel may be destructed, monitor that
-    Monitor monitor(this);
+    // do we even have a consumer?
+    if (!_consumer)
+    {
+        // this should not be possible: receiving a message without doing a consume() call
+        reportError("Received message without having a consumer");
+    }
+    else
+    {
+        // after the report the channel may be destructed, monitor that
+        Monitor monitor(this);
 
-    // do we have a handler?
-    if (_handler) _message->report(_parent, _handler);
+        // send message to the consumer
+        _message->report(*_consumer);
 
-    // skip if channel was destructed
-    if (!monitor.valid()) return;
+        // skip if channel was destructed
+        if (!monitor.valid()) return;
+    }
 
     // no longer need the message
     delete _message;
@@ -567,20 +604,6 @@ MessageImpl *ChannelImpl::message(const BasicDeliverFrame &frame)
 
     // construct a message
     return _message = new ConsumedMessage(frame);
-}
-
-/**
- *  Create an incoming message
- *  @param  frame
- *  @return MessageImpl
- */
-MessageImpl *ChannelImpl::message(const BasicReturnFrame &frame)
-{
-    // it should not be possible that a message already exists, but lets check it anyhow
-    if (_message) delete _message;
-
-    // construct a message
-    return _message = new ReturnedMessage(frame);
 }
 
 /**

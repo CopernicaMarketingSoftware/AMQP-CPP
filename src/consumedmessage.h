@@ -26,7 +26,7 @@ private:
      *  @var uint64_t
      */
     uint64_t _deliveryTag;
-    
+
     /**
      *  Is this a redelivered message?
      *  @var bool
@@ -39,25 +39,24 @@ public:
      *  Constructor
      *  @param  frame
      */
-    ConsumedMessage(const BasicDeliverFrame &frame) : 
-        MessageImpl(frame.exchange(), frame.routingKey()), 
+    ConsumedMessage(const BasicDeliverFrame &frame) :
+        MessageImpl(frame.exchange(), frame.routingKey()),
         _consumerTag(frame.consumerTag()), _deliveryTag(frame.deliveryTag()), _redelivered(frame.redelivered())
     {}
-        
+
     /**
      *  Destructor
      */
     virtual ~ConsumedMessage() {}
-    
+
     /**
      *  Report to the handler
-     *  @param  channel
-     *  @param  handler
+     *  @param  consumer
      */
-    virtual void report(Channel *channel, ChannelHandler *handler) override
+    virtual void report(const DeferredConsumer& consumer) override
     {
-        // report to the handler
-        handler->onReceived(channel, *this, _deliveryTag, _consumerTag, _redelivered);
+        // send ourselves to the consumer
+        consumer.message(*this, _deliveryTag, _consumerTag, _redelivered);
     }
 };
 

@@ -26,9 +26,8 @@ public:
     /**
      *  Construct a channel object
      *  @param  connection
-     *  @param  handler
      */
-    Channel(Connection *connection, ChannelHandler *handler) : _implementation(this, connection, handler) {}
+    Channel(Connection *connection) : _implementation(this, connection) {}
 
     /**
      *  Destructor
@@ -324,7 +323,7 @@ public:
      *
      *      void myCallback(AMQP::Channel *channel, uint32_t messageCount);
      *
-     *  For example: channel.declareQueue("myqueue").onSuccess([](AMQP::Channel *channel, uint32_t messageCount) {
+     *  For example: channel.removeQueue("myqueue").onSuccess([](AMQP::Channel *channel, uint32_t messageCount) {
      *
      *      std::cout << "Queue deleted, along with " << messageCount << " messages" << std::endl;
      *
@@ -335,29 +334,20 @@ public:
     /**
      *  Publish a message to an exchange
      *
-     *  The following flags can be used
-     *
-     *      -   mandatory   if set, an unroutable message will be reported to the channel handler with the onReturned method
-     *      -   immediate   if set, a message that could not immediately be consumed is returned to the onReturned method
-     *
      *  If either of the two flags is set, and the message could not immediately
      *  be published, the message is returned by the server to the client. If you
-     *  want to catch such returned messages, you need to implement the
-     *  ChannelHandler::onReturned() method.
+     *  want to catch such returned messages, you need to install a handler using
+     *  the onReturned() method.
      *
      *  @param  exchange    the exchange to publish to
      *  @param  routingkey  the routing key
-     *  @param  flags       optional flags (see above)
      *  @param  envelope    the full envelope to send
      *  @param  message     the message to send
      *  @param  size        size of the message
      */
-    bool publish(const std::string &exchange, const std::string &routingKey, int flags, const Envelope &envelope) { return _implementation.publish(exchange, routingKey, flags, envelope); }
-    bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope) { return _implementation.publish(exchange, routingKey, 0, envelope); }
-    bool publish(const std::string &exchange, const std::string &routingKey, int flags, const std::string &message) { return _implementation.publish(exchange, routingKey, flags, Envelope(message)); }
-    bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message) { return _implementation.publish(exchange, routingKey, 0, Envelope(message)); }
-    bool publish(const std::string &exchange, const std::string &routingKey, int flags, const char *message, size_t size) { return _implementation.publish(exchange, routingKey, flags, Envelope(message, size)); }
-    bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size) { return _implementation.publish(exchange, routingKey, 0, Envelope(message, size)); }
+    bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope) { return _implementation.publish(exchange, routingKey, envelope); }
+    bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message) { return _implementation.publish(exchange, routingKey, Envelope(message)); }
+    bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size) { return _implementation.publish(exchange, routingKey, Envelope(message, size)); }
 
     /**
      *  Set the Quality of Service (QOS) for this channel
@@ -392,7 +382,7 @@ public:
      *      -   exclusive           request exclusive access, only this consumer can access the queue
      *      -   nowait              the server does not have to send a response back that consuming is active
      *
-     *  The method ChannelHandler::onConsumerStarted() will be called when the
+     *  The method Deferred::onSuccess() will be called when the
      *  consumer has started (unless the nowait option was set, in which case
      *  no confirmation method is called)
      *
@@ -400,14 +390,26 @@ public:
      *  @param  tag                 a consumer tag that will be associated with this consume operation
      *  @param  flags               additional flags
      *  @param  arguments           additional arguments
-     *  @return bool
+     *
+     *  This function returns a deferred handler. Callbacks can be installed
+     *  using onSuccess(), onError() and onFinalize() methods.
+     *
+     *  The onSuccess() callback that you can install should have the following signature:
+     *
+     *      void myCallback(AMQP::Channel *channel, const std::string& tag);
+     *
+     *  For example: channel.consume("myqueue").onSuccess([](AMQP::Channel *channel, const std::string& tag) {
+     *
+     *      std::cout << "Started consuming under tag " << tag << std::endl;
+     *
+     *  });
      */
-    bool consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments) { return _implementation.consume(queue, tag, flags, arguments); }
-    bool consume(const std::string &queue, const std::string &tag, int flags = 0) { return _implementation.consume(queue, tag, flags, Table()); }
-    bool consume(const std::string &queue, const std::string &tag, const Table &arguments) { return _implementation.consume(queue, tag, 0, arguments); }
-    bool consume(const std::string &queue, int flags, const Table &arguments) { return _implementation.consume(queue, std::string(), flags, arguments); }
-    bool consume(const std::string &queue, int flags = 0) { return _implementation.consume(queue, std::string(), flags, Table()); }
-    bool consume(const std::string &queue, const Table &arguments) { return _implementation.consume(queue, std::string(), 0, arguments); }
+    DeferredConsumer& consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments) { return _implementation.consume(queue, tag, flags, arguments); }
+    DeferredConsumer& consume(const std::string &queue, const std::string &tag, int flags = 0) { return _implementation.consume(queue, tag, flags, Table()); }
+    DeferredConsumer& consume(const std::string &queue, const std::string &tag, const Table &arguments) { return _implementation.consume(queue, tag, 0, arguments); }
+    DeferredConsumer& consume(const std::string &queue, int flags, const Table &arguments) { return _implementation.consume(queue, std::string(), flags, arguments); }
+    DeferredConsumer& consume(const std::string &queue, int flags = 0) { return _implementation.consume(queue, std::string(), flags, Table()); }
+    DeferredConsumer& consume(const std::string &queue, const Table &arguments) { return _implementation.consume(queue, std::string(), 0, arguments); }
 
     /**
      *  Cancel a running consume call
@@ -418,27 +420,39 @@ public:
      *
      *      -   nowait              the server does not have to send a response back that the consumer has been cancelled
      *
-     *  The method ChannelHandler::onConsumerStopped() will be called when the consumer
+     *  The method Deferred::onSuccess() will be called when the consumer
      *  was succesfully stopped (unless the nowait option was used, in which case no
      *  confirmation method is called)
      *
      *  @param  tag                 the consumer tag
      *  @param  flags               optional additional flags
-     *  @return bool
+     *
+     *  This function returns a deferred handler. Callbacks can be installed
+     *  using onSuccess(), onError() and onFinalize() methods.
+     *
+     *  The onSuccess() callback that you can install should have the following signature:
+     *
+     *      void myCallback(AMQP::Channel *channel, const std::string& tag);
+     *
+     *  For example: channel.cancel("myqueue").onSuccess([](AMQP::Channel *channel, const std::string& tag) {
+     *
+     *      std::cout << "Stopped consuming under tag " << tag << std::endl;
+     *
+     *  });
      */
-    bool cancel(const std::string &tag, int flags = 0) { return _implementation.cancel(tag, flags); }
+    Deferred<const std::string&>& cancel(const std::string &tag, int flags = 0) { return _implementation.cancel(tag, flags); }
 
     /**
      *  Acknoldge a received message
      *
-     *  When a message is received in the ChannelHandler::onReceived() method,
-     *  you must acknoledge it so that RabbitMQ removes it from the queue (unless
+     *  When a message is received in the DeferredConsumer::onReceived() method,
+     *  you must acknowledge it so that RabbitMQ removes it from the queue (unless
      *  you are consuming with the noack option). This method can be used for
-     *  this acknoledging.
+     *  this acknowledging.
      *
      *  The following flags are supported:
      *
-     *      -   multiple            acknoledge multiple messages: all un-acked messages that were earlier delivered are acknowledged too
+     *      -   multiple            acknowledge multiple messages: all un-acked messages that were earlier delivered are acknowledged too
      *
      *  @param  deliveryTag         the unique delivery tag of the message
      *  @param  flags               optional flags
@@ -449,8 +463,8 @@ public:
     /**
      *  Reject or nack a message
      *
-     *  When a message was received in the ChannelHandler::onReceived() method,
-     *  and you don't want to acknoledge it, you can also choose to reject it by
+     *  When a message was received in the DeferredConsumer::onReceived() method,
+     *  and you don't want to acknowledge it, you can also choose to reject it by
      *  calling this reject method.
      *
      *  The following flags are supported:
