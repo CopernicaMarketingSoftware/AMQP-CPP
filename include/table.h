@@ -1,7 +1,7 @@
 #pragma once
 /**
  *  AMQP field table
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -40,7 +40,7 @@ public:
      *  @param  frame   received frame to decode
      */
     Table(ReceivedFrame &frame);
-    
+
     /**
      *  Copy constructor
      *  @param  table
@@ -64,7 +64,7 @@ public:
      *  @return Table
      */
     Table &operator=(const Table &table);
-    
+
     /**
      *  Move assignment operator
      *  @param  table
@@ -104,13 +104,44 @@ public:
 
     /**
      *  Get a field
-     * 
+     *
      *  If the field does not exist, an empty string field is returned
      *
      *  @param  name    field name
      *  @return         the field value
      */
     const Field &get(const std::string &name) const;
+
+    /**
+     *  Get a string field
+     * @param name field name
+     * @return the string or "" if field is not a string
+     */
+    std::string getString(const std::string& name) const;
+
+    /**
+     * Get Array field
+     * @param name field name
+     * @return array or an empty one if field is not an array
+     */
+    Array getArray(const std::string& name) const;
+
+    /**
+     * Get int field
+     * @param name field name
+     * @return int or 0 if field is not an integer
+     */
+    template<typename IntegerType>
+    IntegerType getInt(const std::string& field_name) const
+    {
+        const Field& field = get(field_name);
+        if (field.typeID() == 'T')
+        {
+            return dynamic_cast<const Timestamp&>(field).value();
+        }
+        // TODO: Add other types as needed
+        return 0;
+    }
 
     /**
      *  Get a field
@@ -123,7 +154,7 @@ public:
     }
 
     /**
-     *  Write encoded payload to the given buffer. 
+     *  Write encoded payload to the given buffer.
      *  @param  buffer
      */
     virtual void fill(OutBuffer& buffer) const override;
