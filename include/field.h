@@ -59,8 +59,24 @@ public:
      */
     virtual char typeID() const = 0;
     
-    
+    /**
+     *  Output the object to a stream
+     *  @param std::ostream
+     */
+    virtual void output(std::ostream &stream) const = 0;
 };
+
+/**
+ *  Custom output stream operator
+ *  @param  stream
+ *  @param  field
+ *  @return ostream
+ */
+inline std::ostream &operator<<(std::ostream &stream, const Field &field)
+{
+    field.output(stream);
+    return stream;
+}
 
 /**
  *  end namespace

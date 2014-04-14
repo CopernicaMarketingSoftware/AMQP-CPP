@@ -7,6 +7,9 @@
  *  @documentation private
  */
 
+// for debug
+#include <iostream>
+
 // include the generic amqp functions
 #include "../amqpcpp.h"
 

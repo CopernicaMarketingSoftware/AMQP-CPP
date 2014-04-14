@@ -84,6 +84,22 @@ public:
     }
 
     /**
+     *  Output the object to a stream
+     *  @param std::ostream
+     */
+    virtual void output(std::ostream &stream) const override
+    {
+        // prefix
+        stream << "booleanset(";
+        
+        // the members
+        for (int i=0; i<8; i++) stream << (i == 0 ? "" : ",") << (get(i) ? 1 : 0);
+        
+        // postfix
+        stream << ")";
+    }
+
+    /**
      *  Get one of the booleans
      *  @param  index   from 0 to 7, where 0 is rightmost bit
      *  @return bool

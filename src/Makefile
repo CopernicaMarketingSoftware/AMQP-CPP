@@ -1,6 +1,6 @@
 CPP			    = g++
 RM			    = rm -f
-CPPFLAGS		= -Wall -c -I. -O2 -flto -std=c++11 -g
+CPPFLAGS		= -Wall -c -I. -g -flto -std=c++11 -g
 LD			    = g++
 LD_FLAGS		= -Wall -shared -O2
 SHARED_LIB		= libamqpcpp.so

@@ -89,6 +89,16 @@ public:
     }
 
     /**
+     *  Output the object to a stream
+     *  @param std::ostream
+     */
+    virtual void output(std::ostream &stream) const override
+    {
+        // output floating point value
+        stream << "decimal(" << _number / pow(10, _places) << ")";
+    }
+
+    /**
      *  Assign a new value
      *
      *  @param  value   new value for field
