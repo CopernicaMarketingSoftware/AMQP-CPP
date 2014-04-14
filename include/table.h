@@ -76,9 +76,9 @@ public:
      *  Create a new instance on the heap of this object, identical to the object passed
      *  @return Field*
      */
-    virtual Field *clone() const override
+    virtual std::shared_ptr<Field> clone() const override
     {
-        return new Table(*this);
+        return std::make_shared<Table>(*this);
     }
 
     /**
@@ -96,7 +96,7 @@ public:
     Table set(const std::string& name, const Field &value)
     {
         // copy to a new pointer and store it
-        _fields[name] = std::shared_ptr<Field>(value.clone());
+        _fields[name] = value.clone();
 
         // allow chaining
         return *this;
@@ -123,11 +123,31 @@ public:
     }
 
     /**
+     *  Get a field
+     *
+     *  @param  name    field name
+     */
+    AssociativeFieldProxy operator[](const char *name)
+    {
+        return AssociativeFieldProxy(this, name);
+    }
+
+    /**
      *  Get a const field
      *
      *  @param  name    field name
      */
     const Field &operator[](const std::string& name) const
+    {
+        return get(name);
+    }
+
+    /**
+     *  Get a const field
+     *
+     *  @param  name    field name
+     */
+    const Field &operator[](const char *name) const
     {
         return get(name);
     }
@@ -160,7 +180,7 @@ public:
         bool first = true;
         
         // loop through all members
-        for (auto iter : _fields) 
+        for (auto &iter : _fields) 
         {
             // split with comma
             if (!first) stream << ",";
@@ -175,6 +195,17 @@ public:
         // postfix
         stream << ")";
     }
+
+    /**
+     *  Cast to table
+     *  @return Table
+     */
+    virtual operator const Table& () const override
+    {
+        // this already is an array, so no cast is necessary
+        return *this;
+    }
+
 };
 
 /**

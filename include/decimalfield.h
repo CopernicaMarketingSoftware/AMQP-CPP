@@ -83,9 +83,9 @@ public:
      *  Create a new identical instance of this object
      *  @return Field*
      */
-    virtual Field *clone() const override
+    virtual std::shared_ptr<Field> clone() const override
     {
-        return new DecimalField(_places, _number);
+        return std::make_shared<DecimalField>(_places, _number);
     }
 
     /**

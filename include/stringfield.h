@@ -58,10 +58,10 @@ public:
      *  Create a new instance of this object
      *  @return Field*
      */
-    virtual Field *clone() const override
+    virtual std::shared_ptr<Field> clone() const override
     {
         // create a new copy of ourselves and return it
-        return new StringField(_data);
+        return std::make_shared<StringField>(_data);
     }
 
     /**
@@ -96,7 +96,7 @@ public:
      *  Get the value
      *  @return string
      */
-    operator const std::string& () const
+    virtual operator const std::string& () const override
     {
         return _data;
     }

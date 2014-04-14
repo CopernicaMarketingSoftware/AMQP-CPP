@@ -62,9 +62,9 @@ public:
      *  Create a new instance of this object
      *  @return Field*
      */
-    virtual Field *clone() const override
+    virtual std::shared_ptr<Field> clone() const override
     {
-        return new Array(*this);
+        return std::make_shared<Array>(*this);
     }
 
     /**
@@ -84,7 +84,7 @@ public:
     Array set(uint8_t index, const Field &value)
     {
         // construct a shared pointer
-        auto ptr = std::shared_ptr<Field>(value.clone());
+        auto ptr = value.clone();
 
         // should we overwrite an existing record?
         if (index >= _fields.size())
@@ -181,7 +181,7 @@ public:
         bool first = true;
         
         // loop through all members
-        for (auto iter : _fields) 
+        for (auto &iter : _fields) 
         {
             // split with comma
             if (!first) stream << ",";
@@ -195,6 +195,16 @@ public:
         
         // postfix
         stream << ")";
+    }
+    
+    /**
+     *  Cast to array
+     *  @return Array
+     */
+    virtual operator const Array& () const override
+    {
+        // this already is an array, so no cast is necessary
+        return *this;
     }
 };
 

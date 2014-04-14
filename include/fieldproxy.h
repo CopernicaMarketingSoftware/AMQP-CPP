@@ -198,6 +198,30 @@ public:
     }
     
     /**
+     *  Assign an array value
+     *  @param  value
+     *  @return FieldProxy
+     */
+    FieldProxy &operator=(const Array &value)
+    {
+        // assign value and allow chaining
+        _source->set(_index, value);
+        return *this;
+    }
+
+    /**
+     *  Assign a table value
+     *  @param  value
+     *  @return FieldProxy
+     */
+    FieldProxy &operator=(const Table &value)
+    {
+        // assign value and allow chaining
+        _source->set(_index, value);
+        return *this;
+    }
+    
+    /**
      *  Get the underlying field
      *  @return Field
      */
@@ -210,97 +234,8 @@ public:
      *  Get a boolean
      *  @return bool
      */
-    operator bool ()
-    {
-        // retrieve the value
-        return _source->get(_index);
-    }
-
-    /**
-     *  Get numeric value
-     *  @return int8_t
-     */
-    operator int8_t ()
-    {
-        // retrieve the value
-        return _source->get(_index);
-    }
-
-    /**
-     *  Get numeric value
-     *  @return uint8_t
-     */
-    operator uint8_t ()
-    {
-        // retrieve the value
-        return _source->get(_index);
-    }
-
-    /**
-     *  Get numeric value
-     *  @return int16_t
-     */
-    operator int16_t ()
-    {
-        // retrieve the value
-        return _source->get(_index);
-    }
-
-    /**
-     *  Get numeric value
-     *  @return uint16_t
-     */
-    operator uint16_t ()
-    {
-        // retrieve the value
-        return _source->get(_index);
-    }
-
-    /**
-     *  Get numeric value
-     *  @return int32_t
-     */
-    operator int32_t ()
-    {
-        // retrieve the value
-        return _source->get(_index);
-    }
-
-    /**
-     *  Get numeric value
-     *  @return uint32_t
-     */
-    operator uint32_t ()
-    {
-        // retrieve the value
-        return _source->get(_index);
-    }
-
-    /**
-     *  Get numeric value
-     *  @return int64_t
-     */
-    operator int64_t ()
-    {
-        // retrieve the value
-        return _source->get(_index);
-    }
-
-    /**
-     *  Get numeric value
-     *  @return uint64_t
-     */
-    operator uint64_t ()
-    {
-        // retrieve the value
-        return _source->get(_index);
-    }
-
-    /**
-     *  Get string value
-     *  @return string
-     */
-    operator std::string ()
+    template <typename TARGET>
+    operator TARGET () const
     {
         // retrieve the value
         return _source->get(_index);

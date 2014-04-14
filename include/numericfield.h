@@ -78,10 +78,10 @@ public:
      *  Create a new instance of this object
      *  @return Field*
      */
-    virtual Field *clone() const override
+    virtual std::shared_ptr<Field> clone() const override
     {
         // create a new copy of ourselves and return it
-        return new NumericField(_value);
+        return std::make_shared<NumericField>(_value);
     }
 
     /**
@@ -100,7 +100,7 @@ public:
      *  Get the value
      *  @return mixed
      */
-    operator T () const
+    virtual operator T () const override
     {
         return _value;
     }

@@ -78,9 +78,9 @@ public:
      *  Extending from field forces us to implement a clone function.
      *  @return shared_ptr
      */
-    virtual Field *clone() const override
+    virtual std::shared_ptr<Field> clone() const override
     {
-        return new BooleanSet(*this);
+        return std::make_shared<BooleanSet>(*this);
     }
 
     /**
