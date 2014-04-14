@@ -85,9 +85,9 @@ public:
     {
         // construct a shared pointer
         auto ptr = std::shared_ptr<Field>(value.clone());
-        
+
         // should we overwrite an existing record?
-        if (index <= _fields.size())
+        if (index >= _fields.size())
         {
             // append index
             _fields.push_back(ptr);
