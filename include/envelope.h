@@ -25,67 +25,54 @@ protected:
      */
     std::string _str;
 
-    /**
-     *  Pointer to the body data (the memory buffer is not managed by the AMQP
-     *  library!)
-     *  @var    const char *
-     */
-    const char *_body;
-    
-    /**
-     *  Size of the data
-     *  @var    uint64_t
-     */
-    uint64_t _bodySize;
-
 public:
     /**
      *  Constructor
-     * 
+     *
      *  The data buffer that you pass to this constructor must be valid during
      *  the lifetime of the Envelope object.
-     * 
+     *
      *  @param  body
      *  @param  size
      */
-    Envelope(const char *body, uint64_t size) : MetaData(), _body(body), _bodySize(size) {}
-    
+    Envelope(const char *body, uint64_t size) : MetaData(), _str(body, size) {}
+
     /**
      *  Constructor based on a string
      *  @param  body
      */
-    Envelope(const std::string &body) : MetaData(), _str(body), _body(_str.data()), _bodySize(_str.size()) {}
+    Envelope(const std::string &body) : MetaData(), _str(body) {}
 
     /**
      *  Destructor
      */
     virtual ~Envelope() {}
-    
+
     /**
      *  Access to the full message data
      *  @return buffer
      */
     const char *body() const
     {
-        return _body;
+        return _str.c_str();
     }
-    
+
     /**
      *  Size of the body
      *  @return uint64_t
      */
     uint64_t bodySize() const
     {
-        return _bodySize;
+        return _str.size();
     }
-    
+
     /**
      *  Body as a string
      *  @return string
      */
     std::string message() const
     {
-        return std::string(_body, _bodySize);
+        return _str;
     }
 };
 
