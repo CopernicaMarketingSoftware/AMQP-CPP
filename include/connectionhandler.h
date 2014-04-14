@@ -25,8 +25,8 @@ public:
      *  Set a function to be executed after a given timeout.
      *
      *  This function is not strictly necessary to implement. If you
-     *  do not implement it, certain channel methods that fail
-     *  immediately will not be reported.
+     *  do not implement it, certain methods that fail immediately
+     *  will not be reported.
      *
      *  @param  timeout         number of seconds to wait
      *  @param  callback        function to execute once time runs out

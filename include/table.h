@@ -136,6 +136,35 @@ public:
     {
         return 'F';
     }
+
+    /**
+     *  Output the object to a stream
+     *  @param std::ostream
+     */
+    virtual void output(std::ostream &stream) const
+    {
+        // prefix
+        stream << "table(";
+        
+        // is this the first iteration
+        bool first = true;
+        
+        // loop through all members
+        for (auto iter : _fields) 
+        {
+            // split with comma
+            if (!first) stream << ",";
+            
+            // show output
+            stream << iter.first << ":" << *iter.second;
+            
+            // no longer first iter
+            first = false;
+        }
+        
+        // postfix
+        stream << ")";
+    }
 };
 
 /**

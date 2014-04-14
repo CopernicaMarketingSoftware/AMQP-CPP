@@ -196,21 +196,14 @@ public:
         // cast to a string
         return operator=(std::string(value));
     }
-
+    
     /**
-     *  Get boolean value
-     *  @return BooleanSet
+     *  Get the underlying field
+     *  @return Field
      */
-    operator BooleanSet ()
+    const Field &get() const
     {
-        // the value
-        BooleanSet value;
-
-        // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value;
+        return _source->get(_index);
     }
 
     /**
@@ -219,14 +212,8 @@ public:
      */
     operator bool ()
     {
-        // the value
-        BooleanSet value;
-
         // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
+        return _source->get(_index);
     }
 
     /**
@@ -235,14 +222,8 @@ public:
      */
     operator int8_t ()
     {
-        // the value
-        Octet value;
-
         // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
+        return _source->get(_index);
     }
 
     /**
@@ -251,14 +232,8 @@ public:
      */
     operator uint8_t ()
     {
-        // the value
-        UOctet value;
-
         // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
+        return _source->get(_index);
     }
 
     /**
@@ -267,14 +242,8 @@ public:
      */
     operator int16_t ()
     {
-        // the value
-        Short value;
-
         // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
+        return _source->get(_index);
     }
 
     /**
@@ -283,14 +252,8 @@ public:
      */
     operator uint16_t ()
     {
-        // the value
-        UShort value;
-
         // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
+        return _source->get(_index);
     }
 
     /**
@@ -299,14 +262,8 @@ public:
      */
     operator int32_t ()
     {
-        // the value
-        Long value;
-
         // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
+        return _source->get(_index);
     }
 
     /**
@@ -315,14 +272,8 @@ public:
      */
     operator uint32_t ()
     {
-        // the value
-        ULong value;
-
         // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
+        return _source->get(_index);
     }
 
     /**
@@ -331,14 +282,8 @@ public:
      */
     operator int64_t ()
     {
-        // the value
-        Long value;
-
         // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
+        return _source->get(_index);
     }
 
     /**
@@ -347,30 +292,8 @@ public:
      */
     operator uint64_t ()
     {
-        // the value
-        ULong value;
-
         // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
-    }
-
-    /**
-     *  Get decimal value
-     *  @return DecimalField
-     */
-    operator DecimalField ()
-    {
-        // the value
-        DecimalField value;
-
-        // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
+        return _source->get(_index);
     }
 
     /**
@@ -379,22 +302,38 @@ public:
      */
     operator std::string ()
     {
-        // it has to be either a short or a long string
-        ShortString shortValue;
-        LongString longValue;
-
-        // try to retrieve the value
-        if (_source->get(_index, shortValue)) return shortValue.value();
-        if (_source->get(_index, longValue))  return longValue.value();
-
-        // no valid string found
-        return std::string("");
+        // retrieve the value
+        return _source->get(_index);
     }
 };
 
 // define types for array- and table-based field proxy
 typedef FieldProxy<Table, std::string> AssociativeFieldProxy;
 typedef FieldProxy<Array, uint8_t> ArrayFieldProxy;
+
+/**
+ *  Custom output stream operator
+ *  @param  stream
+ *  @param  field
+ *  @return ostream
+ */
+inline std::ostream &operator<<(std::ostream &stream, const AssociativeFieldProxy &field)
+{
+    // get underlying field, and output that
+    return stream << field.get();
+}
+
+/**
+ *  Custom output stream operator
+ *  @param  stream
+ *  @param  field
+ *  @return ostream
+ */
+inline std::ostream &operator<<(std::ostream &stream, const ArrayFieldProxy &field)
+{
+    // get underlying field, and output that
+    return stream << field.get();
+}
 
 /**
  *  end namespace
