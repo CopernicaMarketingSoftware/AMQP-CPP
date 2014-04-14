@@ -6,6 +6,8 @@
  *  @documentation public
  */
 
+#pragma once
+
 // base C++ include files
 #include <vector>
 #include <string>

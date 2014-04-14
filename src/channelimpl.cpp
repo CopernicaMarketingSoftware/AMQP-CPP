@@ -540,25 +540,27 @@ template <typename... Arguments>
 Deferred<Arguments...>& ChannelImpl::send(const Frame &frame, const char *message)
 {
     // create a new deferred handler and get a pointer to it
-    auto &handler = _callbacks.push_back(Deferred<Arguments...>(_parent));
+    // note: cannot use auto here or the lambda below chokes
+    // when compiling under gcc 4.8
+    Deferred<Arguments...> *handler = &_callbacks.push_back(Deferred<Arguments...>(_parent));
 
     // send the frame over the channel
     if (!send(frame))
     {
         // we can immediately put the handler in failed state
-        handler._failed = true;
+        handler->_failed = true;
 
-        // the frame could not be send
-        // we should register an error
-        // on the handler, but only after
-        // a timeout, so a handler can
-        // be attached first
-
-        // TODO
+        // register an error on the deferred handler
+        // after a timeout, so it gets called only
+        // after a possible handler was installed.
+        _connection->_handler->setTimeout(0, [handler, message]() {
+            // emit an error on the handler
+            handler->error(message);
+        });
     }
 
     // return the new handler
-    return handler;
+    return *handler;
 }
 
 /**

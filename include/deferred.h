@@ -56,11 +56,8 @@ private:
      *
      *  @param  error   description of the error that occured
      */
-    void error(const std::string& error)
+    void error(const std::string& error) const
     {
-        // we are now in a failed state
-        _failed = true;
-
         // execute callbacks if registered
         if (_errorCallback)     _errorCallback(_channel, error);
         if (_finalizeCallback)  _finalizeCallback(_channel, error);

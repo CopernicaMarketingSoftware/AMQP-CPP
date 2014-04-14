@@ -22,24 +22,6 @@ private:
      */
     ConnectionImpl _implementation;
 
-    /**
-     *  Function to execute code after a certain timeout.
-     *
-     *  If the timeout is 0, the code is supposed to be run
-     *  in the next iteration of the event loop.
-     *
-     *  This is a simple placeholder function that will just
-     *  execute the code immediately, it should be overridden
-     *  by the timeout function the used event loop has.
-     *
-     *  @param  timeout     the amount of time to wait
-     *  @param  callback    the callback to execute after the timeout
-     */
-    std::function<void(double timeout, const std::function<void()>)> _timeoutHandler = [](double timeout, const std::function<void()>& callback) {
-        // execute callback immediately
-        callback();
-    };
-
 public:
     /**
      *  Construct an AMQP object based on full login data

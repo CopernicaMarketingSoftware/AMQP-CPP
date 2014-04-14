@@ -298,7 +298,7 @@ public:
      *  The actual connection is a friend and can construct this class
      */
     friend class Connection;
-
+    friend class ChannelImpl;
 };
 
 /**
