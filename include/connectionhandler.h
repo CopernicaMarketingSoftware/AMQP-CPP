@@ -28,10 +28,11 @@ public:
      *  do not implement it, certain methods that fail immediately
      *  will not be reported.
      *
+     *  @param  connection      the connection that needs the timeout
      *  @param  timeout         number of seconds to wait
      *  @param  callback        function to execute once time runs out
      */
-    virtual void setTimeout(double seconds, const std::function<void()>& callback) {}
+    virtual void setTimeout(Connection *connection, double seconds, const std::function<void()>& callback) {}
 
     /**
      *  Method that is called when data needs to be sent over the network

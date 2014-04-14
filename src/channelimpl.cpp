@@ -553,7 +553,7 @@ Deferred<Arguments...>& ChannelImpl::send(const Frame &frame, const char *messag
         // register an error on the deferred handler
         // after a timeout, so it gets called only
         // after a possible handler was installed.
-        _connection->_handler->setTimeout(0, [handler, message]() {
+        _connection->_handler->setTimeout(_connection->_parent, 0, [handler, message]() {
             // emit an error on the handler
             handler->error(message);
         });
