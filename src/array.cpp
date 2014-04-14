@@ -58,7 +58,7 @@ Array::Array(const Array &array)
  *  @param  index   field index
  *  @return Field
  */
-const Field &Array::get(uint8_t index)
+const Field &Array::get(uint8_t index) const
 {
     // used if index does not exist
     static ShortString empty;

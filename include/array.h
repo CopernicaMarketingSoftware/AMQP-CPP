@@ -110,7 +110,7 @@ public:
      *  @param  index   field index
      *  @return Field
      */
-    const Field &get(uint8_t index);
+    const Field &get(uint8_t index) const;
 
     /**
      *  Get number of elements on this array
@@ -140,6 +140,16 @@ public:
     ArrayFieldProxy operator[](uint8_t index)
     {
         return ArrayFieldProxy(this, index);
+    }
+    
+    /**
+     *  Get a const field
+     *  @param  index   field index
+     *  @return Field
+     */
+    const Field &operator[](uint8_t index) const
+    {
+        return get(index);
     }
 
     /**

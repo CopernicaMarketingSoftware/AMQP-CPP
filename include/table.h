@@ -123,6 +123,16 @@ public:
     }
 
     /**
+     *  Get a const field
+     *
+     *  @param  name    field name
+     */
+    const Field &operator[](const std::string& name) const
+    {
+        return get(name);
+    }
+
+    /**
      *  Write encoded payload to the given buffer. 
      *  @param  buffer
      */
