@@ -20,6 +20,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <utility>
+#include <iostream>
 
 // base C include files
 #include <stdint.h>
