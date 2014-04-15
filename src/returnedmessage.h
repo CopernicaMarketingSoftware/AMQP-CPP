@@ -45,15 +45,6 @@ public:
      *  Destructor
      */
     virtual ~ReturnedMessage() {}
-
-    /**
-     *  Report to the handler
-     *  @param  consumer
-     */
-    virtual void report(const DeferredConsumer& consumer) override
-    {
-        // we no longer support returned messages
-    }
 };
 
 /**

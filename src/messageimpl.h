@@ -98,12 +98,6 @@ public:
             return _received >= _bodySize;
         }
     }
-
-    /**
-     *  Report to the handler
-     *  @param  consumer
-     */
-    virtual void report(const DeferredConsumer& consumer) = 0;
 };
 
 /**

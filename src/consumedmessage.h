@@ -50,13 +50,22 @@ public:
     virtual ~ConsumedMessage() {}
 
     /**
-     *  Report to the handler
-     *  @param  consumer
+     *  Retrieve the consumer tag
+     *  @return std::string
      */
-    virtual void report(const DeferredConsumer& consumer) override
+    const std::string &consumer() const
+    {
+        return _consumerTag;
+    }
+     
+    /**
+     *  Report to the handler
+     *  @param  callback
+     */
+    void report(const MessageCallback &callback) const
     {
         // send ourselves to the consumer
-        consumer.message(*this, _deliveryTag, _consumerTag, _redelivered);
+        if (callback) callback(*this, _deliveryTag, _redelivered);
     }
 };
 

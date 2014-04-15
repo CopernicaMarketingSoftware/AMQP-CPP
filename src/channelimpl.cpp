@@ -487,21 +487,17 @@ Deferred &ChannelImpl::setQos(uint16_t prefetchCount)
  */
 DeferredConsumer& ChannelImpl::consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments)
 {
-    // create the deferred consumer
-    _consumer = std::unique_ptr<DeferredConsumer>(new DeferredConsumer(false));
-
-    // can we send the basic consume frame?
-    if (!send(BasicConsumeFrame(_id, queue, tag, flags & nolocal, flags & noack, flags & exclusive, flags & nowait, arguments)))
-    {
-        // we set the consumer to be failed immediately
-        _consumer->_failed = true;
-
-        // we should call the error function later
-        // TODO
-    }
-
-    // return the consumer
-    return *_consumer;
+    // the frame to send
+    BasicConsumeFrame frame(_id, queue, tag, flags & nolocal, flags & noack, flags & exclusive, flags & nowait, arguments);
+    
+    // send the frame, and create deferred object
+    auto *deferred = new DeferredConsumer(this, send(frame));
+    
+    // push to list
+    push(deferred, "Cannot send basic consume frame");
+    
+    // done
+    return *deferred;
 }
 
 /**
@@ -611,44 +607,39 @@ Deferred &ChannelImpl::send(const Frame &frame, const char *message)
  */
 void ChannelImpl::reportMessage()
 {
-    // @todo what does this method do?
-    
     // skip if there is no message
     if (!_message) return;
 
-    // do we even have a consumer?
-    if (!_consumer)
-    {
-        // this should not be possible: receiving a message without doing a consume() call
-        reportError("Received message without having a consumer");
-    }
-    else
-    {
-        // after the report the channel may be destructed, monitor that
-        Monitor monitor(this);
+    // look for the consumer
+    auto iter = _consumers.find(_message->consumer());
+    if (iter == _consumers.end()) return;
+    
+    // is this a valid callback method
+    if (!iter->second) return;
 
-        // send message to the consumer
-        _message->report(*_consumer);
-
-        // skip if channel was destructed
-        if (!monitor.valid()) return;
-    }
+    // after the report the channel may be destructed, monitor that
+    Monitor monitor(this);
+    
+    // call the callback
+    _message->report(iter->second);
+    
+    // skip if channel was destructed
+    if (!monitor.valid()) return;
 
     // no longer need the message
-    delete _message;
-    _message = nullptr;
+    delete _message; _message = nullptr;
 }
 
 /**
  *  Create an incoming message
  *  @param  frame
- *  @return MessageImpl
+ *  @return ConsumedMessage
  */
-MessageImpl *ChannelImpl::message(const BasicDeliverFrame &frame)
+ConsumedMessage *ChannelImpl::message(const BasicDeliverFrame &frame)
 {
-    // it should not be possible that a message already exists, but lets check it anyhow
+    // destruct if message is already set
     if (_message) delete _message;
-
+    
     // construct a message
     return _message = new ConsumedMessage(frame);
 }

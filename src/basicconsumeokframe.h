@@ -94,7 +94,7 @@ public:
         if (!channel) return false;
 
         // report
-        channel->reportConsumerStarted(consumerTag());
+        channel->reportSuccess(consumerTag());
 
         // done
         return true;

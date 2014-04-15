@@ -15,6 +15,11 @@
 namespace AMQP {
 
 /**
+ *  Forward declarations
+ */
+class ConsumedMessage;
+
+/**
  *  Class definition
  */
 class ChannelImpl : public Watchable
@@ -45,11 +50,10 @@ private:
     ErrorCallback _errorCallback;
 
     /**
-     *  Callback to execute when a message arrives
-     * 
-     *  @todo   do this different??
+     *  Callbacks for all consumers that are active
+     *  @var    std::map<std::string,MessageCallback>
      */
-    std::unique_ptr<DeferredConsumer> _consumer;
+    std::map<std::string,MessageCallback> _consumers;
 
     /**
      *  Pointer to the oldest deferred result (the first one that is going
@@ -84,9 +88,9 @@ private:
 
     /**
      *  The message that is now being received
-     *  @var MessageImpl
+     *  @var ConsumedMessage
      */
-    MessageImpl *_message = nullptr;
+    ConsumedMessage *_message = nullptr;
 
     /**
      *  Construct a channel object
@@ -492,6 +496,20 @@ public:
     }
 
     /**
+     *  Install a consumer callback
+     *  @param  consumertag     The consumer tag
+     *  @param  callback        The callback to be called
+     */
+    void install(const std::string &consumertag, const MessageCallback &callback)
+    {
+        // install the callback if it is assigned
+        if (callback) _consumers[consumertag] = callback;
+        
+        // otherwise we erase the previously set callback
+        else _consumers.erase(consumertag);
+    }
+
+    /**
      *  Report that a message was received
      */
     void reportMessage();
@@ -499,32 +517,17 @@ public:
     /**
      *  Create an incoming message
      *  @param  frame
-     *  @return MessageImpl
+     *  @return ConsumedMessage
      */
-    MessageImpl *message(const BasicDeliverFrame &frame);
+    ConsumedMessage *message(const BasicDeliverFrame &frame);
 
     /**
      *  Retrieve the current incoming message
-     *  @return MessageImpl
+     *  @return ConsumedMessage
      */
-    MessageImpl *message()
+    ConsumedMessage *message()
     {
         return _message;
-    }
-
-    /**
-     *  Report that the consumer has started
-     *
-     *  @param  consumerTag the tag under which we are now consuming
-     */
-    void reportConsumerStarted(const std::string& consumerTag)
-    {
-        // if we do not have a consumer, something is very wrong
-        if (!_consumer) reportError("Received basic consume ok frame, but no consumer was found");
-
-        // otherwise, we now report the consumer as started
-        // @todo look at this implementation
-        //else _consumer->success(consumerTag);
     }
 
     /**

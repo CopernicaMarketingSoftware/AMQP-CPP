@@ -66,6 +66,7 @@
 #include "transactionrollbackframe.h"
 #include "transactionrollbackokframe.h"
 #include "messageimpl.h"
+#include "consumedmessage.h"
 #include "bodyframe.h"
 #include "basicheaderframe.h"
 #include "framecheck.h"

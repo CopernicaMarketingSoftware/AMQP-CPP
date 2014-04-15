@@ -18,24 +18,30 @@ class DeferredConsumer : public Deferred
 {
 private:
     /**
+     *  The channel to which the consumer is linked
+     *  @var    ChannelImpl
+     */
+    ChannelImpl *_channel;
+
+    /**
      *  Callback to execute when a message arrives
-     *  @var    ConsumeCallbacl
+     *  @var    ConsumeCallback
      */
     ConsumeCallback _consumeCallback;
 
     /**
-     *  Process a message
-     *
-     *  @param  message the message to process
-     *  @param  deliveryTag the message delivery tag
-     *  @param  consumerTag the tag we are consuming under
-     *  @param  is this a redelivered message?
+     *  Callback for incoming messages
+     *  @var    MessageCallback
      */
-    void message(const Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered) const
-    {
-        // do we have a valid callback
-        if (_consumeCallback) _consumeCallback(message, deliveryTag, consumerTag, redelivered);
-    }
+    MessageCallback _messageCallback;
+
+
+    /**
+     *  Report success for frames that report start consumer operations
+     *  @param  name            Consumer tag that is started
+     *  @return Deferred
+     */
+    virtual Deferred *reportSuccess(const std::string &name) const override;
 
     /**
      *  The channel implementation may call our
@@ -49,23 +55,36 @@ protected:
      *  Protected constructor that can only be called
      *  from within the channel implementation
      *
-     *  @param  boolea  are we already failed?
+     *  @param  channel     the channel implementation
+     *  @param  failed      are we already failed?
      */
-    DeferredConsumer(bool failed = false) : Deferred(failed) {}
+    DeferredConsumer(ChannelImpl *channel, bool failed = false) : 
+        Deferred(failed), _channel(channel) {}
 
 public:
     /**
+     *  Register the function that is called when the consumer starts
+     *  @param  callback
+     */
+    DeferredConsumer &onSuccess(const ConsumeCallback &callback)
+    {
+        // store the callback
+        _consumeCallback = callback;
+        
+        // allow chaining
+        return *this;
+    }
+
+    /**
      *  Register a function to be called when a message arrives
-     *
-     *  Only one callback can be registered. Successive calls
-     *  to this function will clear callbacks registered before.
-     *
      *  @param  callback    the callback to execute
      */
-    DeferredConsumer& onReceived(const ConsumeCallback &callback)
+    DeferredConsumer& onReceived(const MessageCallback &callback)
     {
         // store callback
-        _consumeCallback = callback;
+        _messageCallback = callback;
+        
+        // allow chaining
         return *this;
     }
 
