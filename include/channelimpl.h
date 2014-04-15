@@ -486,6 +486,12 @@ public:
     }
 
     /**
+     *  Report errors to all deferred objects already in an error state
+     *  @param  force           Report errors even for objects not already in error state
+     */
+    void reportErrors(bool force = false);
+
+    /**
      *  Report an error message on a channel
      *  @param  message
      */
@@ -514,6 +520,9 @@ public:
         
         // if there was no next callback, the newest callback was just used
         if (!next) _newestCallback = nullptr;
+        
+        // when one error occured, all subsequent messages are in an error state too
+        reportErrors(true);
     }
 
     /**

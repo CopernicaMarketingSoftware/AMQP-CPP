@@ -31,6 +31,9 @@ public:
      *  @param  connection      the connection that needs the timeout
      *  @param  timeout         number of seconds to wait
      *  @param  callback        function to execute once time runs out
+     * 
+     * 
+     *  @todo   this one should be removed
      */
     virtual void setTimeout(Connection *connection, double seconds, const std::function<void()>& callback) {}
 

@@ -122,6 +122,32 @@ Deferred &ChannelImpl::push(const Frame &frame)
 }
 
 /**
+ *  Report errors to all deferred objects already in an error state
+ *  @param  force           Report errors even for objects not already in error state
+ */
+void ChannelImpl::reportErrors(bool force)
+{
+    // keep looping for as long as the oldest callback is in an error state
+    while (_oldestCallback && (force || !*_oldestCallback))
+    {
+        // construct monitor, because channel could be destructed
+        Monitor monitor(this);
+        
+        // report the error
+        auto *next = _oldestCallback->reportError("Frame could not be sent");
+        
+        // leap out if object is no longer valid after the callback was called
+        if (!monitor.valid()) return;
+        
+        // install the next deferred object
+        _oldestCallback.reset(next);
+        
+        // was this also the newest callback
+        if (!next) _newestCallback = nullptr;
+    }
+}
+
+/**
  *  Pause deliveries on a channel
  *
  *  This will stop all incoming messages
