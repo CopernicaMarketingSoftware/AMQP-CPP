@@ -42,7 +42,7 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    void onReady(const std::function<void(Channel *channel)>& callback)
+    void onReady(const SuccessCallback &callback)
     {
         // store callback in implementation
         _implementation._readyCallback = callback;
@@ -56,7 +56,7 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    void onError(const std::function<void(Channel *channel, const std::string& message)>& callback)
+    void onError(const ErrorCallback &callback)
     {
         // store callback in implementation
         _implementation._errorCallback = callback;
@@ -70,7 +70,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& pause()
+    Deferred &pause()
     {
         return _implementation.pause();
     }
@@ -83,7 +83,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& resume()
+    Deferred &resume()
     {
         return _implementation.resume();
     }
@@ -103,7 +103,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& startTransaction()
+    Deferred &startTransaction()
     {
         return _implementation.startTransaction();
     }
@@ -114,7 +114,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& commitTransaction()
+    Deferred &commitTransaction()
     {
         return _implementation.commitTransaction();
     }
@@ -125,7 +125,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& rollbackTransaction()
+    Deferred &rollbackTransaction()
     {
         return _implementation.rollbackTransaction();
     }
@@ -149,12 +149,12 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& declareExchange(const std::string &name, ExchangeType type, int flags, const Table &arguments) { return _implementation.declareExchange(name, type, flags, arguments); }
-    Deferred<>& declareExchange(const std::string &name, ExchangeType type, const Table &arguments) { return _implementation.declareExchange(name, type, 0, arguments); }
-    Deferred<>& declareExchange(const std::string &name, ExchangeType type = fanout, int flags = 0) { return _implementation.declareExchange(name, type, flags, Table()); }
-    Deferred<>& declareExchange(ExchangeType type, int flags, const Table &arguments) { return _implementation.declareExchange(std::string(), type, flags, arguments); }
-    Deferred<>& declareExchange(ExchangeType type, const Table &arguments) { return _implementation.declareExchange(std::string(), type, 0, arguments); }
-    Deferred<>& declareExchange(ExchangeType type = fanout, int flags = 0) { return _implementation.declareExchange(std::string(), type, flags, Table()); }
+    Deferred &declareExchange(const std::string &name, ExchangeType type, int flags, const Table &arguments) { return _implementation.declareExchange(name, type, flags, arguments); }
+    Deferred &declareExchange(const std::string &name, ExchangeType type, const Table &arguments) { return _implementation.declareExchange(name, type, 0, arguments); }
+    Deferred &declareExchange(const std::string &name, ExchangeType type = fanout, int flags = 0) { return _implementation.declareExchange(name, type, flags, Table()); }
+    Deferred &declareExchange(ExchangeType type, int flags, const Table &arguments) { return _implementation.declareExchange(std::string(), type, flags, arguments); }
+    Deferred &declareExchange(ExchangeType type, const Table &arguments) { return _implementation.declareExchange(std::string(), type, 0, arguments); }
+    Deferred &declareExchange(ExchangeType type = fanout, int flags = 0) { return _implementation.declareExchange(std::string(), type, flags, Table()); }
 
     /**
      *  Remove an exchange
@@ -169,7 +169,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& removeExchange(const std::string &name, int flags = 0) { return _implementation.removeExchange(name, flags); }
+    Deferred &removeExchange(const std::string &name, int flags = 0) { return _implementation.removeExchange(name, flags); }
 
     /**
      *  Bind two exchanges to each other
@@ -187,9 +187,9 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments) { return _implementation.bindExchange(source, target, routingkey, flags, arguments); }
-    Deferred<>& bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, const Table &arguments) { return _implementation.bindExchange(source, target, routingkey, 0, arguments); }
-    Deferred<>& bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags = 0) { return _implementation.bindExchange(source, target, routingkey, flags, Table()); }
+    Deferred &bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments) { return _implementation.bindExchange(source, target, routingkey, flags, arguments); }
+    Deferred &bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, const Table &arguments) { return _implementation.bindExchange(source, target, routingkey, 0, arguments); }
+    Deferred &bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags = 0) { return _implementation.bindExchange(source, target, routingkey, flags, Table()); }
 
     /**
      *  Unbind two exchanges from one another
@@ -207,9 +207,9 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& unbindExchange(const std::string &target, const std::string &source, const std::string &routingkey, int flags, const Table &arguments) { return _implementation.unbindExchange(target, source, routingkey, flags, arguments); }
-    Deferred<>& unbindExchange(const std::string &target, const std::string &source, const std::string &routingkey, const Table &arguments) { return _implementation.unbindExchange(target, source, routingkey, 0, arguments); }
-    Deferred<>& unbindExchange(const std::string &target, const std::string &source, const std::string &routingkey, int flags = 0) { return _implementation.unbindExchange(target, source, routingkey, flags, Table()); }
+    Deferred &unbindExchange(const std::string &target, const std::string &source, const std::string &routingkey, int flags, const Table &arguments) { return _implementation.unbindExchange(target, source, routingkey, flags, arguments); }
+    Deferred &unbindExchange(const std::string &target, const std::string &source, const std::string &routingkey, const Table &arguments) { return _implementation.unbindExchange(target, source, routingkey, 0, arguments); }
+    Deferred &unbindExchange(const std::string &target, const std::string &source, const std::string &routingkey, int flags = 0) { return _implementation.unbindExchange(target, source, routingkey, flags, Table()); }
 
     /**
      *  Declare a queue
@@ -240,12 +240,12 @@ public:
      *
      *  });
      */
-    Deferred<const std::string&, uint32_t, uint32_t>& declareQueue(const std::string &name, int flags, const Table &arguments) { return _implementation.declareQueue(name, flags, arguments); }
-    Deferred<const std::string&, uint32_t, uint32_t>& declareQueue(const std::string &name, const Table &arguments) { return _implementation.declareQueue(name, 0, arguments); }
-    Deferred<const std::string&, uint32_t, uint32_t>& declareQueue(const std::string &name, int flags = 0) { return _implementation.declareQueue(name, flags, Table()); }
-    Deferred<const std::string&, uint32_t, uint32_t>& declareQueue(int flags, const Table &arguments) { return _implementation.declareQueue(std::string(), flags, arguments); }
-    Deferred<const std::string&, uint32_t, uint32_t>& declareQueue(const Table &arguments) { return _implementation.declareQueue(std::string(), 0, arguments); }
-    Deferred<const std::string&, uint32_t, uint32_t>& declareQueue(int flags = 0) { return _implementation.declareQueue(std::string(), flags, Table()); }
+    DeferredQueue &declareQueue(const std::string &name, int flags, const Table &arguments) { return _implementation.declareQueue(name, flags, arguments); }
+    DeferredQueue &declareQueue(const std::string &name, const Table &arguments) { return _implementation.declareQueue(name, 0, arguments); }
+    DeferredQueue &declareQueue(const std::string &name, int flags = 0) { return _implementation.declareQueue(name, flags, Table()); }
+    DeferredQueue &declareQueue(int flags, const Table &arguments) { return _implementation.declareQueue(std::string(), flags, arguments); }
+    DeferredQueue &declareQueue(const Table &arguments) { return _implementation.declareQueue(std::string(), 0, arguments); }
+    DeferredQueue &declareQueue(int flags = 0) { return _implementation.declareQueue(std::string(), flags, Table()); }
 
     /**
      *  Bind a queue to an exchange
@@ -263,9 +263,9 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, int flags, const Table &arguments) { return _implementation.bindQueue(exchange, queue, routingkey, flags, arguments); }
-    Deferred<>& bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments) { return _implementation.bindQueue(exchange, queue, routingkey, 0, arguments); }
-    Deferred<>& bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, int flags = 0) { return _implementation.bindQueue(exchange, queue, routingkey, flags, Table()); }
+    Deferred &bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, int flags, const Table &arguments) { return _implementation.bindQueue(exchange, queue, routingkey, flags, arguments); }
+    Deferred &bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments) { return _implementation.bindQueue(exchange, queue, routingkey, 0, arguments); }
+    Deferred &bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, int flags = 0) { return _implementation.bindQueue(exchange, queue, routingkey, flags, Table()); }
 
     /**
      *  Unbind a queue from an exchange
@@ -277,8 +277,8 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& unbindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments) {  return _implementation.unbindQueue(exchange, queue, routingkey, arguments); }
-    Deferred<>& unbindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey) { return _implementation.unbindQueue(exchange, queue, routingkey, Table()); }
+    Deferred &unbindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments) {  return _implementation.unbindQueue(exchange, queue, routingkey, arguments); }
+    Deferred &unbindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey) { return _implementation.unbindQueue(exchange, queue, routingkey, Table()); }
 
     /**
      *  Purge a queue
@@ -303,7 +303,7 @@ public:
      *
      *  });
      */
-    Deferred<uint32_t>& purgeQueue(const std::string &name, int flags = 0){ return _implementation.purgeQueue(name, flags); }
+    DeferredDelete &purgeQueue(const std::string &name, int flags = 0){ return _implementation.purgeQueue(name, flags); }
 
     /**
      *  Remove a queue
@@ -329,7 +329,7 @@ public:
      *
      *  });
      */
-    Deferred<uint32_t>& removeQueue(const std::string &name, int flags = 0) { return _implementation.removeQueue(name, flags); }
+    DeferredDelete &removeQueue(const std::string &name, int flags = 0) { return _implementation.removeQueue(name, flags); }
 
     /**
      *  Publish a message to an exchange
@@ -361,7 +361,7 @@ public:
      *  @param  prefetchCount       maximum number of messages to prefetch
      *  @return bool                whether the Qos frame is sent.
      */
-    Deferred<>& setQos(uint16_t prefetchCount)
+    Deferred &setQos(uint16_t prefetchCount)
     {
         return _implementation.setQos(prefetchCount);
     }
@@ -440,7 +440,7 @@ public:
      *
      *  });
      */
-    Deferred<const std::string&>& cancel(const std::string &tag, int flags = 0) { return _implementation.cancel(tag, flags); }
+    DeferredCancel &cancel(const std::string &tag, int flags = 0) { return _implementation.cancel(tag, flags); }
 
     /**
      *  Acknoldge a received message
@@ -493,7 +493,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& recover(int flags = 0) { return _implementation.recover(flags); }
+    Deferred &recover(int flags = 0) { return _implementation.recover(flags); }
 
     /**
      *  Close the current channel
@@ -501,7 +501,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& close() { return _implementation.close(); }
+    Deferred &close() { return _implementation.close(); }
 
     /**
      *  Get the channel we're working on

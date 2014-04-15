@@ -20,47 +20,132 @@ class Callbacks;
 /**
  *  Class definition
  */
-template <typename... Arguments>
 class Deferred
 {
-private:
+protected:
     /**
      *  Callback to execute on success
+     *  @var    SuccessCallback
      */
-    std::function<void(Arguments ...parameters)> _successCallback;
+    SuccessCallback _successCallback;
 
     /**
      *  Callback to execute on failure
+     *  @var    ErrorCallback
      */
-    std::function<void(const std::string& error)> _errorCallback;
+    ErrorCallback _errorCallback;
 
     /**
      *  Callback to execute either way
+     *  @var    FinalizeCallback
      */
-    std::function<void(const std::string& error)> _finalizeCallback;
+    FinalizeCallback _finalizeCallback;
+
+    /**
+     *  Pointer to the next deferred object
+     *  @var    Deferred
+     */
+    Deferred *_next = nullptr;
+
+    /**
+     *  Do we already know we failed?
+     *  @var bool
+     */
+    bool _failed;
+
 
     /**
      *  Indicate success
-     *
-     *  @param  parameters...   the extra parameters relevant for this deferred handler
+     *  @return Deferred        Next deferred result
      */
-    void success(Arguments ...parameters) const
+    Deferred *reportSuccess() const
     {
         // execute callbacks if registered
-        if (_successCallback)   _successCallback(parameters...);
-        if (_finalizeCallback)  _finalizeCallback("");
+        if (_successCallback)   _successCallback();
+        if (_finalizeCallback)  _finalizeCallback();
+        
+        // return the next deferred result
+        return _next;
+    }
+    
+    /**
+     *  Report success for queue declared messages
+     *  @param  name            Name of the new queue
+     *  @param  messagecount    Number of messages in the queue
+     *  @param  consumercount   Number of consumers linked to the queue
+     *  @return Deferred        Next deferred result
+     */
+    virtual Deferred *reportSuccess(const std::string &name, uint32_t messagecount, uint32_t consumercount) const
+    {
+        // this is the same as a regular success message
+        return reportSuccess();
+    }
+    
+    /**
+     *  Report success for frames that report delete operations
+     *  @param  messagecount    Number of messages that were deleted
+     *  @return Deferred
+     */
+    virtual Deferred *reportSuccess(uint32_t messagecount) const
+    {
+        // this is the same as a regular success message
+        return reportSuccess();
+    }
+    
+    /**
+     *  Report success for frames that report cancel operations
+     *  @param  name            Consumer tag that is cancelled
+     *  @return Deferred
+     */
+    virtual Deferred *reportSuccess(const std::string &name) const
+    {
+        // this is the same as a regular success message
+        return reportSuccess();
     }
 
     /**
      *  Indicate failure
-     *
+     *  @param  error           Description of the error that occured
+     *  @return Deferred        Next deferred result
+     */
+    Deferred *reportError(const std::string& error) 
+    {
+        // from this moment on the object should be listed as failed
+        _failed = true;
+        
+        // execute callbacks if registered
+        if (_errorCallback)     _errorCallback(error.c_str());
+        if (_finalizeCallback)  _finalizeCallback();
+        
+        // return the next deferred result
+        return _next;
+    }
+
+    /**
+     *  Indicate failure
      *  @param  error   description of the error that occured
      */
-    void error(const std::string& error) const
+    Deferred *reportError(const char *error) 
     {
+        // from this moment on the object should be listed as failed
+        _failed = true;
+
         // execute callbacks if registered
         if (_errorCallback)     _errorCallback(error);
-        if (_finalizeCallback)  _finalizeCallback(error);
+        if (_finalizeCallback)  _finalizeCallback();
+        
+        // return the next deferred result
+        return _next;
+    }
+
+    /**
+     *  Add a pointer to the next deferred result
+     *  @param  deferred
+     */
+    void add(Deferred *deferred)
+    {
+        // store pointer
+        _next = deferred;
     }
 
     /**
@@ -72,12 +157,6 @@ private:
     
 protected:
     /**
-     *  Do we already know we failed?
-     *  @var bool
-     */
-    bool _failed;
-
-    /**
      *  Protected constructor that can only be called
      *  from within the channel implementation
      *
@@ -87,18 +166,10 @@ protected:
 
 public:
     /**
-     *  Deleted copy constructor
+     *  Deleted copy and move constructors
      */
-    Deferred(const Deferred& that) = delete;
-
-    /**
-     *  Move constructor
-     */
-    Deferred(Deferred&& that) :
-        _successCallback(std::move(that._successCallback)),
-        _errorCallback(std::move(that._errorCallback)),
-        _finalizeCallback(std::move(that._finalizeCallback))
-    {}
+    Deferred(const Deferred &that) = delete;
+    Deferred(Deferred &&that) = delete;
 
     /**
      *  Cast to a boolean
@@ -119,10 +190,12 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    Deferred& onSuccess(const std::function<void(Arguments ...parameters)>& callback)
+    Deferred &onSuccess(const SuccessCallback &callback)
     {
         // store callback
         _successCallback = callback;
+        
+        // allow chaining
         return *this;
     }
 
@@ -136,10 +209,12 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    Deferred& onError(const std::function<void(const std::string& error)>& callback)
+    Deferred &onError(const ErrorCallback &callback)
     {
         // store callback
         _errorCallback = callback;
+        
+        // allow chaining
         return *this;
     }
 
@@ -158,10 +233,12 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    Deferred& onFinalize(const std::function<void(const std::string& error)>& callback)
+    Deferred &onFinalize(const FinalizeCallback &callback)
     {
         // store callback
         _finalizeCallback = callback;
+        
+        // allow chaining
         return *this;
     }
 };

@@ -34,24 +34,38 @@ private:
 
     /**
      *  Callback when the channel is ready
+     *  @var    SuccessCallback
      */
-    std::function<void(Channel *channel)> _readyCallback;
+    SuccessCallback _readyCallback;
 
     /**
      *  Callback when the channel errors out
+     *  @var    ErrorCallback
      */
-    std::function<void(Channel *channel, const std::string& message)> _errorCallback;
+    ErrorCallback _errorCallback;
 
     /**
      *  Callback to execute when a message arrives
+     * 
+     *  @todo   do this different??
      */
     std::unique_ptr<DeferredConsumer> _consumer;
 
     /**
-     *  The callbacks waiting to be called
+     *  Pointer to the oldest deferred result (the first one that is going
+     *  to be executed)
+     * 
+     *  @var    Deferred
      */
-    Callbacks _callbacks;
-
+    Deferred *_oldestCallback = nullptr;
+    
+    /**
+     *  Pointer to the newest deferred result (the last one to be added).
+     * 
+     *  @var    Deferred
+     */
+    Deferred *_newestCallback = nullptr;
+    
     /**
      *  The channel number
      *  @var uint16_t
@@ -86,6 +100,14 @@ private:
      */
     ChannelImpl(Channel *parent, Connection *connection);
 
+    /**
+     *  Push a deferred result
+     *  @param  result          The deferred result
+     *  @param  error           Error message in case the result is not ok
+     */
+    void push(Deferred *deferred, const char *error);
+
+
 public:
     /**
      *  Destructor
@@ -109,7 +131,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& pause();
+    Deferred &pause();
 
     /**
      *  Resume a paused channel
@@ -119,7 +141,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& resume();
+    Deferred &resume();
 
     /**
      *  Is the channel connected?
@@ -133,7 +155,7 @@ public:
     /**
      *  Start a transaction
      */
-    Deferred<>& startTransaction();
+    Deferred &startTransaction();
 
     /**
      *  Commit the current transaction
@@ -141,7 +163,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& commitTransaction();
+    Deferred &commitTransaction();
 
     /**
      *  Rollback the current transaction
@@ -149,7 +171,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& rollbackTransaction();
+    Deferred &rollbackTransaction();
 
     /**
      *  declare an exchange
@@ -162,7 +184,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& declareExchange(const std::string &name, ExchangeType type, int flags, const Table &arguments);
+    Deferred &declareExchange(const std::string &name, ExchangeType type, int flags, const Table &arguments);
 
     /**
      *  bind two exchanges
@@ -176,7 +198,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments);
+    Deferred &bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments);
 
     /**
      *  unbind two exchanges
@@ -190,7 +212,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& unbindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments);
+    Deferred &unbindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments);
 
     /**
      *  remove an exchange
@@ -201,7 +223,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& removeExchange(const std::string &name, int flags);
+    Deferred &removeExchange(const std::string &name, int flags);
 
     /**
      *  declare a queue
@@ -212,7 +234,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<const std::string&, uint32_t, uint32_t>& declareQueue(const std::string &name, int flags, const Table &arguments);
+    DeferredQueue &declareQueue(const std::string &name, int flags, const Table &arguments);
 
     /**
      *  Bind a queue to an exchange
@@ -226,7 +248,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& bindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, int flags, const Table &arguments);
+    Deferred &bindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, int flags, const Table &arguments);
 
     /**
      *  Unbind a queue from an exchange
@@ -239,7 +261,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& unbindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, const Table &arguments);
+    Deferred &unbindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, const Table &arguments);
 
     /**
      *  Purge a queue
@@ -259,7 +281,7 @@ public:
      *
      *  });
      */
-    Deferred<uint32_t>& purgeQueue(const std::string &name, int flags);
+    DeferredDelete &purgeQueue(const std::string &name, int flags);
 
     /**
      *  Remove a queue
@@ -279,7 +301,7 @@ public:
      *
      *  });
      */
-    Deferred<uint32_t>& removeQueue(const std::string &name, int flags);
+    DeferredDelete &removeQueue(const std::string &name, int flags);
 
     /**
      *  Publish a message to an exchange
@@ -303,7 +325,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& setQos(uint16_t prefetchCount);
+    Deferred &setQos(uint16_t prefetchCount);
 
     /**
      *  Tell the RabbitMQ server that we're ready to consume messages
@@ -345,7 +367,7 @@ public:
      *
      *  });
      */
-    Deferred<const std::string&>& cancel(const std::string &tag, int flags);
+    DeferredCancel &cancel(const std::string &tag, int flags);
 
     /**
      *  Acknowledge a message
@@ -370,7 +392,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& recover(int flags);
+    Deferred &recover(int flags);
 
     /**
      *  Close the current channel
@@ -378,7 +400,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred<>& close();
+    Deferred &close();
 
     /**
      *  Get the channel we're working on
@@ -402,9 +424,9 @@ public:
      *
      *  @param  frame       frame to send
      *  @param  message     the message to trigger if the frame cannot be send at all
+     *  @return Deferred    the deferred object
      */
-    template <typename... Arguments>
-    Deferred<Arguments...>& send(const Frame &frame, const char *message);
+    Deferred &send(const Frame &frame, const char *message);
 
     /**
      *  Report to the handler that the channel is opened
@@ -412,7 +434,7 @@ public:
     void reportReady()
     {
         // inform handler
-        if (_readyCallback) _readyCallback(_parent);
+        if (_readyCallback) _readyCallback();
     }
 
     /**
@@ -436,8 +458,13 @@ public:
     template <typename... Arguments>
     void reportSuccess(Arguments ...parameters)
     {
-        // report success to the relevant callback
-        _callbacks.reportSuccess<Arguments...>(std::forward<Arguments>(parameters)...);
+        // skip if there is no oldest callback
+        if (!_oldestCallback) return;
+        
+        // report to the oldest callback, and install a new oldest callback
+        _oldestCallback = _oldestCallback->reportSuccess(std::forward<Arguments>(parameters)...);
+        
+        // @todo destruct oldest callback
     }
 
     /**
@@ -449,11 +476,19 @@ public:
         // change state
         _state = state_closed;
 
-        // inform handler
-        if (_errorCallback) _errorCallback(_parent, message);
+        // @todo    multiple callbacks are called, this could break
+        // @todo    should this be a std::string parameter?
 
-        // report to all waiting callbacks too
-        _callbacks.reportError(message);
+        // inform handler
+        if (_errorCallback) _errorCallback(message.c_str());
+
+        // skip if there is no oldest callback
+        if (!_oldestCallback) return;
+
+        // report to the oldest callback, and install a new oldest callback
+        _oldestCallback = _oldestCallback->reportError(message);
+
+        // @todo destruct oldest callback
     }
 
     /**
@@ -488,7 +523,8 @@ public:
         if (!_consumer) reportError("Received basic consume ok frame, but no consumer was found");
 
         // otherwise, we now report the consumer as started
-        else _consumer->success(consumerTag);
+        // @todo look at this implementation
+        //else _consumer->success(consumerTag);
     }
 
     /**

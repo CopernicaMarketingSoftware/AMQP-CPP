@@ -53,9 +53,12 @@
 // mid level includes
 #include <amqpcpp/exchangetype.h>
 #include <amqpcpp/flags.h>
+#include <amqpcpp/callbacks.h>
 #include <amqpcpp/deferred.h>
 #include <amqpcpp/deferredconsumer.h>
-#include <amqpcpp/callbacks.h>
+#include <amqpcpp/deferredqueue.h>
+#include <amqpcpp/deferreddelete.h>
+#include <amqpcpp/deferredcancel.h>
 #include <amqpcpp/channelimpl.h>
 #include <amqpcpp/channel.h>
 #include <amqpcpp/login.h>

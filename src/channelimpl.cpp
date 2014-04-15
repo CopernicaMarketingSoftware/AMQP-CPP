@@ -85,6 +85,28 @@ ChannelImpl::~ChannelImpl()
 
     // close the channel now
     close();
+    
+    
+    // @todo destruct deferred resutls
+}
+
+/**
+ *  Push a deferred result
+ *  @param  result          The deferred object to push
+ *  @param  error           Error message in case of error
+ */
+void ChannelImpl::push(Deferred *deferred, const char *error)
+{
+    // do we already have an oldest?
+    if (!_oldestCallback) _oldestCallback = deferred;
+    
+    // do we already have a newest?
+    if (_newestCallback) _newestCallback->add(deferred);
+    
+    // store newest callback
+    _newestCallback = deferred;
+    
+    // @todo in case of error we have to report the error with a timeout
 }
 
 /**
@@ -95,10 +117,10 @@ ChannelImpl::~ChannelImpl()
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::pause()
+Deferred &ChannelImpl::pause()
 {
     // send a channel flow frame
-    return send<>(ChannelFlowFrame(_id, false), "Cannot send channel flow frame");
+    return send(ChannelFlowFrame(_id, false), "Cannot send channel flow frame");
 }
 
 /**
@@ -109,10 +131,10 @@ Deferred<>& ChannelImpl::pause()
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::resume()
+Deferred &ChannelImpl::resume()
 {
     // send a channel flow frame
-    return send<>(ChannelFlowFrame(_id, true), "Cannot send channel flow frame");
+    return send(ChannelFlowFrame(_id, true), "Cannot send channel flow frame");
 }
 
 /**
@@ -121,10 +143,10 @@ Deferred<>& ChannelImpl::resume()
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::startTransaction()
+Deferred &ChannelImpl::startTransaction()
 {
     // send a transaction frame
-    return send<>(TransactionSelectFrame(_id), "Cannot send transaction start frame");
+    return send(TransactionSelectFrame(_id), "Cannot send transaction start frame");
 }
 
 /**
@@ -133,10 +155,10 @@ Deferred<>& ChannelImpl::startTransaction()
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::commitTransaction()
+Deferred &ChannelImpl::commitTransaction()
 {
     // send a transaction frame
-    return send<>(TransactionCommitFrame(_id), "Cannot send transaction commit frame");
+    return send(TransactionCommitFrame(_id), "Cannot send transaction commit frame");
 }
 
 /**
@@ -145,10 +167,10 @@ Deferred<>& ChannelImpl::commitTransaction()
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::rollbackTransaction()
+Deferred &ChannelImpl::rollbackTransaction()
 {
     // send a transaction frame
-    return send<>(TransactionRollbackFrame(_id), "Cannot send transaction commit frame");
+    return send(TransactionRollbackFrame(_id), "Cannot send transaction commit frame");
 }
 
 /**
@@ -157,13 +179,13 @@ Deferred<>& ChannelImpl::rollbackTransaction()
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::close()
+Deferred &ChannelImpl::close()
 {
     // channel could be dead after send operation, we need to monitor that
     Monitor monitor(this);
 
     // send a channel close frame
-    auto &handler = send<>(ChannelCloseFrame(_id), "Cannot send channel close frame");
+    auto &handler = send(ChannelCloseFrame(_id), "Cannot send channel close frame");
 
     // was the frame sent and are we still alive?
     if (handler && monitor.valid()) _state = state_closing;
@@ -183,7 +205,7 @@ Deferred<>& ChannelImpl::close()
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::declareExchange(const std::string &name, ExchangeType type, int flags, const Table &arguments)
+Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType type, int flags, const Table &arguments)
 {
     // convert exchange type
     std::string exchangeType;
@@ -193,7 +215,7 @@ Deferred<>& ChannelImpl::declareExchange(const std::string &name, ExchangeType t
     if (type == ExchangeType::headers)exchangeType = "headers";
 
     // send declare exchange frame
-    return send<>(ExchangeDeclareFrame(_id, name, exchangeType, flags & passive, flags & durable, flags & nowait, arguments), "Cannot send exchange declare frame");
+    return send(ExchangeDeclareFrame(_id, name, exchangeType, flags & passive, flags & durable, flags & nowait, arguments), "Cannot send exchange declare frame");
 }
 
 /**
@@ -208,10 +230,10 @@ Deferred<>& ChannelImpl::declareExchange(const std::string &name, ExchangeType t
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments)
+Deferred &ChannelImpl::bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments)
 {
     // send exchange bind frame
-    return send<>(ExchangeBindFrame(_id, target, source, routingkey, flags & nowait, arguments), "Cannot send exchange bind frame");
+    return send(ExchangeBindFrame(_id, target, source, routingkey, flags & nowait, arguments), "Cannot send exchange bind frame");
 }
 
 /**
@@ -226,10 +248,10 @@ Deferred<>& ChannelImpl::bindExchange(const std::string &source, const std::stri
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::unbindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments)
+Deferred &ChannelImpl::unbindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments)
 {
     // send exchange unbind frame
-    return send<>(ExchangeUnbindFrame(_id, target, source, routingkey, flags & nowait, arguments), "Cannot send exchange unbind frame");
+    return send(ExchangeUnbindFrame(_id, target, source, routingkey, flags & nowait, arguments), "Cannot send exchange unbind frame");
 }
 
 /**
@@ -241,10 +263,10 @@ Deferred<>& ChannelImpl::unbindExchange(const std::string &source, const std::st
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::removeExchange(const std::string &name, int flags)
+Deferred &ChannelImpl::removeExchange(const std::string &name, int flags)
 {
     // send delete exchange frame
-    return send<>(ExchangeDeleteFrame(_id, name, flags & ifunused, flags & nowait), "Cannot send exchange delete frame");
+    return send(ExchangeDeleteFrame(_id, name, flags & ifunused, flags & nowait), "Cannot send exchange delete frame");
 }
 
 /**
@@ -256,10 +278,19 @@ Deferred<>& ChannelImpl::removeExchange(const std::string &name, int flags)
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<const std::string&, uint32_t, uint32_t>& ChannelImpl::declareQueue(const std::string &name, int flags, const Table &arguments)
+DeferredQueue &ChannelImpl::declareQueue(const std::string &name, int flags, const Table &arguments)
 {
+    // the frame to send
+    QueueDeclareFrame frame(_id, name, flags & passive, flags & durable, flags & exclusive, flags & autodelete, flags & nowait, arguments);
+    
     // send the queuedeclareframe
-    return send<const std::string&, uint32_t, uint32_t>(QueueDeclareFrame(_id, name, flags & passive, flags & durable, flags & exclusive, flags & autodelete, flags & nowait, arguments), "Cannot send queue declare frame");
+    auto *result = new DeferredQueue(send(frame));
+    
+    // add the deferred result
+    push(result, "Cannot send queue declare frame");
+    
+    // done
+    return *result;
 }
 
 /**
@@ -274,10 +305,10 @@ Deferred<const std::string&, uint32_t, uint32_t>& ChannelImpl::declareQueue(cons
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::bindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, int flags, const Table &arguments)
+Deferred &ChannelImpl::bindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, int flags, const Table &arguments)
 {
     // send the bind queue frame
-    return send<>(QueueBindFrame(_id, queueName, exchangeName, routingkey, flags & nowait, arguments), "Cannot send queue bind frame");
+    return send(QueueBindFrame(_id, queueName, exchangeName, routingkey, flags & nowait, arguments), "Cannot send queue bind frame");
 }
 
 /**
@@ -291,10 +322,10 @@ Deferred<>& ChannelImpl::bindQueue(const std::string &exchangeName, const std::s
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::unbindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments)
+Deferred &ChannelImpl::unbindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments)
 {
     // send the unbind queue frame
-    return send<>(QueueUnbindFrame(_id, queue, exchange, routingkey, arguments), "Cannot send queue unbind frame");
+    return send(QueueUnbindFrame(_id, queue, exchange, routingkey, arguments), "Cannot send queue unbind frame");
 }
 
 /**
@@ -315,10 +346,19 @@ Deferred<>& ChannelImpl::unbindQueue(const std::string &exchange, const std::str
  *
  *  });
  */
-Deferred<uint32_t>& ChannelImpl::purgeQueue(const std::string &name, int flags)
+DeferredDelete &ChannelImpl::purgeQueue(const std::string &name, int flags)
 {
-    // send the queue purge frame
-    return send<uint32_t>(QueuePurgeFrame(_id, name, flags & nowait), "Cannot send queue purge frame");
+    // the frame to send 
+    QueuePurgeFrame frame(_id, name, flags & nowait);
+    
+    // send the frame, and create deferred object
+    auto *deferred = new DeferredDelete(send(frame));
+    
+    // push to list
+    push(deferred, "Cannot send queue purge frame");
+    
+    // done
+    return *deferred;
 }
 
 /**
@@ -339,10 +379,19 @@ Deferred<uint32_t>& ChannelImpl::purgeQueue(const std::string &name, int flags)
  *
  *  });
  */
-Deferred<uint32_t>& ChannelImpl::removeQueue(const std::string &name, int flags)
+DeferredDelete &ChannelImpl::removeQueue(const std::string &name, int flags)
 {
-    // send the remove queue frame
-    return send<uint32_t>(QueueDeleteFrame(_id, name, flags & ifunused, flags & ifempty, flags & nowait), "Cannot send remove queue frame");
+    // the frame to send
+    QueueDeleteFrame frame(_id, name, flags & ifunused, flags & ifempty, flags & nowait);
+
+    // send the frame, and create deferred object
+    auto *deferred = new DeferredDelete(send(frame));
+    
+    // push to list
+    push(deferred, "Cannot send remove queue frame");
+    
+    // done
+    return *deferred;
 }
 
 /**
@@ -410,7 +459,7 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::setQos(uint16_t prefetchCount)
+Deferred &ChannelImpl::setQos(uint16_t prefetchCount)
 {
     // send a qos frame
     return send(BasicQosFrame(_id, prefetchCount, false), "Cannot send basic QOS frame");
@@ -473,10 +522,19 @@ DeferredConsumer& ChannelImpl::consume(const std::string &queue, const std::stri
  *
  *  });
  */
-Deferred<const std::string&>& ChannelImpl::cancel(const std::string &tag, int flags)
+DeferredCancel &ChannelImpl::cancel(const std::string &tag, int flags)
 {
-    // send a cancel frame
-    return send<const std::string&>(BasicCancelFrame(_id, tag, flags & nowait), "Cannot send basic cancel frame");
+    // the cancel frame to send
+    BasicCancelFrame frame(_id, tag, flags & nowait);
+
+    // send the frame, and create deferred object
+    auto *deferred = new DeferredCancel(send(frame));
+    
+    // push to list
+    push(deferred, "Cannot send basic cancel frame");
+    
+    // done
+    return *deferred;
 }
 
 /**
@@ -510,7 +568,7 @@ bool ChannelImpl::reject(uint64_t deliveryTag, int flags)
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred<>& ChannelImpl::recover(int flags)
+Deferred &ChannelImpl::recover(int flags)
 {
     // send a nack frame
     return send(BasicRecoverFrame(_id, flags & requeue), "Cannot send basic recover frame");
@@ -536,32 +594,16 @@ bool ChannelImpl::send(const Frame &frame)
  *  @param  frame       frame to send
  *  @param  message     the message to trigger if the frame cannot be send at all
  */
-template <typename... Arguments>
-Deferred<Arguments...>& ChannelImpl::send(const Frame &frame, const char *message)
+Deferred &ChannelImpl::send(const Frame &frame, const char *message)
 {
-    // create a new deferred handler and get a pointer to it
-    // note: cannot use auto here or the lambda below chokes
-    // when compiling under gcc 4.8
-    Deferred<Arguments...> *handler = &_callbacks.push_back(Deferred<Arguments...>());
-
-    // send the frame over the channel
-    if (!send(frame))
-    {
-        // we can immediately put the handler in failed state
-        handler->_failed = true;
-
-        // register an error on the deferred handler
-        // after a timeout, so it gets called only
-        // after a possible handler was installed.
-        _connection->_handler->setTimeout(_connection->_parent, 0, [handler, message]() {
-            
-            // emit an error on the handler
-            handler->error(message);
-        });
-    }
-
-    // return the new handler
-    return *handler;
+    // send the frame, and create deferred object
+    auto *deferred = new Deferred(send(frame));
+    
+    // push to list
+    push(deferred, message);
+    
+    // done
+    return *deferred;
 }
 
 /**
@@ -569,6 +611,8 @@ Deferred<Arguments...>& ChannelImpl::send(const Frame &frame, const char *messag
  */
 void ChannelImpl::reportMessage()
 {
+    // @todo what does this method do?
+    
     // skip if there is no message
     if (!_message) return;
 

@@ -132,8 +132,8 @@ public:
         // what if channel doesn't exist?
         if (!channel) return false;
 
-        // report to the handler, we need to specify template arguments otherwise a string will lose const and reference
-        channel->reportSuccess<const std::string&, uint32_t, uint32_t>(this->name(), this->messageCount(), this->consumerCount());
+        // report success
+        channel->reportSuccess(name(), messageCount(), consumerCount());
 
         // done
         return true;

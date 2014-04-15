@@ -14,13 +14,14 @@ namespace AMQP {
 /**
  *  We extend from the default deferred and add extra functionality
  */
-class DeferredConsumer : public Deferred<const std::string&>
+class DeferredConsumer : public Deferred
 {
 private:
     /**
      *  Callback to execute when a message arrives
+     *  @var    ConsumeCallbacl
      */
-    std::function<void(const Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered)> _messageCallback;
+    ConsumeCallback _consumeCallback;
 
     /**
      *  Process a message
@@ -33,7 +34,7 @@ private:
     void message(const Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered) const
     {
         // do we have a valid callback
-        if (_messageCallback) _messageCallback(message, deliveryTag, consumerTag, redelivered);
+        if (_consumeCallback) _consumeCallback(message, deliveryTag, consumerTag, redelivered);
     }
 
     /**
@@ -48,7 +49,6 @@ protected:
      *  Protected constructor that can only be called
      *  from within the channel implementation
      *
-     *  @param  channel the channel we operate under
      *  @param  boolea  are we already failed?
      */
     DeferredConsumer(bool failed = false) : Deferred(failed) {}
@@ -62,12 +62,17 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    DeferredConsumer& onReceived(const std::function<void(const Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered)>& callback)
+    DeferredConsumer& onReceived(const ConsumeCallback &callback)
     {
         // store callback
-        _messageCallback = callback;
+        _consumeCallback = callback;
         return *this;
     }
+
+    /**
+     *  All the onSuccess() functions defined in the base class are accessible too
+     */
+    using Deferred::onSuccess;
 };
 
 /**
