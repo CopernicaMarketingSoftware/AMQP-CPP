@@ -22,22 +22,6 @@ class ConnectionHandler
 {
 public:
     /**
-     *  Set a function to be executed after a given timeout.
-     *
-     *  This function is not strictly necessary to implement. If you
-     *  do not implement it, certain methods that fail immediately
-     *  will not be reported.
-     *
-     *  @param  connection      the connection that needs the timeout
-     *  @param  timeout         number of seconds to wait
-     *  @param  callback        function to execute once time runs out
-     * 
-     * 
-     *  @todo   this one should be removed
-     */
-    virtual void setTimeout(Connection *connection, double seconds, const std::function<void()>& callback) {}
-
-    /**
      *  Method that is called when data needs to be sent over the network
      *
      *  Note that the AMQP library does no buffering by itself. This means

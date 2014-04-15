@@ -205,6 +205,9 @@ public:
     {
         // store callback
         _errorCallback = callback;
+
+        // if the object is already in a failed state, we call the callback right away
+        if (_failed) callback("Frame could not be sent");
         
         // allow chaining
         return *this;
@@ -229,6 +232,9 @@ public:
     {
         // store callback
         _finalizeCallback = callback;
+        
+        // if the object is already in a failed state, we call the callback right away
+        if (_failed) callback();
         
         // allow chaining
         return *this;

@@ -134,7 +134,7 @@ void ChannelImpl::reportErrors(bool force)
         Monitor monitor(this);
         
         // report the error
-        auto *next = _oldestCallback->reportError("Frame could not be sent");
+        auto *next = _oldestCallback->reportError("Frame could not be delivered");
         
         // leap out if object is no longer valid after the callback was called
         if (!monitor.valid()) return;
