@@ -431,8 +431,6 @@ public:
 
     /**
      *  Report to the handler that the channel is opened
-     * 
-     *  @todo when is this sent?
      */
     void reportReady()
     {
@@ -442,18 +440,14 @@ public:
 
     /**
      *  Report to the handler that the channel is closed
-     * 
-     *  @todo do we need this?
      */
     void reportClosed()
     {
         // change state
         _state = state_closed;
 
-        // inform handler
-        
-        // @todo do we report success here?
-        
+        // and pass on to the reportSuccess() method which will call the
+        // appropriate deferred object to report the successful operation
         reportSuccess();
     }
 

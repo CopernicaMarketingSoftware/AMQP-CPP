@@ -105,8 +105,6 @@ Deferred &ChannelImpl::push(Deferred *deferred)
     // store newest callback
     _newestCallback = deferred;
     
-    // @todo in case of error we have to report the error with a timeout
-    
     // done
     return *deferred;
 }
