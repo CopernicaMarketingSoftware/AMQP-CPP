@@ -55,7 +55,7 @@ public:
      *  state and can no longer be used.
      *
      *  This method has an empty default implementation, although you are very
-     *  much advised to implement it. Because when an error occurs, the connection
+     *  much advised to implement it. When an error occurs, the connection
      *  is no longer usable, so you probably want to know.
      *
      *  @param  connection      The connection that entered the error state
@@ -65,14 +65,15 @@ public:
 
     /**
      *  Method that is called when the login attempt succeeded. After this method
-     *  was called, the connection is ready to use. This is the first method
+     *  is called, the connection is ready to use. This is the first method
      *  that is normally called after you've constructed the connection object.
      *
      *  According to the AMQP protocol, you must wait for the connection to become
      *  ready (and this onConnected method to be called) before you can start
      *  using the Connection object. However, this AMQP library will cache all
      *  methods that you call before the connection is ready, so in reality there
-     *  is no real reason to wait.
+     *  is no real reason to wait for this method to be called before you send
+     *  the first instructions.
      *
      *  @param  connection      The connection that can now be used
      */

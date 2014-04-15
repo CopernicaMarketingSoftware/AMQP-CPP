@@ -22,8 +22,6 @@ Deferred *DeferredConsumer::reportSuccess(const std::string &name) const
     // we now know the name, so we can install the message callback on the channel
     _channel->install(name, _messageCallback);
     
-    // @todo when a consumer stops, we should uninstall the message callback
-    
     // skip if no special callback was installed
     if (!_consumeCallback) return Deferred::reportSuccess();
     

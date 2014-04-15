@@ -107,9 +107,16 @@ private:
     /**
      *  Push a deferred result
      *  @param  result          The deferred result
-     *  @param  error           Error message in case the result is not ok
+     *  @return Deferred        The object just pushed
      */
-    void push(Deferred *deferred, const char *error);
+    Deferred &push(Deferred *deferred);
+
+    /**
+     *  Send a framen and push a deferred result
+     *  @param  frame           The frame to send
+     *  @return Deferred        The object just pushed
+     */
+    Deferred &push(const Frame &frame);
 
 
 public:
@@ -423,17 +430,9 @@ public:
     bool send(const Frame &frame);
 
     /**
-     *  Send a frame over the channel and
-     *  get a deferred handler for it.
-     *
-     *  @param  frame       frame to send
-     *  @param  message     the message to trigger if the frame cannot be send at all
-     *  @return Deferred    the deferred object
-     */
-    Deferred &send(const Frame &frame, const char *message);
-
-    /**
      *  Report to the handler that the channel is opened
+     * 
+     *  @todo when is this sent?
      */
     void reportReady()
     {
@@ -443,6 +442,8 @@ public:
 
     /**
      *  Report to the handler that the channel is closed
+     * 
+     *  @todo do we need this?
      */
     void reportClosed()
     {
@@ -450,6 +451,9 @@ public:
         _state = state_closed;
 
         // inform handler
+        
+        // @todo do we report success here?
+        
         reportSuccess();
     }
 
