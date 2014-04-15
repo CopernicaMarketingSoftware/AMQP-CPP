@@ -493,8 +493,6 @@ public:
         // we are going to call callbacks that could destruct the channel
         Monitor monitor(this);
         
-        // @todo    should this be a std::string parameter?
-
         // inform handler
         if (_errorCallback) _errorCallback(message);
         
@@ -526,6 +524,16 @@ public:
         
         // otherwise we erase the previously set callback
         else _consumers.erase(consumertag);
+    }
+
+    /**
+     *  Uninstall a consumer callback
+     *  @param  consumertag     The consumer tag
+     */
+    void uninstall(const std::string &consumertag)
+    {
+        // erase the callback
+        _consumers.erase(consumertag);
     }
 
     /**

@@ -20,6 +20,12 @@ class DeferredCancel : public Deferred
 {
 private:
     /**
+     *  Pointer to the channel
+     *  @var    ChannelImpl
+     */
+    ChannelImpl *_channel;
+
+    /**
      *  Callback to execute when the instruction is completed
      *  @var    CancelCallback
      */
@@ -30,20 +36,7 @@ private:
      *  @param  name            Consumer tag that is cancelled
      *  @return Deferred
      */
-    virtual Deferred *reportSuccess(const std::string &name) const override
-    {
-        // skip if no special callback was installed
-        if (!_cancelCallback) return Deferred::reportSuccess();
-        
-        // call the callback
-        _cancelCallback(name);
-        
-        // call finalize callback
-        if (_finalizeCallback) _finalizeCallback();
-        
-        // return next object
-        return _next;
-    }
+    virtual Deferred *reportSuccess(const std::string &name) const override;
 
     /**
      *  The channel implementation may call our
@@ -57,9 +50,11 @@ protected:
      *  Protected constructor that can only be called
      *  from within the channel implementation
      *
-     *  @param  boolean     are we already failed?
+     *  @param  channel     Pointer to the channel
+     *  @param  failed      Are we already failed?
      */
-    DeferredCancel(bool failed = false) : Deferred(failed) {}
+    DeferredCancel(ChannelImpl *channel, bool failed = false) : 
+        Deferred(failed), _channel(channel) {}
 
 public:
     /**

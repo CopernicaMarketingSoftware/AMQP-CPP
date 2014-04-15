@@ -524,7 +524,7 @@ DeferredCancel &ChannelImpl::cancel(const std::string &tag, int flags)
     BasicCancelFrame frame(_id, tag, flags & nowait);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredCancel(send(frame));
+    auto *deferred = new DeferredCancel(this, send(frame));
     
     // push to list
     push(deferred, "Cannot send basic cancel frame");
