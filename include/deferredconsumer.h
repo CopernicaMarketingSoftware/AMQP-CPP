@@ -20,7 +20,7 @@ private:
     /**
      *  Callback to execute when a message arrives
      */
-    std::function<void(Channel *channel, const Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered)> _messageCallback;
+    std::function<void(const Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered)> _messageCallback;
 
     /**
      *  Process a message
@@ -33,7 +33,7 @@ private:
     void message(const Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered) const
     {
         // do we have a valid callback
-        if (_messageCallback) _messageCallback(_channel, message, deliveryTag, consumerTag, redelivered);
+        if (_messageCallback) _messageCallback(message, deliveryTag, consumerTag, redelivered);
     }
 
     /**
@@ -42,6 +42,7 @@ private:
      */
     friend class ChannelImpl;
     friend class ConsumedMessage;
+    
 protected:
     /**
      *  Protected constructor that can only be called
@@ -50,9 +51,8 @@ protected:
      *  @param  channel the channel we operate under
      *  @param  boolea  are we already failed?
      */
-    DeferredConsumer(Channel *channel, bool failed = false) :
-        Deferred(channel, failed)
-    {}
+    DeferredConsumer(bool failed = false) : Deferred(failed) {}
+
 public:
     /**
      *  Register a function to be called when a message arrives
@@ -62,7 +62,7 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    DeferredConsumer& onReceived(const std::function<void(Channel *channel, const Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered)>& callback)
+    DeferredConsumer& onReceived(const std::function<void(const Message &message, uint64_t deliveryTag, const std::string &consumerTag, bool redelivered)>& callback)
     {
         // store callback
         _messageCallback = callback;

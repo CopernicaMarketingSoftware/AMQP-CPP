@@ -439,7 +439,7 @@ Deferred<>& ChannelImpl::setQos(uint16_t prefetchCount)
 DeferredConsumer& ChannelImpl::consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments)
 {
     // create the deferred consumer
-    _consumer = std::unique_ptr<DeferredConsumer>(new DeferredConsumer(_parent, false));
+    _consumer = std::unique_ptr<DeferredConsumer>(new DeferredConsumer(false));
 
     // can we send the basic consume frame?
     if (!send(BasicConsumeFrame(_id, queue, tag, flags & nolocal, flags & noack, flags & exclusive, flags & nowait, arguments)))
@@ -542,7 +542,7 @@ Deferred<Arguments...>& ChannelImpl::send(const Frame &frame, const char *messag
     // create a new deferred handler and get a pointer to it
     // note: cannot use auto here or the lambda below chokes
     // when compiling under gcc 4.8
-    Deferred<Arguments...> *handler = &_callbacks.push_back(Deferred<Arguments...>(_parent));
+    Deferred<Arguments...> *handler = &_callbacks.push_back(Deferred<Arguments...>());
 
     // send the frame over the channel
     if (!send(frame))
@@ -554,6 +554,7 @@ Deferred<Arguments...>& ChannelImpl::send(const Frame &frame, const char *messag
         // after a timeout, so it gets called only
         // after a possible handler was installed.
         _connection->_handler->setTimeout(_connection->_parent, 0, [handler, message]() {
+            
             // emit an error on the handler
             handler->error(message);
         });

@@ -27,17 +27,17 @@ private:
     /**
      *  Callback to execute on success
      */
-    std::function<void(Channel *channel, Arguments ...parameters)> _successCallback;
+    std::function<void(Arguments ...parameters)> _successCallback;
 
     /**
      *  Callback to execute on failure
      */
-    std::function<void(Channel *channel, const std::string& error)> _errorCallback;
+    std::function<void(const std::string& error)> _errorCallback;
 
     /**
      *  Callback to execute either way
      */
-    std::function<void(Channel *channel, const std::string& error)> _finalizeCallback;
+    std::function<void(const std::string& error)> _finalizeCallback;
 
     /**
      *  Indicate success
@@ -47,8 +47,8 @@ private:
     void success(Arguments ...parameters) const
     {
         // execute callbacks if registered
-        if (_successCallback)   _successCallback(_channel, parameters...);
-        if (_finalizeCallback)  _finalizeCallback(_channel, "");
+        if (_successCallback)   _successCallback(parameters...);
+        if (_finalizeCallback)  _finalizeCallback("");
     }
 
     /**
@@ -59,8 +59,8 @@ private:
     void error(const std::string& error) const
     {
         // execute callbacks if registered
-        if (_errorCallback)     _errorCallback(_channel, error);
-        if (_finalizeCallback)  _finalizeCallback(_channel, error);
+        if (_errorCallback)     _errorCallback(error);
+        if (_finalizeCallback)  _finalizeCallback(error);
     }
 
     /**
@@ -69,14 +69,11 @@ private:
      */
     friend class ChannelImpl;
     friend class Callbacks;
+    
 protected:
     /**
-     *  The channel we operate under
-     */
-    Channel *_channel;
-
-    /**
      *  Do we already know we failed?
+     *  @var bool
      */
     bool _failed;
 
@@ -84,13 +81,10 @@ protected:
      *  Protected constructor that can only be called
      *  from within the channel implementation
      *
-     *  @param  channel the channel we operate under
-     *  @param  boolea  are we already failed?
+     *  @param  failed  are we already failed?
      */
-    Deferred(Channel *channel, bool failed = false) :
-        _channel(channel),
-        _failed(failed)
-    {}
+    Deferred(bool failed = false) : _failed(failed) {}
+
 public:
     /**
      *  Deleted copy constructor
@@ -125,7 +119,7 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    Deferred& onSuccess(const std::function<void(Channel *channel, Arguments ...parameters)>& callback)
+    Deferred& onSuccess(const std::function<void(Arguments ...parameters)>& callback)
     {
         // store callback
         _successCallback = callback;
@@ -142,7 +136,7 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    Deferred& onError(const std::function<void(Channel *channel, const std::string& error)>& callback)
+    Deferred& onError(const std::function<void(const std::string& error)>& callback)
     {
         // store callback
         _errorCallback = callback;
@@ -164,7 +158,7 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    Deferred& onFinalize(const std::function<void(Channel *channel, const std::string& error)>& callback)
+    Deferred& onFinalize(const std::function<void(const std::string& error)>& callback)
     {
         // store callback
         _finalizeCallback = callback;
