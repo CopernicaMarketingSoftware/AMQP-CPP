@@ -156,7 +156,7 @@ public:
         if (!channel) return false;
         
         // report to the handler
-        channel->reportError(text());
+        channel->reportError(_text.value().c_str());
         
         // done
         return true;

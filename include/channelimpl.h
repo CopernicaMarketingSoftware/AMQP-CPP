@@ -485,7 +485,7 @@ public:
      *  Report an error message on a channel
      *  @param  message
      */
-    void reportError(const std::string &message)
+    void reportError(const char *message)
     {
         // change state
         _state = state_closed;
@@ -496,7 +496,7 @@ public:
         // @todo    should this be a std::string parameter?
 
         // inform handler
-        if (_errorCallback) _errorCallback(message.c_str());
+        if (_errorCallback) _errorCallback(message);
         
         // leap out if channel is already destructed, or when there are no further callbacks
         if (!monitor.valid() || !_oldestCallback) return;

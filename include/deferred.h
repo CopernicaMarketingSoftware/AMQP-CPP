@@ -117,28 +117,11 @@ protected:
      *  @param  error           Description of the error that occured
      *  @return Deferred        Next deferred result
      */
-    Deferred *reportError(const std::string& error) 
-    {
-        // from this moment on the object should be listed as failed
-        _failed = true;
-        
-        // execute callbacks if registered
-        if (_errorCallback)     _errorCallback(error.c_str());
-        if (_finalizeCallback)  _finalizeCallback();
-        
-        // return the next deferred result
-        return _next;
-    }
-
-    /**
-     *  Indicate failure
-     *  @param  error   description of the error that occured
-     */
     Deferred *reportError(const char *error) 
     {
         // from this moment on the object should be listed as failed
         _failed = true;
-
+        
         // execute callbacks if registered
         if (_errorCallback)     _errorCallback(error);
         if (_finalizeCallback)  _finalizeCallback();
