@@ -287,8 +287,8 @@ myChannel.onReady([]() {
 });
 ````
 
-In theory, you should always use the onReady() function before you send any
-other instructions over the channel. In practive however, the AMQP library
+In theory, you should wait for the onReady() callback to be called before you 
+send any other instructions over the channel. In practice however, the AMQP library
 caches all instructions that were sent too early, so that you can use the
 channel object right after it was constructed.
 
@@ -562,7 +562,7 @@ DeferredConsumer &consume(const std::string &queue, const AMQP::Table &arguments
 ````
 
 As you can see, the consume method returns a DeferredConsumer. This object is a 
-regular Deferred, with the some additions. The onSuccess() method of a 
+regular Deferred, with  additions. The onSuccess() method of a 
 DeferredConsumer is slightly different than the onSuccess() method of a regular
 Deferred object: one extra parameter will be supplied to your callback function
 with the consumer tag.
