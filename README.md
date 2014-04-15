@@ -182,8 +182,8 @@ You should do all the book keeping for the buffer yourselves. If you for example
 call the Connection::parse() method with a buffer of 100 bytes, and the method 
 returns that only 60 bytes were processed, you should later call the method again, 
 with a buffer filled with the remaining 40 bytes. If the method returns 0, you should 
-make a new call to parse() when more data is available, with a buffer with more
-data.
+make a new call to parse() when more data is available, with a buffer that contains
+both the old data, and the new data.
 
 
 CHANNELS
@@ -269,7 +269,7 @@ for sending the first instruction to RabbitMQ.
 
 ````c++
 // create a channel
-Channel myChannel(connection, &myHandler);
+Channel myChannel(&connection);
 
 // install a generic channel-error handler that will be called for every
 // error that occurs on the channel
@@ -302,7 +302,7 @@ were already sent over it. This means that if you call multiple methods in a row
 and the first method fails, all subsequent methods will not be executed either:
 
 ````c++
-Channel myChannel(connection, &myHandler);
+Channel myChannel(&connection);
 myChannel.declareQueue("my-queue");
 myChannel.declareExchange("my-exchange");
 ````
@@ -316,8 +316,8 @@ state after the first failure.
 You can overcome this by using multiple channels:
 
 ````c++
-Channel channel1(connection, &myHandler);
-Channel channel2(connection, &myHandler);
+Channel channel1(&connection);
+Channel channel2(&connection);
 channel1.declareQueue("my-queue");
 channel2.declareExchange("my-exchange");
 ````
