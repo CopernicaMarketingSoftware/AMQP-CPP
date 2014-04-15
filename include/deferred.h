@@ -55,6 +55,15 @@ protected:
 
 
     /**
+     *  The next deferred object
+     *  @return Deferred
+     */
+    Deferred *next() const
+    {
+        return _next;
+    }
+
+    /**
      *  Indicate success
      *  @return Deferred        Next deferred result
      */

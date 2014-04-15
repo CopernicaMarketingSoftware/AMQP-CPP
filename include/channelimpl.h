@@ -61,7 +61,7 @@ private:
      * 
      *  @var    Deferred
      */
-    Deferred *_oldestCallback = nullptr;
+    std::unique_ptr<Deferred> _oldestCallback = nullptr;
     
     /**
      *  Pointer to the newest deferred result (the last one to be added).
@@ -464,11 +464,21 @@ public:
     {
         // skip if there is no oldest callback
         if (!_oldestCallback) return;
+     
+        // we are going to call callbacks that could destruct the channel
+        Monitor monitor(this);
+     
+        // call the callback
+        auto *next = _oldestCallback->reportSuccess(std::forward<Arguments>(parameters)...);
         
-        // report to the oldest callback, and install a new oldest callback
-        _oldestCallback = _oldestCallback->reportSuccess(std::forward<Arguments>(parameters)...);
+        // leap out if channel no longer exists
+        if (!monitor.valid()) return;
         
-        // @todo destruct oldest callback
+        // set the oldest callback
+        _oldestCallback.reset(next);
+        
+        // if there was no next callback, the newest callback was just used
+        if (!next) _newestCallback = nullptr;
     }
 
     /**
@@ -480,19 +490,28 @@ public:
         // change state
         _state = state_closed;
 
-        // @todo    multiple callbacks are called, this could break
+        // we are going to call callbacks that could destruct the channel
+        Monitor monitor(this);
+        
         // @todo    should this be a std::string parameter?
 
         // inform handler
         if (_errorCallback) _errorCallback(message.c_str());
+        
+        // leap out if channel is already destructed, or when there are no further callbacks
+        if (!monitor.valid() || !_oldestCallback) return;
 
-        // skip if there is no oldest callback
-        if (!_oldestCallback) return;
-
-        // report to the oldest callback, and install a new oldest callback
-        _oldestCallback = _oldestCallback->reportError(message);
-
-        // @todo destruct oldest callback
+        // call the callback
+        auto *next = _oldestCallback->reportError(message);
+        
+        // leap out if channel no longer exists
+        if (!monitor.valid()) return;
+        
+        // set the oldest callback
+        _oldestCallback.reset(next);
+        
+        // if there was no next callback, the newest callback was just used
+        if (!next) _newestCallback = nullptr;
     }
 
     /**

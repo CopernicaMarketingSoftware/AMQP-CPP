@@ -86,8 +86,8 @@ ChannelImpl::~ChannelImpl()
     // close the channel now
     close();
     
-    
-    // @todo destruct deferred resutls
+    // destruct deferred results
+    while (_oldestCallback) _oldestCallback.reset(_oldestCallback->next());
 }
 
 /**
@@ -98,7 +98,7 @@ ChannelImpl::~ChannelImpl()
 void ChannelImpl::push(Deferred *deferred, const char *error)
 {
     // do we already have an oldest?
-    if (!_oldestCallback) _oldestCallback = deferred;
+    if (!_oldestCallback) _oldestCallback.reset(deferred);
     
     // do we already have a newest?
     if (_newestCallback) _newestCallback->add(deferred);

@@ -34,6 +34,7 @@
 #include <amqpcpp/receivedframe.h>
 #include <amqpcpp/outbuffer.h>
 #include <amqpcpp/watchable.h>
+#include <amqpcpp/monitor.h>
 
 // amqp types
 #include <amqpcpp/field.h>
