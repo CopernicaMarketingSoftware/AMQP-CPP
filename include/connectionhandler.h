@@ -48,7 +48,7 @@ public:
      *  @param  connection      The connection that entered the error state
      *  @param  message         Error message
      */
-    virtual void onError(Connection *connection, const std::string &message) {}
+    virtual void onError(Connection *connection, const char *message) {}
 
     /**
      *  Method that is called when the login attempt succeeded. After this method

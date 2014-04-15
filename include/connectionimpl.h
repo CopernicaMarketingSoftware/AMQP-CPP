@@ -273,7 +273,7 @@ public:
      *  Report an error message
      *  @param  message
      */
-    void reportError(const std::string &message)
+    void reportError(const char *message)
     {
         // set connection state to closed
         _state = state_closed;

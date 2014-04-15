@@ -157,7 +157,7 @@ public:
         
         // no need to check for a channel, the error is connection wide
         // report the error on the connection
-        connection->reportError(text());
+        connection->reportError(text().c_str());
         
         // done
         return true;
