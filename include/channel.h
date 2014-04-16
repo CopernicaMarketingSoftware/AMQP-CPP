@@ -334,11 +334,6 @@ public:
     /**
      *  Publish a message to an exchange
      *
-     *  If either of the two flags is set, and the message could not immediately
-     *  be published, the message is returned by the server to the client. If you
-     *  want to catch such returned messages, you need to install a handler using
-     *  the onReturned() method.
-     *
      *  @param  exchange    the exchange to publish to
      *  @param  routingkey  the routing key
      *  @param  envelope    the full envelope to send

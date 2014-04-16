@@ -80,9 +80,17 @@ public:
     }
     
     /**
-     *  All the onSuccess() functions defined in the base class are accessible too
+     *  Register the function that is called when the queue is declared
+     *  @param  callback
      */
-    using Deferred::onSuccess;
+    DeferredQueue &onSuccess(const SuccessCallback &callback)
+    {
+        // call base
+        Deferred::onSuccess(callback);
+        
+        // allow chaining
+        return *this;
+    }
 };
 
 /**

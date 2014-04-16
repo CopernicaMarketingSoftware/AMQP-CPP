@@ -76,6 +76,19 @@ public:
     }
 
     /**
+     *  Register the function that is called when the consumer starts
+     *  @param  callback
+     */
+    DeferredConsumer &onSuccess(const SuccessCallback &callback)
+    {
+        // call base
+        Deferred::onSuccess(callback);
+        
+        // allow chaining
+        return *this;
+    }
+
+    /**
      *  Register a function to be called when a message arrives
      *  This fuction is also available as onMessage() because I always forget which name I gave to it
      *  @param  callback    the callback to execute
@@ -102,11 +115,6 @@ public:
         // allow chaining
         return *this;
     }
-
-    /**
-     *  All the onSuccess() functions defined in the base class are accessible too
-     */
-    using Deferred::onSuccess;
 };
 
 /**

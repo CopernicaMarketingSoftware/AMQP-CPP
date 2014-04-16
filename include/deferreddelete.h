@@ -80,9 +80,17 @@ public:
     }
 
     /**
-     *  All the onSuccess() functions defined in the base class are accessible too
+     *  Register the function that is called when the queue is deleted or purged
+     *  @param  callback
      */
-    using Deferred::onSuccess;
+    DeferredDelete &onSuccess(const SuccessCallback &callback)
+    {
+        // call base
+        Deferred::onSuccess(callback);
+        
+        // allow chaining
+        return *this;
+    }
 };
 
 /**

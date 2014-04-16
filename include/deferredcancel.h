@@ -75,9 +75,17 @@ public:
     }
 
     /**
-     *  All the onSuccess() functions defined in the base class are accessible too
+     *  Register the function that is called when the cancel operation succeeded
+     *  @param  callback
      */
-    using Deferred::onSuccess;
+    DeferredCancel &onSuccess(const SuccessCallback &callback)
+    {
+        // call base
+        Deferred::onSuccess(callback);
+        
+        // allow chaining
+        return *this;
+    }
 };
 
 /**
