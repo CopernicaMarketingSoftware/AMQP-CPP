@@ -481,9 +481,10 @@ public:
 
     /**
      *  Report an error message on a channel
-     *  @param  message
+     *  @param  message             the error message
+     *  @param  notifyhandler       should the channel-wide handler also be called?
      */
-    void reportError(const char *message)
+    void reportError(const char *message, bool notifyhandler = true)
     {
         // change state
         _state = state_closed;
@@ -521,7 +522,7 @@ public:
         _newestCallback = nullptr;
         
         // inform handler
-        if (_errorCallback) _errorCallback(message);
+        if (notifyhandler && _errorCallback) _errorCallback(message);
     }
 
     /**

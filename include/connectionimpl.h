@@ -285,7 +285,7 @@ public:
         for (auto &iter : _channels)
         {
             // report the errors
-            iter.second->reportError(message);
+            iter.second->reportError(message, false);
             
             // leap out if no longer valid
             if (!monitor.valid()) return;
