@@ -277,6 +277,19 @@ public:
     {
         // set connection state to closed
         _state = state_closed;
+        
+        // monitor because every callback could invalidate the connection
+        Monitor monitor(this);
+
+        // all deferred result objects in the channels should report this error too
+        for (auto &iter : _channels)
+        {
+            // report the errors
+            iter.second->reportError(message);
+            
+            // leap out if no longer valid
+            if (!monitor.valid()) return;
+        }
 
         // inform handler
         _handler->onError(_parent, message);

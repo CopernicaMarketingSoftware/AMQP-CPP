@@ -480,12 +480,6 @@ public:
     }
 
     /**
-     *  Report errors to all deferred objects already in an error state
-     *  @param  force           Report errors even for objects not already in error state
-     */
-    void reportErrors(bool force = false);
-
-    /**
      *  Report an error message on a channel
      *  @param  message
      */
@@ -496,27 +490,38 @@ public:
 
         // we are going to call callbacks that could destruct the channel
         Monitor monitor(this);
+
+        // call the oldest
+        if (_oldestCallback)
+        {
+            // call the callback
+            auto *next = _oldestCallback->reportError(message);
+            
+            // leap out if channel no longer exists
+            if (!monitor.valid()) return;
+            
+            // set the oldest callback
+            _oldestCallback.reset(next);
+        }
+        
+        // clean up all deferred other objects
+        while (_oldestCallback)
+        {
+            // call the callback
+            auto *next = _oldestCallback->reportError("Channel is in error state");
+            
+            // leap out if channel no longer exists
+            if (!monitor.valid()) return;
+            
+            // set the oldest callback
+            _oldestCallback.reset(next);
+        }
+
+        // all callbacks have been processed, so we also can reset the pointer to the newest
+        _newestCallback = nullptr;
         
         // inform handler
         if (_errorCallback) _errorCallback(message);
-        
-        // leap out if channel is already destructed, or when there are no further callbacks
-        if (!monitor.valid() || !_oldestCallback) return;
-
-        // call the callback
-        auto *next = _oldestCallback->reportError(message);
-        
-        // leap out if channel no longer exists
-        if (!monitor.valid()) return;
-        
-        // set the oldest callback
-        _oldestCallback.reset(next);
-        
-        // if there was no next callback, the newest callback was just used
-        if (!next) _newestCallback = nullptr;
-        
-        // when one error occured, all subsequent messages are in an error state too
-        reportErrors(true);
     }
 
     /**
