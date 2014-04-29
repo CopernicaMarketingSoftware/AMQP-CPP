@@ -86,8 +86,8 @@ class MyConnectionHandler : public AMQP::ConnectionHandler
     }
 
     /**
-     *  Method that is called when the connection was closed. This is the 
-     *  counter part of a call to Connection::close() and it confirms that the 
+     *  Method that is called when the connection was closed. This is the
+     *  counter part of a call to Connection::close() and it confirms that the
      *  connection was correctly closed.
      *
      *  @param  connection      The connection that was closed and that is now unusable
@@ -143,12 +143,12 @@ every time that it wants to send out data. We've explained that it is up to you 
 implement that method. But what about data in the other direction? How does the
 library receive data back from RabbitMQ?
 
-The AMQP-CPP library does not do any IO by itself and it is therefore of course 
-also not possible for the library to receive data from a socket. It is again up 
-to you to do this. If, for example, you notice in your event loop that the socket 
-that is connected with the RabbitMQ server becomes readable, you should read out 
-that socket (for example by using the recv() system call), and pass the received 
-bytes to the AMQP-CPP library. This is done by calling the parse() method in the 
+The AMQP-CPP library does not do any IO by itself and it is therefore of course
+also not possible for the library to receive data from a socket. It is again up
+to you to do this. If, for example, you notice in your event loop that the socket
+that is connected with the RabbitMQ server becomes readable, you should read out
+that socket (for example by using the recv() system call), and pass the received
+bytes to the AMQP-CPP library. This is done by calling the parse() method in the
 Connection object.
 
 The Connection::parse() method gets two parameters, a pointer to a buffer of
@@ -160,12 +160,12 @@ The code snippet below comes from the Connection.h C++ header file.
  *  Parse data that was recevied from RabbitMQ
  *
  *  Every time that data comes in from RabbitMQ, you should call this method to parse
- *  the incoming data, and let it handle by the AMQP-CPP library. This method returns 
+ *  the incoming data, and let it handle by the AMQP-CPP library. This method returns
  *  the number of bytes that were processed.
  *
- *  If not all bytes could be processed because it only contained a partial frame, 
- *  you should call this same method later on when more data is available. The 
- *  AMQP-CPP library does not do any buffering, so it is up to the caller to ensure 
+ *  If not all bytes could be processed because it only contained a partial frame,
+ *  you should call this same method later on when more data is available. The
+ *  AMQP-CPP library does not do any buffering, so it is up to the caller to ensure
  *  that the old data is also passed in that later call.
  *
  *  @param  buffer      buffer to decode
@@ -178,10 +178,10 @@ size_t parse(char *buffer, size_t size)
 }
 ````
 
-You should do all the book keeping for the buffer yourselves. If you for example 
-call the Connection::parse() method with a buffer of 100 bytes, and the method 
-returns that only 60 bytes were processed, you should later call the method again, 
-with a buffer filled with the remaining 40 bytes. If the method returns 0, you should 
+You should do all the book keeping for the buffer yourselves. If you for example
+call the Connection::parse() method with a buffer of 100 bytes, and the method
+returns that only 60 bytes were processed, you should later call the method again,
+with a buffer filled with the remaining 40 bytes. If the method returns 0, you should
 make a new call to parse() when more data is available, with a buffer that contains
 both the old data, and the new data.
 
@@ -189,8 +189,8 @@ both the old data, and the new data.
 CHANNELS
 ========
 
-In the example we created a channel object. A channel is a virtual connection over 
-a single TCP connection, and it is possible to create many channels that all use 
+In the example we created a channel object. A channel is a virtual connection over
+a single TCP connection, and it is possible to create many channels that all use
 the same TCP connection.
 
 AMQP instructions are always sent over a channel, so before you can send the first
@@ -203,21 +203,21 @@ documented.
 
 The constructor of the Channel object accepts one parameter: the connection object.
 Unlike the connection it does not accept a handler. Instead of a handler object,
-(almost) every method of the Channel class returns an instance of the 'Deferred' 
-class. This object can be used to install handlers that will be called in case 
+(almost) every method of the Channel class returns an instance of the 'Deferred'
+class. This object can be used to install handlers that will be called in case
 of success or failure.
 
-For example, if you call the channel.declareExchange() method, the AMQP-CPP library 
+For example, if you call the channel.declareExchange() method, the AMQP-CPP library
 will send a message to the RabbitMQ message broker to ask it to declare the
 queue. However, because all operations in the library are asynchronous, the
 declareExchange() method can not return 'true' or 'false' to inform you whether
-the operation was succesful or not. Only after a while, after the instruction 
-has reached the RabbitMQ server, and the confirmation from the server has been 
+the operation was succesful or not. Only after a while, after the instruction
+has reached the RabbitMQ server, and the confirmation from the server has been
 sent back to the client, the library can report the result of the declareExchange()
 call.
 
-To prevent any blocking calls, the channel.declareExchange() method returns a 
-'Deferred' result object, on which you can set callback functions that will be 
+To prevent any blocking calls, the channel.declareExchange() method returns a
+'Deferred' result object, on which you can set callback functions that will be
 called when the operation succeeds or fails.
 
 ````c++
@@ -249,9 +249,9 @@ run in either case: when the operation succeeds or when it fails.
 
 The signature for the onError() method is always the same: it gets one parameter
 with a human readable error message. The onSuccess() function has a different
-signature depending on the method that you call. Most onSuccess() functions 
-(like the one we showed for the declareExchange() method) do not get any 
-parameters at all. Some specific onSuccess callbacks receive extra parameters 
+signature depending on the method that you call. Most onSuccess() functions
+(like the one we showed for the declareExchange() method) do not get any
+parameters at all. Some specific onSuccess callbacks receive extra parameters
 with additional information.
 
 
@@ -287,7 +287,7 @@ myChannel.onReady([]() {
 });
 ````
 
-In theory, you should wait for the onReady() callback to be called before you 
+In theory, you should wait for the onReady() callback to be called before you
 send any other instructions over the channel. In practice however, the AMQP library
 caches all instructions that were sent too early, so that you can use the
 channel object right after it was constructed.
@@ -307,10 +307,10 @@ myChannel.declareQueue("my-queue");
 myChannel.declareExchange("my-exchange");
 ````
 
-If the first declareQueue() call fails in the example above, the second 
+If the first declareQueue() call fails in the example above, the second
 myChannel.declareExchange() method will not be executed, even when this
 second instruction was already sent to the server. The second instruction will be
-ignored by the RabbitMQ server because the channel was already in an invalid 
+ignored by the RabbitMQ server because the channel was already in an invalid
 state after the first failure.
 
 You can overcome this by using multiple channels:
@@ -322,10 +322,10 @@ channel1.declareQueue("my-queue");
 channel2.declareExchange("my-exchange");
 ````
 
-Now, if an error occurs with declaring the queue, it will not have consequences 
-for the other call. But this comes at a small price: setting up the extra channel 
-requires and extra instruction to be sent to the RabbitMQ server, so some extra 
-bytes are sent over the network, and some additional resources in both the client 
+Now, if an error occurs with declaring the queue, it will not have consequences
+for the other call. But this comes at a small price: setting up the extra channel
+requires and extra instruction to be sent to the RabbitMQ server, so some extra
+bytes are sent over the network, and some additional resources in both the client
 application and the RabbitMQ server are used (although this is all very limited).
 
 
@@ -385,9 +385,9 @@ channel.declareQueue("myQueue").onSuccess(callback);
 ````
 
 Just like many others methods in the Channel class, the declareQueue() method
-accept an integer parameter named 'flags'. This is a variable in which you can 
-set method-specific options, by summing up all the options that are described in 
-the documentation above the method. If you for example want to create a durable, 
+accept an integer parameter named 'flags'. This is a variable in which you can
+set method-specific options, by summing up all the options that are described in
+the documentation above the method. If you for example want to create a durable,
 auto-deleted queue, you can pass in the value AMQP::durable + AMQP::autodelete.
 
 The declareQueue() method also accepts a parameter named 'arguments', which is of type
@@ -421,7 +421,7 @@ exchange to publish to, the routing key to use, and the actual message that
 you're publishing - all these parameters are standard C++ strings.
 
 More extended versions of the publish() method exist that accept additional
-arguments, and that enable you to publish entire Envelope objects. An envelope 
+arguments, and that enable you to publish entire Envelope objects. An envelope
 is an object that contains the message plus a list of optional meta information like
 the content-type, content-encoding, priority, expire time and more. None of these
 meta fields are interpreted by this library, and also the RabbitMQ ignores most
@@ -441,10 +441,10 @@ in almost any form:
  *
  *  The following flags can be used
  *
- *      -   mandatory   if set, an unroutable message will be reported to the 
+ *      -   mandatory   if set, an unroutable message will be reported to the
  *                      channel handler with the onReturned method
- * 
- *      -   immediate   if set, a message that could not immediately be consumed 
+ *
+ *      -   immediate   if set, a message that could not immediately be consumed
  *                      is returned to the onReturned method
  *
  *  If either of the two flags is set, and the message could not immediately
@@ -469,17 +469,17 @@ bool publish(const std::string &exchange, const std::string &routingKey, const c
 
 Published messages are normally not confirmed by the server, and the RabbitMQ
 will not send a report back to inform us whether the message was succesfully
-published or not. Therefore the publish method does also not return a Deferred 
+published or not. Therefore the publish method does also not return a Deferred
 object.
 
-As long as no error is reported via the Channel::onError() method, you can safely 
+As long as no error is reported via the Channel::onError() method, you can safely
 assume that your messages were delivered.
 
-This can of course be a problem when you are publishing many messages. If you get 
-an error halfway through there is no way to know for sure how many messages made 
-it to the broker and how many should be republished. If this is important, you can 
+This can of course be a problem when you are publishing many messages. If you get
+an error halfway through there is no way to know for sure how many messages made
+it to the broker and how many should be republished. If this is important, you can
 wrap the publish commands inside a transaction. In this case, if an error occurs,
-the transaction is automatically rolled back by RabbitMQ and none of the messages 
+the transaction is automatically rolled back by RabbitMQ and none of the messages
 are actually published.
 
 ````c++
@@ -531,21 +531,17 @@ The full documentation from the C++ Channel.h headerfile looks like this:
  *
  *  The following flags are supported:
  *
- *      -   nolocal             if set, messages published on this channel are 
+ *      -   nolocal             if set, messages published on this channel are
  *                              not also consumed
  *
- *      -   noack               if set, consumed messages do not have to be acked, 
+ *      -   noack               if set, consumed messages do not have to be acked,
  *                              this happens automatically
  *
- *      -   exclusive           request exclusive access, only this consumer can 
+ *      -   exclusive           request exclusive access, only this consumer can
  *                              access the queue
  *
- *      -   nowait              the server does not have to send a response back 
- *                              that consuming is active
- *
  *  The method ChannelHandler::onConsumerStarted() will be called when the
- *  consumer has started (unless the nowait option was set, in which case
- *  no confirmation method is called)
+ *  consumer has started.
  *
  *  @param  queue               the queue from which you want to consume
  *  @param  tag                 a consumer tag that will be associated with this consume operation
@@ -561,14 +557,14 @@ DeferredConsumer &consume(const std::string &queue, int flags = 0);
 DeferredConsumer &consume(const std::string &queue, const AMQP::Table &arguments);
 ````
 
-As you can see, the consume method returns a DeferredConsumer. This object is a 
-regular Deferred, with  additions. The onSuccess() method of a 
+As you can see, the consume method returns a DeferredConsumer. This object is a
+regular Deferred, with  additions. The onSuccess() method of a
 DeferredConsumer is slightly different than the onSuccess() method of a regular
 Deferred object: one extra parameter will be supplied to your callback function
 with the consumer tag.
 
 The onSuccess() callback will be called when the consume operation _has started_,
-but not when messages are actually consumed. For this you will have to install 
+but not when messages are actually consumed. For this you will have to install
 a different callback, using the onReceived() method.
 
 ````c++
@@ -588,7 +584,7 @@ auto errorCb = [](const char *message) {
 auto messageCb = [&channel](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
 
     std::cout << "message received" << std::endl;
-    
+
     // acknowledge the message
     channel.ack(deliveryTag);
 }
@@ -601,33 +597,33 @@ channel.consume("my-queue")
 
 ````
 
-The Message object holds all information of the delivered message: the actual 
-content, all meta information from the envelope (in fact, the Message class is 
-derived from the Envelope class), and even the name of the exchange and the 
-routing key that were used when the message was originally published. For a full 
+The Message object holds all information of the delivered message: the actual
+content, all meta information from the envelope (in fact, the Message class is
+derived from the Envelope class), and even the name of the exchange and the
+routing key that were used when the message was originally published. For a full
 list of all information in the Message class, you best have a look at the
 message.h, envelope.h and metadata.h header files.
 
-Another important parameter to the onReceived() method is the deliveryTag parameter. 
-This is a unique identifier that you need to acknowledge an incoming message. 
-RabbitMQ only removes the message after it has been acknowledged, so that if your 
-application crashes while it was busy processing the message, the message does 
-not get lost but remains in the queue. But this means that after you've processed 
-the message, you must inform RabbitMQ about it by calling the Channel:ack() method. 
+Another important parameter to the onReceived() method is the deliveryTag parameter.
+This is a unique identifier that you need to acknowledge an incoming message.
+RabbitMQ only removes the message after it has been acknowledged, so that if your
+application crashes while it was busy processing the message, the message does
+not get lost but remains in the queue. But this means that after you've processed
+the message, you must inform RabbitMQ about it by calling the Channel:ack() method.
 This method is very simple and takes in its simplest form only one parameter: the
 deliveryTag of the message.
 
-Consuming messages is a continuous process. RabbitMQ keeps sending messages, until 
-you stop the consumer, which can be done by calling the Channel::cancel() method. 
+Consuming messages is a continuous process. RabbitMQ keeps sending messages, until
+you stop the consumer, which can be done by calling the Channel::cancel() method.
 If you close the channel, or the entire TCP connection, consuming also stops.
 
-RabbitMQ throttles the number of messages that are delivered to you, to prevent 
-that your application is flooded with messages from the queue, and to spread out 
-the messages over multiple consumers. This is done with a setting called 
-quality-of-service (QOS). The QOS setting is a numeric value which holds the number 
+RabbitMQ throttles the number of messages that are delivered to you, to prevent
+that your application is flooded with messages from the queue, and to spread out
+the messages over multiple consumers. This is done with a setting called
+quality-of-service (QOS). The QOS setting is a numeric value which holds the number
 of unacknowledged messages that you are allowed to have. RabbitMQ stops sending
-additional messages when the number of unacknowledges messages has reached this 
-limit, and only sends additional messages when an earlier message gets acknowledged. 
+additional messages when the number of unacknowledges messages has reached this
+limit, and only sends additional messages when an earlier message gets acknowledged.
 To change the QOS, you can simple call Channel::setQos().
 
 
