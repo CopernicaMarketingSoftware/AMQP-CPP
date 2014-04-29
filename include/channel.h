@@ -174,42 +174,30 @@ public:
     /**
      *  Bind two exchanges to each other
      *
-     *  The following flags can be used for the exchange
-     *
-     *      -   nowait      do not wait on response
-     *
      *  @param  source      the source exchange
      *  @param  target      the target exchange
      *  @param  routingkey  the routing key
-     *  @param  flags       optional flags
      *  @param  arguments   additional bind arguments
      *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments) { return _implementation.bindExchange(source, target, routingkey, flags, arguments); }
-    Deferred &bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, const Table &arguments) { return _implementation.bindExchange(source, target, routingkey, 0, arguments); }
-    Deferred &bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags = 0) { return _implementation.bindExchange(source, target, routingkey, flags, Table()); }
+    Deferred &bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, const Table &arguments) { return _implementation.bindExchange(source, target, routingkey, arguments); }
+    Deferred &bindExchange(const std::string &source, const std::string &target, const std::string &routingkey) { return _implementation.bindExchange(source, target, routingkey, Table()); }
 
     /**
      *  Unbind two exchanges from one another
      *
-     *  The following flags can be used for the exchange
-     *
-     *      -   nowait      do not wait on response
-     *
      *  @param  target      the target exchange
      *  @param  source      the source exchange
      *  @param  routingkey  the routing key
-     *  @param  flags       optional flags
      *  @param  arguments   additional unbind arguments
      *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &unbindExchange(const std::string &target, const std::string &source, const std::string &routingkey, int flags, const Table &arguments) { return _implementation.unbindExchange(target, source, routingkey, flags, arguments); }
-    Deferred &unbindExchange(const std::string &target, const std::string &source, const std::string &routingkey, const Table &arguments) { return _implementation.unbindExchange(target, source, routingkey, 0, arguments); }
-    Deferred &unbindExchange(const std::string &target, const std::string &source, const std::string &routingkey, int flags = 0) { return _implementation.unbindExchange(target, source, routingkey, flags, Table()); }
+    Deferred &unbindExchange(const std::string &target, const std::string &source, const std::string &routingkey, const Table &arguments) { return _implementation.unbindExchange(target, source, routingkey, arguments); }
+    Deferred &unbindExchange(const std::string &target, const std::string &source, const std::string &routingkey) { return _implementation.unbindExchange(target, source, routingkey, Table()); }
 
     /**
      *  Declare a queue
@@ -250,22 +238,16 @@ public:
     /**
      *  Bind a queue to an exchange
      *
-     *  The following flags can be used for the exchange
-     *
-     *      -   nowait      do not wait on response
-     *
      *  @param  exchange    the source exchange
      *  @param  queue       the target queue
      *  @param  routingkey  the routing key
-     *  @param  flags       additional flags
      *  @param  arguments   additional bind arguments
      *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, int flags, const Table &arguments) { return _implementation.bindQueue(exchange, queue, routingkey, flags, arguments); }
-    Deferred &bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments) { return _implementation.bindQueue(exchange, queue, routingkey, 0, arguments); }
-    Deferred &bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, int flags = 0) { return _implementation.bindQueue(exchange, queue, routingkey, flags, Table()); }
+    Deferred &bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments) { return _implementation.bindQueue(exchange, queue, routingkey, arguments); }
+    Deferred &bindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey) { return _implementation.bindQueue(exchange, queue, routingkey, Table()); }
 
     /**
      *  Unbind a queue from an exchange
@@ -283,12 +265,7 @@ public:
     /**
      *  Purge a queue
      *
-     *  The following flags can be used for the exchange
-     *
-     *      -   nowait      do not wait on response
-     *
      *  @param  name        name of the queue
-     *  @param  flags       additional flags
      *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
@@ -303,7 +280,7 @@ public:
      *
      *  });
      */
-    DeferredDelete &purgeQueue(const std::string &name, int flags = 0){ return _implementation.purgeQueue(name, flags); }
+    DeferredDelete &purgeQueue(const std::string &name){ return _implementation.purgeQueue(name); }
 
     /**
      *  Remove a queue
@@ -375,11 +352,6 @@ public:
      *      -   nolocal             if set, messages published on this channel are not also consumed
      *      -   noack               if set, consumed messages do not have to be acked, this happens automatically
      *      -   exclusive           request exclusive access, only this consumer can access the queue
-     *      -   nowait              the server does not have to send a response back that consuming is active
-     *
-     *  The method Deferred::onSuccess() will be called when the
-     *  consumer has started (unless the nowait option was set, in which case
-     *  no confirmation method is called)
      *
      *  @param  queue               the queue from which you want to consume
      *  @param  tag                 a consumer tag that will be associated with this consume operation
@@ -411,16 +383,7 @@ public:
      *
      *  If you want to stop a running consumer, you can use this method with the consumer tag
      *
-     *  The following flags are supported:
-     *
-     *      -   nowait              the server does not have to send a response back that the consumer has been cancelled
-     *
-     *  The method Deferred::onSuccess() will be called when the consumer
-     *  was succesfully stopped (unless the nowait option was used, in which case no
-     *  confirmation method is called)
-     *
      *  @param  tag                 the consumer tag
-     *  @param  flags               optional additional flags
      *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
@@ -435,7 +398,7 @@ public:
      *
      *  });
      */
-    DeferredCancel &cancel(const std::string &tag, int flags = 0) { return _implementation.cancel(tag, flags); }
+    DeferredCancel &cancel(const std::string &tag) { return _implementation.cancel(tag); }
 
     /**
      *  Acknoldge a received message

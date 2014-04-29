@@ -133,7 +133,7 @@ public:
         if (!channel) return false;
 
         // report success
-        channel->reportSuccess(name(), messageCount(), consumerCount());
+        if (channel->reportSuccess(name(), messageCount(), consumerCount())) channel->synchronized();
 
         // done
         return true;

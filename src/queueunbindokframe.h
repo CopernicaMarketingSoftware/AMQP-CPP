@@ -73,7 +73,7 @@ public:
         if(!channel) return false;
 
         // report queue unbind success
-        channel->reportSuccess();
+        if (channel->reportSuccess()) channel->synchronized();
 
         // done
         return true;

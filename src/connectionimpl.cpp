@@ -213,9 +213,9 @@ void ConnectionImpl::setConnected()
     // store connected state
     _state = state_connected;
 
-    // if the close operation was already called, we do that again now again
-    // so that the actual messages to close down the connection and the channel
-    // are appended to the queue
+    // if the close method was called before, the frame was not
+    // sent. append it to the end of the queue to make sure we
+    // are correctly closed down.
     if (_closed && !sendClose()) return;
 
     // we're going to call the handler, which can destruct the connection,
@@ -225,11 +225,8 @@ void ConnectionImpl::setConnected()
     // inform handler
     _handler->onConnected(_parent);
 
-    // leap out if the connection no longer exists
-    if (!monitor.valid()) return;
-
     // empty the queue of messages
-    while (!_queue.empty())
+    while (monitor.valid() && !_queue.empty())
     {
         // get the next message
         OutBuffer buffer(std::move(_queue.front()));
@@ -239,9 +236,6 @@ void ConnectionImpl::setConnected()
 
         // send it
         _handler->onData(_parent, buffer.data(), buffer.size());
-
-        // leap out if the connection was destructed
-        if (!monitor.valid()) return;
     }
 }
 
@@ -256,16 +250,10 @@ bool ConnectionImpl::send(const Frame &frame)
     if (_state == state_closing || _state == state_closed) return false;
 
     // we need an output buffer
-    OutBuffer buffer(frame.totalSize());
-
-    // fill the buffer
-    frame.fill(buffer);
-
-    // append an end of frame byte (but not when still negotiating the protocol)
-    if (frame.needsSeparator()) buffer.add((uint8_t)206);
+    OutBuffer buffer(frame.buffer());
 
     // are we still setting up the connection?
-    if ((_state == state_connected && _queue.size() == 0) || frame.partOfHandshake())
+    if ((_state == state_connected && _queue.empty()) || frame.partOfHandshake())
     {
         // send the buffer
         _handler->onData(_parent, buffer.data(), buffer.size());
@@ -273,6 +261,32 @@ bool ConnectionImpl::send(const Frame &frame)
     else
     {
         // the connection is still being set up, so we need to delay the message sending
+        _queue.push(std::move(buffer));
+    }
+
+    // done
+    return true;
+}
+
+/**
+ *  Send buffered data over the connection
+ *
+ *  @param  buffer      the buffer with data to send
+ */
+bool ConnectionImpl::send(OutBuffer &&buffer)
+{
+    // this only works when we are already connected
+    if (_state != state_connected) return false;
+
+    // are we waiting for other frames to be sent before us?
+    if (_queue.empty())
+    {
+        // send it directly
+        _handler->onData(_parent, buffer.data(), buffer.size());
+    }
+    else
+    {
+        // add to the list of waiting buffers
         _queue.push(std::move(buffer));
     }
 

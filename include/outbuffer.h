@@ -24,7 +24,7 @@ private:
      *  @var char*
      */
     char *_buffer;
-    
+
     /**
      *  Pointer to the buffer to be filled
      *  @var char*
@@ -36,13 +36,13 @@ private:
      *  @var size_t
      */
     size_t _size;
-    
+
     /**
      *  The total capacity of the out buffer
      *  @var size_t
      */
     size_t _capacity;
-    
+
 
 public:
     /**
@@ -56,7 +56,7 @@ public:
         _capacity = capacity;
         _buffer = _current = new char[capacity];
     }
-    
+
     /**
      *  Copy constructor
      *  @param  that
@@ -68,11 +68,11 @@ public:
         _capacity = that._capacity;
         _buffer = new char[_capacity];
         _current = _buffer + _size;
-        
+
         // copy memory
         memcpy(_buffer, that._buffer, _size);
     }
-    
+
     /**
      *  Move constructor
      *  @param  that
@@ -84,7 +84,7 @@ public:
         _capacity = that._capacity;
         _buffer = that._buffer;
         _current = that._current;
-        
+
         // reset the other object
         that._size = 0;
         that._capacity = 0;
@@ -95,7 +95,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~OutBuffer() 
+    virtual ~OutBuffer()
     {
         if (_buffer) delete[] _buffer;
     }
@@ -104,7 +104,7 @@ public:
      *  Get access to the internal buffer
      *  @return const char*
      */
-    const char *data()
+    const char *data() const
     {
         return _buffer;
     }
@@ -113,7 +113,7 @@ public:
      *  Current size of the output buffer
      *  @return size_t
      */
-    size_t size()
+    size_t size() const
     {
         return _size;
     }

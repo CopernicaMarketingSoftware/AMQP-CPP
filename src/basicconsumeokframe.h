@@ -94,7 +94,7 @@ public:
         if (!channel) return false;
 
         // report
-        channel->reportSuccess(consumerTag());
+        if (channel->reportSuccess(consumerTag())) channel->synchronized();
 
         // done
         return true;

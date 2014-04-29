@@ -67,7 +67,7 @@ public:
         if(!channel) return false;
 
         // report to handler
-        channel->reportSuccess();
+        if (channel->reportSuccess()) channel->synchronized();
 
         // done
         return true;

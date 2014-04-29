@@ -94,7 +94,7 @@ public:
         if (!channel) return false;
 
         // report
-        channel->reportSuccess<const std::string&>(consumerTag());
+        if (channel->reportSuccess<const std::string&>(consumerTag())) channel->synchronized();
 
         // done
         return true;

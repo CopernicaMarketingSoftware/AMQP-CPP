@@ -67,7 +67,19 @@ public:
      *  Destructor
      */
     virtual ~BasicCancelFrame() {}
-    
+
+    /**
+     *  Is this a synchronous frame?
+     *
+     *  After a synchronous frame no more frames may be
+     *  sent until the accompanying -ok frame arrives
+     */
+    bool synchronous() const override
+    {
+        // we are synchronous when the nowait option is not used
+        return !noWait();
+    }
+
     /**
      *  Return the consumertag, which is specified by the client or provided by the server
      *  @return  string
@@ -90,7 +102,7 @@ public:
      *  Return whether to wait for a response
      *  @return  boolean
      */
-    const bool noWait()
+    const bool noWait() const
     {
         return _noWait.get(0);
     }

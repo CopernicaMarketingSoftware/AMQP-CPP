@@ -1,6 +1,6 @@
 /**
  *  Exchangebindframe.h
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -26,25 +26,25 @@ private:
      *  @var ShortString
      */
     ShortString _destination;
-    
+
     /**
-     *  Exchange which is bound 
+     *  Exchange which is bound
      *  @var ShortString
      */
     ShortString _source;
-    
+
     /**
      *  Routing key
      *  @var ShortString
      */
     ShortString _routingKey;
-    
+
     /**
      *  contains: nowait  do not wait on response
      *  @var booleanset
      */
     BooleanSet _bools;
-    
+
     /**
      *  Additional arguments
      *  @var Table
@@ -61,7 +61,7 @@ protected:
     {
         // call base
         ExchangeFrame::fill(buffer);
-        
+
         buffer.add(_reserved);
         _destination.fill(buffer);
         _source.fill(buffer);
@@ -70,13 +70,13 @@ protected:
         _arguments.fill(buffer);
     }
 
-public: 
+public:
     /**
      *  Constructor based on incoming data
-     * 
+     *
      *  @param  frame   received frame to decode
      */
-    ExchangeBindFrame(ReceivedFrame &frame) : 
+    ExchangeBindFrame(ReceivedFrame &frame) :
         ExchangeFrame(frame),
         _reserved(frame.nextUint16()),
         _destination(frame),
@@ -102,8 +102,19 @@ public:
         _bools(noWait),
         _arguments(arguments)
     {}
-    
-    
+
+    /**
+     *  Is this a synchronous frame?
+     *
+     *  After a synchronous frame no more frames may be
+     *  sent until the accompanying -ok frame arrives
+     */
+    bool synchronous() const override
+    {
+        // we are synchronous when the nowait option has not been set
+        return !noWait();
+    }
+
     /**
      *  Get the destination exchange
      *  @return string
@@ -112,7 +123,7 @@ public:
     {
         return _destination;
     }
-    
+
     /**
      *  Get the source exchange
      *  @return string
@@ -121,7 +132,7 @@ public:
     {
         return _source;
     }
-    
+
     /**
      *  Get the routing key
      *  @return string
@@ -130,7 +141,7 @@ public:
     {
         return _routingKey;
     }
-    
+
     /**
      *  Get the method id
      *  @return uint16_t
@@ -139,7 +150,7 @@ public:
     {
         return 30;
     }
-    
+
     /**
      *  Get the additional arguments
      *  @return Table
@@ -148,12 +159,12 @@ public:
     {
         return _arguments;
     }
-    
+
     /**
      *  Get the nowait bool
      *  @return bool
      */
-    bool noWait()
+    bool noWait() const
     {
         return _bools.get(0);
     }

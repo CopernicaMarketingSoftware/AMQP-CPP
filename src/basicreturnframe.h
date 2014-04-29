@@ -93,6 +93,17 @@ public:
     virtual ~BasicReturnFrame() {}
 
     /**
+     *  Is this a synchronous frame?
+     *
+     *  After a synchronous frame no more frames may be
+     *  sent until the accompanying -ok frame arrives
+     */
+    virtual bool synchronous() const override
+    {
+        return false;
+    }
+
+    /**
      *  Return the name of the exchange to publish to
      *  @return  string
      */

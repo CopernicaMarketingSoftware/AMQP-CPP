@@ -1,6 +1,6 @@
 /**
  *  Class describing a basic acknowledgement frame
- *  
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -38,10 +38,10 @@ protected:
     {
         // call base
         BasicFrame::fill(buffer);
-        
+
         // add the delivery tag
         buffer.add(_deliveryTag);
-        
+
         // add the booleans
         _multiple.fill(buffer);
     }
@@ -54,24 +54,35 @@ public:
      *  @param  deliveryTag     server-assigned and channel specific delivery tag
      *  @param  multiple        acknowledge mutiple messages
      */
-    BasicAckFrame(uint16_t channel, uint64_t deliveryTag, bool multiple = false) : 
+    BasicAckFrame(uint16_t channel, uint64_t deliveryTag, bool multiple = false) :
         BasicFrame(channel, 9),
         _deliveryTag(deliveryTag),
         _multiple(multiple) {}
-    
+
     /**
      *  Construct based on received frame
      *  @param  frame
      */
-    BasicAckFrame(ReceivedFrame &frame) : 
+    BasicAckFrame(ReceivedFrame &frame) :
         BasicFrame(frame),
         _deliveryTag(frame.nextUint64()),
         _multiple(frame) {}
-    
+
     /**
      *  Destructor
      */
     virtual ~BasicAckFrame() {}
+
+    /**
+     *  Is this a synchronous frame?
+     *
+     *  After a synchronous frame no more frames may be
+     *  sent until the accompanying -ok frame arrives
+     */
+    virtual bool synchronous() const override
+    {
+        return false;
+    }
 
     /**
      *  Return the method ID

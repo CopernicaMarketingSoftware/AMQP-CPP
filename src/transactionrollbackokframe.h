@@ -74,7 +74,7 @@ public:
         if(!channel) return false;
 
         // report that the channel is open
-        channel->reportSuccess();
+        if (channel->reportSuccess()) channel->synchronized();
 
         // done
         return true;

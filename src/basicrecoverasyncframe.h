@@ -63,6 +63,17 @@ public:
     virtual ~BasicRecoverAsyncFrame() {}
 
     /**
+     *  Is this a synchronous frame?
+     *
+     *  After a synchronous frame no more frames may be
+     *  sent until the accompanying -ok frame arrives
+     */
+    virtual bool synchronous() const override
+    {
+        return false;
+    }
+
+    /**
      *  Return the method ID
      *  @return  uint16_t
      */

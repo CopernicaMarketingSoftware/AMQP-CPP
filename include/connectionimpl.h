@@ -254,6 +254,13 @@ public:
     bool send(const Frame &frame);
 
     /**
+     *  Send buffered data over the connection
+     *
+     *  @param  buffer      the buffer with data to send
+     */
+    bool send(OutBuffer &&buffer);
+
+    /**
      *  Get a channel by its identifier
      *
      *  This method only works if you had already created the channel before.

@@ -50,6 +50,14 @@ public:
     virtual ~MethodFrame() {}
 
     /**
+     *  Is this a synchronous frame?
+     *
+     *  After a synchronous frame no more frames may be
+     *  sent until the accompanying -ok frame arrives
+     */
+    bool synchronous() const override { return true; }
+
+    /**
      *  Get the message type
      *  @return uint8_t
      */

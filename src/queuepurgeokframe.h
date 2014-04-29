@@ -94,7 +94,7 @@ public:
         if(!channel) return false;
 
         // report queue purge success
-        channel->reportSuccess(this->messageCount());
+        if (channel->reportSuccess(this->messageCount())) channel->synchronized();
 
         // done
         return true;

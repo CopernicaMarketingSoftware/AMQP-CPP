@@ -58,18 +58,18 @@ private:
     /**
      *  Pointer to the oldest deferred result (the first one that is going
      *  to be executed)
-     * 
+     *
      *  @var    Deferred
      */
     std::unique_ptr<Deferred> _oldestCallback = nullptr;
-    
+
     /**
      *  Pointer to the newest deferred result (the last one to be added).
-     * 
+     *
      *  @var    Deferred
      */
     Deferred *_newestCallback = nullptr;
-    
+
     /**
      *  The channel number
      *  @var uint16_t
@@ -85,6 +85,19 @@ private:
         state_closing,
         state_closed
     } _state = state_connected;
+
+    /**
+     *  The frames that still need to be send out
+     *
+     *  We store the data as well as whether they
+     *  should be handled synchronously.
+     */
+    std::queue<std::pair<bool, OutBuffer>> _queue;
+
+    /**
+     *  Are we currently operating in synchronous mode?
+     */
+    bool _synchronous = false;
 
     /**
      *  The message that is now being received
@@ -203,13 +216,12 @@ public:
      *  @param  source      exchange which binds to target
      *  @param  target      exchange to bind to
      *  @param  routingKey  routing key
-     *  @param  glags       additional flags
      *  @param  arguments   additional arguments for binding
      *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments);
+    Deferred &bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, const Table &arguments);
 
     /**
      *  unbind two exchanges
@@ -217,13 +229,12 @@ public:
      *  @param  source      the source exchange
      *  @param  target      the target exchange
      *  @param  routingkey  the routing key
-     *  @param  flags       optional flags
      *  @param  arguments   additional unbind arguments
      *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &unbindExchange(const std::string &source, const std::string &target, const std::string &routingkey, int flags, const Table &arguments);
+    Deferred &unbindExchange(const std::string &source, const std::string &target, const std::string &routingkey, const Table &arguments);
 
     /**
      *  remove an exchange
@@ -253,13 +264,12 @@ public:
      *  @param  exchangeName    name of the exchange to bind to
      *  @param  queueName       name of the queue
      *  @param  routingkey      routingkey
-     *  @param  flags           additional flags
      *  @param  arguments       additional arguments
      *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &bindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, int flags, const Table &arguments);
+    Deferred &bindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, const Table &arguments);
 
     /**
      *  Unbind a queue from an exchange
@@ -277,7 +287,6 @@ public:
     /**
      *  Purge a queue
      *  @param  queue       queue to purge
-     *  @param  flags       additional flags
      *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
@@ -292,7 +301,7 @@ public:
      *
      *  });
      */
-    DeferredDelete &purgeQueue(const std::string &name, int flags);
+    DeferredDelete &purgeQueue(const std::string &name);
 
     /**
      *  Remove a queue
@@ -363,7 +372,6 @@ public:
     /**
      *  Cancel a running consumer
      *  @param  tag                 the consumer tag
-     *  @param  flags               optional flags
      *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
@@ -378,7 +386,7 @@ public:
      *
      *  });
      */
-    DeferredCancel &cancel(const std::string &tag, int flags);
+    DeferredCancel &cancel(const std::string &tag);
 
     /**
      *  Acknowledge a message
@@ -430,53 +438,78 @@ public:
     bool send(const Frame &frame);
 
     /**
+     *  Signal the channel that a synchronous operation
+     *  was completed. After this operation, waiting
+     *  frames can be sent out.
+     */
+    void synchronized();
+
+    /**
      *  Report to the handler that the channel is opened
      */
     void reportReady()
     {
+        // callbacks could destroy us, so monitor it
+        Monitor monitor(this);
+
         // inform handler
         if (_readyCallback) _readyCallback();
+
+        // if the monitor is still valid, we exit synchronous mode now
+        if (monitor.valid()) synchronized();
     }
 
     /**
      *  Report to the handler that the channel is closed
+     *
+     *  Returns whether the channel object is still valid
      */
-    void reportClosed()
+    bool reportClosed()
     {
         // change state
         _state = state_closed;
 
         // and pass on to the reportSuccess() method which will call the
         // appropriate deferred object to report the successful operation
-        reportSuccess();
+        return reportSuccess();
+
+        // technically, we should exit synchronous method now
+        // since the synchronous channel close frame has been
+        // acknowledged by the server.
+        //
+        // but since the channel was just closed, there is no
+        // real point in doing this, as we cannot send frames
+        // out anymore.
     }
 
     /**
      *  Report success
      *
-     *  This function is called to report success for all
-     *  cases where the callback does not receive any parameters
+     *  Returns whether the channel object is still valid
      */
     template <typename... Arguments>
-    void reportSuccess(Arguments ...parameters)
+    bool reportSuccess(Arguments ...parameters)
     {
         // skip if there is no oldest callback
-        if (!_oldestCallback) return;
-     
+        if (!_oldestCallback) return true;
+
         // we are going to call callbacks that could destruct the channel
         Monitor monitor(this);
-     
+
         // call the callback
         auto *next = _oldestCallback->reportSuccess(std::forward<Arguments>(parameters)...);
-        
+
         // leap out if channel no longer exists
-        if (!monitor.valid()) return;
-        
+        if (!monitor.valid()) return false;
+
         // set the oldest callback
         _oldestCallback.reset(next);
-        
+
         // if there was no next callback, the newest callback was just used
         if (!next) _newestCallback = nullptr;
+
+        // we are still valid
+        return true;
     }
 
     /**
@@ -497,30 +530,30 @@ public:
         {
             // call the callback
             auto *next = _oldestCallback->reportError(message);
-            
+
             // leap out if channel no longer exists
             if (!monitor.valid()) return;
-            
+
             // set the oldest callback
             _oldestCallback.reset(next);
         }
-        
+
         // clean up all deferred other objects
         while (_oldestCallback)
         {
             // call the callback
             auto *next = _oldestCallback->reportError("Channel is in error state");
-            
+
             // leap out if channel no longer exists
             if (!monitor.valid()) return;
-            
+
             // set the oldest callback
             _oldestCallback.reset(next);
         }
 
         // all callbacks have been processed, so we also can reset the pointer to the newest
         _newestCallback = nullptr;
-        
+
         // inform handler
         if (notifyhandler && _errorCallback) _errorCallback(message);
     }
@@ -534,7 +567,7 @@ public:
     {
         // install the callback if it is assigned
         if (callback) _consumers[consumertag] = callback;
-        
+
         // otherwise we erase the previously set callback
         else _consumers.erase(consumertag);
     }

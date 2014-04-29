@@ -93,7 +93,7 @@ public:
         if (!channel) return false;
 
         // report success for the call
-        channel->reportSuccess();
+        if (channel->reportSuccess()) channel->synchronized();
 
         // done
         return true;
