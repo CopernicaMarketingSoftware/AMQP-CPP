@@ -72,11 +72,11 @@ protected:
         // execute callbacks if registered
         if (_successCallback)   _successCallback();
         if (_finalizeCallback)  _finalizeCallback();
-        
+
         // return the next deferred result
         return _next;
     }
-    
+
     /**
      *  Report success for queue declared messages
      *  @param  name            Name of the new queue
@@ -89,7 +89,7 @@ protected:
         // this is the same as a regular success message
         return reportSuccess();
     }
-    
+
     /**
      *  Report success for frames that report delete operations
      *  @param  messagecount    Number of messages that were deleted
@@ -100,7 +100,7 @@ protected:
         // this is the same as a regular success message
         return reportSuccess();
     }
-    
+
     /**
      *  Report success for frames that report cancel operations
      *  @param  name            Consumer tag that is cancelled
@@ -117,15 +117,15 @@ protected:
      *  @param  error           Description of the error that occured
      *  @return Deferred        Next deferred result
      */
-    Deferred *reportError(const char *error) 
+    Deferred *reportError(const char *error)
     {
         // from this moment on the object should be listed as failed
         _failed = true;
-        
+
         // execute callbacks if registered
         if (_errorCallback)     _errorCallback(error);
         if (_finalizeCallback)  _finalizeCallback();
-        
+
         // return the next deferred result
         return _next;
     }
@@ -146,7 +146,7 @@ protected:
      */
     friend class ChannelImpl;
     friend class Callbacks;
-    
+
 protected:
     /**
      *  Protected constructor that can only be called
@@ -162,6 +162,11 @@ public:
      */
     Deferred(const Deferred &that) = delete;
     Deferred(Deferred &&that) = delete;
+
+    /**
+     *  Destructor
+     */
+    virtual ~Deferred() {}
 
     /**
      *  Cast to a boolean
@@ -186,7 +191,7 @@ public:
     {
         // store callback
         _successCallback = callback;
-        
+
         // allow chaining
         return *this;
     }
@@ -208,7 +213,7 @@ public:
 
         // if the object is already in a failed state, we call the callback right away
         if (_failed) callback("Frame could not be sent");
-        
+
         // allow chaining
         return *this;
     }
@@ -232,10 +237,10 @@ public:
     {
         // store callback
         _finalizeCallback = callback;
-        
+
         // if the object is already in a failed state, we call the callback right away
         if (_failed) callback();
-        
+
         // allow chaining
         return *this;
     }
