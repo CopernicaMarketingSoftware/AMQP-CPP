@@ -5,7 +5,7 @@ include(set_cxx_norm.cmake)
 set_cxx_norm (${CXX_NORM_CXX11})
 
 macro (add_sources)
-    file (RELATIVE_PATH _relPath "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+    file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     foreach (_src ${ARGN})
         if (_relPath)
             list (APPEND SRCS "${_relPath}/${_src}")
