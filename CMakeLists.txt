@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+project(amqp-cpp)
+
 # ensure c++11 on all compilers
 include(set_cxx_norm.cmake)
 set_cxx_norm (${CXX_NORM_CXX11})
@@ -24,5 +26,5 @@ add_subdirectory(include)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 add_library(amqp-cpp STATIC ${SRCS})
-target_include_directories(amqp-cpp SYSTEM PUBLIC ${CMAKE_SOURCE_DIR})
+target_include_directories(amqp-cpp SYSTEM PUBLIC ${PROJECT_SOURCE_DIR})
 
