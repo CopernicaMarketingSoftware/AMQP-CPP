@@ -1,6 +1,6 @@
 /**
  *  Class describing a channel close acknowledgement frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -67,13 +67,13 @@ public:
     {
         // we need the appropriate channel
         ChannelImpl *channel = connection->channel(this->channel());
-        
+
         // channel does not exist
-        if (!channel) return false;    
-        
+        if (!channel) return false;
+
         // report that the channel is closed
-        channel->reportClosed();
-        
+        if (channel->reportClosed()) channel->synchronized();
+
         // done
         return true;
     }

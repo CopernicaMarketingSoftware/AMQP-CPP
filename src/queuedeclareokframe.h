@@ -1,6 +1,6 @@
 /**
  *  Class describing an AMQP queue declare ok frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -70,7 +70,7 @@ public:
 
     /**
      *  Constructor based on incoming data
-     *  @param  frame   received frame 
+     *  @param  frame   received frame
      */
     QueueDeclareOKFrame(ReceivedFrame &frame) :
         QueueFrame(frame),
@@ -91,7 +91,7 @@ public:
     {
         return 11;
     }
-    
+
     /**
      *  Queue name
      *  @return string
@@ -105,7 +105,7 @@ public:
      *  Number of messages
      *  @return int32_t
      */
-    int32_t messageCount() const
+    uint32_t messageCount() const
     {
         return _messageCount;
     }
@@ -114,11 +114,11 @@ public:
      *  Number of consumers
      *  @return int32_t
      */
-    int32_t consumerCount() const
+    uint32_t consumerCount() const
     {
         return _consumerCount;
     }
-    
+
     /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
@@ -128,13 +128,13 @@ public:
     {
         // check if we have a channel
         ChannelImpl *channel = connection->channel(this->channel());
-        
+
         // what if channel doesn't exist?
         if (!channel) return false;
-        
-        // report to the handler
-        channel->reportQueueDeclared(this->name(), this->messageCount(), this->consumerCount());
-        
+
+        // report success
+        if (channel->reportSuccess(name(), messageCount(), consumerCount())) channel->synchronized();
+
         // done
         return true;
     }

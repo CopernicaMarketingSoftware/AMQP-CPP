@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  Available field types for AMQP
  * 
@@ -36,7 +37,7 @@ public:
      *  Create a new instance on the heap of this object, identical to the object passed
      *  @return Field*
      */
-    virtual Field *clone() const = 0;
+    virtual std::shared_ptr<Field> clone() const = 0;
 
     /**
      *  Get the size this field will take when
@@ -58,8 +59,43 @@ public:
      */
     virtual char typeID() const = 0;
     
+    /**
+     *  Output the object to a stream
+     *  @param std::ostream
+     */
+    virtual void output(std::ostream &stream) const = 0;
     
+    /**
+     *  Casting operators
+     *  @return mixed
+     */
+    virtual operator const std::string& () const;
+    virtual operator const char * () const { return nullptr; }
+    virtual operator uint8_t () const { return 0; }
+    virtual operator uint16_t () const { return 0; }
+    virtual operator uint32_t () const { return 0; }
+    virtual operator uint64_t () const { return 0; }
+    virtual operator int8_t () const { return 0; }
+    virtual operator int16_t () const { return 0; }
+    virtual operator int32_t () const { return 0; }
+    virtual operator int64_t () const { return 0; }
+    virtual operator float () const { return 0; }
+    virtual operator double () const { return 0; }
+    virtual operator const Array& () const;
+    virtual operator const Table& () const;
 };
+
+/**
+ *  Custom output stream operator
+ *  @param  stream
+ *  @param  field
+ *  @return ostream
+ */
+inline std::ostream &operator<<(std::ostream &stream, const Field &field)
+{
+    field.output(stream);
+    return stream;
+}
 
 /**
  *  end namespace

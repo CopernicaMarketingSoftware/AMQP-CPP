@@ -1,6 +1,6 @@
 /**
  *  Class describing an AMQP exchange declare ok frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -55,7 +55,7 @@ public:
     {
         return 11;
     }
-    
+
     /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
@@ -65,13 +65,13 @@ public:
     {
         // we need the appropriate channel
         ChannelImpl *channel = connection->channel(this->channel());
-        
+
         // channel does not exist
         if(!channel) return false;
-        
+
         // report exchange declare ok
-        channel->reportExchangeDeclared();
-        
+        if (channel->reportSuccess()) channel->synchronized();
+
         // done
         return true;
     }

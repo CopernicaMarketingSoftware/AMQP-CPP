@@ -22,12 +22,6 @@ protected:
      *  @param  what
      */
     explicit Exception(const std::string &what) : runtime_error(what) {}
-
-public:
-    /**
-     *  Destructor
-     */
-    virtual ~Exception() {}
 };
     
 /**

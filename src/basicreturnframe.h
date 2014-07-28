@@ -93,6 +93,17 @@ public:
     virtual ~BasicReturnFrame() {}
 
     /**
+     *  Is this a synchronous frame?
+     *
+     *  After a synchronous frame no more frames may be
+     *  sent until the accompanying -ok frame arrives
+     */
+    virtual bool synchronous() const override
+    {
+        return false;
+    }
+
+    /**
      *  Return the name of the exchange to publish to
      *  @return  string
      */
@@ -144,17 +155,8 @@ public:
      */
     virtual bool process(ConnectionImpl *connection) override
     {
-        // we need the appropriate channel
-        ChannelImpl *channel = connection->channel(this->channel());
-        
-        // channel does not exist
-        if (!channel) return false;    
-        
-        // construct the message
-        channel->message(*this);
-        
-        // done
-        return true;
+        // we no longer support returned messages
+        return false;
     }
 };
 

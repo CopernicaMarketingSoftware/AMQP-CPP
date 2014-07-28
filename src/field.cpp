@@ -46,6 +46,45 @@ Field *Field::decode(ReceivedFrame &frame)
 }
 
 /**
+ *  Cast to string
+ *  @return std::string
+ */
+Field::operator const std::string& () const
+{
+    // static empty string
+    static std::string empty;
+    
+    // return it
+    return empty;
+}
+
+/**
+ *  Cast to array
+ *  @return Array
+ */
+Field::operator const Array& () const
+{
+    // static empty array
+    static Array empty;
+    
+    // return it
+    return empty;
+}
+
+/**
+ *  Cast to object
+ *  @return Array
+ */
+Field::operator const Table& () const
+{
+    // static empty table
+    static Table empty;
+    
+    // return it
+    return empty;
+}
+
+/**
  *  End of namespace
  */
 }

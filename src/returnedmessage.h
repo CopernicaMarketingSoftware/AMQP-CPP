@@ -24,7 +24,7 @@ private:
      *  @var    int16_t
      */
     int16_t _replyCode;
-    
+
     /**
      *  The reply message
      *  @var    string
@@ -40,22 +40,11 @@ public:
     ReturnedMessage(const BasicReturnFrame &frame) :
         MessageImpl(frame.exchange(), frame.routingKey()),
         _replyCode(frame.replyCode()), _replyText(frame.replyText()) {}
-        
+
     /**
      *  Destructor
      */
     virtual ~ReturnedMessage() {}
-    
-    /**
-     *  Report to the handler
-     *  @param  channel
-     *  @param  handler
-     */
-    virtual void report(Channel *channel, ChannelHandler *handler) override
-    {
-        // report to the handler
-        handler->onReturned(channel, *this, _replyCode, _replyText);
-    }
 };
 
 /**

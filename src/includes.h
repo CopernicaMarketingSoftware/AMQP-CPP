@@ -11,7 +11,6 @@
 #include "../amqpcpp.h"
 
 // classes that are very commonly used
-#include "monitor.h"
 #include "exception.h"
 #include "protocolexception.h"
 #include "frame.h"

@@ -1,6 +1,6 @@
 /**
  *  Class describing an AMQP queue purge frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -27,7 +27,7 @@ private:
     ShortString _name;
 
     /**
-     *  Do not wait on response 
+     *  Do not wait on response
      *  @var BooleanSet
      */
     BooleanSet _noWait;
@@ -37,7 +37,7 @@ protected:
      *  Encode the frame into a buffer
      *
      *  @param   buffer  buffer to write frame to
-     */ 
+     */
     virtual void fill(OutBuffer& buffer) const override
     {
         // call base
@@ -63,13 +63,13 @@ public:
      *  @param   noWait  Do not wait on response
      *
      *  @return  newly created Queuepurgeframe
-     */ 
+     */
     QueuePurgeFrame(uint16_t channel, const std::string& name, bool noWait = false) :
         QueueFrame(channel, name.length() + 4), // 1 extra for string length, 1 for bool, 2 for deprecated field
         _name(name),
         _noWait(noWait)
     {}
-    
+
     /**
      *  Constructor based on received data
      *  @param frame    received frame
@@ -80,11 +80,23 @@ public:
         _name(frame),
         _noWait(frame)
     {}
-    
+
+    /**
+     *  Is this a synchronous frame?
+     *
+     *  After a synchronous frame no more frames may be
+     *  sent until the accompanying -ok frame arrives
+     */
+    bool synchronous() const override
+    {
+        // we are synchronous without the nowait option
+        return !noWait();
+    }
+
     /**
      *  The method ID
      *  @return method id
-     */ 
+     */
     virtual uint16_t methodID() const override
     {
         return 30;

@@ -84,6 +84,18 @@ public:
     virtual ~ExchangeDeleteFrame() {}
 
     /**
+     *  Is this a synchronous frame?
+     *
+     *  After a synchronous frame no more frames may be
+     *  sent until the accompanying -ok frame arrives
+     */
+    bool synchronous() const override
+    {
+        // we are synchronous without the nowait option
+        return !noWait();
+    }
+
+    /**
      *  returns the method id
      *  @return uint16_t
      */

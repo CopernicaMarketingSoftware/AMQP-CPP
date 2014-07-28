@@ -97,7 +97,7 @@ Table &Table::operator=(Table &&table)
  *  @param  name    field name
  *  @return         the field value
  */
-const Field &Table::get(const std::string &name)
+const Field &Table::get(const std::string &name) const
 {
     // we need an empty string
     static ShortString empty;
@@ -145,7 +145,7 @@ size_t Table::size() const
 void Table::fill(OutBuffer& buffer) const
 {
     // add size
-    buffer.add((uint32_t) size()-4);
+    buffer.add(static_cast<uint32_t>(size()-4));
 
     // loop through the fields
     for (auto iter(_fields.begin()); iter != _fields.end(); ++iter)

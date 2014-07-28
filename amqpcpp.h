@@ -6,6 +6,8 @@
  *  @documentation public
  */
 
+#pragma once
+
 // base C++ include files
 #include <vector>
 #include <string>
@@ -16,6 +18,9 @@
 #include <limits>
 #include <cstddef>
 #include <cstring>
+#include <stdexcept>
+#include <utility>
+#include <iostream>
 
 // base C include files
 #include <stdint.h>
@@ -29,6 +34,7 @@
 #include <amqpcpp/receivedframe.h>
 #include <amqpcpp/outbuffer.h>
 #include <amqpcpp/watchable.h>
+#include <amqpcpp/monitor.h>
 
 // amqp types
 #include <amqpcpp/field.h>
@@ -48,7 +54,12 @@
 // mid level includes
 #include <amqpcpp/exchangetype.h>
 #include <amqpcpp/flags.h>
-#include <amqpcpp/channelhandler.h>
+#include <amqpcpp/callbacks.h>
+#include <amqpcpp/deferred.h>
+#include <amqpcpp/deferredconsumer.h>
+#include <amqpcpp/deferredqueue.h>
+#include <amqpcpp/deferreddelete.h>
+#include <amqpcpp/deferredcancel.h>
 #include <amqpcpp/channelimpl.h>
 #include <amqpcpp/channel.h>
 #include <amqpcpp/login.h>

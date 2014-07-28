@@ -1,6 +1,6 @@
 /**
  *  Class describing an AMQP queue purge frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -35,7 +35,7 @@ protected:
         // add fields
         buffer.add(_messageCount);
     }
-    
+
 public:
     /**
      *  Construct a queuepurgeokframe
@@ -79,7 +79,7 @@ public:
     {
         return _messageCount;
     }
-    
+
     /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
@@ -89,13 +89,13 @@ public:
     {
         // check if we have a channel
         ChannelImpl *channel = connection->channel(this->channel());
-        
+
         // channel does not exist
         if(!channel) return false;
 
         // report queue purge success
-        channel->reportQueuePurged(this->messageCount());
-        
+        if (channel->reportSuccess(this->messageCount())) channel->synchronized();
+
         // done
         return true;
     }

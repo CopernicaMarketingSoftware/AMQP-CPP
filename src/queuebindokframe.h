@@ -1,6 +1,6 @@
 /**
  *  Class describing an AMQP queue bind ok frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -54,7 +54,7 @@ public:
     {
         return 21;
     }
-    
+
     /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
@@ -64,13 +64,13 @@ public:
     {
         // check if we have a channel
         ChannelImpl *channel = connection->channel(this->channel());
-        
+
         // channel does not exist
         if(!channel) return false;
-        
+
         // report to handler
-        channel->reportQueueBound();
-        
+        if (channel->reportSuccess()) channel->synchronized();
+
         // done
         return true;
     }

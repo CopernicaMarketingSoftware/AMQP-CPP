@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  BooleanSet.h
  *
@@ -77,9 +78,25 @@ public:
      *  Extending from field forces us to implement a clone function.
      *  @return shared_ptr
      */
-    virtual Field *clone() const override
+    virtual std::shared_ptr<Field> clone() const override
     {
-        return new BooleanSet(*this);
+        return std::make_shared<BooleanSet>(*this);
+    }
+
+    /**
+     *  Output the object to a stream
+     *  @param std::ostream
+     */
+    virtual void output(std::ostream &stream) const override
+    {
+        // prefix
+        stream << "booleanset(";
+        
+        // the members
+        for (int i=0; i<8; i++) stream << (i == 0 ? "" : ",") << (get(i) ? 1 : 0);
+        
+        // postfix
+        stream << ")";
     }
 
     /**

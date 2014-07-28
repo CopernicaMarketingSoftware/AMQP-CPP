@@ -1,6 +1,7 @@
+#pragma once
 /**
  *  AMQP field array
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -20,7 +21,7 @@ private:
      *  @typedef
      */
     typedef std::vector<std::shared_ptr<Field>> FieldArray;
-    
+
     /**
      *  The actual fields
      *  @var FieldArray
@@ -30,7 +31,7 @@ private:
 public:
     /**
      *  Constructor to construct an array from a received frame
-     * 
+     *
      *  @param  frame   received frame
      */
     Array(ReceivedFrame &frame);
@@ -61,9 +62,9 @@ public:
      *  Create a new instance of this object
      *  @return Field*
      */
-    virtual Field *clone() const override
+    virtual std::shared_ptr<Field> clone() const override
     {
-        return new Array(*this);
+        return std::make_shared<Array>(*this);
     }
 
     /**
@@ -82,8 +83,20 @@ public:
      */
     Array set(uint8_t index, const Field &value)
     {
-        // copy to a new pointer and store it
-        _fields[index] = std::shared_ptr<Field>(value.clone());
+        // construct a shared pointer
+        auto ptr = value.clone();
+
+        // should we overwrite an existing record?
+        if (index >= _fields.size())
+        {
+            // append index
+            _fields.push_back(ptr);
+        }
+        else
+        {
+            // overwrite pointer
+            _fields[index] = ptr;
+        }
 
         // allow chaining
         return *this;
@@ -97,7 +110,26 @@ public:
      *  @param  index   field index
      *  @return Field
      */
-    const Field &get(uint8_t index);
+    const Field &get(uint8_t index) const;
+
+    /**
+     *  Get number of elements on this array
+     *
+     *  @return array size
+     */
+    uint32_t count() const;
+
+    /**
+     *  Remove last element from array
+     */
+    void pop_back();
+
+    /**
+     *  Add field to end of array
+     *
+     *  @param value
+     */
+    void push_back(const Field &value);
 
     /**
      *  Get a field
@@ -109,9 +141,19 @@ public:
     {
         return ArrayFieldProxy(this, index);
     }
+    
+    /**
+     *  Get a const field
+     *  @param  index   field index
+     *  @return Field
+     */
+    const Field &operator[](uint8_t index) const
+    {
+        return get(index);
+    }
 
     /**
-     *  Write encoded payload to the given buffer. 
+     *  Write encoded payload to the given buffer.
      *  @param  buffer
      */
     virtual void fill(OutBuffer& buffer) const override;
@@ -124,6 +166,45 @@ public:
     virtual char typeID() const override
     {
         return 'A';
+    }
+
+    /**
+     *  Output the object to a stream
+     *  @param std::ostream
+     */
+    virtual void output(std::ostream &stream) const
+    {
+        // prefix
+        stream << "array(";
+        
+        // is this the first iteration
+        bool first = true;
+        
+        // loop through all members
+        for (auto &iter : _fields) 
+        {
+            // split with comma
+            if (!first) stream << ",";
+            
+            // show output
+            stream << *iter;
+            
+            // no longer first iter
+            first = false;
+        }
+        
+        // postfix
+        stream << ")";
+    }
+    
+    /**
+     *  Cast to array
+     *  @return Array
+     */
+    virtual operator const Array& () const override
+    {
+        // this already is an array, so no cast is necessary
+        return *this;
     }
 };
 

@@ -8,7 +8,7 @@
  *  Set up namespace
  */
 namespace AMQP {
-    
+
 /**
  *  Class definition
  */
@@ -26,31 +26,31 @@ private:
      *  @var ShortString
      */
     ShortString _destination;
-    
+
     /**
-     *  Exchange which is bound 
+     *  Exchange which is bound
      *  @var ShortString
      */
     ShortString _source;
-    
+
     /**
      *  Routing key
      *  @var ShortString
      */
     ShortString _routingKey;
-    
+
     /**
      *  contains: nowait  do not wait on response
      *  @var booleanset
      */
     BooleanSet _bools;
-    
+
     /**
      *  Additional arguments
      *  @var Table
      */
     Table _arguments;
-  
+
 protected:
     /**
      *  Encode a frame on a string buffer
@@ -61,7 +61,7 @@ protected:
     {
         // call base
         ExchangeFrame::fill(buffer);
-        
+
         buffer.add(_reserved);
         _destination.fill(buffer);
         _source.fill(buffer);
@@ -73,10 +73,10 @@ protected:
 public:
     /**
      *  Constructor based on incoming data
-     * 
+     *
      *  @param  frame   received frame to decode
      */
-    ExchangeUnbindFrame(ReceivedFrame &frame) : 
+    ExchangeUnbindFrame(ReceivedFrame &frame) :
         ExchangeFrame(frame),
         _reserved(frame.nextUint16()),
         _destination(frame),
@@ -102,8 +102,19 @@ public:
         _bools(noWait),
         _arguments(arguments)
     {}
-    
-    
+
+    /**
+     *  Is this a synchronous frame?
+     *
+     *  After a synchronous frame no more frames may be
+     *  sent until the accompanying -ok frame arrives
+     */
+    bool synchronous() const override
+    {
+        // we are synchronous without the nowait option
+        return !noWait();
+    }
+
     /**
      *  Get the destination exchange
      *  @return string
@@ -112,7 +123,7 @@ public:
     {
         return _destination;
     }
-    
+
     /**
      *  Get the source exchange
      *  @return string
@@ -121,7 +132,7 @@ public:
     {
         return _source;
     }
-    
+
     /**
      *  Get the routing key
      *  @return string
@@ -130,7 +141,7 @@ public:
     {
         return _routingKey;
     }
-    
+
     /**
      *  Get the method id
      *  @return uint16_t
@@ -139,7 +150,7 @@ public:
     {
         return 40;
     }
-    
+
     /**
      *  Get the additional arguments
      *  @return Table
@@ -148,16 +159,16 @@ public:
     {
         return _arguments;
     }
-    
+
     /**
      *  Get the nowait bool
      *  @return bool
      */
-    bool noWait()
+    bool noWait() const
     {
         return _bools.get(0);
     }
-    
+
 };
 // leave namespace
 }

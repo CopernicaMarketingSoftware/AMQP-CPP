@@ -17,13 +17,13 @@ namespace AMQP {
 
 /**
  *  Construct an AMQP object based on full login data
- * 
+ *
  *  The first parameter is a handler object. This handler class is
  *  an interface that should be implemented by the caller.
- * 
+ *
  *  Note that the constructor is private to ensure that nobody can construct
  *  this class, only the real Connection class via a friend construct
- * 
+ *
  *  @param  parent          Parent connection object
  *  @param  handler         Connection handler
  *  @param  login           Login data
@@ -42,7 +42,7 @@ ConnectionImpl::~ConnectionImpl()
 {
     // close the connection in a nice fashion
     close();
-    
+
     // invalidate all channels, so they will no longer call methods on this channel object
     for (auto iter = _channels.begin(); iter != _channels.end(); iter++) iter->second->invalidate();
 }
@@ -57,20 +57,20 @@ uint16_t ConnectionImpl::add(ChannelImpl *channel)
 {
     // check if we have exceeded the limit already
     if (_maxChannels > 0 && _channels.size() >= _maxChannels) return 0;
-    
+
     // keep looping to find an id that is not in use
     while (true)
     {
         // is this id in use?
         if (_nextFreeChannel > 0 && _channels.find(_nextFreeChannel) == _channels.end()) break;
-        
+
         // id is in use, move on
         _nextFreeChannel++;
     }
-    
+
     // we have a new channel
     _channels[_nextFreeChannel] = channel;
-    
+
     // done
     return _nextFreeChannel++;
 }
@@ -90,7 +90,7 @@ void ConnectionImpl::remove(ChannelImpl *channel)
 
 /**
  *  Parse the buffer into a recognized frame
- *  
+ *
  *  Every time that data comes in on the connection, you should call this method to parse
  *  the incoming data, and let it handle by the AMQP library. This method returns the number
  *  of bytes that were processed.
@@ -104,17 +104,17 @@ void ConnectionImpl::remove(ChannelImpl *channel)
  *  @param  size        size of the buffer to decode
  *  @return             number of bytes that were processed
  */
-size_t ConnectionImpl::parse(char *buffer, size_t size)
+size_t ConnectionImpl::parse(const char *buffer, size_t size)
 {
     // do not parse if already in an error state
     if (_state == state_closed) return 0;
-    
+
     // number of bytes processed
     size_t processed = 0;
-    
+
     // create a monitor object that checks if the connection still exists
     Monitor monitor(this);
-    
+
     // keep looping until we have processed all bytes, and the monitor still
     // indicates that the connection is in a valid state
     while (size > 0 && monitor.valid())
@@ -131,7 +131,7 @@ size_t ConnectionImpl::parse(char *buffer, size_t size)
 
             // number of bytes processed
             size_t bytes = receivedFrame.totalSize();
-            
+
             // add bytes
             processed += bytes; size -= bytes; buffer += bytes;
         }
@@ -139,12 +139,12 @@ size_t ConnectionImpl::parse(char *buffer, size_t size)
         {
             // something terrible happened on the protocol (like data out of range)
             reportError(exception.what());
-            
+
             // done
             return processed;
         }
     }
-    
+
     // done
     return processed;
 }
@@ -161,13 +161,13 @@ bool ConnectionImpl::close()
 
     // mark that the object is closed
     _closed = true;
-    
+
     // if still busy with handshake, we delay closing for a while
     if (_state == state_handshake || _state == state_protocol) return true;
 
     // perform the close operation
     sendClose();
-    
+
     // done
     return true;
 }
@@ -181,26 +181,26 @@ bool ConnectionImpl::sendClose()
 {
     // after the send operation the object could be dead
     Monitor monitor(this);
-    
+
     // loop over all channels
     for (auto iter = _channels.begin(); iter != _channels.end(); iter++)
     {
         // close the channel
         iter->second->close();
-        
+
         // we could be dead now
         if (!monitor.valid()) return false;
     }
-    
+
     // send the close frame
     send(ConnectionCloseFrame(0, "shutdown"));
-    
+
     // leap out if object no longer is alive
     if (!monitor.valid()) return false;
-    
+
     // we're in a new state
     _state = state_closing;
-    
+
     // done
     return true;
 }
@@ -213,35 +213,29 @@ void ConnectionImpl::setConnected()
     // store connected state
     _state = state_connected;
 
-    // if the close operation was already called, we do that again now again
-    // so that the actual messages to close down the connection and the channel 
-    // are appended to the queue
+    // if the close method was called before, the frame was not
+    // sent. append it to the end of the queue to make sure we
+    // are correctly closed down.
     if (_closed && !sendClose()) return;
-    
+
     // we're going to call the handler, which can destruct the connection,
     // so we must monitor if the queue object is still valid after calling
     Monitor monitor(this);
-    
+
     // inform handler
     _handler->onConnected(_parent);
-    
-    // leap out if the connection no longer exists
-    if (!monitor.valid()) return;
-    
+
     // empty the queue of messages
-    while (!_queue.empty())
+    while (monitor.valid() && !_queue.empty())
     {
         // get the next message
         OutBuffer buffer(std::move(_queue.front()));
 
         // remove it from the queue
         _queue.pop();
-        
+
         // send it
         _handler->onData(_parent, buffer.data(), buffer.size());
-        
-        // leap out if the connection was destructed
-        if (!monitor.valid()) return;
     }
 }
 
@@ -254,18 +248,12 @@ bool ConnectionImpl::send(const Frame &frame)
 {
     // its not possible to send anything if closed or closing down
     if (_state == state_closing || _state == state_closed) return false;
-    
+
     // we need an output buffer
-    OutBuffer buffer(frame.totalSize());
-    
-    // fill the buffer
-    frame.fill(buffer);
-    
-    // append an end of frame byte (but not when still negotiating the protocol)
-    if (frame.needsSeparator()) buffer.add((uint8_t)206);
-    
+    OutBuffer buffer(frame.buffer());
+
     // are we still setting up the connection?
-    if ((_state == state_connected && _queue.size() == 0) || frame.partOfHandshake())
+    if ((_state == state_connected && _queue.empty()) || frame.partOfHandshake())
     {
         // send the buffer
         _handler->onData(_parent, buffer.data(), buffer.size());
@@ -275,7 +263,33 @@ bool ConnectionImpl::send(const Frame &frame)
         // the connection is still being set up, so we need to delay the message sending
         _queue.push(std::move(buffer));
     }
-    
+
+    // done
+    return true;
+}
+
+/**
+ *  Send buffered data over the connection
+ *
+ *  @param  buffer      the buffer with data to send
+ */
+bool ConnectionImpl::send(OutBuffer &&buffer)
+{
+    // this only works when we are already connected
+    if (_state != state_connected) return false;
+
+    // are we waiting for other frames to be sent before us?
+    if (_queue.empty())
+    {
+        // send it directly
+        _handler->onData(_parent, buffer.data(), buffer.size());
+    }
+    else
+    {
+        // add to the list of waiting buffers
+        _queue.push(std::move(buffer));
+    }
+
     // done
     return true;
 }

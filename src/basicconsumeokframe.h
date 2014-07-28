@@ -1,6 +1,6 @@
 /**
  *  Class describing a basic consume ok frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -52,7 +52,7 @@ public:
      *
      *  @param frame    received frame
      */
-    BasicConsumeOKFrame(ReceivedFrame &frame) : 
+    BasicConsumeOKFrame(ReceivedFrame &frame) :
         BasicFrame(frame),
         _consumerTag(frame)
     {}
@@ -89,13 +89,13 @@ public:
     {
         // we need the appropriate channel
         ChannelImpl *channel = connection->channel(this->channel());
-        
+
         // channel does not exist
-        if (!channel) return false;    
-        
+        if (!channel) return false;
+
         // report
-        channel->reportConsumerStarted(consumerTag());
-        
+        if (channel->reportSuccess(consumerTag())) channel->synchronized();
+
         // done
         return true;
     }

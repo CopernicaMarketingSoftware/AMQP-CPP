@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  Decimal field type for AMQP
  * 
@@ -82,9 +83,19 @@ public:
      *  Create a new identical instance of this object
      *  @return Field*
      */
-    virtual Field *clone() const override
+    virtual std::shared_ptr<Field> clone() const override
     {
-        return new DecimalField(_places, _number);
+        return std::make_shared<DecimalField>(_places, _number);
+    }
+
+    /**
+     *  Output the object to a stream
+     *  @param std::ostream
+     */
+    virtual void output(std::ostream &stream) const override
+    {
+        // output floating point value
+        stream << "decimal(" << _number / pow(10, _places) << ")";
     }
 
     /**

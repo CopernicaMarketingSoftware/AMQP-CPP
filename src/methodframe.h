@@ -50,6 +50,14 @@ public:
     virtual ~MethodFrame() {}
 
     /**
+     *  Is this a synchronous frame?
+     *
+     *  After a synchronous frame no more frames may be
+     *  sent until the accompanying -ok frame arrives
+     */
+    bool synchronous() const override { return true; }
+
+    /**
      *  Get the message type
      *  @return uint8_t
      */
@@ -79,9 +87,6 @@ public:
     {
         // this is an exception
         throw ProtocolException("unimplemented frame type " + std::to_string(type()) + " class " + std::to_string(classID()) + " method " + std::to_string(methodID()));
-        
-        // unreachable
-        return false;
     }
 };
 

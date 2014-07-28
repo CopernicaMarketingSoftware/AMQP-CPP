@@ -1,6 +1,6 @@
 /**
  *  Class describing a basic cancel ok frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -42,7 +42,7 @@ public:
      *
      *  @param  frame   received frame
      */
-    BasicCancelOKFrame(ReceivedFrame &frame) : 
+    BasicCancelOKFrame(ReceivedFrame &frame) :
         BasicFrame(frame),
         _consumerTag(frame)
     {}
@@ -89,13 +89,13 @@ public:
     {
         // we need the appropriate channel
         ChannelImpl *channel = connection->channel(this->channel());
-        
+
         // channel does not exist
-        if (!channel) return false;    
-        
+        if (!channel) return false;
+
         // report
-        channel->reportConsumerStopped(consumerTag());
-        
+        if (channel->reportSuccess<const std::string&>(consumerTag())) channel->synchronized();
+
         // done
         return true;
     }

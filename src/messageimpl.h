@@ -20,10 +20,10 @@ class MessageImpl : public Message
 private:
     /**
      *  How many bytes have been received?
-     *  @var uint64_t 
+     *  @var uint64_t
      */
     uint64_t _received;
-    
+
     /**
      *  Was the buffer allocated by us?
      *  @var bool
@@ -36,8 +36,8 @@ protected:
      *  @param  exchange
      *  @param  routingKey
      */
-    MessageImpl(const std::string &exchange, const std::string &routingKey) : 
-        Message(exchange, routingKey), 
+    MessageImpl(const std::string &exchange, const std::string &routingKey) :
+        Message(exchange, routingKey),
         _received(0), _selfAllocated(false)
         {}
 
@@ -45,12 +45,12 @@ public:
     /**
      *  Destructor
      */
-    virtual ~MessageImpl() 
+    virtual ~MessageImpl()
     {
         // clear up memory if it was self allocated
         if (_selfAllocated) delete[] _body;
     }
-    
+
     /**
      *  Set the body size
      *  This field is set when the header is received
@@ -60,7 +60,7 @@ public:
     {
         _bodySize = size;
     }
-    
+
     /**
      *  Append data
      *  @param  buffer      incoming data
@@ -84,27 +84,20 @@ public:
             // it does not yet fit, do we have to allocate?
             if (!_body) _body = new char[_bodySize];
             _selfAllocated = true;
-            
+
             // prevent that size is too big
             if (size > _bodySize - _received) size = _bodySize - _received;
-            
+
             // append data
             memcpy((char *)(_body + _received), buffer, size);
-            
+
             // we have more data now
             _received += size;
-            
+
             // done
             return _received >= _bodySize;
         }
     }
-    
-    /**
-     *  Report to the handler
-     *  @param  channel
-     *  @param  handler
-     */
-    virtual void report(Channel *channel, ChannelHandler *handler) = 0;
 };
 
 /**

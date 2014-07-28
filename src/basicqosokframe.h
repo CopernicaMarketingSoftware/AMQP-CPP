@@ -1,6 +1,6 @@
 /**
  *  Class describing a basic QOS frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -32,7 +32,7 @@ public:
      *  @param  channel     channel we're working on
      */
     BasicQosOKFrame(uint16_t channel) : BasicFrame(channel, 0) {}
-    
+
     /**
      *  Constructor based on incoming data
      *  @param  frame
@@ -52,7 +52,7 @@ public:
     {
         return 11;
     }
-    
+
     /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
@@ -62,13 +62,13 @@ public:
     {
         // we need the appropriate channel
         ChannelImpl *channel = connection->channel(this->channel());
-        
+
         // channel does not exist
-        if (!channel) return false;    
-        
+        if (!channel) return false;
+
         // report
-        channel->reportQosSet();
-        
+        if (channel->reportSuccess()) channel->synchronized();
+
         // done
         return true;
     }

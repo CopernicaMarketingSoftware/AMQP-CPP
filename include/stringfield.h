@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  String field types for amqp
  * 
@@ -57,10 +58,10 @@ public:
      *  Create a new instance of this object
      *  @return Field*
      */
-    virtual Field *clone() const override
+    virtual std::shared_ptr<Field> clone() const override
     {
         // create a new copy of ourselves and return it
-        return new StringField(_data);
+        return std::make_shared<StringField>(_data);
     }
 
     /**
@@ -95,7 +96,7 @@ public:
      *  Get the value
      *  @return string
      */
-    operator const std::string& () const
+    virtual operator const std::string& () const override
     {
         return _data;
     }
@@ -143,6 +144,16 @@ public:
     virtual char typeID() const override
     {
         return F;
+    }
+
+    /**
+     *  Output the object to a stream
+     *  @param std::ostream
+     */
+    virtual void output(std::ostream &stream) const override
+    {
+        // show
+        stream << "string(" << value() << ")";
     }
 };
 

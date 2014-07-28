@@ -1,3 +1,4 @@
+#pragma once
 /**
  *  Field proxy. Returned by the table. Can be casted to the
  *  relevant native type (std::string or numeric)
@@ -195,205 +196,79 @@ public:
         // cast to a string
         return operator=(std::string(value));
     }
+    
+    /**
+     *  Assign an array value
+     *  @param  value
+     *  @return FieldProxy
+     */
+    FieldProxy &operator=(const Array &value)
+    {
+        // assign value and allow chaining
+        _source->set(_index, value);
+        return *this;
+    }
 
     /**
-     *  Get boolean value
-     *  @return BooleanSet
+     *  Assign a table value
+     *  @param  value
+     *  @return FieldProxy
      */
-    operator BooleanSet ()
+    FieldProxy &operator=(const Table &value)
     {
-        // the value
-        BooleanSet value;
-
-        // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value;
+        // assign value and allow chaining
+        _source->set(_index, value);
+        return *this;
+    }
+    
+    /**
+     *  Get the underlying field
+     *  @return Field
+     */
+    const Field &get() const
+    {
+        return _source->get(_index);
     }
 
     /**
      *  Get a boolean
      *  @return bool
      */
-    operator bool ()
+    template <typename TARGET>
+    operator TARGET () const
     {
-        // the value
-        BooleanSet value;
-
         // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
-    }
-
-    /**
-     *  Get numeric value
-     *  @return int8_t
-     */
-    operator int8_t ()
-    {
-        // the value
-        Octet value;
-
-        // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
-    }
-
-    /**
-     *  Get numeric value
-     *  @return uint8_t
-     */
-    operator uint8_t ()
-    {
-        // the value
-        UOctet value;
-
-        // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
-    }
-
-    /**
-     *  Get numeric value
-     *  @return int16_t
-     */
-    operator int16_t ()
-    {
-        // the value
-        Short value;
-
-        // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
-    }
-
-    /**
-     *  Get numeric value
-     *  @return uint16_t
-     */
-    operator uint16_t ()
-    {
-        // the value
-        UShort value;
-
-        // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
-    }
-
-    /**
-     *  Get numeric value
-     *  @return int32_t
-     */
-    operator int32_t ()
-    {
-        // the value
-        Long value;
-
-        // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
-    }
-
-    /**
-     *  Get numeric value
-     *  @return uint32_t
-     */
-    operator uint32_t ()
-    {
-        // the value
-        ULong value;
-
-        // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
-    }
-
-    /**
-     *  Get numeric value
-     *  @return int64_t
-     */
-    operator int64_t ()
-    {
-        // the value
-        Long value;
-
-        // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
-    }
-
-    /**
-     *  Get numeric value
-     *  @return uint64_t
-     */
-    operator uint64_t ()
-    {
-        // the value
-        ULong value;
-
-        // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
-    }
-
-    /**
-     *  Get decimal value
-     *  @return DecimalField
-     */
-    operator DecimalField ()
-    {
-        // the value
-        DecimalField value;
-
-        // retrieve the value
-        _source->get(_index, value);
-
-        // return the result
-        return value.value();
-    }
-
-    /**
-     *  Get string value
-     *  @return string
-     */
-    operator std::string ()
-    {
-        // it has to be either a short or a long string
-        ShortString shortValue;
-        LongString longValue;
-
-        // try to retrieve the value
-        if (_source->get(_index, shortValue)) return shortValue.value();
-        if (_source->get(_index, longValue))  return longValue.value();
-
-        // no valid string found
-        return std::string("");
+        return _source->get(_index);
     }
 };
 
 // define types for array- and table-based field proxy
 typedef FieldProxy<Table, std::string> AssociativeFieldProxy;
 typedef FieldProxy<Array, uint8_t> ArrayFieldProxy;
+
+/**
+ *  Custom output stream operator
+ *  @param  stream
+ *  @param  field
+ *  @return ostream
+ */
+inline std::ostream &operator<<(std::ostream &stream, const AssociativeFieldProxy &field)
+{
+    // get underlying field, and output that
+    return stream << field.get();
+}
+
+/**
+ *  Custom output stream operator
+ *  @param  stream
+ *  @param  field
+ *  @return ostream
+ */
+inline std::ostream &operator<<(std::ostream &stream, const ArrayFieldProxy &field)
+{
+    // get underlying field, and output that
+    return stream << field.get();
+}
 
 /**
  *  end namespace
