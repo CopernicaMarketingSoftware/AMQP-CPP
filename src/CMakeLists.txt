@@ -42,6 +42,8 @@ connectionstartokframe.h
 connectiontuneframe.h
 connectiontuneokframe.h
 consumedmessage.h
+deferredcancel.cpp
+deferredconsumer.cpp
 exception.h
 exchangebindframe.h
 exchangebindokframe.h
@@ -62,7 +64,6 @@ heartbeatframe.h
 includes.h
 messageimpl.h
 methodframe.h
-monitor.h
 protocolexception.h
 protocolheaderframe.h
 queuebindframe.h

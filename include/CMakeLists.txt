@@ -1,8 +1,8 @@
 add_sources(
 array.h
 booleanset.h
+callbacks.h
 channel.h
-channelhandler.h
 channelimpl.h
 classes.h
 compat_endian.h
@@ -10,6 +10,11 @@ connection.h
 connectionhandler.h
 connectionimpl.h
 decimalfield.h
+deferred.h
+deferredcancel.h
+deferredconsumer.h
+deferreddelete.h
+deferredqueue.h
 entityimpl.h
 envelope.h
 exchangetype.h
@@ -19,6 +24,7 @@ flags.h
 login.h
 message.h
 metadata.h
+monitor.h
 numericfield.h
 outbuffer.h
 receivedframe.h
