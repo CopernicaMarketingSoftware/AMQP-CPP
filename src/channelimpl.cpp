@@ -290,7 +290,7 @@ DeferredQueue &ChannelImpl::declareQueue(const std::string &name, int flags, con
     QueueDeclareFrame frame(_id, name, flags & passive, flags & durable, flags & exclusive, flags & autodelete, false, arguments);
 
     // send the queuedeclareframe
-    auto *result = new DeferredQueue(send(frame));
+    auto *result = new DeferredQueue(!send(frame));
 
     // add the deferred result
     push(result);
@@ -389,7 +389,7 @@ DeferredDelete &ChannelImpl::removeQueue(const std::string &name, int flags)
     QueueDeleteFrame frame(_id, name, flags & ifunused, flags & ifempty, false);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredDelete(send(frame));
+    auto *deferred = new DeferredDelete(!send(frame));
 
     // push to list
     push(deferred);
@@ -495,7 +495,7 @@ DeferredConsumer& ChannelImpl::consume(const std::string &queue, const std::stri
     BasicConsumeFrame frame(_id, queue, tag, flags & nolocal, flags & noack, flags & exclusive, false, arguments);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredConsumer(this, send(frame));
+    auto *deferred = new DeferredConsumer(this, !send(frame));
 
     // push to list
     push(deferred);
@@ -527,7 +527,7 @@ DeferredCancel &ChannelImpl::cancel(const std::string &tag)
     BasicCancelFrame frame(_id, tag, false);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredCancel(this, send(frame));
+    auto *deferred = new DeferredCancel(this, !send(frame));
 
     // push to list
     push(deferred);
