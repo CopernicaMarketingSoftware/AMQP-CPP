@@ -117,7 +117,7 @@ Deferred &ChannelImpl::push(Deferred *deferred)
 Deferred &ChannelImpl::push(const Frame &frame)
 {
     // send the frame, and push the result
-    return push(new Deferred(send(frame)));
+    return push(new Deferred(!send(frame)));
 }
 
 /**
