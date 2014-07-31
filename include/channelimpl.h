@@ -344,8 +344,11 @@ public:
      *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
+     * 
+     *  @param  count       number of messages to pre-fetch
+     *  @param  global      share count between all consumers on the same channel
      */
-    Deferred &setQos(uint16_t prefetchCount);
+    Deferred &setQos(uint16_t prefetchCount, bool global = false);
 
     /**
      *  Tell the RabbitMQ server that we're ready to consume messages

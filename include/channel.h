@@ -331,11 +331,12 @@ public:
      *  the prefetchCount
      *
      *  @param  prefetchCount       maximum number of messages to prefetch
+     *  @param  global              share counter between all consumers on the same channel
      *  @return bool                whether the Qos frame is sent.
      */
-    Deferred &setQos(uint16_t prefetchCount)
+    Deferred &setQos(uint16_t prefetchCount, bool global = false)
     {
-        return _implementation.setQos(prefetchCount);
+        return _implementation.setQos(prefetchCount, global);
     }
 
     /**
