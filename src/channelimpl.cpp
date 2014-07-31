@@ -462,11 +462,14 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
  *
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
+ * 
+ *  @param  prefetchCount       number of messages to fetch
+ *  @param  global              share counter between all consumers on the same channel
  */
-Deferred &ChannelImpl::setQos(uint16_t prefetchCount)
+Deferred &ChannelImpl::setQos(uint16_t prefetchCount, bool global)
 {
     // send a qos frame
-    return push(BasicQosFrame(_id, prefetchCount, false));
+    return push(BasicQosFrame(_id, prefetchCount, global));
 }
 
 /**

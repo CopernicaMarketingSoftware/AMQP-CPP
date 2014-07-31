@@ -55,7 +55,7 @@ public:
      *
      * @param   channel         channel we're working on
      * @param   prefetchCount   specifies a prefetch window in terms of whole messages
-     * @param   global          apply QoS settings to entire connection
+     * @param   global          share prefetch count with all consumers on the same channel
      * @default false
      */
     BasicQosFrame(uint16_t channel, int16_t prefetchCount = 0, bool global = false) :
