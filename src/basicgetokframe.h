@@ -156,6 +156,33 @@ public:
     {
         return _redelivered.get(0);
     }
+
+    /**
+     *  Process the frame
+     *  @param  connection      The connection over which it was received
+     *  @return bool            Was it succesfully processed?
+     */
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // we need the appropriate channel
+        ChannelImpl *channel = connection->channel(this->channel());
+        
+        // channel does not exist
+        if (!channel) return false;    
+        
+        // report (if this function returns false, it means that the channel
+        // object no longer is valid)
+        if (!channel->reportSuccess(_messageCount)) return true;
+        
+        // construct the message
+        channel->message(*this);
+        
+        // we're synchronized
+        channel->synchronized();
+        
+        // done
+        return true;
+    }
 };
 
 /**

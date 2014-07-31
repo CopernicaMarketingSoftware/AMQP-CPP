@@ -16,6 +16,7 @@ namespace AMQP {
  */
 class Array;
 class BasicDeliverFrame;
+class BasicGetOKFrame;
 class BasicHeaderFrame;
 class BasicReturnFrame;
 class BodyFrame;

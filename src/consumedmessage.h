@@ -45,6 +45,16 @@ public:
     {}
 
     /**
+     *  Constructor
+     *  @param  frame
+     */
+    ConsumedMessage(const BasicGetOKFrame &frame) :
+        MessageImpl(frame.exchange(), frame.routingKey()),
+        _deliveryTag(frame.deliveryTag()), _redelivered(frame.redelivered())
+    {}
+
+
+    /**
      *  Destructor
      */
     virtual ~ConsumedMessage() {}

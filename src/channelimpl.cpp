@@ -7,6 +7,7 @@
  */
 #include "includes.h"
 #include "basicdeliverframe.h"
+#include "basicgetokframe.h"
 #include "basicreturnframe.h"
 #include "messageimpl.h"
 #include "consumedmessage.h"
@@ -37,6 +38,8 @@
 #include "basicnackframe.h"
 #include "basicrecoverframe.h"
 #include "basicrejectframe.h"
+#include "basicgetframe.h"
+
 
 /**
  *  Set up namespace
@@ -516,9 +519,9 @@ DeferredConsumer& ChannelImpl::consume(const std::string &queue, const std::stri
  *
  *  The onSuccess() callback that you can install should have the following signature:
  *
- *      void myCallback(AMQP::Channel *channel, const std::string& tag);
+ *      void myCallback(const std::string& tag);
  *
- *  For example: channel.declareQueue("myqueue").onSuccess([](AMQP::Channel *channel, const std::string& tag) {
+ *  For example: channel.declareQueue("myqueue").onSuccess([](const std::string& tag) {
  *
  *      std::cout << "Started consuming under tag " << tag << std::endl;
  *
@@ -531,6 +534,53 @@ DeferredCancel &ChannelImpl::cancel(const std::string &tag)
 
     // send the frame, and create deferred object
     auto *deferred = new DeferredCancel(this, !send(frame));
+
+    // push to list
+    push(deferred);
+
+    // done
+    return *deferred;
+}
+
+/**
+ *  Retrieve a single message from RabbitMQ
+ * 
+ *  When you call this method, you can get one single message from the queue (or none
+ *  at all if the queue is empty). The deferred object that is returned, should be used
+ *  to install a onEmpty() and onSuccess() callback function that will be called
+ *  when the message is consumed and/or when the message could not be consumed.
+ * 
+ *  The following flags are supported:
+ * 
+ *      -   noack               if set, consumed messages do not have to be acked, this happens automatically
+ * 
+ *  @param  queue               name of the queue to consume from
+ *  @param  flags               optional flags
+ * 
+ *  The object returns a deferred handler. Callbacks can be installed 
+ *  using onSuccess(), onEmpty(), onError() and onFinalize() methods.
+ * 
+ *  The onSuccess() callback has the following signature:
+ * 
+ *      void myCallback(const Message &message, uint64_t deliveryTag, bool redelivered);
+ * 
+ *  For example: channel.get("myqueue").onSuccess([](const Message &message, uint64_t deliveryTag, bool redelivered) {
+ * 
+ *      std::cout << "Message fetched" << std::endl;
+ * 
+ *  }).onEmpty([]() {
+ * 
+ *      std::cout << "Queue is empty" << std::endl;
+ * 
+ *  });
+ */
+DeferredGet &ChannelImpl::get(const std::string &queue, int flags)
+{
+    // the get frame to send
+    BasicGetFrame frame(_id, queue, flags & noack);
+    
+    // send the frame, and create deferred object
+    auto *deferred = new DeferredGet(this, send(frame));
 
     // push to list
     push(deferred);
@@ -674,7 +724,7 @@ void ChannelImpl::reportMessage()
 }
 
 /**
- *  Create an incoming message
+ *  Create an incoming message from a consume call
  *  @param  frame
  *  @return ConsumedMessage
  */
@@ -684,6 +734,20 @@ ConsumedMessage *ChannelImpl::message(const BasicDeliverFrame &frame)
     if (_message) delete _message;
 
     // construct a message
+    return _message = new ConsumedMessage(frame);
+}
+
+/**
+ *  Create an incoming message from a get call
+ *  @param  frame
+ *  @return ConsumedMessage
+ */
+ConsumedMessage *ChannelImpl::message(const BasicGetOKFrame &frame)
+{
+    // destruct if message is already set
+    if (_message) delete _message;
+    
+    // construct message
     return _message = new ConsumedMessage(frame);
 }
 
