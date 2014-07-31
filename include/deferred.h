@@ -67,7 +67,7 @@ protected:
      *  Indicate success
      *  @return Deferred        Next deferred result
      */
-    Deferred *reportSuccess() const
+    virtual Deferred *reportSuccess() const
     {
         // execute callbacks if registered
         if (_successCallback)   _successCallback();
@@ -111,7 +111,7 @@ protected:
         // this is the same as a regular success message
         return reportSuccess();
     }
-
+    
     /**
      *  Indicate failure
      *  @param  error           Description of the error that occured

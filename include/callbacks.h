@@ -20,6 +20,7 @@ namespace AMQP {
 using SuccessCallback   =   std::function<void()>;
 using ErrorCallback     =   std::function<void(const char *message)>;
 using FinalizeCallback  =   std::function<void()>;
+using EmptyCallback     =   std::function<void()>;
 using MessageCallback   =   std::function<void(const Message &message, uint64_t deliveryTag, bool redelivered)>;
 using QueueCallback     =   std::function<void(const std::string &name, uint32_t messagecount, uint32_t consumercount)>;
 using DeleteCallback    =   std::function<void(uint32_t deletedmessages)>;
