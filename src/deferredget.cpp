@@ -27,9 +27,13 @@ Deferred *DeferredGet::reportSuccess(uint32_t messageCount) const
     // make copies of the callbacks
     auto messageCallback = _messageCallback;
     auto finalizeCallback = _finalizeCallback;
+    auto *channel = _channel;
     
     // we now know the name, so we can install the message callback on the channel
-    _channel->install("", [messageCallback, finalizeCallback](const Message &message, uint64_t deliveryTag, bool redelivered) {
+    _channel->install("", [channel, messageCallback, finalizeCallback](const Message &message, uint64_t deliveryTag, bool redelivered) {
+
+        // we can remove the callback now from the channel
+        channel->uninstall("");
         
         // call the callbacks
         if (messageCallback) messageCallback(message, deliveryTag, redelivered);
