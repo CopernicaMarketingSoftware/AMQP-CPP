@@ -703,15 +703,21 @@ void ChannelImpl::reportMessage()
     // skip if there is no message
     if (!_message) return;
 
+    // after the report the channel may be destructed, monitor that
+    Monitor monitor(this);
+
+    // synchronize the channel if this comes from a basic.get frame
+    if (_message->consumer().empty()) synchronized();
+
+    // syncing the channel may destruct the channel
+    if (!monitor.valid()) return;
+
     // look for the consumer
     auto iter = _consumers.find(_message->consumer());
     if (iter == _consumers.end()) return;
 
     // is this a valid callback method
     if (!iter->second) return;
-
-    // after the report the channel may be destructed, monitor that
-    Monitor monitor(this);
 
     // call the callback
     _message->report(iter->second);

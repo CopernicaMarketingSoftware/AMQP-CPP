@@ -177,8 +177,8 @@ public:
         // construct the message
         channel->message(*this);
         
-        // we're synchronized
-        channel->synchronized();
+        // notice that the channel is not yet synchronized here, because
+        // we first have to receive the entire body
         
         // done
         return true;
