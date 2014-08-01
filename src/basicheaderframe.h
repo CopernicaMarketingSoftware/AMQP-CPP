@@ -119,10 +119,13 @@ public:
         if (!message) return false;
         
         // store size
-        message->setBodySize(bodySize());
+        message->setBodySize(_bodySize);
         
         // and copy the meta data
         message->set(_metadata);
+        
+        // for empty bodies we're ready now
+        if (_bodySize == 0) channel->reportMessage();
         
         // done
         return true;
