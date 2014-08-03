@@ -46,7 +46,7 @@ macro(set_cxx_norm NORM)
     elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
 
         if(${NORM} EQUAL ${CXX_NORM_CXX11})
-            add_definitions("-std=c++0x")
+            add_definitions("-std=c++11")
         endif()
 
     endif()
