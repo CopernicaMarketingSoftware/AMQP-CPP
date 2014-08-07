@@ -1,6 +1,8 @@
 add_sources(
 array.h
 booleanset.h
+buffer.h
+bytebuffer.h
 callbacks.h
 channel.h
 channelimpl.h
@@ -14,6 +16,7 @@ deferred.h
 deferredcancel.h
 deferredconsumer.h
 deferreddelete.h
+deferredget.h
 deferredqueue.h
 entityimpl.h
 envelope.h
