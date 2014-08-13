@@ -344,7 +344,7 @@ bool ReceivedFrame::processConnectionFrame(ConnectionImpl *connection)
 {
     // read the method id from the method
     uint16_t methodID = nextUint16();
-    
+
     // construct frame based on method id
     switch (methodID)
     {
