@@ -31,14 +31,14 @@
 #include <amqpcpp/classes.h>
 
 // utility classes
+#include <amqpcpp/buffer.h>
+#include <amqpcpp/bytebuffer.h>
 #include <amqpcpp/receivedframe.h>
 #include <amqpcpp/outbuffer.h>
 #include <amqpcpp/watchable.h>
 #include <amqpcpp/monitor.h>
 
 // amqp types
-#include <amqpcpp/buffer.h>
-#include <amqpcpp/bytebuffer.h>
 #include <amqpcpp/field.h>
 #include <amqpcpp/numericfield.h>
 #include <amqpcpp/decimalfield.h>

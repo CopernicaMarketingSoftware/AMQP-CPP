@@ -1,4 +1,3 @@
-#pragma once
 /**
  *  ReceivedFrame.h
  *
@@ -13,6 +12,11 @@
  */
 
 /**
+ *  Include guard
+ */
+#pragma once
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -25,15 +29,15 @@ class ReceivedFrame
 private:
     /**
      *  The buffer we are reading from
-     *  @var    char*
+     *  @var    Buffer
      */
-    const char *_buffer = nullptr;
+    const Buffer &_buffer;
 
     /**
-     *  Number of bytes left to retrieve
+     *  Number of bytes already processed
      *  @var    uint32_t
      */
-    uint32_t _left = 0;
+    uint32_t _skip = 0;
 
     /**
      *  Type of frame
@@ -115,10 +119,9 @@ public:
     /**
      *  Constructor
      *  @param  buffer      Binary buffer
-     *  @param  size        Size of the buffer
      *  @param  max         Max buffer size
      */
-    ReceivedFrame(const char *buffer, uint32_t size, uint32_t max);
+    ReceivedFrame(const Buffer &buffer, uint32_t max);
 
     /**
      *  Destructor

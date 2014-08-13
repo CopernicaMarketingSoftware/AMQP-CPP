@@ -9,6 +9,7 @@
 #include "protocolheaderframe.h"
 #include "connectioncloseokframe.h"
 #include "connectioncloseframe.h"
+#include "reducedbuffer.h"
 
 /**
  *  set namespace
@@ -101,10 +102,9 @@ void ConnectionImpl::remove(ChannelImpl *channel)
  *  later call.
  *
  *  @param  buffer      buffer to decode
- *  @param  size        size of the buffer to decode
  *  @return             number of bytes that were processed
  */
-size_t ConnectionImpl::parse(const char *buffer, size_t size)
+size_t ConnectionImpl::parse(const Buffer &buffer)
 {
     // do not parse if already in an error state
     if (_state == state_closed) return 0;
@@ -117,13 +117,13 @@ size_t ConnectionImpl::parse(const char *buffer, size_t size)
 
     // keep looping until we have processed all bytes, and the monitor still
     // indicates that the connection is in a valid state
-    while (size > 0 && monitor.valid())
+    while (processed < buffer.size() && monitor.valid())
     {
         // prevent protocol exceptions
         try
         {
             // try to recognize the frame
-            ReceivedFrame receivedFrame(buffer, size, _maxFrame);
+            ReceivedFrame receivedFrame(ReducedBuffer(buffer, processed), _maxFrame);
             if (!receivedFrame.complete()) return processed;
 
             // process the frame
@@ -133,7 +133,7 @@ size_t ConnectionImpl::parse(const char *buffer, size_t size)
             size_t bytes = receivedFrame.totalSize();
 
             // add bytes
-            processed += bytes; size -= bytes; buffer += bytes;
+            processed += bytes;
         }
         catch (const ProtocolException &exception)
         {

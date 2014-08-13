@@ -38,7 +38,7 @@ public:
     FrameCheck(ReceivedFrame *frame, size_t size) : _frame(frame), _size(size)
     {
         // no problem is there are still enough bytes left
-        if (frame->_left >= size) return;
+        if (frame->_buffer.size() - frame->_skip >= size) return;
         
         // frame buffer is too small
         throw ProtocolException("frame out of range");
@@ -49,9 +49,8 @@ public:
      */
     virtual ~FrameCheck()
     {
-        // update the buffer and the number of bytes left
-        _frame->_buffer += _size;
-        _frame->_left -= _size;
+        // update the number of bytes to skip
+        _frame->_skip += _size;
     }
 };
 

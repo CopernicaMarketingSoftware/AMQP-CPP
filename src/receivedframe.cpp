@@ -80,13 +80,12 @@ namespace AMQP {
 /**
  *  Constructor
  *  @param  buffer      Binary buffer
- *  @param  size        Size of the buffer
  *  @param  max         Max size for a frame
  */
-ReceivedFrame::ReceivedFrame(const char *buffer, uint32_t size, uint32_t max) : _buffer(buffer), _left(size)
+ReceivedFrame::ReceivedFrame(const Buffer &buffer, uint32_t max) : _buffer(buffer)
 {
     // we need enough room for type, channel, the payload size and the end-of-frame byte
-    if (size < 8) return;
+    if (buffer.size() < 8) return;
 
     // get the information
     _type = nextUint8();
@@ -97,10 +96,10 @@ ReceivedFrame::ReceivedFrame(const char *buffer, uint32_t size, uint32_t max) : 
     if (max > 0 && _payloadSize > max - 8) throw ProtocolException("frame size exceeded");
 
     // check if the buffer is big enough to contain all data
-    if (size >= _payloadSize + 8)
+    if (buffer.size() >= _payloadSize + 8)
     {
         // buffer is big enough, check for a valid end-of-frame marker
-        if ((int)buffer[_payloadSize+7] != -50) throw ProtocolException("invalid end of frame marker");
+        if ((int)buffer.byte(_payloadSize+7) != -50) throw ProtocolException("invalid end of frame marker");
     }
     else
     {
@@ -130,7 +129,7 @@ uint8_t ReceivedFrame::nextUint8()
     FrameCheck check(this, 1);
     
     // get a byte
-    return (uint8_t)_buffer[0];
+    return _buffer.byte(_skip);
 }
 
 /**
@@ -145,7 +144,7 @@ int8_t ReceivedFrame::nextInt8()
     FrameCheck check(this, 1);
     
     // get a byte
-    return (int8_t)_buffer[0];
+    return (int8_t)_buffer.byte(_skip);
 }
 
 /**
@@ -156,11 +155,11 @@ int8_t ReceivedFrame::nextInt8()
 uint16_t ReceivedFrame::nextUint16()
 {
     // check if there is enough size
-    FrameCheck check(this, 2);
+    FrameCheck check(this, sizeof(uint16_t));
     
     // get two bytes, and convert to host-byte-order
     uint16_t value;
-    memcpy(&value, _buffer, sizeof(uint16_t));
+    _buffer.copy(_skip, sizeof(uint16_t), &value);
     return be16toh(value);
 }
 
@@ -172,11 +171,11 @@ uint16_t ReceivedFrame::nextUint16()
 int16_t ReceivedFrame::nextInt16()
 {
     // check if there is enough size
-    FrameCheck check(this, 2);
+    FrameCheck check(this, sizeof(int16_t));
     
     // get two bytes, and convert to host-byte-order
     int16_t value;
-    memcpy(&value, _buffer, sizeof(int16_t));
+    _buffer.copy(_skip, sizeof(int16_t), &value);
     return be16toh(value);
 }
 
@@ -188,11 +187,11 @@ int16_t ReceivedFrame::nextInt16()
 uint32_t ReceivedFrame::nextUint32()
 {
     // check if there is enough size
-    FrameCheck check(this, 4);
+    FrameCheck check(this, sizeof(uint32_t));
     
     // get four bytes, and convert to host-byte-order
     uint32_t value;
-    memcpy(&value, _buffer, sizeof(uint32_t));
+    _buffer.copy(_skip, sizeof(uint32_t), &value);
     return be32toh(value);
 }
 
@@ -204,11 +203,11 @@ uint32_t ReceivedFrame::nextUint32()
 int32_t ReceivedFrame::nextInt32()
 {
     // check if there is enough size
-    FrameCheck check(this, 4);
+    FrameCheck check(this, sizeof(int32_t));
     
     // get four bytes, and convert to host-byte-order
     int32_t value;
-    memcpy(&value, _buffer, sizeof(int32_t));
+    _buffer.copy(_skip, sizeof(int32_t), &value);
     return be32toh(value);
 }
 
@@ -220,11 +219,11 @@ int32_t ReceivedFrame::nextInt32()
 uint64_t ReceivedFrame::nextUint64()
 {
     // check if there is enough size
-    FrameCheck check(this, 8);
+    FrameCheck check(this, sizeof(uint64_t));
     
     // get eight bytes, and convert to host-byte-order
     uint64_t value;
-    memcpy(&value, _buffer, sizeof(uint64_t));
+    _buffer.copy(_skip, sizeof(uint64_t), &value);
     return be64toh(value);
 }
 
@@ -236,11 +235,11 @@ uint64_t ReceivedFrame::nextUint64()
 int64_t ReceivedFrame::nextInt64()
 {
     // check if there is enough size
-    FrameCheck check(this, 8);
+    FrameCheck check(this, sizeof(int64_t));
     
     // get eight bytes, and convert to host-byte-order
     int64_t value;
-    memcpy(&value, _buffer, sizeof(int64_t));
+    _buffer.copy(_skip, sizeof(int64_t), &value);
     return be64toh(value);
 }
 
@@ -252,12 +251,12 @@ int64_t ReceivedFrame::nextInt64()
 float ReceivedFrame::nextFloat()
 {
     // check if there is enough size
-    FrameCheck check(this, 4);
+    FrameCheck check(this, sizeof(float));
     
     // get four bytes
-    float result;
-    memcpy(&result, _buffer, sizeof(float));
-    return result;
+    float value;
+    _buffer.copy(_skip, sizeof(float), &value);
+    return value;
 }
 
 /**
@@ -268,12 +267,12 @@ float ReceivedFrame::nextFloat()
 double ReceivedFrame::nextDouble()
 {
     // check if there is enough size
-    FrameCheck check(this, 8);
+    FrameCheck check(this, sizeof(double));
     
     // get eight bytes, and convert to host-byte-order
-    double result;
-    memcpy(&result, _buffer, sizeof(double));
-    return result;
+    double value;
+    _buffer.copy(_skip, sizeof(double), &value);
+    return value;
 }
 
 /**
@@ -287,7 +286,7 @@ const char * ReceivedFrame::nextData(uint32_t size)
     FrameCheck check(this, size);
     
     // get the data
-    return _buffer;
+    return _buffer.data(_skip, size);
 }
 
 /**

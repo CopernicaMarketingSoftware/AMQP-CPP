@@ -1,8 +1,7 @@
 /**
- *  ByteByffer.h
+ *  ReducedBuffer.h
  *
- *  Very simple implementation of the buffer class that simply wraps
- *  around a buffer of bytes
+ *  Wrapper around a buffer with a number of bytes to skip
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
  *  @copyright 2014 Copernica BV
@@ -21,41 +20,41 @@ namespace AMQP {
 /**
  *  Class definition
  */
-class ByteBuffer : public Buffer
+class ReducedBuffer : public Buffer
 {
 private:
     /**
-     *  The actual byte buffer
-     *  @var const char *
+     *  Pointer to the original buffer
+     *  @var    Buffer
      */
-    const char *_data;
+    const Buffer &_buffer;
     
     /**
-     *  Size of the buffer
-     *  @var size_t
+     *  Number of bytes to skip
+     *  @var    size_t
      */
-    size_t _size;
+    size_t _skip;
 
 public:
     /**
      *  Constructor
-     *  @param  data
-     *  @param  size
+     *  @param  buffer
+     *  @param  skip
      */
-    ByteBuffer(const char *data, size_t size) : _data(data), _size(size) {}
+    ReducedBuffer(const Buffer &buffer, size_t skip) : _buffer(buffer), _skip(skip) {}
     
     /**
      *  Destructor
      */
-    virtual ~ByteBuffer() {}
-
+    virtual ~ReducedBuffer();
+    
     /**
      *  Total size of the buffer
      *  @return size_t
      */
     virtual size_t size() const override
     {
-        return _size;
+        return _buffer.size() - _skip;
     }
 
     /**
@@ -65,7 +64,7 @@ public:
      */
     virtual char byte(size_t pos) const override
     {
-        return _data[pos];
+        return _buffer.byte(pos + _skip);
     }
 
     /**
@@ -76,24 +75,29 @@ public:
      */
     virtual const char *data(size_t pos, size_t size) const override
     {
-        return _data + pos;
+        return _buffer.data(pos + _skip, size);
     }
     
     /**
      *  Copy bytes to a buffer
+     * 
+     *  No safety checks are necessary: this method will only be called
+     *  for bytes that actually exist
+     * 
      *  @param  pos         position in the buffer
      *  @param  size        number of bytes to copy
      *  @param  buffer      buffer to copy into
-     *  @return size_t      pointer to buffer
+     *  @return void*       pointer to buffer
      */
     virtual void *copy(size_t pos, size_t size, void *buffer) const override
     {
-        return memcpy(buffer, _data + pos, size);
+        return _buffer.copy(pos + _skip, size, buffer);
     }
-
 };
 
 /**
- *  End namespace
+ *  End of namespace
  */
 }
+
+
