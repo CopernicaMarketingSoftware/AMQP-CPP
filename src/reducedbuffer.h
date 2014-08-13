@@ -46,7 +46,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~ReducedBuffer();
+    virtual ~ReducedBuffer() {}
     
     /**
      *  Total size of the buffer
