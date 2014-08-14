@@ -201,7 +201,7 @@ public:
      *  Cast to array
      *  @return Array
      */
-    virtual operator const Array& () const override
+    virtual const Array& to_array() const override
     {
         // this already is an array, so no cast is necessary
         return *this;

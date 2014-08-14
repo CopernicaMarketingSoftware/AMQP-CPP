@@ -62,10 +62,10 @@ Field::operator const std::string& () const
  *  Cast to array
  *  @return Array
  */
-Field::operator const Array& () const
+const Array& Field::to_array() const
 {
     // static empty array
-    static Array empty;
+    static const Array empty;
     
     // return it
     return empty;
@@ -75,10 +75,10 @@ Field::operator const Array& () const
  *  Cast to object
  *  @return Array
  */
-Field::operator const Table& () const
+const Table& Field::to_table() const
 {
     // static empty table
-    static Table empty;
+    static const Table empty;
     
     // return it
     return empty;

@@ -28,13 +28,13 @@ private:
      *  The actual byte buffer
      *  @var const char *
      */
-    const char *_data;
+//    const char *_data;
     
     /**
      *  Size of the buffer
      *  @var size_t
      */
-    size_t _size;
+//    size_t _size;
 
 public:
     /**
@@ -42,7 +42,8 @@ public:
      *  @param  data
      *  @param  size
      */
-    ByteBuffer(const char *data, size_t size) : _data(data), _size(size) {}
+    ByteBuffer(const char *data, size_t size) //: _data(data), _size(size)
+    {}
     
     /**
      *  Destructor

@@ -200,7 +200,7 @@ public:
      *  Cast to table
      *  @return Table
      */
-    virtual operator const Table& () const override
+    virtual const Table& to_table() const override
     {
         // this already is an array, so no cast is necessary
         return *this;

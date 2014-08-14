@@ -26,6 +26,8 @@ protected:
      *  @return Field*
      */
     static Field *decode(ReceivedFrame &frame);
+    virtual const Table& to_table() const;
+    virtual const Array& to_array() const;
     
 public:
     /**
@@ -81,8 +83,8 @@ public:
     virtual operator int64_t () const { return 0; }
     virtual operator float () const { return 0; }
     virtual operator double () const { return 0; }
-    virtual operator const Array& () const;
-    virtual operator const Table& () const;
+    operator const Array& () const { return to_array(); }
+    operator const Table& () const { return to_table(); }
 };
 
 /**
