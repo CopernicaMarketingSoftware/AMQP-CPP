@@ -102,7 +102,7 @@ public:
     {
         return _implementation.parse(buffer);
     }
-    
+
     /**
      *  Close the connection
      *  This will close all channels

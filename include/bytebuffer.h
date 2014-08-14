@@ -90,7 +90,6 @@ public:
     {
         return memcpy(buffer, _data + pos, size);
     }
-
 };
 
 /**

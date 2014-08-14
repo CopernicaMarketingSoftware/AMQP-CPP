@@ -25,7 +25,9 @@
 // base C include files
 #include <stdint.h>
 #include <math.h>
-#include <endian.h>
+
+// include compatibilities for apple
+#include <amqpcpp/apple.h>
 
 // forward declarations
 #include <amqpcpp/classes.h>
