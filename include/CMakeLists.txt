@@ -7,7 +7,7 @@ callbacks.h
 channel.h
 channelimpl.h
 classes.h
-compat_endian.h
+endian.h
 connection.h
 connectionhandler.h
 connectionimpl.h

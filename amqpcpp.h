@@ -26,13 +26,11 @@
 #include <stdint.h>
 #include <math.h>
 
-// include compatibilities for apple
-#include <amqpcpp/apple.h>
-
 // forward declarations
 #include <amqpcpp/classes.h>
 
 // utility classes
+#include <amqpcpp/endian.h>
 #include <amqpcpp/buffer.h>
 #include <amqpcpp/bytebuffer.h>
 #include <amqpcpp/receivedframe.h>
