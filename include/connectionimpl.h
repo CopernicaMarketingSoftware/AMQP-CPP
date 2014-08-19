@@ -145,7 +145,7 @@ public:
      *  Are we fully connected?
      *  @return bool
      */
-    bool connected()
+    bool connected() const
     {
         // state must be connected
         return _state == state_connected;
@@ -160,7 +160,7 @@ public:
      *  Retrieve the login data
      *  @return Login
      */
-    Login &login()
+    const Login &login() const
     {
         return _login;
     }
@@ -169,7 +169,7 @@ public:
      *  Retrieve the vhost
      *  @return string
      */
-    std::string &vhost()
+    const std::string &vhost() const
     {
         return _vhost;
     }

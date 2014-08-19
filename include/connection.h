@@ -58,6 +58,24 @@ public:
      *  Destructor
      */
     virtual ~Connection() {}
+    
+    /**
+     *  Retrieve the login data
+     *  @return Login
+     */
+    const Login &login() const
+    {
+        return _implementation.login();
+    }
+
+    /**
+     *  Retrieve the vhost
+     *  @return string
+     */
+    const std::string &vhost() const
+    {
+        return _implemention.vhost();
+    }
 
     /**
      *  Parse data that was recevied from RabbitMQ
