@@ -81,7 +81,7 @@ public:
      *  String representation in SASL PLAIN mode
      *  @return string
      */
-    std::string saslPlain()
+    std::string saslPlain() const
     {
         // we need an initial string
         std::string result("\0", 1);

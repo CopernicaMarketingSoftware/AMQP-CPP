@@ -74,7 +74,7 @@ public:
      */
     const std::string &vhost() const
     {
-        return _implemention.vhost();
+        return _implementation.vhost();
     }
 
     /**
