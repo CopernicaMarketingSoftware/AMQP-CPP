@@ -61,7 +61,7 @@ private:
      *
      *  @var    Deferred
      */
-    std::unique_ptr<Deferred> _oldestCallback = nullptr;
+    std::shared_ptr<Deferred> _oldestCallback = nullptr;
 
     /**
      *  Pointer to the newest deferred result (the last one to be added).
@@ -533,8 +533,12 @@ public:
         // we are going to call callbacks that could destruct the channel
         Monitor monitor(this);
 
+        // copy the callback (so that it will not be destructed during
+        // the "reportSuccess" call
+        auto cb = _oldestCallback;
+
         // call the callback
-        auto *next = _oldestCallback->reportSuccess(std::forward<Arguments>(parameters)...);
+        auto *next = cb->reportSuccess(std::forward<Arguments>(parameters)...);
 
         // leap out if channel no longer exists
         if (!monitor.valid()) return false;
@@ -565,8 +569,12 @@ public:
         // call the oldest
         if (_oldestCallback)
         {
+            // copy the callback (so that it can not be destructed during
+            // the "reportError" call
+            auto cb = _oldestCallback;
+            
             // call the callback
-            auto *next = _oldestCallback->reportError(message);
+            auto *next = cb->reportError(message);
 
             // leap out if channel no longer exists
             if (!monitor.valid()) return;
@@ -578,8 +586,12 @@ public:
         // clean up all deferred other objects
         while (_oldestCallback)
         {
+            // copy the callback (so that it can not be destructed during
+            // the "reportError" call
+            auto cb = _oldestCallback;
+
             // call the callback
-            auto *next = _oldestCallback->reportError("Channel is in error state");
+            auto *next = cb->reportError("Channel is in error state");
 
             // leap out if channel no longer exists
             if (!monitor.valid()) return;
