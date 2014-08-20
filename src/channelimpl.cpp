@@ -47,66 +47,6 @@
 namespace AMQP {
 
 /**
- *  Derived class with public constructor
- * 
- *  We need this because std::make_shared<ChannelImpl> is not possible
- */
-struct PublicChannelImpl : public ChannelImpl
-{
-    /**
-     *  Constructor
-     *  @param  parent
-     *  @param  connection
-     */
-    PublicChannelImpl(Channel *parent, Connection *connection) : ChannelImpl(parent, connection) {}
-    
-    /**
-     *  Destructor
-     */
-    virtual ~PublicChannelImpl() {}
-};
-
-/**
- *  Constructor to make a shared pointer
- *  @param  parent          the publis channel object
- *  @param  connection      pointer to the connection
- */
-std::shared_ptr<ChannelImpl> ChannelImpl::instantiate(Channel *parent, Connection *connection)
-{
-    // we can only use std::make_shared with a PublicChannelImpl
-    return std::make_shared<PublicChannelImpl>(parent, connection);
-}
-
-/**
- *  Construct a channel object
- *  @param  parent
- *  @param  connection
- *  @param  handler
- */
-ChannelImpl::ChannelImpl(Channel *parent, Connection *connection) :
-    _parent(parent),
-    _connection(&connection->_implementation)
-{
-    // add the channel to the connection
-    _id = _connection->add(shared_from_this());
-
-    // check if the id is valid
-    if (_id == 0)
-    {
-        // this is invalid
-        _state = state_closed;
-    }
-    else
-    {
-        // busy connecting
-        _state = state_connected;
-
-        // valid id, send a channel open frame
-        send(ChannelOpenFrame(_id));
-    }
-}
-
-/**
  *  Destructor
  */
 ChannelImpl::~ChannelImpl()
@@ -121,6 +61,34 @@ ChannelImpl::~ChannelImpl()
     // destruct deferred results
     while (_oldestCallback) _oldestCallback.reset(_oldestCallback->next());
 }
+
+/**
+ *  Initialize the object with an connection
+ *  @param  connection
+ */
+void ChannelImpl::attach(Connection *connection)
+{
+    // get connection impl
+    _connection = &connection->_implementation;
+    
+    // retrieve an ID
+    _id = _connection->add(shared_from_this());
+    
+    // check if the id is valid
+    if (_id == 0)
+    {
+        // this is invalid
+        _state = state_closed;
+    }
+    else
+    {
+        // busy connecting
+        _state = state_connected;
+        
+        // valid id, send a channel open frame
+        send(ChannelOpenFrame(_id));
+    }
+}    
 
 /**
  *  Push a deferred result

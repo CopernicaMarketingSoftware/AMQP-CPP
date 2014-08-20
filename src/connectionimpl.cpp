@@ -45,7 +45,7 @@ ConnectionImpl::~ConnectionImpl()
     close();
 
     // invalidate all channels, so they will no longer call methods on this channel object
-    for (auto iter = _channels.begin(); iter != _channels.end(); iter++) iter->second->invalidate();
+    for (auto iter = _channels.begin(); iter != _channels.end(); iter++) iter->second->detach();
 }
 
 /**

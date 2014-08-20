@@ -27,7 +27,11 @@ public:
      *  Construct a channel object
      *  @param  connection
      */
-    Channel(Connection *connection) : _implementation(ChannelImpl::instantiate(this, connection)) {}
+    Channel(Connection *connection) : _implementation(new ChannelImpl()) 
+    {
+        // attach the connection to the channel
+        _implementation->attach(connection);
+    }
 
     /**
      *  Destructor

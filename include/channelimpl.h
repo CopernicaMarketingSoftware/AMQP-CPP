@@ -26,16 +26,10 @@ class ChannelImpl : public Watchable, public std::enable_shared_from_this<Channe
 {
 private:
     /**
-     *  The actual channel object
-     *  @var    Channel
-     */
-    Channel *_parent;
-
-    /**
      *  Pointer to the connection
      *  @var    ConnectionImpl
      */
-    ConnectionImpl *_connection;
+    ConnectionImpl *_connection = nullptr;
 
     /**
      *  Callback when the channel is ready
@@ -74,7 +68,7 @@ private:
      *  The channel number
      *  @var uint16_t
      */
-    uint16_t _id;
+    uint16_t _id = 0;
 
     /**
      *  State of the channel object
@@ -84,7 +78,7 @@ private:
         state_connected,
         state_closing,
         state_closed
-    } _state = state_connected;
+    } _state = state_closed;
 
     /**
      *  The frames that still need to be send out
@@ -109,11 +103,10 @@ private:
     ConsumedMessage *_message = nullptr;
 
     /**
-     *  Constructor to make a shared pointer
-     *  @param  parent          the publis channel object
-     *  @param  connection      pointer to the connection
+     *  Attach the connection
+     *  @param  connection
      */
-    static std::shared_ptr<ChannelImpl> instantiate(Channel *parent, Connection *connection);
+    void attach(Connection *connection);
 
     /**
      *  Push a deferred result
@@ -136,11 +129,8 @@ protected:
      *  Note that the constructor is private, and that the Channel class is
      *  a friend. By doing this we ensure that nobody can instantiate this
      *  object, and that it can thus only be used inside the library.
-     *
-     *  @param  parent          the public channel object
-     *  @param  connection      pointer to the connection
      */
-    ChannelImpl(Channel *parent, Connection *connection);
+    ChannelImpl() {}
 
 public:
     /**
@@ -152,7 +142,7 @@ public:
      *  Invalidate the channel
      *  This method is called when the connection is destructed
      */
-    void invalidate()
+    void detach()
     {
         _connection = nullptr;
     }
