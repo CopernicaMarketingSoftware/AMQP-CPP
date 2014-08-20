@@ -144,10 +144,10 @@ size_t ConnectionImpl::parse(const Buffer &buffer)
             return processed;
         }
     }
-    
+
     // leap out if the connection object no longer exists
     if (!monitor.valid() || !_closed || _state != state_connected) return processed;
-    
+
     // the close() function was called, but if the close frame was not yet sent
     // if there are no waiting channels, we can do that right now
     if (!waiting()) sendClose();
@@ -183,7 +183,7 @@ bool ConnectionImpl::close()
 
         // we could be dead now
         if (!monitor.valid()) return true;
-        
+
         // is this channel waiting for an answer
         if (iter->second->waiting()) waiters++;
     }
@@ -254,7 +254,7 @@ void ConnectionImpl::setConnected()
 
     // if the close method was called before, and no channel is waiting
     // for an answer, we can now safely send out the close frame
-    if (_closed && state == _state_connected && !waiting()) sendClose();
+    if (_closed && _state == state_connected && !waiting()) sendClose();
 }
 
 /**
@@ -269,7 +269,7 @@ bool ConnectionImpl::waiting() const
         // is this a waiting channel
         if (iter.second->waiting()) return true;
     }
-    
+
     // no waiting channel found
     return false;
 }
