@@ -22,7 +22,7 @@ class ConsumedMessage;
 /**
  *  Class definition
  */
-class ChannelImpl : public Watchable
+class ChannelImpl : public Watchable, public std::enable_shared_from_this<ChannelImpl>
 {
 private:
     /**
@@ -91,11 +91,14 @@ private:
      *
      *  We store the data as well as whether they
      *  should be handled synchronously.
+     * 
+     *  @var std::queue
      */
     std::queue<std::pair<bool, OutBuffer>> _queue;
 
     /**
      *  Are we currently operating in synchronous mode?
+     *  @var bool
      */
     bool _synchronous = false;
 
@@ -106,16 +109,11 @@ private:
     ConsumedMessage *_message = nullptr;
 
     /**
-     *  Construct a channel object
-     *
-     *  Note that the constructor is private, and that the Channel class is
-     *  a friend. By doing this we ensure that nobody can instantiate this
-     *  object, and that it can thus only be used inside the library.
-     *
-     *  @param  parent          the public channel object
+     *  Constructor to make a shared pointer
+     *  @param  parent          the publis channel object
      *  @param  connection      pointer to the connection
      */
-    ChannelImpl(Channel *parent, Connection *connection);
+    static std::shared_ptr<ChannelImpl> instantiate(Channel *parent, Connection *connection);
 
     /**
      *  Push a deferred result
@@ -131,6 +129,18 @@ private:
      */
     Deferred &push(const Frame &frame);
 
+protected:
+    /**
+     *  Construct a channel object
+     *
+     *  Note that the constructor is private, and that the Channel class is
+     *  a friend. By doing this we ensure that nobody can instantiate this
+     *  object, and that it can thus only be used inside the library.
+     *
+     *  @param  parent          the public channel object
+     *  @param  connection      pointer to the connection
+     */
+    ChannelImpl(Channel *parent, Connection *connection);
 
 public:
     /**
@@ -475,11 +485,19 @@ public:
     bool send(const Frame &frame);
 
     /**
-     *  Signal the channel that a synchronous operation
-     *  was completed. After this operation, waiting
-     *  frames can be sent out.
+     *  Is this channel waiting for an answer before it can send furher instructions
+     *  @return bool
      */
-    void synchronized();
+    bool waiting() const
+    {
+        return _synchronous;
+    }
+
+    /**
+     *  Signal the channel that a synchronous operation was completed. 
+     *  After this operation, waiting frames can be sent out.
+     */
+    void onSynchronized();
 
     /**
      *  Report to the handler that the channel is opened
@@ -493,36 +511,48 @@ public:
         if (_readyCallback) _readyCallback();
 
         // if the monitor is still valid, we exit synchronous mode now
-        if (monitor.valid()) synchronized();
+        if (monitor.valid()) onSynchronized();
     }
 
     /**
      *  Report to the handler that the channel is closed
      *
      *  Returns whether the channel object is still valid
+     * 
+     *  @return bool
      */
     bool reportClosed()
     {
         // change state
         _state = state_closed;
+        _synchronous = false;
+
+        // create a monitor, because the callbacks could destruct the current object
+        Monitor monitor(this);
 
         // and pass on to the reportSuccess() method which will call the
         // appropriate deferred object to report the successful operation
-        return reportSuccess();
-
-        // technically, we should exit synchronous method now
-        // since the synchronous channel close frame has been
-        // acknowledged by the server.
-        //
-        // but since the channel was just closed, there is no
-        // real point in doing this, as we cannot send frames
-        // out anymore.
+        bool result = reportSuccess();
+        
+        // leap out if object no longer exists
+        if (!monitor.valid()) return result;
+        
+        // all later deferred objects should report an error, because it
+        // was not possible to complete the instruction as the channel is
+        // now closed
+        reportError("Channel has been closed", false);
+        
+        // done
+        return result;
     }
 
     /**
      *  Report success
      *
      *  Returns whether the channel object is still valid
+     * 
+     *  @param  mixed
+     *  @return bool
      */
     template <typename... Arguments>
     bool reportSuccess(Arguments ...parameters)
@@ -558,54 +588,7 @@ public:
      *  @param  message             the error message
      *  @param  notifyhandler       should the channel-wide handler also be called?
      */
-    void reportError(const char *message, bool notifyhandler = true)
-    {
-        // change state
-        _state = state_closed;
-
-        // we are going to call callbacks that could destruct the channel
-        Monitor monitor(this);
-
-        // call the oldest
-        if (_oldestCallback)
-        {
-            // copy the callback (so that it can not be destructed during
-            // the "reportError" call
-            auto cb = _oldestCallback;
-            
-            // call the callback
-            auto *next = cb->reportError(message);
-
-            // leap out if channel no longer exists
-            if (!monitor.valid()) return;
-
-            // set the oldest callback
-            _oldestCallback.reset(next);
-        }
-
-        // clean up all deferred other objects
-        while (_oldestCallback)
-        {
-            // copy the callback (so that it can not be destructed during
-            // the "reportError" call
-            auto cb = _oldestCallback;
-
-            // call the callback
-            auto *next = cb->reportError("Channel is in error state");
-
-            // leap out if channel no longer exists
-            if (!monitor.valid()) return;
-
-            // set the oldest callback
-            _oldestCallback.reset(next);
-        }
-
-        // all callbacks have been processed, so we also can reset the pointer to the newest
-        _newestCallback = nullptr;
-
-        // inform handler
-        if (notifyhandler && _errorCallback) _errorCallback(message);
-    }
+    void reportError(const char *message, bool notifyhandler = true);
 
     /**
      *  Install a consumer callback
@@ -657,7 +640,6 @@ public:
      *  The channel class is its friend, thus can it instantiate this object
      */
     friend class Channel;
-
 };
 
 /**

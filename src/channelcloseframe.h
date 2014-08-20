@@ -147,7 +147,7 @@ public:
     virtual bool process(ConnectionImpl *connection) override
     {
         // check if we have a channel
-        ChannelImpl *channel = connection->channel(this->channel());
+        auto channel = connection->channel(this->channel());
         
         // send back an ok frame
         connection->send(ChannelCloseOKFrame(this->channel()));

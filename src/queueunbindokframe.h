@@ -67,13 +67,13 @@ public:
     virtual bool process(ConnectionImpl *connection) override
     {
         // check if we have a channel
-        ChannelImpl *channel = connection->channel(this->channel());
+        auto channel = connection->channel(this->channel());
 
         // channel does not exist
         if(!channel) return false;
 
         // report queue unbind success
-        if (channel->reportSuccess()) channel->synchronized();
+        if (channel->reportSuccess()) channel->onSynchronized();
 
         // done
         return true;

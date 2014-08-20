@@ -55,7 +55,7 @@ protected:
      *  All channels that are active
      *  @var    map
      */
-    std::map<uint16_t, ChannelImpl*> _channels;
+    std::map<uint16_t, std::shared_ptr<ChannelImpl>> _channels;
 
     /**
      *  The last unused channel ID
@@ -99,6 +99,13 @@ protected:
      *  @return bool
      */
     bool sendClose();
+
+    /**
+     *  Is any channel waiting for an answer on a synchronous call?
+     *  @return bool
+     */
+    bool waiting() const;
+
 
 private:
     /**
@@ -210,13 +217,13 @@ public:
      *  @param  channel
      *  @return uint16_t
      */
-    uint16_t add(ChannelImpl *channel);
+    uint16_t add(const std::shared_ptr<ChannelImpl> &channel);
 
     /**
      *  Remove a channel
      *  @param  channel
      */
-    void remove(ChannelImpl *channel);
+    void remove(const ChannelImpl *channel);
 
     /**
      *  Parse the buffer into a recognized frame
@@ -269,7 +276,7 @@ public:
      *  @param  number          channel identifier
      *  @return channel         the channel object, or nullptr if not yet created
      */
-    ChannelImpl *channel(int number)
+    std::shared_ptr<ChannelImpl> channel(int number)
     {
         auto iter = _channels.find(number);
         return iter == _channels.end() ? nullptr : iter->second;

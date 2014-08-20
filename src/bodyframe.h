@@ -100,7 +100,7 @@ public:
     virtual bool process(ConnectionImpl *connection) override
     {
         // we need the appropriate channel
-        ChannelImpl *channel = connection->channel(this->channel());
+        auto channel = connection->channel(this->channel());
         
         // channel does not exist
         if (!channel) return false;    

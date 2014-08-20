@@ -140,6 +140,15 @@ public:
     }
 
     /**
+     *  This frame is part of the shutdown operation
+     *  @return bool
+     */
+    virtual bool partOfShutdown() const override
+    {
+        return true;
+    }
+
+    /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
      *  @return bool            Was it succesfully processed?

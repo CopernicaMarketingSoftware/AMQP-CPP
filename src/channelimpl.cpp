@@ -47,6 +47,37 @@
 namespace AMQP {
 
 /**
+ *  Derived class with public constructor
+ * 
+ *  We need this because std::make_shared<ChannelImpl> is not possible
+ */
+struct PublicChannelImpl : public ChannelImpl
+{
+    /**
+     *  Constructor
+     *  @param  parent
+     *  @param  connection
+     */
+    PublicChannelImpl(Channel *parent, Connection *connection) : ChannelImpl(parent, connection) {}
+    
+    /**
+     *  Destructor
+     */
+    virtual ~PublicChannelImpl() {}
+};
+
+/**
+ *  Constructor to make a shared pointer
+ *  @param  parent          the publis channel object
+ *  @param  connection      pointer to the connection
+ */
+std::shared_ptr<ChannelImpl> ChannelImpl::instantiate(Channel *parent, Connection *connection)
+{
+    // we can only use std::make_shared with a PublicChannelImpl
+    return std::make_shared<PublicChannelImpl>(parent, connection);
+}
+
+/**
  *  Construct a channel object
  *  @param  parent
  *  @param  connection
@@ -57,7 +88,7 @@ ChannelImpl::ChannelImpl(Channel *parent, Connection *connection) :
     _connection(&connection->_implementation)
 {
     // add the channel to the connection
-    _id = _connection->add(this);
+    _id = _connection->add(shared_from_this());
 
     // check if the id is valid
     if (_id == 0)
@@ -86,9 +117,6 @@ ChannelImpl::~ChannelImpl()
 
     // remove this channel from the connection (but not if the connection is already destructed)
     if (_connection) _connection->remove(this);
-
-    // close the channel now
-    close();
 
     // destruct deferred results
     while (_oldestCallback) _oldestCallback.reset(_oldestCallback->next());
@@ -195,6 +223,9 @@ Deferred &ChannelImpl::rollbackTransaction()
  */
 Deferred &ChannelImpl::close()
 {
+    // this is completely pointless if not connected
+    if (_state != state_connected) return push(new Deferred(_state == state_closing));
+    
     // send a channel close frame
     auto &handler = push(ChannelCloseFrame(_id));
 
@@ -643,7 +674,13 @@ Deferred &ChannelImpl::recover(int flags)
 bool ChannelImpl::send(const Frame &frame)
 {
     // skip if channel is not connected
-    if (_state != state_connected || !_connection) return false;
+    if (_state == state_closed || !_connection) return false;
+
+    // if we're busy closing, we pretend that the send operation was a
+    // success. this causes the deferred object to be created, and to be
+    // added to the list of deferred objects. it will be notified about
+    // the error when the close operation succeeds
+    if (_state == state_closing) return true;
 
     // are we currently in synchronous mode or are there
     // other frames waiting for their turn to be sent?
@@ -666,11 +703,10 @@ bool ChannelImpl::send(const Frame &frame)
 }
 
 /**
- *  Signal the channel that a synchronous operation
- *  was completed. After this operation, waiting
- *  frames can be sent out.
+ *  Signal the channel that a synchronous operation was completed. After 
+ *  this operation, waiting frames can be sent out.
  */
-void ChannelImpl::synchronized()
+void ChannelImpl::onSynchronized()
 {
     // we are no longer waiting for synchronous operations
     _synchronous = false;
@@ -679,7 +715,7 @@ void ChannelImpl::synchronized()
     Monitor monitor(this);
 
     // send all frames while not in synchronous mode
-    while (monitor.valid() && !_synchronous && !_queue.empty())
+    while (monitor.valid() && _connection && !_synchronous && !_queue.empty())
     {
         // retrieve the first buffer and synchronous
         auto pair = std::move(_queue.front());
@@ -707,7 +743,7 @@ void ChannelImpl::reportMessage()
     Monitor monitor(this);
 
     // synchronize the channel if this comes from a basic.get frame
-    if (_message->consumer().empty()) synchronized();
+    if (_message->consumer().empty()) onSynchronized();
 
     // syncing the channel may destruct the channel
     if (!monitor.valid()) return;
@@ -728,6 +764,73 @@ void ChannelImpl::reportMessage()
     // no longer need the message
     delete _message; _message = nullptr;
 }
+
+/**
+ *  Report an error message on a channel
+ *  @param  message             the error message
+ *  @param  notifyhandler       should the channel-wide handler also be called?
+ */
+void ChannelImpl::reportError(const char *message, bool notifyhandler)
+{
+    // change state
+    _state = state_closed;
+    _synchronous = false;
+    
+    // the queue of messages that still have to sent can be emptied now
+    // (we do this by moving the current queue into an unused variable)
+    auto queue(std::move(_queue));
+
+    // we are going to call callbacks that could destruct the channel
+    Monitor monitor(this);
+
+    // call the oldest
+    if (_oldestCallback)
+    {
+        // copy the callback (so that it can not be destructed during
+        // the "reportError" call
+        auto cb = _oldestCallback;
+        
+        // call the callback
+        auto *next = cb->reportError(message);
+
+        // leap out if channel no longer exists
+        if (!monitor.valid()) return;
+
+        // set the oldest callback
+        _oldestCallback.reset(next);
+    }
+
+    // clean up all deferred other objects
+    while (_oldestCallback)
+    {
+        // copy the callback (so that it can not be destructed during
+        // the "reportError" call
+        auto cb = _oldestCallback;
+
+        // call the callback
+        auto *next = cb->reportError("Channel is in error state");
+
+        // leap out if channel no longer exists
+        if (!monitor.valid()) return;
+
+        // set the oldest callback
+        _oldestCallback.reset(next);
+    }
+
+    // all callbacks have been processed, so we also can reset the pointer to the newest
+    _newestCallback = nullptr;
+
+    // inform handler
+    if (notifyhandler && _errorCallback) _errorCallback(message);
+
+    // leap out if object no longer exists
+    if (!monitor.valid()) return;
+
+    // the connection now longer has to know that this channel exists,
+    // because the channel ID is no longer in use
+    if (_connection) _connection->remove(this);
+}
+
 
 /**
  *  Create an incoming message from a consume call

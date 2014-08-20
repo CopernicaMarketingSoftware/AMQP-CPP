@@ -49,6 +49,12 @@ public:
     virtual bool partOfHandshake() const { return false; }
 
     /**
+     *  Is this a frame that is part of the connection close operation?
+     *  @return bool
+     */
+    virtual bool partOfShutdown() const { return false; }
+
+    /**
      *  Does this frame need an end-of-frame seperator?
      *  @return bool
      */
