@@ -146,7 +146,7 @@ size_t ConnectionImpl::parse(const Buffer &buffer)
     }
     
     // leap out if the connection object no longer exists
-    if (!monitor.valid() || !_closed || _state == state_connected) return processed;
+    if (!monitor.valid() || !_closed || _state != state_connected) return processed;
     
     // the close() function was called, but if the close frame was not yet sent
     // if there are no waiting channels, we can do that right now
@@ -189,9 +189,9 @@ bool ConnectionImpl::close()
     }
 
     // if still busy with handshake, we delay closing for a while
-    if (waiters > 0 || _state == state_handshake || _state == state_protocol) return true;
+    if (waiters > 0 || _state != state_connected) return true;
 
-    // perform the close operation
+    // perform the close frame
     sendClose();
 
     // done
@@ -229,11 +229,6 @@ void ConnectionImpl::setConnected()
     // store connected state
     _state = state_connected;
 
-    // if the close method was called before, the frame was not
-    // sent. append it to the end of the queue to make sure we
-    // are correctly closed down.
-    if (_closed && !waiting() && !sendClose()) return;
-
     // we're going to call the handler, which can destruct the connection,
     // so we must monitor if the queue object is still valid after calling
     Monitor monitor(this);
@@ -253,6 +248,13 @@ void ConnectionImpl::setConnected()
         // send it
         _handler->onData(_parent, buffer.data(), buffer.size());
     }
+
+    // leap out if object is dead
+    if (!monitor.valid()) return;
+
+    // if the close method was called before, and no channel is waiting
+    // for an answer, we can now safely send out the close frame
+    if (_closed && state == _state_connected && !waiting()) sendClose();
 }
 
 /**
