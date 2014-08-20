@@ -80,13 +80,16 @@ void ChannelImpl::attach(Connection *connection)
         // this is invalid
         _state = state_closed;
     }
-    else
+    else 
     {
-        // busy connecting
+        // assume channel is connected
         _state = state_connected;
-        
-        // valid id, send a channel open frame
-        send(ChannelOpenFrame(_id));
+    
+        // send the open frame
+        if (send(ChannelOpenFrame(_id))) return;
+
+        // report an error
+        reportError("Channel could not be initialized", true);
     }
 }    
 
@@ -663,11 +666,14 @@ bool ChannelImpl::send(const Frame &frame)
         return true;
     }
 
-    // enter synchronous mode if necessary
-    _synchronous = frame.synchronous();
-
     // send to tcp connection
-    return _connection->send(frame);
+    if (!_connection->send(frame)) return false;
+    
+    // frame was sent, if this was a synchronous frame, we now have to wait
+    _synchronous = frame.synchronous();
+    
+    // done
+    return true;
 }
 
 /**

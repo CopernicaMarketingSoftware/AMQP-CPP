@@ -144,7 +144,38 @@ public:
      */
     void detach()
     {
+        // connection is gone
         _connection = nullptr;
+    }
+
+    /**
+     *  Callback that is called when the channel was succesfully created.
+     *  @param  callback    the callback to execute
+     */
+    void onReady(const SuccessCallback &callback)
+    {
+        // store callback
+        _readyCallback = callback;
+        
+        // direct call if channel is already ready
+        if (_state == state_connected) callback();
+    }
+
+    /**
+     *  Callback that is called when an error occurs.
+     *
+     *  Only one error callback can be registered. Calling this function
+     *  multiple times will remove the old callback.
+     *
+     *  @param  callback    the callback to execute
+     */
+    void onError(const ErrorCallback &callback)
+    {
+        // store callback
+        _errorCallback = callback;
+        
+        // direct call if channel is already in error state
+        if (_state != state_connected) callback("Channel is in error state");
     }
 
     /**
@@ -480,7 +511,7 @@ public:
      */
     bool waiting() const
     {
-        return _synchronous;
+        return _synchronous || !_queue.empty();
     }
 
     /**

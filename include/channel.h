@@ -52,8 +52,7 @@ public:
      */
     void onReady(const SuccessCallback &callback)
     {
-        // store callback in implementation
-        _implementation->_readyCallback = callback;
+        _implementation->onReady(callback);
     }
 
     /**
@@ -66,8 +65,7 @@ public:
      */
     void onError(const ErrorCallback &callback)
     {
-        // store callback in implementation
-        _implementation->_errorCallback = callback;
+        _implementation->onError(callback);
     }
 
     /**
