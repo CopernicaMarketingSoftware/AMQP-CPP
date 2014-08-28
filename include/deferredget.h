@@ -33,6 +33,12 @@ private:
      *  @var    EmptyCallback
      */
     EmptyCallback _emptyCallback;
+    
+    /**
+     *  Callback with the number of messages still in the queue
+     *  @var    SizeCallback
+     */
+    SizeCallback _sizeCallback;
 
     /**
      *  Report success when a message is indeed expected
@@ -117,6 +123,19 @@ public:
     {
         // store callback
         _emptyCallback = callback;
+        
+        // allow chaining
+        return *this;
+    }
+    
+    /**
+     *  Register a function to be called when size information is known
+     *  @param  callback    the callback to execute
+     */
+    DeferredGet &onSize(const SizeCallback &callback)
+    {
+        // store callback
+        _sizeCallback = callback;
         
         // allow chaining
         return *this;
