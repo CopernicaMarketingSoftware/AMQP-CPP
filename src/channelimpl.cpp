@@ -361,7 +361,7 @@ DeferredDelete &ChannelImpl::purgeQueue(const std::string &name)
     QueuePurgeFrame frame(_id, name, false);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredDelete(send(frame));
+    auto *deferred = new DeferredDelete(!send(frame));
 
     // push to list
     push(deferred);
@@ -582,7 +582,7 @@ DeferredGet &ChannelImpl::get(const std::string &queue, int flags)
     BasicGetFrame frame(_id, queue, flags & noack);
     
     // send the frame, and create deferred object
-    auto *deferred = new DeferredGet(this, send(frame));
+    auto *deferred = new DeferredGet(this, !send(frame));
 
     // push to list
     push(deferred);
