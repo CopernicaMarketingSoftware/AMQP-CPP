@@ -136,6 +136,13 @@ public:
     virtual ~ConnectionImpl();
 
     /**
+     *  No assignments of other connections
+     *  @param  connection
+     *  @return ConnectionImpl
+     */
+    ConnectionImpl &operator=(const ConnectionImpl &connection) = delete;
+
+    /**
      *  What is the state of the connection - is the protocol handshake completed?
      *  @return bool
      */

@@ -64,6 +64,13 @@ public:
      *  Destructor
      */
     virtual ~Connection() {}
+
+    /**
+     *  No assignments of other connections
+     *  @param  connection
+     *  @return Connection
+     */
+    Connection &operator=(const Connection &connection) = delete;
     
     /**
      *  Retrieve the login data

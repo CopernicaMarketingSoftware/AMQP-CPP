@@ -145,6 +145,13 @@ public:
     virtual ~ChannelImpl();
 
     /**
+     *  No assignments of other channels
+     *  @param  channel
+     *  @return Channel
+     */
+    ChannelImpl &operator=(const ChannelImpl &channel) = delete;
+
+    /**
      *  Invalidate the channel
      *  This method is called when the connection is destructed
      */

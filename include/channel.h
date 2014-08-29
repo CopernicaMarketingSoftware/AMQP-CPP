@@ -49,6 +49,13 @@ public:
     }
 
     /**
+     *  No assignments of other channels
+     *  @param  channel
+     *  @return Channel
+     */
+    Channel &operator=(const Channel &channel) = delete;
+
+    /**
      *  Callback that is called when the channel was succesfully created.
      *
      *  Only one callback can be registered. Calling this function multiple
