@@ -134,6 +134,12 @@ protected:
 
 public:
     /**
+     *  Copy'ing of channel objects is not supported
+     *  @param  channel
+     */
+    ChannelImpl(const ChannelImpl &channel) = delete;
+
+    /**
      *  Destructor
      */
     virtual ~ChannelImpl();

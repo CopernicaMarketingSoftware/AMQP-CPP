@@ -125,6 +125,12 @@ private:
 
 public:
     /**
+     *  Copy'ing connections is impossible
+     *  @param  connection
+     */
+    ConnectionImpl(const ConnectionImpl &connection) = delete;
+
+    /**
      *  Destructor
      */
     virtual ~ConnectionImpl();

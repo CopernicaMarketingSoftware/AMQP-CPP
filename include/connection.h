@@ -55,6 +55,12 @@ public:
     Connection(ConnectionHandler *handler) : _implementation(this, handler, Login(), "/") {}
 
     /**
+     *  No copy'ing, we do not support having two identical connection objects
+     *  @param  connection
+     */
+    Connection(const Connection &connection) = delete;
+
+    /**
      *  Destructor
      */
     virtual ~Connection() {}

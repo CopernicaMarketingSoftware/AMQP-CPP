@@ -34,6 +34,12 @@ public:
     }
 
     /**
+     *  Copy'ing of channel objects is not supported
+     *  @param  channel
+     */
+    Channel(const Channel &channel) = delete;
+
+    /**
      *  Destructor
      */
     virtual ~Channel() 
