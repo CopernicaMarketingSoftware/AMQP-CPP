@@ -38,9 +38,6 @@ private:
         // call the queue callback
         _queueCallback(name, messagecount, consumercount);
         
-        // call finalize callback
-        if (_finalizeCallback) _finalizeCallback();
-        
         // return next object
         return _next;
     }

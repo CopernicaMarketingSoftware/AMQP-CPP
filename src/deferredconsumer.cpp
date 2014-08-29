@@ -28,9 +28,6 @@ Deferred *DeferredConsumer::reportSuccess(const std::string &name) const
     // call the callback
     _consumeCallback(name);
     
-    // call finalize callback
-    if (_finalizeCallback) _finalizeCallback();
-    
     // return next object
     return _next;
 }

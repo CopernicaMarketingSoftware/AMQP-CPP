@@ -22,6 +22,13 @@ class Callbacks;
  */
 class Deferred
 {
+private:
+    /**
+     *  Callback to execute either way
+     *  @var    FinalizeCallback
+     */
+    FinalizeCallback _finalizeCallback;
+
 protected:
     /**
      *  Callback to execute on success
@@ -34,12 +41,6 @@ protected:
      *  @var    ErrorCallback
      */
     ErrorCallback _errorCallback;
-
-    /**
-     *  Callback to execute either way
-     *  @var    FinalizeCallback
-     */
-    FinalizeCallback _finalizeCallback;
 
     /**
      *  Pointer to the next deferred object
@@ -70,8 +71,7 @@ protected:
     virtual Deferred *reportSuccess() const
     {
         // execute callbacks if registered
-        if (_successCallback)   _successCallback();
-        if (_finalizeCallback)  _finalizeCallback();
+        if (_successCallback) _successCallback();
 
         // return the next deferred result
         return _next;
@@ -123,8 +123,7 @@ protected:
         _failed = true;
 
         // execute callbacks if registered
-        if (_errorCallback)     _errorCallback(error);
-        if (_finalizeCallback)  _finalizeCallback();
+        if (_errorCallback) _errorCallback(error);
 
         // return the next deferred result
         return _next;
@@ -166,7 +165,11 @@ public:
     /**
      *  Destructor
      */
-    virtual ~Deferred() {}
+    virtual ~Deferred() 
+    {
+        // report to the finalize callback
+        if (_finalizeCallback) _finalizeCallback();
+    }
 
     /**
      *  Cast to a boolean
@@ -237,9 +240,6 @@ public:
     {
         // store callback
         _finalizeCallback = callback;
-
-        // if the object is already in a failed state, we call the callback right away
-        if (_failed) callback();
 
         // allow chaining
         return *this;

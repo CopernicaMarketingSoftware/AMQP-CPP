@@ -37,9 +37,6 @@ private:
         // call the callback
         _deleteCallback(messagecount);
         
-        // call finalize callback
-        if (_finalizeCallback) _finalizeCallback();
-        
         // return next object
         return _next;
     }

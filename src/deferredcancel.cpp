@@ -28,9 +28,6 @@ Deferred *DeferredCancel::reportSuccess(const std::string &name) const
     // call the callback
     _cancelCallback(name);
     
-    // call finalize callback
-    if (_finalizeCallback) _finalizeCallback();
-    
     // return next object
     return _next;
 }

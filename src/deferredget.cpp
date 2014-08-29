@@ -26,7 +26,6 @@ Deferred *DeferredGet::reportSuccess(uint32_t messageCount) const
 {
     // make copies of the callbacks
     auto messageCallback = _messageCallback;
-    auto finalizeCallback = _finalizeCallback;
     auto *channel = _channel;
 
     // install a monitor because the channel could be destructed
@@ -36,7 +35,7 @@ Deferred *DeferredGet::reportSuccess(uint32_t messageCount) const
     if (_sizeCallback) _sizeCallback(messageCount);
     
     // we now know the name, so we can install the message callback on the channel
-    _channel->install("", [channel, messageCallback, finalizeCallback](const Message &message, uint64_t deliveryTag, bool redelivered) {
+    _channel->install("", [channel, messageCallback](const Message &message, uint64_t deliveryTag, bool redelivered) {
 
         // install a monitor to deal with the case that the channel is removed
         Monitor monitor(channel);
@@ -44,9 +43,6 @@ Deferred *DeferredGet::reportSuccess(uint32_t messageCount) const
         // call the callbacks
         if (messageCallback) messageCallback(message, deliveryTag, redelivered);
         
-        // call the finalize callback
-        if (finalizeCallback) finalizeCallback();
-
         // we can remove the callback now from the channel
         if (monitor.valid()) channel->uninstall("");
     });
@@ -65,9 +61,6 @@ Deferred *DeferredGet::reportSuccess() const
 
     // check if a callback was set
     if (_emptyCallback) _emptyCallback();
-    
-    // call finalize callback
-    if (_finalizeCallback) _finalizeCallback();
     
     // return next object
     return _next;
