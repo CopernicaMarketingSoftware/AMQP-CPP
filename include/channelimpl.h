@@ -598,7 +598,7 @@ public:
         Monitor monitor(this);
         
         // copy the callback (so that it will not be destructed during
-        // the "reportSuccess" call
+        // the "reportSuccess" call, if the channel is destructed during the call)
         auto cb = _oldestCallback;
 
         // call the callback
