@@ -22,29 +22,25 @@ namespace AMQP {
  *  @param  messageCount    Message count
  *  @return Deferred
  */
-Deferred *DeferredGet::reportSuccess(uint32_t messageCount) const
+const std::shared_ptr<Deferred> &DeferredGet::reportSuccess(uint32_t messageCount) const
 {
-    // make copies of the callbacks
-    auto messageCallback = _messageCallback;
-    auto *channel = _channel;
-
-    // install a monitor because the channel could be destructed
-    Monitor monitor(channel);
+    // we grab a self pointer to ensure that the deferred object stays alive
+    auto self = shared_from_this();
 
     // report the size (technically, the channel object could be destructed now, but we ignore that case)
     if (_sizeCallback) _sizeCallback(messageCount);
     
     // we now know the name, so we can install the message callback on the channel
-    _channel->install("", [channel, messageCallback](const Message &message, uint64_t deliveryTag, bool redelivered) {
+    _channel->install("", [self, this](const Message &message, uint64_t deliveryTag, bool redelivered) {
 
         // install a monitor to deal with the case that the channel is removed
-        Monitor monitor(channel);
+        Monitor monitor(_channel);
 
         // call the callbacks
-        if (messageCallback) messageCallback(message, deliveryTag, redelivered);
+        if (_messageCallback) _messageCallback(message, deliveryTag, redelivered);
         
         // we can remove the callback now from the channel
-        if (monitor.valid()) channel->uninstall("");
+        if (monitor.valid()) _channel->uninstall("");
     });
     
     // return next object
@@ -53,8 +49,9 @@ Deferred *DeferredGet::reportSuccess(uint32_t messageCount) const
 
 /**
  *  Report success, although no message could be get
+ *  @return Deferred
  */
-Deferred *DeferredGet::reportSuccess() const
+const std::shared_ptr<Deferred> &DeferredGet::reportSuccess() const
 {
     // report the size
     if (_sizeCallback) _sizeCallback(0);

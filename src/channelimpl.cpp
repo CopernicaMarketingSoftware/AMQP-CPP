@@ -57,9 +57,6 @@ ChannelImpl::~ChannelImpl()
 
     // remove this channel from the connection (but not if the connection is already destructed)
     if (_connection) _connection->remove(this);
-
-    // destruct deferred results
-    while (_oldestCallback) _oldestCallback.reset(_oldestCallback->next());
 }
 
 /**
@@ -97,10 +94,10 @@ void ChannelImpl::attach(Connection *connection)
  *  Push a deferred result
  *  @param  result          The deferred object to push
  */
-Deferred &ChannelImpl::push(Deferred *deferred)
+Deferred &ChannelImpl::push(const std::shared_ptr<Deferred> &deferred)
 {
     // do we already have an oldest?
-    if (!_oldestCallback) _oldestCallback.reset(deferred);
+    if (!_oldestCallback) _oldestCallback = deferred;
 
     // do we already have a newest?
     if (_newestCallback) _newestCallback->add(deferred);
@@ -119,7 +116,7 @@ Deferred &ChannelImpl::push(Deferred *deferred)
 Deferred &ChannelImpl::push(const Frame &frame)
 {
     // send the frame, and push the result
-    return push(new Deferred(!send(frame)));
+    return push(std::make_shared<Deferred>(!send(frame)));
 }
 
 /**
@@ -195,7 +192,7 @@ Deferred &ChannelImpl::rollbackTransaction()
 Deferred &ChannelImpl::close()
 {
     // this is completely pointless if not connected
-    if (_state != state_connected) return push(new Deferred(_state == state_closing));
+    if (_state != state_connected) return push(std::make_shared<Deferred>(_state == state_closing));
     
     // send a channel close frame
     auto &handler = push(ChannelCloseFrame(_id));
@@ -295,7 +292,7 @@ DeferredQueue &ChannelImpl::declareQueue(const std::string &name, int flags, con
     QueueDeclareFrame frame(_id, name, flags & passive, flags & durable, flags & exclusive, flags & autodelete, false, arguments);
 
     // send the queuedeclareframe
-    auto *result = new DeferredQueue(!send(frame));
+    auto result = std::make_shared<DeferredQueue>(!send(frame));
 
     // add the deferred result
     push(result);
@@ -361,7 +358,7 @@ DeferredDelete &ChannelImpl::purgeQueue(const std::string &name)
     QueuePurgeFrame frame(_id, name, false);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredDelete(!send(frame));
+    auto deferred = std::make_shared<DeferredDelete>(!send(frame));
 
     // push to list
     push(deferred);
@@ -394,7 +391,7 @@ DeferredDelete &ChannelImpl::removeQueue(const std::string &name, int flags)
     QueueDeleteFrame frame(_id, name, flags & ifunused, flags & ifempty, false);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredDelete(!send(frame));
+    auto deferred = std::make_shared<DeferredDelete>(!send(frame));
 
     // push to list
     push(deferred);
@@ -503,7 +500,7 @@ DeferredConsumer& ChannelImpl::consume(const std::string &queue, const std::stri
     BasicConsumeFrame frame(_id, queue, tag, flags & nolocal, flags & noack, flags & exclusive, false, arguments);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredConsumer(this, !send(frame));
+    auto deferred = std::make_shared<DeferredConsumer>(this, !send(frame));
 
     // push to list
     push(deferred);
@@ -535,7 +532,7 @@ DeferredCancel &ChannelImpl::cancel(const std::string &tag)
     BasicCancelFrame frame(_id, tag, false);
 
     // send the frame, and create deferred object
-    auto *deferred = new DeferredCancel(this, !send(frame));
+    auto deferred = std::make_shared<DeferredCancel>(this, !send(frame));
 
     // push to list
     push(deferred);
@@ -582,7 +579,7 @@ DeferredGet &ChannelImpl::get(const std::string &queue, int flags)
     BasicGetFrame frame(_id, queue, flags & noack);
     
     // send the frame, and create deferred object
-    auto *deferred = new DeferredGet(this, !send(frame));
+    auto deferred = std::make_shared<DeferredGet>(this, !send(frame));
 
     // push to list
     push(deferred);
@@ -765,13 +762,13 @@ void ChannelImpl::reportError(const char *message, bool notifyhandler)
         auto cb = _oldestCallback;
         
         // call the callback
-        auto *next = cb->reportError(message);
+        auto next = cb->reportError(message);
 
         // leap out if channel no longer exists
         if (!monitor.valid()) return;
 
         // set the oldest callback
-        _oldestCallback.reset(next);
+        _oldestCallback = next;
     }
 
     // clean up all deferred other objects
@@ -782,13 +779,13 @@ void ChannelImpl::reportError(const char *message, bool notifyhandler)
         auto cb = _oldestCallback;
 
         // call the callback
-        auto *next = cb->reportError("Channel is in error state");
+        auto next = cb->reportError("Channel is in error state");
 
         // leap out if channel no longer exists
         if (!monitor.valid()) return;
 
         // set the oldest callback
-        _oldestCallback.reset(next);
+        _oldestCallback = next;
     }
 
     // all callbacks have been processed, so we also can reset the pointer to the newest

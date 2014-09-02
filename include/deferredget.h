@@ -12,8 +12,12 @@ namespace AMQP {
 
 /**
  *  Class definition
+ * 
+ *  This class implements the 'shared_from_this' functionality, because
+ *  it grabs a self-pointer when the callback is running, otherwise the onFinalize()
+ *  is called before the actual message is consumed.
  */
-class DeferredGet : public Deferred
+class DeferredGet : public Deferred, public std::enable_shared_from_this<DeferredGet>
 {
 private:
     /**
@@ -45,13 +49,13 @@ private:
      *  @param  count           number of messages in the queue
      *  @return Deferred
      */
-    virtual Deferred *reportSuccess(uint32_t messagecount) const override;
+    virtual const std::shared_ptr<Deferred> &reportSuccess(uint32_t messagecount) const override;
 
     /**
      *  Report success when queue was empty
      *  @return Deferred
      */
-    virtual Deferred *reportSuccess() const override;
+    virtual const std::shared_ptr<Deferred> &reportSuccess() const override;
     
     /**
      *  The channel implementation may call our
@@ -60,12 +64,15 @@ private:
     friend class ChannelImpl;
     friend class ConsumedMessage;
 
-
-protected:
+public:
     /**
      *  Protected constructor that can only be called
      *  from within the channel implementation
      *
+     *  Note: this constructor _should_ be protected, but because make_shared
+     *  will then not work, we have decided to make it public after all,
+     *  because the work-around would result in not-so-easy-to-read code.
+     * 
      *  @param  channel     the channel implementation
      *  @param  failed      are we already failed?
      */

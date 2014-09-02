@@ -30,7 +30,7 @@ private:
      *  @param  consumercount   Number of consumers linked to the queue
      *  @return Deferred        Next deferred result
      */
-    virtual Deferred *reportSuccess(const std::string &name, uint32_t messagecount, uint32_t consumercount) const override
+    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name, uint32_t messagecount, uint32_t consumercount) const override
     {
         // skip if no special callback was installed
         if (!_queueCallback) return Deferred::reportSuccess();
@@ -49,12 +49,16 @@ private:
     friend class ChannelImpl;
     friend class ConsumedMessage;
     
-protected:
+public:
     /**
      *  Protected constructor that can only be called
      *  from within the channel implementation
+     * 
+     *  Note: this constructor _should_ be protected, but because make_shared
+     *  will then not work, we have decided to make it public after all,
+     *  because the work-around would result in not-so-easy-to-read code.
      *
-     *  @param  boolea  are we already failed?
+     *  @param  bool    are we already failed?
      */
     DeferredQueue(bool failed = false) : Deferred(failed) {}
 

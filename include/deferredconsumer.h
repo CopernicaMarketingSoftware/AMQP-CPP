@@ -41,7 +41,7 @@ private:
      *  @param  name            Consumer tag that is started
      *  @return Deferred
      */
-    virtual Deferred *reportSuccess(const std::string &name) const override;
+    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) const override;
 
     /**
      *  The channel implementation may call our
@@ -50,10 +50,14 @@ private:
     friend class ChannelImpl;
     friend class ConsumedMessage;
     
-protected:
+public:
     /**
      *  Protected constructor that can only be called
      *  from within the channel implementation
+     * 
+     *  Note: this constructor _should_ be protected, but because make_shared
+     *  will then not work, we have decided to make it public after all,
+     *  because the work-around would result in not-so-easy-to-read code.
      *
      *  @param  channel     the channel implementation
      *  @param  failed      are we already failed?

@@ -15,7 +15,6 @@ namespace AMQP {
 
 // forward declaration
 class ChannelImpl;
-class Callbacks;
 
 /**
  *  Class definition
@@ -46,7 +45,7 @@ protected:
      *  Pointer to the next deferred object
      *  @var    Deferred
      */
-    Deferred *_next = nullptr;
+    std::shared_ptr<Deferred> _next;
 
     /**
      *  Do we already know we failed?
@@ -59,7 +58,7 @@ protected:
      *  The next deferred object
      *  @return Deferred
      */
-    Deferred *next() const
+    const std::shared_ptr<Deferred> &next() const
     {
         return _next;
     }
@@ -68,7 +67,7 @@ protected:
      *  Indicate success
      *  @return Deferred        Next deferred result
      */
-    virtual Deferred *reportSuccess() const
+    virtual const std::shared_ptr<Deferred> &reportSuccess() const
     {
         // execute callbacks if registered
         if (_successCallback) _successCallback();
@@ -84,7 +83,7 @@ protected:
      *  @param  consumercount   Number of consumers linked to the queue
      *  @return Deferred        Next deferred result
      */
-    virtual Deferred *reportSuccess(const std::string &name, uint32_t messagecount, uint32_t consumercount) const
+    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name, uint32_t messagecount, uint32_t consumercount) const
     {
         // this is the same as a regular success message
         return reportSuccess();
@@ -95,7 +94,7 @@ protected:
      *  @param  messagecount    Number of messages that were deleted
      *  @return Deferred
      */
-    virtual Deferred *reportSuccess(uint32_t messagecount) const
+    virtual const std::shared_ptr<Deferred> &reportSuccess(uint32_t messagecount) const
     {
         // this is the same as a regular success message
         return reportSuccess();
@@ -106,7 +105,7 @@ protected:
      *  @param  name            Consumer tag that is cancelled
      *  @return Deferred
      */
-    virtual Deferred *reportSuccess(const std::string &name) const
+    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) const
     {
         // this is the same as a regular success message
         return reportSuccess();
@@ -117,7 +116,7 @@ protected:
      *  @param  error           Description of the error that occured
      *  @return Deferred        Next deferred result
      */
-    Deferred *reportError(const char *error)
+    const std::shared_ptr<Deferred> &reportError(const char *error)
     {
         // from this moment on the object should be listed as failed
         _failed = true;
@@ -133,7 +132,7 @@ protected:
      *  Add a pointer to the next deferred result
      *  @param  deferred
      */
-    void add(Deferred *deferred)
+    void add(const std::shared_ptr<Deferred> &deferred)
     {
         // store pointer
         _next = deferred;
@@ -144,17 +143,20 @@ protected:
      *  private members and construct us
      */
     friend class ChannelImpl;
-    friend class Callbacks;
 
-protected:
+public:
     /**
      *  Protected constructor that can only be called
      *  from within the channel implementation
+     * 
+     *  Note: this constructor _should_ be protected, but because make_shared
+     *  will then not work, we have decided to make it public after all,
+     *  because the work-around would result in not-so-easy-to-read code.
      *
      *  @param  failed  are we already failed?
      */
     Deferred(bool failed = false) : _failed(failed) {}
-
+    
 public:
     /**
      *  Deleted copy and move constructors

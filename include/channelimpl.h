@@ -55,14 +55,14 @@ private:
      *
      *  @var    Deferred
      */
-    std::shared_ptr<Deferred> _oldestCallback = nullptr;
+    std::shared_ptr<Deferred> _oldestCallback;
 
     /**
      *  Pointer to the newest deferred result (the last one to be added).
      *
      *  @var    Deferred
      */
-    Deferred *_newestCallback = nullptr;
+    std::shared_ptr<Deferred> _newestCallback;
 
     /**
      *  The channel number
@@ -113,7 +113,7 @@ private:
      *  @param  result          The deferred result
      *  @return Deferred        The object just pushed
      */
-    Deferred &push(Deferred *deferred);
+    Deferred &push(const std::shared_ptr<Deferred> &deferred);
 
     /**
      *  Send a framen and push a deferred result
@@ -596,19 +596,19 @@ public:
 
         // we are going to call callbacks that could destruct the channel
         Monitor monitor(this);
-
+        
         // copy the callback (so that it will not be destructed during
         // the "reportSuccess" call
         auto cb = _oldestCallback;
 
         // call the callback
-        auto *next = cb->reportSuccess(std::forward<Arguments>(parameters)...);
+        auto next = cb->reportSuccess(std::forward<Arguments>(parameters)...);
 
         // leap out if channel no longer exists
         if (!monitor.valid()) return false;
 
         // set the oldest callback
-        _oldestCallback.reset(next);
+        _oldestCallback = next;
 
         // if there was no next callback, the newest callback was just used
         if (!next) _newestCallback = nullptr;
