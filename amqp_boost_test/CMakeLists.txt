@@ -30,6 +30,8 @@ include_directories(SYSTEM ${AMQP-CPP_INCLUDE_PATH})
 add_executable(amqp_boost_test ${SRC})
 target_link_libraries(amqp_boost_test ${LIBS} ${SPECIFIC_HOST_LIBS})
 
+add_test(NAME amqp_boost_test COMMAND amqp_boost_test)
+
 install(TARGETS amqp_boost_test
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
