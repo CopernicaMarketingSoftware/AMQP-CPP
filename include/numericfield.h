@@ -5,6 +5,8 @@
  *  @copyright 2014 Copernica BV
  */
 
+#include <cassert>
+
 /**
  *  Set up namespace
  */
@@ -57,6 +59,8 @@ public:
                 case 2: _value = frame.nextUint16(); break;
                 case 4: _value = frame.nextUint32(); break;
                 case 8: _value = frame.nextUint64(); break;
+                // prevent compiler warnings
+                default: assert(!"unhandled switch"); break;
             }
         }
         else
@@ -65,6 +69,8 @@ public:
             {
                 case 4: _value = frame.nextFloat();  break;
                 case 8: _value = frame.nextDouble(); break;
+                // prevent compiler warnings
+                default: assert(!"unhandled switch"); break;
             }
         }
     }
