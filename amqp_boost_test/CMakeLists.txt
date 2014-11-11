@@ -1,3 +1,4 @@
+if(NOT TRUSTPORTAL_IS_IOS_BUILD)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
@@ -37,3 +38,4 @@ install(TARGETS amqp_boost_test
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
 )
+endif()
