@@ -27,7 +27,28 @@ add_subdirectory(amqp_boost_test)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 add_library(amqp-cpp STATIC ${SRCS})
-target_include_directories(amqp-cpp SYSTEM PUBLIC ${PROJECT_SOURCE_DIR})
+
+target_include_directories(amqp-cpp PRIVATE
+$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+$<INSTALL_INTERFACE:include>)
+
+target_include_directories(amqp-cpp SYSTEM PUBLIC
+$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+$<INSTALL_INTERFACE:include>)
+
+install(TARGETS amqp-cpp
+    EXPORT amqp-cppExport
+    DESTINATION lib
+    INCLUDES DESTINATION include
+)
+
+file(GLOB includes_1 RELATIVE include "*.h")
+install(FILES ${includes_1} DESTINATION "include/amqpcpp")
+install(FILES "amqpcpp.h" DESTINATION "include")
+
+INSTALL(EXPORT amqp-cppExport DESTINATION lib)
+
+
 
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
