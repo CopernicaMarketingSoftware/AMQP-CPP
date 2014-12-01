@@ -16,6 +16,9 @@ operating system specific IO calls, and it can be easily integrated into any
 event loop. It is fully asynchronous and does not do any blocking (system) calls,
 so it can be used in high performance applications without the need for threads.
 
+The AMQP-CPP library uses C++11 features, so if you intend use it, please make 
+sure that your compiler is up-to-date and supports C++11.
+
 
 ABOUT
 =====
