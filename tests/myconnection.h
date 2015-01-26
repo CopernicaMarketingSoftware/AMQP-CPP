@@ -24,13 +24,13 @@ private:
      *  The AMQP connection
      *  @var    Connection
      */
-    AMQP::Connection *_connection;
+    std::shared_ptr<AMQP::Connection> _connection;
     
     /**
      *  The AMQP channel
      *  @var    Channel
      */
-    AMQP::Channel *_channel;
+    std::shared_ptr<AMQP::Channel> _channel;
 
     /**
      *  Method that is called when the connection failed

@@ -371,8 +371,8 @@ public:
      *  Publish a message to an exchange
      *
      *  If the mandatory or immediate flag is set, and the message could not immediately
-     *  be published, the message will be returned to the client, and will eventually
-     *  end up in your onReturned() handler method.
+     *  be published, the message will be returned to the client. However, the AMQP-CPP
+     *  library does not yet report such returned messages.
      *
      *  @param  exchange    the exchange to publish to
      *  @param  routingkey  the routing key

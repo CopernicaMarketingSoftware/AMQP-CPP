@@ -27,9 +27,7 @@ using namespace Copernica;
  *  Constructor
  */
 MyConnection::MyConnection(const std::string &ip) :
-    _socket(Event::MainLoop::instance(), this),
-    _connection(nullptr),
-    _channel(nullptr)
+    _socket(Event::MainLoop::instance(), this)
 {
     // start connecting
     if (_socket.connect(Network::Ipv4Address(ip), 5672)) return;
@@ -43,11 +41,6 @@ MyConnection::MyConnection(const std::string &ip) :
  */
 MyConnection::~MyConnection()
 {
-    // do we still have a channel?
-    if (_channel)  delete _channel;
-    
-    // do we still have a connection?
-    if (_connection) delete _connection;
 }
 
 /**
@@ -83,8 +76,8 @@ void MyConnection::onConnected(Network::TcpSocket *socket)
     if (_connection) return;
     
     // create amqp connection, and a new channel
-    _connection = new AMQP::Connection(this, AMQP::Login("guest", "guest"), "/");
-    _channel = new AMQP::Channel(_connection);
+    _connection = std::make_shared<AMQP::Connection>(this, AMQP::Login("guest1", "guest2"), "/");
+    _channel = std::make_shared<AMQP::Channel>(_connection.get());
     
     // install a handler when channel is in error
     _channel->onError([](const char *message) {
@@ -130,10 +123,6 @@ void MyConnection::onClosed(Network::TcpSocket *socket)
     // show
     std::cout << "myconnection closed" << std::endl;
 
-    // close the channel and connection
-    if (_channel) delete _channel;
-    if (_connection) delete _connection;
-    
     // set to null
     _channel = nullptr;
     _connection = nullptr;
@@ -147,10 +136,6 @@ void MyConnection::onLost(Network::TcpSocket *socket)
 {
     // report error
     std::cout << "connection lost" << std::endl;
-    
-    // close the channel and connection
-    if (_channel) delete _channel;
-    if (_connection) delete _connection;
     
     // set to null
     _channel = nullptr;
@@ -229,6 +214,6 @@ void MyConnection::onConnected(AMQP::Connection *connection)
     std::cout << "AMQP login success" << std::endl;
     
     // create channel if it does not yet exist
-    if (!_channel) _channel = new AMQP::Channel(connection);
+    if (!_channel) _channel = std::make_shared<AMQP::Channel>(connection);
 }
 

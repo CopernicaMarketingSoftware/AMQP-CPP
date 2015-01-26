@@ -6,7 +6,7 @@
  *  message, plus some additional information.
  *
  *  Message objects can not be constructed by end users, they are only constructed
- *  by the AMQP library, and passed to the ChannelHandler::onDelivered() method
+ *  by the AMQP library, and passed to user callbacks.
  *
  *  @copyright 2014 Copernica BV
  */

@@ -38,7 +38,7 @@ private:
      *  @var Table
      */
     Table _properties;
-
+    
     /**
      *  Available security mechanisms
      *  @var LongString
@@ -148,6 +148,16 @@ public:
     }
 
     /**
+     *  The capabilities of the connection
+     *  @return Table
+     */
+    const Table& capabilities() const
+    {
+        // retrieve the capabilities
+        return _properties.get("capabilities");
+    }
+
+    /**
      *  Available security mechanisms
      *  @return string
      */
@@ -173,6 +183,12 @@ public:
      */
     virtual bool process(ConnectionImpl *connection) override
     {
+        // the capabilities
+        Table capabilities;
+        
+        // we want a special treatment for authentication failures
+        capabilities["authentication_failure_close"] = true;
+        
         // the peer properties
         Table properties;
         
@@ -182,6 +198,7 @@ public:
         properties["platform"] = "Unknown";
         properties["copyright"] = "Copyright 2014 Copernica BV";
         properties["information"] = "http://www.copernica.com";
+        properties["capabilities"] = capabilities;
         
         // move connection to handshake mode
         connection->setProtocolOk();

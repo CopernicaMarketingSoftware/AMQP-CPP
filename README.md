@@ -444,16 +444,16 @@ in almost any form:
  *
  *  The following flags can be used
  *
- *      -   mandatory   if set, an unroutable message will be reported to the
- *                      channel handler with the onReturned method
+ *      -   mandatory   if set, an unroutable message will be sent back to
+ *                      the client (currently not supported)
  *
  *      -   immediate   if set, a message that could not immediately be consumed
- *                      is returned to the onReturned method
+ *                      is returned to the client (currently not supported)
  *
  *  If either of the two flags is set, and the message could not immediately
- *  be published, the message is returned by the server to the client. If you
- *  want to catch such returned messages, you need to implement the
- *  ChannelHandler::onReturned() method.
+ *  be published, the message is returned by the server to the client. However,
+ *  at this moment in time, the AMQP-CPP library does not support catching
+ *  such returned messages.
  *
  *  @param  exchange    the exchange to publish to
  *  @param  routingkey  the routing key
@@ -543,7 +543,7 @@ The full documentation from the C++ Channel.h headerfile looks like this:
  *      -   exclusive           request exclusive access, only this consumer can
  *                              access the queue
  *
- *  The method ChannelHandler::onConsumerStarted() will be called when the
+ *  The callback registered with DeferredConsumer::onSuccess() will be called when the
  *  consumer has started.
  *
  *  @param  queue               the queue from which you want to consume
