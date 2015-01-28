@@ -308,11 +308,11 @@ public:
         Monitor monitor(this);
 
         // all deferred result objects in the channels should report this error too
-        for (auto &iter : _channels)
+        while (!_channels.empty())
         {
             // report the errors
-            iter.second->reportError(message, false);
-            
+            _channels.begin()->second->reportError(message, false);
+
             // leap out if no longer valid
             if (!monitor.valid()) return;
         }
