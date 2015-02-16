@@ -85,6 +85,7 @@ protected:
      */
     virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name, uint32_t messagecount, uint32_t consumercount) const
     {
+        unused(name, messagecount, consumercount);
         // this is the same as a regular success message
         return reportSuccess();
     }
@@ -96,6 +97,7 @@ protected:
      */
     virtual const std::shared_ptr<Deferred> &reportSuccess(uint32_t messagecount) const
     {
+        unused(messagecount);
         // this is the same as a regular success message
         return reportSuccess();
     }
@@ -107,6 +109,7 @@ protected:
      */
     virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) const
     {
+        unused(name);
         // this is the same as a regular success message
         return reportSuccess();
     }

@@ -94,6 +94,7 @@ public:
      */
     virtual bool process(ConnectionImpl *connection)
     {
+        unused(connection);
         // this is an exception
         throw ProtocolException("unimplemented frame");
 
