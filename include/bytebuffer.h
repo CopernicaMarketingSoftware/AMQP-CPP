@@ -13,6 +13,8 @@
  */
 #pragma once
 
+#include <include/unused.h>
+
 /**
  *  Open namespace
  */
@@ -76,6 +78,7 @@ public:
      */
     virtual const char *data(size_t pos, size_t size) const override
     {
+        unused(size);
         return _data + pos;
     }
     

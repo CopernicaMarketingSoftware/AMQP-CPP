@@ -48,7 +48,9 @@ public:
      *  @param  connection      The connection that entered the error state
      *  @param  message         Error message
      */
-    virtual void onError(Connection *connection, const char *message) {}
+    virtual void onError(Connection *connection, const char *message) {
+        unused(connection, message);
+    }
 
     /**
      *  Method that is called when the login attempt succeeded. After this method
@@ -64,7 +66,9 @@ public:
      *
      *  @param  connection      The connection that can now be used
      */
-    virtual void onConnected(Connection *connection) {}
+    virtual void onConnected(Connection *connection) {
+        unused(connection);
+    }
 
     /**
      *  Method that is called when the connection was closed.
@@ -74,7 +78,9 @@ public:
      *
      *  @param  connection      The connection that was closed and that is now unusable
      */
-    virtual void onClosed(Connection *connection) {}
+    virtual void onClosed(Connection *connection) {
+        unused(connection);
+    }
 
 };
 

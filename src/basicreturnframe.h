@@ -155,6 +155,7 @@ public:
      */
     virtual bool process(ConnectionImpl *connection) override
     {
+        unused(connection);
         // we no longer support returned messages
         return false;
     }

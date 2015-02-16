@@ -224,8 +224,8 @@ public:
     const std::string &expiration     () const { return _expiration;        }
     const std::string &replyTo        () const { return _replyTo;           }
     const std::string &correlationID  () const { return _correlationID;     }
-    const uint8_t      priority       () const { return _priority;          }
-    const uint8_t      deliveryMode   () const { return _deliveryMode;      }
+    uint8_t           priority        () const { return _priority;          }
+    uint8_t           deliveryMode    () const { return _deliveryMode;      }
     const Table       &headers        () const { return _headers;           }
     const std::string &contentEncoding() const { return _contentEncoding;   }
     const std::string &contentType    () const { return _contentType;       }
@@ -233,7 +233,7 @@ public:
     const std::string &appID          () const { return _appID;             }
     const std::string &userID         () const { return _userID;            }
     const std::string &typeName       () const { return _typeName;          }
-    const uint64_t     timestamp      () const { return _timestamp;         }
+    uint64_t          timestamp       () const { return _timestamp;         }
     const std::string &messageID      () const { return _messageID;         }
     
     /**
