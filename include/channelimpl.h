@@ -506,7 +506,7 @@ public:
      *  Get the channel we're working on
      *  @return uint16_t
      */
-    const uint16_t id() const
+    uint16_t id() const
     {
         return _id;
     }
