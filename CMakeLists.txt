@@ -26,6 +26,9 @@ add_subdirectory(include)
 
 add_library(amqp-cpp STATIC ${SRCS})
 target_include_directories(amqp-cpp SYSTEM PUBLIC ${PROJECT_SOURCE_DIR})
+install(TARGETS amqp-cpp
+        ARCHIVE DESTINATION lib
+)
 
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
