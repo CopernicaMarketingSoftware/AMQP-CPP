@@ -23,9 +23,7 @@ endmacro()
 
 add_subdirectory(src)
 add_subdirectory(include)
-add_subdirectory(amqp_boost_test)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
 add_library(amqp-cpp STATIC ${SRCS})
 target_include_directories(amqp-cpp SYSTEM PUBLIC ${PROJECT_SOURCE_DIR})
 
