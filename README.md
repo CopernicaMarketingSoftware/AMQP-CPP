@@ -27,9 +27,16 @@ This library is created and maintained by Copernica (www.copernica.com), and is
 used inside the MailerQ (www.mailerq.com) application, MailerQ is a tool for
 sending large volumes of email, using AMQP message queues.
 
+Do you appreciate our work and are you looking for high quality email solutions? 
+Please take a look at one or more of our commercial solutions to 
 
-HOW TO USE
-==========
+* Copernica Martkeing Suite (www.copernica.com)
+* MailerQ MTA (www.mailerq.com)
+* Responsive Email web service (www.responsiveemail.com)
+
+
+HOW TO USE AMQP-CPP
+===================
 
 As we mentioned above, the library does not do any IO by itself, and you need
 to pass an object to the library that the library can use for that. So, before
