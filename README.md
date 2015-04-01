@@ -28,7 +28,7 @@ used inside the MailerQ (www.mailerq.com) application, MailerQ is a tool for
 sending large volumes of email, using AMQP message queues.
 
 Do you appreciate our work and are you looking for high quality email solutions? 
-Please take a look at one or more of our commercial solutions to 
+Then check out our commercial solutions:
 
 * Copernica Martkeing Suite (www.copernica.com)
 * MailerQ MTA (www.mailerq.com)
