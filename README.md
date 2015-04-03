@@ -30,7 +30,7 @@ sending large volumes of email, using AMQP message queues.
 Do you appreciate our work and are you looking for high quality email solutions? 
 Then check out our commercial solutions:
 
-* Copernica Martkeing Suite (www.copernica.com)
+* Copernica Marketing Suite (www.copernica.com)
 * MailerQ MTA (www.mailerq.com)
 * Responsive Email web service (www.responsiveemail.com)
 
