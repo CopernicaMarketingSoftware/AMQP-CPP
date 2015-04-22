@@ -31,7 +31,7 @@ protected:
      *  @var    const char *
      */
     const char *_body;
-    
+
     /**
      *  Size of the data
      *  @var    uint64_t
@@ -41,15 +41,15 @@ protected:
 public:
     /**
      *  Constructor
-     * 
+     *
      *  The data buffer that you pass to this constructor must be valid during
      *  the lifetime of the Envelope object.
-     * 
+     *
      *  @param  body
      *  @param  size
      */
     Envelope(const char *body, uint64_t size) : MetaData(), _body(body), _bodySize(size) {}
-    
+
     /**
      *  Constructor based on a string
      *  @param  body
@@ -57,10 +57,16 @@ public:
     Envelope(const std::string &body) : MetaData(), _str(body), _body(_str.data()), _bodySize(_str.size()) {}
 
     /**
+     *  Constructor based on a string
+     *  @param  body
+     */
+    Envelope(std::string &&body) : MetaData(), _str(std::move(body)), _body(_str.data()), _bodySize(_str.size()) {}
+
+    /**
      *  Destructor
      */
     virtual ~Envelope() {}
-    
+
     /**
      *  Access to the full message data
      *  @return buffer
@@ -69,7 +75,7 @@ public:
     {
         return _body;
     }
-    
+
     /**
      *  Size of the body
      *  @return uint64_t
@@ -78,7 +84,7 @@ public:
     {
         return _bodySize;
     }
-    
+
     /**
      *  Body as a string
      *  @return string
