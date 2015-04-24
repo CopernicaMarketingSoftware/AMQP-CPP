@@ -115,7 +115,7 @@ public:
      *  Get the maximum allowed string length for this field
      *  @return size_t
      */
-    constexpr static size_t maxLength()
+    inline static size_t maxLength()
     {
         return T::max();
     }

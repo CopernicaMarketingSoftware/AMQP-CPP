@@ -8,6 +8,8 @@
 
 #pragma once
 
+#define NOMINMAX
+
 // base C++ include files
 #include <vector>
 #include <string>
@@ -21,6 +23,7 @@
 #include <stdexcept>
 #include <utility>
 #include <iostream>
+#include <functional>
 
 // base C include files
 #include <stdint.h>
@@ -30,7 +33,7 @@
 #include <amqpcpp/classes.h>
 
 // utility classes
-#include <amqpcpp/endian.h>
+#include <amqpcpp/portable_endian.h>
 #include <amqpcpp/buffer.h>
 #include <amqpcpp/bytebuffer.h>
 #include <amqpcpp/receivedframe.h>
