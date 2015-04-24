@@ -81,15 +81,21 @@ public:
         }
         else
         {
+            // we're going to allocated memory, but that should be a size_t, not a uint64_t
+            size_t memory = static_cast<size_t>(_bodySize);
+            
+            // prevent truncation
+            if (memory < _bodySize) throw std::runtime_error("message is too big for this system");
+            
             // it does not yet fit, do we have to allocate?
-            if (!_body) _body = new char[_bodySize];
+            if (!_body) _body = new char[memory];
             _selfAllocated = true;
 
             // prevent that size is too big
             if (size > _bodySize - _received) size = _bodySize - _received;
 
             // append data
-            memcpy((char *)(_body + _received), buffer, size);
+            memcpy(static_cast<void*>(const_cast<char*>(_body) + _received), buffer, static_cast<size_t>(size));
 
             // we have more data now
             _received += size;

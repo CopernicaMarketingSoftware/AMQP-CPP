@@ -47,26 +47,28 @@ public:
      */
     NumericField(ReceivedFrame &frame)
     {
-        // copy the data from the buffer into the field
-        if (!std::is_floating_point<T>::value)
-        {
-            // convert value based on internal storage size
-            switch (sizeof(T))
-            {
-                case 1: _value = frame.nextUint8();  break;
-                case 2: _value = frame.nextUint16(); break;
-                case 4: _value = frame.nextUint32(); break;
-                case 8: _value = frame.nextUint64(); break;
-            }
-        }
-        else
-        {
-            switch (sizeof(T))
-            {
-                case 4: _value = frame.nextFloat();  break;
-                case 8: _value = frame.nextDouble(); break;
-            }
-        }
+// The Microsoft Visual Studio compiler thinks that there is an issue
+// with the following code, so we temporarily disable a specific warning
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif
+
+        if      (std::is_same<int8_t,   typename std::remove_cv<T>::type>::value) _value = frame.nextInt8();
+        else if (std::is_same<int16_t,  typename std::remove_cv<T>::type>::value) _value = frame.nextInt16();
+        else if (std::is_same<int32_t,  typename std::remove_cv<T>::type>::value) _value = frame.nextInt32();
+        else if (std::is_same<int64_t,  typename std::remove_cv<T>::type>::value) _value = frame.nextInt64();
+        else if (std::is_same<uint8_t,  typename std::remove_cv<T>::type>::value) _value = frame.nextUint8();
+        else if (std::is_same<uint16_t, typename std::remove_cv<T>::type>::value) _value = frame.nextUint16();
+        else if (std::is_same<uint32_t, typename std::remove_cv<T>::type>::value) _value = frame.nextUint32();
+        else if (std::is_same<uint64_t, typename std::remove_cv<T>::type>::value) _value = frame.nextUint64();
+        else if (std::is_same<float,    typename std::remove_cv<T>::type>::value) _value = frame.nextFloat();
+        else if (std::is_same<double,   typename std::remove_cv<T>::type>::value) _value = frame.nextDouble();
+
+// re-enable the warning
+#if defined(_MSC_VER)
+#pragma warning( pop )
+#endif
     }
 
     /**
@@ -124,15 +126,6 @@ public:
     {
         // numeric types have no extra storage requirements
         return sizeof(_value);
-    }
-
-    /**
-     *  Get the maximum allowed value for this field
-     *  @return mixed
-     */
-    constexpr static T max()
-    {
-        return std::numeric_limits<T>::max();
     }
 
     /**

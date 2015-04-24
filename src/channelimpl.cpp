@@ -225,7 +225,7 @@ Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType typ
     if (type == ExchangeType::headers)exchangeType = "headers";
 
     // send declare exchange frame
-    return push(ExchangeDeclareFrame(_id, name, exchangeType, flags & passive, flags & durable, false, arguments));
+    return push(ExchangeDeclareFrame(_id, name, exchangeType, (flags & passive) != 0, (flags & durable) != 0, false, arguments));
 }
 
 /**
@@ -274,7 +274,7 @@ Deferred &ChannelImpl::unbindExchange(const std::string &source, const std::stri
 Deferred &ChannelImpl::removeExchange(const std::string &name, int flags)
 {
     // send delete exchange frame
-    return push(ExchangeDeleteFrame(_id, name, flags & ifunused, false));
+    return push(ExchangeDeleteFrame(_id, name, (flags & ifunused) != 0, false));
 }
 
 /**
@@ -289,7 +289,7 @@ Deferred &ChannelImpl::removeExchange(const std::string &name, int flags)
 DeferredQueue &ChannelImpl::declareQueue(const std::string &name, int flags, const Table &arguments)
 {
     // the frame to send
-    QueueDeclareFrame frame(_id, name, flags & passive, flags & durable, flags & exclusive, flags & autodelete, false, arguments);
+    QueueDeclareFrame frame(_id, name, (flags & passive) != 0, (flags & durable) != 0, (flags & exclusive) != 0, (flags & autodelete) != 0, false, arguments);
 
     // send the queuedeclareframe
     auto result = std::make_shared<DeferredQueue>(!send(frame));
@@ -388,7 +388,7 @@ DeferredDelete &ChannelImpl::purgeQueue(const std::string &name)
 DeferredDelete &ChannelImpl::removeQueue(const std::string &name, int flags)
 {
     // the frame to send
-    QueueDeleteFrame frame(_id, name, flags & ifunused, flags & ifempty, false);
+    QueueDeleteFrame frame(_id, name, (flags & ifunused) != 0, (flags & ifempty) != 0, false);
 
     // send the frame, and create deferred object
     auto deferred = std::make_shared<DeferredDelete>(!send(frame));
@@ -431,17 +431,17 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
 
     // the max payload size is the max frame size minus the bytes for headers and trailer
     uint32_t maxpayload = _connection->maxPayload();
-    uint32_t bytessent = 0;
+    uint64_t bytessent = 0;
 
     // the buffer
     const char *data = envelope.body();
-    uint32_t bytesleft = envelope.bodySize();
+    uint64_t bytesleft = envelope.bodySize();
 
     // split up the body in multiple frames depending on the max frame size
     while (bytesleft > 0)
     {
         // size of this chunk
-        uint32_t chunksize = std::min(maxpayload, bytesleft);
+        uint64_t chunksize = std::min(static_cast<uint64_t>(maxpayload), bytesleft);
 
         // send out a body frame
         if (!send(BodyFrame(_id, data + bytessent, chunksize))) return false;
@@ -497,7 +497,7 @@ Deferred &ChannelImpl::setQos(uint16_t prefetchCount, bool global)
 DeferredConsumer& ChannelImpl::consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments)
 {
     // the frame to send
-    BasicConsumeFrame frame(_id, queue, tag, flags & nolocal, flags & noack, flags & exclusive, false, arguments);
+    BasicConsumeFrame frame(_id, queue, tag, (flags & nolocal) != 0, (flags & noack) != 0, (flags & exclusive) != 0, false, arguments);
 
     // send the frame, and create deferred object
     auto deferred = std::make_shared<DeferredConsumer>(this, !send(frame));
@@ -576,7 +576,7 @@ DeferredCancel &ChannelImpl::cancel(const std::string &tag)
 DeferredGet &ChannelImpl::get(const std::string &queue, int flags)
 {
     // the get frame to send
-    BasicGetFrame frame(_id, queue, flags & noack);
+    BasicGetFrame frame(_id, queue, (flags & noack) != 0);
     
     // send the frame, and create deferred object
     auto deferred = std::make_shared<DeferredGet>(this, !send(frame));
@@ -597,7 +597,7 @@ DeferredGet &ChannelImpl::get(const std::string &queue, int flags)
 bool ChannelImpl::ack(uint64_t deliveryTag, int flags)
 {
     // send an ack frame
-    return send(BasicAckFrame(_id, deliveryTag, flags & multiple));
+    return send(BasicAckFrame(_id, deliveryTag, (flags & multiple) != 0));
 }
 
 /**
@@ -612,12 +612,12 @@ bool ChannelImpl::reject(uint64_t deliveryTag, int flags)
     if (flags & multiple)
     {
         // send a nack frame
-        return send(BasicNackFrame(_id, deliveryTag, true, flags & requeue));
+        return send(BasicNackFrame(_id, deliveryTag, true, (flags & requeue) != 0));
     }
     else
     {
         // send a reject frame
-        return send(BasicRejectFrame(_id, deliveryTag, flags & requeue));
+        return send(BasicRejectFrame(_id, deliveryTag, (flags & requeue) != 0));
     }
 }
 
@@ -631,7 +631,7 @@ bool ChannelImpl::reject(uint64_t deliveryTag, int flags)
 Deferred &ChannelImpl::recover(int flags)
 {
     // send a nack frame
-    return push(BasicRecoverFrame(_id, flags & requeue));
+    return push(BasicRecoverFrame(_id, (flags & requeue) != 0));
 }
 
 /**

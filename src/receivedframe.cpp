@@ -104,7 +104,9 @@ ReceivedFrame::ReceivedFrame(const Buffer &buffer, uint32_t max) : _buffer(buffe
     else
     {
         // frame is not yet valid
-        _type = _channel = _payloadSize = 0;
+        _type = 0;
+        _channel = 0;
+        _payloadSize = 0;
     }
 }
 

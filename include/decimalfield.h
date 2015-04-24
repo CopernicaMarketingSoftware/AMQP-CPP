@@ -136,7 +136,7 @@ public:
      */
     operator float() const
     {
-        return _number / pow(10, _places);
+        return static_cast<float>(_number / pow(10, _places));
     }
 
     /**
