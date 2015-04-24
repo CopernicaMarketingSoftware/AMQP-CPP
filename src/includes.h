@@ -7,8 +7,63 @@
  *  @documentation private
  */
 
-// include the generic amqp functions
-#include "../amqpcpp.h"
+// c and c++ dependencies
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <string>
+#include <set>
+#include <memory>
+#include <limits>
+#include <ostream>
+#include <math.h>
+#include <map>
+#include <vector>
+#include <queue>
+
+// forward declarations
+#include "../include/classes.h"
+
+// utility classes
+#include "../include/endian.h"
+#include "../include/buffer.h"
+#include "../include/bytebuffer.h"
+#include "../include/receivedframe.h"
+#include "../include/outbuffer.h"
+#include "../include/watchable.h"
+#include "../include/monitor.h"
+
+// amqp types
+#include "../include/field.h"
+#include "../include/numericfield.h"
+#include "../include/decimalfield.h"
+#include "../include/stringfield.h"
+#include "../include/booleanset.h"
+#include "../include/fieldproxy.h"
+#include "../include/table.h"
+#include "../include/array.h"
+
+// envelope for publishing and consuming
+#include "../include/metadata.h"
+#include "../include/envelope.h"
+#include "../include/message.h"
+
+// mid level includes
+#include "../include/exchangetype.h"
+#include "../include/flags.h"
+#include "../include/callbacks.h"
+#include "../include/deferred.h"
+#include "../include/deferredconsumer.h"
+#include "../include/deferredqueue.h"
+#include "../include/deferreddelete.h"
+#include "../include/deferredcancel.h"
+#include "../include/deferredget.h"
+#include "../include/channelimpl.h"
+#include "../include/channel.h"
+#include "../include/login.h"
+#include "../include/connectionhandler.h"
+#include "../include/connectionimpl.h"
+#include "../include/connection.h"
 
 // classes that are very commonly used
 #include "exception.h"

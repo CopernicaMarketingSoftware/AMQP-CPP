@@ -76,7 +76,7 @@ void MyConnection::onConnected(Network::TcpSocket *socket)
     if (_connection) return;
     
     // create amqp connection, and a new channel
-    _connection = std::make_shared<AMQP::Connection>(this, AMQP::Login("guest1", "guest2"), "/");
+    _connection = std::make_shared<AMQP::Connection>(this, AMQP::Login("guest", "guest"), "/");
     _channel = std::make_shared<AMQP::Channel>(_connection.get());
     
     // install a handler when channel is in error
@@ -102,7 +102,7 @@ void MyConnection::onConnected(Network::TcpSocket *socket)
     });
 
     // declare an exchange
-    _channel->declareExchange("my_exchange", AMQP::direct).onSuccess([]() { 
+    _channel->declareExchange().onSuccess([]() { 
         std::cout << "exchange declared" << std::endl; 
     });
     
