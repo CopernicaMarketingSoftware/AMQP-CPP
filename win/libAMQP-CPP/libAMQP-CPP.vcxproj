@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{A4F510E4-0F51-402D-8165-D24C1C46D409}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>libAMQPCPP</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\..\include</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>..\..\include</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\amqpcpp.h" />
+    <ClInclude Include="..\..\include\amqpcpp\portable_endian.h" />
+    <ClInclude Include="..\..\include\array.h" />
+    <ClInclude Include="..\..\include\booleanset.h" />
+    <ClInclude Include="..\..\include\buffer.h" />
+    <ClInclude Include="..\..\include\bytebuffer.h" />
+    <ClInclude Include="..\..\include\callbacks.h" />
+    <ClInclude Include="..\..\include\channel.h" />
+    <ClInclude Include="..\..\include\channelimpl.h" />
+    <ClInclude Include="..\..\include\classes.h" />
+    <ClInclude Include="..\..\include\connection.h" />
+    <ClInclude Include="..\..\include\connectionhandler.h" />
+    <ClInclude Include="..\..\include\connectionimpl.h" />
+    <ClInclude Include="..\..\include\decimalfield.h" />
+    <ClInclude Include="..\..\include\deferred.h" />
+    <ClInclude Include="..\..\include\deferredcancel.h" />
+    <ClInclude Include="..\..\include\deferredconsumer.h" />
+    <ClInclude Include="..\..\include\deferreddelete.h" />
+    <ClInclude Include="..\..\include\deferredget.h" />
+    <ClInclude Include="..\..\include\deferredqueue.h" />
+    <ClInclude Include="..\..\include\entityimpl.h" />
+    <ClInclude Include="..\..\include\envelope.h" />
+    <ClInclude Include="..\..\include\exchangetype.h" />
+    <ClInclude Include="..\..\include\field.h" />
+    <ClInclude Include="..\..\include\fieldproxy.h" />
+    <ClInclude Include="..\..\include\flags.h" />
+    <ClInclude Include="..\..\include\login.h" />
+    <ClInclude Include="..\..\include\message.h" />
+    <ClInclude Include="..\..\include\metadata.h" />
+    <ClInclude Include="..\..\include\monitor.h" />
+    <ClInclude Include="..\..\include\numericfield.h" />
+    <ClInclude Include="..\..\include\outbuffer.h" />
+    <ClInclude Include="..\..\include\receivedframe.h" />
+    <ClInclude Include="..\..\include\stringfield.h" />
+    <ClInclude Include="..\..\include\table.h" />
+    <ClInclude Include="..\..\include\watchable.h" />
+    <ClInclude Include="..\..\src\basicackframe.h" />
+    <ClInclude Include="..\..\src\basiccancelframe.h" />
+    <ClInclude Include="..\..\src\basiccancelokframe.h" />
+    <ClInclude Include="..\..\src\basicconsumeframe.h" />
+    <ClInclude Include="..\..\src\basicconsumeokframe.h" />
+    <ClInclude Include="..\..\src\basicdeliverframe.h" />
+    <ClInclude Include="..\..\src\basicframe.h" />
+    <ClInclude Include="..\..\src\basicgetemptyframe.h" />
+    <ClInclude Include="..\..\src\basicgetframe.h" />
+    <ClInclude Include="..\..\src\basicgetokframe.h" />
+    <ClInclude Include="..\..\src\basicheaderframe.h" />
+    <ClInclude Include="..\..\src\basicnackframe.h" />
+    <ClInclude Include="..\..\src\basicpublishframe.h" />
+    <ClInclude Include="..\..\src\basicqosframe.h" />
+    <ClInclude Include="..\..\src\basicqosokframe.h" />
+    <ClInclude Include="..\..\src\basicrecoverasyncframe.h" />
+    <ClInclude Include="..\..\src\basicrecoverframe.h" />
+    <ClInclude Include="..\..\src\basicrecoverokframe.h" />
+    <ClInclude Include="..\..\src\basicrejectframe.h" />
+    <ClInclude Include="..\..\src\basicreturnframe.h" />
+    <ClInclude Include="..\..\src\bodyframe.h" />
+    <ClInclude Include="..\..\src\channelcloseframe.h" />
+    <ClInclude Include="..\..\src\channelcloseokframe.h" />
+    <ClInclude Include="..\..\src\channelflowframe.h" />
+    <ClInclude Include="..\..\src\channelflowokframe.h" />
+    <ClInclude Include="..\..\src\channelframe.h" />
+    <ClInclude Include="..\..\src\channelopenframe.h" />
+    <ClInclude Include="..\..\src\channelopenokframe.h" />
+    <ClInclude Include="..\..\src\connectioncloseframe.h" />
+    <ClInclude Include="..\..\src\connectioncloseokframe.h" />
+    <ClInclude Include="..\..\src\connectionframe.h" />
+    <ClInclude Include="..\..\src\connectionopenframe.h" />
+    <ClInclude Include="..\..\src\connectionopenokframe.h" />
+    <ClInclude Include="..\..\src\connectionsecureframe.h" />
+    <ClInclude Include="..\..\src\connectionsecureokframe.h" />
+    <ClInclude Include="..\..\src\connectionstartframe.h" />
+    <ClInclude Include="..\..\src\connectionstartokframe.h" />
+    <ClInclude Include="..\..\src\connectiontuneframe.h" />
+    <ClInclude Include="..\..\src\connectiontuneokframe.h" />
+    <ClInclude Include="..\..\src\consumedmessage.h" />
+    <ClInclude Include="..\..\src\exception.h" />
+    <ClInclude Include="..\..\src\exchangebindframe.h" />
+    <ClInclude Include="..\..\src\exchangebindokframe.h" />
+    <ClInclude Include="..\..\src\exchangedeclareframe.h" />
+    <ClInclude Include="..\..\src\exchangedeclareokframe.h" />
+    <ClInclude Include="..\..\src\exchangedeleteframe.h" />
+    <ClInclude Include="..\..\src\exchangedeleteokframe.h" />
+    <ClInclude Include="..\..\src\exchangeframe.h" />
+    <ClInclude Include="..\..\src\exchangeunbindframe.h" />
+    <ClInclude Include="..\..\src\exchangeunbindokframe.h" />
+    <ClInclude Include="..\..\src\extframe.h" />
+    <ClInclude Include="..\..\src\frame.h" />
+    <ClInclude Include="..\..\src\framecheck.h" />
+    <ClInclude Include="..\..\src\headerframe.h" />
+    <ClInclude Include="..\..\src\heartbeatframe.h" />
+    <ClInclude Include="..\..\src\includes.h" />
+    <ClInclude Include="..\..\src\messageimpl.h" />
+    <ClInclude Include="..\..\src\methodframe.h" />
+    <ClInclude Include="..\..\src\protocolexception.h" />
+    <ClInclude Include="..\..\src\protocolheaderframe.h" />
+    <ClInclude Include="..\..\src\queuebindframe.h" />
+    <ClInclude Include="..\..\src\queuebindokframe.h" />
+    <ClInclude Include="..\..\src\queuedeclareframe.h" />
+    <ClInclude Include="..\..\src\queuedeclareokframe.h" />
+    <ClInclude Include="..\..\src\queuedeleteframe.h" />
+    <ClInclude Include="..\..\src\queuedeleteokframe.h" />
+    <ClInclude Include="..\..\src\queueframe.h" />
+    <ClInclude Include="..\..\src\queuepurgeframe.h" />
+    <ClInclude Include="..\..\src\queuepurgeokframe.h" />
+    <ClInclude Include="..\..\src\queueunbindframe.h" />
+    <ClInclude Include="..\..\src\queueunbindokframe.h" />
+    <ClInclude Include="..\..\src\reducedbuffer.h" />
+    <ClInclude Include="..\..\src\returnedmessage.h" />
+    <ClInclude Include="..\..\src\transactioncommitframe.h" />
+    <ClInclude Include="..\..\src\transactioncommitokframe.h" />
+    <ClInclude Include="..\..\src\transactionframe.h" />
+    <ClInclude Include="..\..\src\transactionrollbackframe.h" />
+    <ClInclude Include="..\..\src\transactionrollbackokframe.h" />
+    <ClInclude Include="..\..\src\transactionselectframe.h" />
+    <ClInclude Include="..\..\src\transactionselectokframe.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\amqpcpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\array.cpp" />
+    <ClCompile Include="..\..\src\channelimpl.cpp" />
+    <ClCompile Include="..\..\src\connectionimpl.cpp" />
+    <ClCompile Include="..\..\src\deferredcancel.cpp" />
+    <ClCompile Include="..\..\src\deferredconsumer.cpp" />
+    <ClCompile Include="..\..\src\deferredget.cpp" />
+    <ClCompile Include="..\..\src\field.cpp" />
+    <ClCompile Include="..\..\src\flags.cpp" />
+    <ClCompile Include="..\..\src\receivedframe.cpp" />
+    <ClCompile Include="..\..\src\table.cpp" />
+    <ClCompile Include="..\..\src\watchable.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

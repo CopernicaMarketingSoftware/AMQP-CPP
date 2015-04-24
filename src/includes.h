@@ -8,7 +8,7 @@
  */
 
 // include the generic amqp functions
-#include "../amqpcpp.h"
+#include <amqpcpp.h>
 
 // classes that are very commonly used
 #include "exception.h"

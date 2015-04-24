@@ -1,0 +1,413 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Header Files\amqpcpp">
+      <UniqueIdentifier>{f9f8aaad-e8af-4321-ad51-660dc14c3d2d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\basicackframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basiccancelframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basiccancelokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicconsumeframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicconsumeokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicdeliverframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicgetemptyframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicgetframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicgetokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicheaderframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicnackframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicpublishframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicqosframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicqosokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicrecoverasyncframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicrecoverframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicrecoverokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicrejectframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\basicreturnframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\bodyframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\channelcloseframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\channelcloseokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\channelflowframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\channelflowokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\channelframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\channelopenframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\channelopenokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\connectioncloseframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\connectioncloseokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\connectionframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\connectionopenframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\connectionopenokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\connectionsecureframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\connectionsecureokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\connectionstartframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\connectionstartokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\connectiontuneframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\connectiontuneokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\consumedmessage.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\exception.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\exchangebindframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\exchangebindokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\exchangedeclareframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\exchangedeclareokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\exchangedeleteframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\exchangedeleteokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\exchangeframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\exchangeunbindframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\exchangeunbindokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\extframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\frame.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\framecheck.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\headerframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\heartbeatframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\includes.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\messageimpl.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\methodframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\protocolexception.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\protocolheaderframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\queuebindframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\queuebindokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\queuedeclareframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\queuedeclareokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\queuedeleteframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\queuedeleteokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\queueframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\queuepurgeframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\queuepurgeokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\queueunbindframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\queueunbindokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\reducedbuffer.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\returnedmessage.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\transactioncommitframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\transactioncommitokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\transactionframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\transactionrollbackframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\transactionrollbackokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\transactionselectframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\transactionselectokframe.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\amqpcpp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\array.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\booleanset.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\buffer.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\bytebuffer.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\callbacks.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\channel.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\channelimpl.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\classes.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\connection.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\connectionhandler.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\connectionimpl.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\decimalfield.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\deferred.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\deferredcancel.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\deferredconsumer.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\deferreddelete.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\deferredget.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\deferredqueue.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\entityimpl.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\envelope.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\exchangetype.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\field.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\fieldproxy.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\flags.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\login.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\message.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\metadata.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\monitor.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\numericfield.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\outbuffer.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\amqpcpp\portable_endian.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\receivedframe.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\stringfield.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\table.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\watchable.h">
+      <Filter>Header Files\amqpcpp</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\src\amqpcpp">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\array.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\channelimpl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\connectionimpl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\deferredcancel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\deferredconsumer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\deferredget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\field.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\flags.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\receivedframe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\table.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\watchable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

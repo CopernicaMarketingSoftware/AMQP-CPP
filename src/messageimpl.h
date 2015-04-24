@@ -82,14 +82,14 @@ public:
         else
         {
             // it does not yet fit, do we have to allocate?
-            if (!_body) _body = new char[_bodySize];
+            if (_body == nullptr) _body = new char[static_cast<size_t>(_bodySize)];
             _selfAllocated = true;
 
             // prevent that size is too big
             if (size > _bodySize - _received) size = _bodySize - _received;
 
             // append data
-            memcpy((char *)(_body + _received), buffer, size);
+            memcpy(static_cast<void*>(const_cast<char*>(_body) + _received), buffer, static_cast<size_t>(size));
 
             // we have more data now
             _received += size;
