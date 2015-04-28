@@ -31,14 +31,14 @@ const std::shared_ptr<Deferred> &DeferredGet::reportSuccess(uint32_t messageCoun
     // pointer is also captured, which ensures that 'this' is not destructed, all members stay
     // accessible, and that the onFinalize() function will only be called after the message
     // is reported (onFinalize() is called from the destructor of this DeferredGet object)
-    _channel->install("", [self, this](const Message &message, uint64_t deliveryTag, bool redelivered) {
+    _channel->install("", [self, this](Message &&message, uint64_t deliveryTag, bool redelivered) {
 
         // install a monitor to deal with the case that the channel is removed
         Monitor monitor(_channel);
 
         // call the callbacks
-        if (_messageCallback) _messageCallback(message, deliveryTag, redelivered);
-        
+        if (_messageCallback) _messageCallback(std::move(message), deliveryTag, redelivered);
+
         // we can remove the callback now from the channel
         if (monitor.valid()) _channel->uninstall("");
     });
@@ -46,7 +46,7 @@ const std::shared_ptr<Deferred> &DeferredGet::reportSuccess(uint32_t messageCoun
     // report the size (note that this is the size _minus_ the message that is retrieved
     // (and for which the callback will be called later), so it could be zero)
     if (_sizeCallback) _sizeCallback(messageCount);
-    
+
     // return next object
     return _next;
 }
@@ -62,7 +62,7 @@ const std::shared_ptr<Deferred> &DeferredGet::reportSuccess() const
 
     // check if a callback was set
     if (_emptyCallback) _emptyCallback();
-    
+
     // return next object
     return _next;
 }

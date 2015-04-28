@@ -24,7 +24,7 @@ private:
     ChannelImpl *_channel;
 
     /**
-     *  Callback to execute when a message arrives
+     *  Callback to execute when consumption has started
      *  @var    ConsumeCallback
      */
     ConsumeCallback _consumeCallback;
@@ -49,12 +49,12 @@ private:
      */
     friend class ChannelImpl;
     friend class ConsumedMessage;
-    
+
 public:
     /**
      *  Protected constructor that can only be called
      *  from within the channel implementation
-     * 
+     *
      *  Note: this constructor _should_ be protected, but because make_shared
      *  will then not work, we have decided to make it public after all,
      *  because the work-around would result in not-so-easy-to-read code.
@@ -62,7 +62,7 @@ public:
      *  @param  channel     the channel implementation
      *  @param  failed      are we already failed?
      */
-    DeferredConsumer(ChannelImpl *channel, bool failed = false) : 
+    DeferredConsumer(ChannelImpl *channel, bool failed = false) :
         Deferred(failed), _channel(channel) {}
 
 public:
@@ -74,7 +74,7 @@ public:
     {
         // store the callback
         _consumeCallback = callback;
-        
+
         // allow chaining
         return *this;
     }
@@ -87,7 +87,7 @@ public:
     {
         // call base
         Deferred::onSuccess(callback);
-        
+
         // allow chaining
         return *this;
     }
@@ -101,7 +101,7 @@ public:
     {
         // store callback
         _messageCallback = callback;
-        
+
         // allow chaining
         return *this;
     }
@@ -115,7 +115,7 @@ public:
     {
         // store callback
         _messageCallback = callback;
-        
+
         // allow chaining
         return *this;
     }

@@ -17,19 +17,6 @@ namespace AMQP {
  */
 class MessageImpl : public Message
 {
-private:
-    /**
-     *  How many bytes have been received?
-     *  @var uint64_t
-     */
-    uint64_t _received;
-
-    /**
-     *  Was the buffer allocated by us?
-     *  @var bool
-     */
-    bool _selfAllocated;
-
 protected:
     /**
      *  Constructor
@@ -37,19 +24,14 @@ protected:
      *  @param  routingKey
      */
     MessageImpl(const std::string &exchange, const std::string &routingKey) :
-        Message(exchange, routingKey),
-        _received(0), _selfAllocated(false)
+        Message(exchange, routingKey)
         {}
 
 public:
     /**
      *  Destructor
      */
-    virtual ~MessageImpl()
-    {
-        // clear up memory if it was self allocated
-        if (_selfAllocated) delete[] _body;
-    }
+    virtual ~MessageImpl() {}
 
     /**
      *  Set the body size
@@ -58,6 +40,12 @@ public:
      */
     void setBodySize(uint64_t size)
     {
+        // safety-check: on 32-bit platforms size_t is obviously also a 32-bit dword
+        // in which case casting the uint64_t to a size_t could result in truncation
+        // here we check whether the given size fits inside a size_t
+        if (std::numeric_limits<size_t>::max() < size) throw std::runtime_error("message is too big for this system");
+
+        // store the new size
         _bodySize = size;
     }
 
@@ -70,38 +58,38 @@ public:
     bool append(const char *buffer, uint64_t size)
     {
         // is this the only data, and also direct complete?
-        if (_received == 0 && size >= _bodySize)
+        if (_str.empty() && size >= _bodySize)
         {
             // we have everything
             _body = buffer;
-            _received = _bodySize;
 
             // done
             return true;
         }
         else
         {
-            // we're going to allocated memory, but that should be a size_t, not a uint64_t
-            size_t memory = static_cast<size_t>(_bodySize);
-            
-            // prevent truncation
-            if (memory < _bodySize) throw std::runtime_error("message is too big for this system");
-            
-            // it does not yet fit, do we have to allocate?
-            if (!_body) _body = new char[memory];
-            _selfAllocated = true;
+            // it does not fit yet, do we have to allocate
+            if (!_body)
+            {
+                // allocate memory in the string
+                _str.reserve(static_cast<size_t>(_bodySize));
 
-            // prevent that size is too big
-            if (size > _bodySize - _received) size = _bodySize - _received;
+                // we now use the data buffer inside the string
+                _body = _str.data();
+            }
 
-            // append data
-            memcpy(static_cast<void*>(const_cast<char*>(_body) + _received), buffer, static_cast<size_t>(size));
+            // safety-check: if the given size exceeds the given message body size
+            // we truncate it, this should never happen because it indicates a bug
+            // in the AMQP server implementation, should we report this?
+            size = std::min(size, _bodySize - _str.size());
 
-            // we have more data now
-            _received += size;
+            // we can not safely append the data to the string, it
+            // will not exceed the reserved size so it is guaranteed
+            // not to change the data pointer, we can just leave that
+            _str.append(buffer, static_cast<size_t>(size));
 
-            // done
-            return _received >= _bodySize;
+            // if the string is filled with the given number of characters we are done now
+            return _str.size() >= _bodySize;
         }
     }
 };

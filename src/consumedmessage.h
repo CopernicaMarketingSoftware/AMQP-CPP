@@ -67,15 +67,15 @@ public:
     {
         return _consumerTag;
     }
-     
+
     /**
      *  Report to the handler
      *  @param  callback
      */
-    void report(const MessageCallback &callback) const
+    void report(const MessageCallback &callback)
     {
         // send ourselves to the consumer
-        if (callback) callback(*this, _deliveryTag, _redelivered);
+        if (callback) callback(std::move(*this), _deliveryTag, _redelivered);
     }
 };
 
