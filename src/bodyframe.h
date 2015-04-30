@@ -1,6 +1,6 @@
 /**
  *  Class describing an AMQP Body Frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -11,7 +11,7 @@ namespace AMQP {
 
 /**
  *  Class implementation
- */ 
+ */
 class BodyFrame : public ExtFrame
 {
 private:
@@ -21,12 +21,6 @@ private:
      *  @var const char *
      */
     const char *_payload;
-    
-    /**
-     *  Size of the payload
-     *  @var uint64_t
-     */
-    uint32_t _size;
 
 protected:
     /**
@@ -53,8 +47,7 @@ public:
      */
     BodyFrame(uint16_t channel, const char *payload, uint32_t size) :
         ExtFrame(channel, size),
-        _payload(payload),
-        _size(size)
+        _payload(payload)
     {}
 
     /**
@@ -63,10 +56,9 @@ public:
      *  @param  frame   received frame to decode
      *  @return shared pointer to newly created frame
      */
-    BodyFrame(ReceivedFrame& frame) : 
-        ExtFrame(frame), 
-        _payload(frame.nextData(frame.payloadSize())), 
-        _size(frame.payloadSize()) 
+    BodyFrame(ReceivedFrame& frame) :
+        ExtFrame(frame),
+        _payload(frame.nextData(frame.payloadSize()))
     {}
 
     /**
@@ -77,7 +69,7 @@ public:
     /**
      *  Return the type of frame
      *  @return     uint8_t
-     */ 
+     */
     uint8_t type() const
     {
         return 3;
@@ -91,7 +83,7 @@ public:
     {
         return _payload;
     }
-    
+
     /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
@@ -101,25 +93,25 @@ public:
     {
         // we need the appropriate channel
         auto channel = connection->channel(this->channel());
-        
+
         // channel does not exist
-        if (!channel) return false;    
-        
+        if (!channel) return false;
+
         // is there a current message?
         MessageImpl *message = channel->message();
         if (!message) return false;
-        
+
         // store size
         if (!message->append(_payload, _size)) return true;
-        
+
         // the message is complete
         channel->reportMessage();
-        
+
         // done
         return true;
     }
-    
-    
+
+
 };
 
 /**

@@ -146,7 +146,7 @@ public:
      *  What is the state of the connection - is the protocol handshake completed?
      *  @return bool
      */
-    bool protocolOk()
+    bool protocolOk() const
     {
         // must be busy doing the connection handshake, or already connected
         return _state == state_handshake || _state == state_connected;
@@ -209,7 +209,7 @@ public:
      *  The max frame size
      *  @return uint32_t
      */
-    uint32_t maxFrame()
+    uint32_t maxFrame() const
     {
         return _maxFrame;
     }
@@ -218,7 +218,7 @@ public:
      *  The max payload size for body frames
      *  @return uint32_t
      */
-    uint32_t maxPayload()
+    uint32_t maxPayload() const
     {
         // 8 bytes for header and end-of-frame byte
         return _maxFrame - 8;

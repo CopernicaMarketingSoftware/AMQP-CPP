@@ -1,6 +1,6 @@
 /**
  *  Class describing a basic negative-acknowledgement frame
- *  
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -37,10 +37,10 @@ protected:
     {
         // call base
         BasicFrame::fill(buffer);
-        
+
         // add the delivery tag
         buffer.add(_deliveryTag);
-        
+
         // add the booleans
         _bits.fill(buffer);
     }
@@ -54,20 +54,20 @@ public:
      *  @param  multiple        nack mutiple messages
      *  @param  requeue         requeue the message
      */
-    BasicNackFrame(uint16_t channel, uint64_t deliveryTag, bool multiple = false, bool requeue = false) : 
+    BasicNackFrame(uint16_t channel, uint64_t deliveryTag, bool multiple = false, bool requeue = false) :
         BasicFrame(channel, 9),
         _deliveryTag(deliveryTag),
         _bits(multiple, requeue) {}
-    
+
     /**
      *  Construct based on received frame
      *  @param  frame
      */
-    BasicNackFrame(ReceivedFrame &frame) : 
+    BasicNackFrame(ReceivedFrame &frame) :
         BasicFrame(frame),
         _deliveryTag(frame.nextUint64()),
         _bits(frame) {}
-    
+
     /**
      *  Destructor
      */
@@ -95,7 +95,7 @@ public:
      *  Return whether to acknowledgement multiple messages
      *  @return  bool
      */
-    bool multiple()
+    bool multiple() const
     {
         return _bits.get(0);
     }
@@ -104,7 +104,7 @@ public:
      *  Should the message be put back in the queue?
      *  @return  bool
      */
-    bool requeue()
+    bool requeue() const
     {
         return _bits.get(1);
     }

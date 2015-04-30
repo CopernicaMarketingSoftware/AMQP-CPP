@@ -103,10 +103,10 @@ public:
     }
 
     /**
-     *  Return whether to acknowledgement multiple messages
+     *  Return whether to acknowledge multiple messages
      *  @return  bool
      */
-    bool multiple()
+    bool multiple() const
     {
         return _multiple.get(0);
     }

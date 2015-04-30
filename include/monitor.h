@@ -1,7 +1,7 @@
 /**
  *  Monitor.h
  *
- *  A monitor object monitors if the connection is still valid. When the 
+ *  A monitor object monitors if the connection is still valid. When the
  *  connection is parsing incoming data, it calls the user handler for each
  *  incoming frame. However, it is unknown what this handler is going to do,
  *  it could for example decide to destruct the connection object. In that
@@ -46,7 +46,7 @@ public:
         // register with the watchable
         _watchable->add(this);
     }
-    
+
     /**
      *  Destructor
      */
@@ -55,22 +55,22 @@ public:
         // remove from watchable
         if (_watchable) _watchable->remove(this);
     }
-    
+
     /**
      *  Check if the object is valid
      *  @return bool
      */
-    bool valid()
+    bool valid() const
     {
         return _watchable != nullptr;
     }
-    
+
     /**
      *  The watchable can access private data
      */
     friend class Watchable;
 };
-        
+
 
 
 /**
@@ -79,4 +79,4 @@ public:
 }
 
 
- 
+

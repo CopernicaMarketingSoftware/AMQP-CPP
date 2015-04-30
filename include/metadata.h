@@ -258,7 +258,7 @@ public:
      *  This is an alias for retrieving the delivery mode and checking if it is set to 2
      *  @return bool
      */
-    bool persistent()
+    bool persistent() const
     {
         return hasDeliveryMode() && deliveryMode() == 2;
     }

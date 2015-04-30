@@ -149,7 +149,7 @@ public:
      *  Get the byte value
      *  @return value
      */
-    uint8_t value()
+    uint8_t value() const
     {
         return _byte;
     }

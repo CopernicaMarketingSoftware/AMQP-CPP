@@ -162,7 +162,7 @@ public:
      *  @param  value
      *  @return FieldProxy
      */
-    FieldProxy& operator=(const DecimalField value)
+    FieldProxy& operator=(const DecimalField &value)
     {
         // assign value and allow chaining
         _source->set(_index, DecimalField(value));

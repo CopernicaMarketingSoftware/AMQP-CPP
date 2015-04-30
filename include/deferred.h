@@ -110,7 +110,7 @@ protected:
         // this is the same as a regular success message
         return reportSuccess();
     }
-    
+
     /**
      *  Indicate failure
      *  @param  error           Description of the error that occured
@@ -148,7 +148,7 @@ public:
     /**
      *  Protected constructor that can only be called
      *  from within the channel implementation
-     * 
+     *
      *  Note: this constructor _should_ be protected, but because make_shared
      *  will then not work, we have decided to make it public after all,
      *  because the work-around would result in not-so-easy-to-read code.
@@ -156,7 +156,7 @@ public:
      *  @param  failed  are we already failed?
      */
     Deferred(bool failed = false) : _failed(failed) {}
-    
+
 public:
     /**
      *  Deleted copy and move constructors
@@ -167,7 +167,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~Deferred() 
+    virtual ~Deferred()
     {
         // report to the finalize callback
         if (_finalizeCallback) _finalizeCallback();
@@ -176,7 +176,7 @@ public:
     /**
      *  Cast to a boolean
      */
-    operator bool ()
+    operator bool () const
     {
         return !_failed;
     }
