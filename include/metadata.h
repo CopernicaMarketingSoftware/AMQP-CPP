@@ -24,13 +24,13 @@ protected:
      *  @var    BooleanSet
      */
     BooleanSet _bools1;
-    
+
     /**
      *  Second set of booleans
      *  @var    BooleanSet
      */
     BooleanSet _bools2;
-    
+
     /**
      *  MIME content type
      *  @var    ShortString
@@ -121,8 +121,8 @@ protected:
      *  in a derived class
      */
     MetaData() {}
-    
-    
+
+
 public:
     /**
      *  Read incoming frame
@@ -218,6 +218,23 @@ public:
     void setMessageID       (const std::string &value) { _messageID         = value; _bools2.set(7,true); }
 
     /**
+     *  Set the various supported fields using r-value references
+     *
+     *  @param  value   moveable value
+     */
+    void setExpiration      (std::string &&value) { _expiration       = std::move(value); _bools1.set(0,true); }
+    void setReplyTo         (std::string &&value) { _replyTo          = std::move(value); _bools1.set(1,true); }
+    void setCorrelationID   (std::string &&value) { _correlationID    = std::move(value); _bools1.set(2,true); }
+    void setHeaders         (Table &&value)       { _headers          = std::move(value); _bools1.set(5,true); }
+    void setContentEncoding (std::string &&value) { _contentEncoding  = std::move(value); _bools1.set(6,true); }
+    void setContentType     (std::string &&value) { _contentType      = std::move(value); _bools1.set(7,true); }
+    void setClusterID       (std::string &&value) { _clusterID        = std::move(value); _bools2.set(2,true); }
+    void setAppID           (std::string &&value) { _appID            = std::move(value); _bools2.set(3,true); }
+    void setUserID          (std::string &&value) { _userID           = std::move(value); _bools2.set(4,true); }
+    void setTypeName        (std::string &&value) { _typeName         = std::move(value); _bools2.set(5,true); }
+    void setMessageID       (std::string &&value) { _messageID        = std::move(value); _bools2.set(7,true); }
+
+    /**
      *  Retrieve the fields
      *  @return string
      */
@@ -235,7 +252,7 @@ public:
     const std::string &typeName       () const { return _typeName;          }
           uint64_t     timestamp      () const { return _timestamp;         }
     const std::string &messageID      () const { return _messageID;         }
-    
+
     /**
      *  Is this a message with persistent storage
      *  This is an alias for retrieving the delivery mode and checking if it is set to 2
@@ -245,19 +262,19 @@ public:
     {
         return hasDeliveryMode() && deliveryMode() == 2;
     }
-    
+
     /**
      *  Set whether storage should be persistent or not
      *  @param  bool
      */
     void setPersistent(bool value = true)
     {
-        if (value) 
+        if (value)
         {
             // simply set the delivery mode
             setDeliveryMode(2);
         }
-        else 
+        else
         {
             // we remove the field from the header
             _deliveryMode = 0;
@@ -273,7 +290,7 @@ public:
     {
         // the result (2 for the two boolean sets)
         uint32_t result = 2;
-        
+
         if (hasExpiration())        result += _expiration.size();
         if (hasReplyTo())           result += _replyTo.size();
         if (hasCorrelationID())     result += _correlationID.size();
@@ -288,11 +305,11 @@ public:
         if (hasTypeName())          result += _typeName.size();
         if (hasTimestamp())         result += _timestamp.size();
         if (hasMessageID())         result += _messageID.size();
-        
+
         // done
         return result;
     }
-    
+
     /**
      *  Fill an output buffer
      *  @param  buffer
@@ -302,7 +319,7 @@ public:
         // the two boolean sets are always present
         _bools1.fill(buffer);
         _bools2.fill(buffer);
-        
+
         // only copy the properties that were sent
         if (hasContentType())       _contentType.fill(buffer);
         if (hasContentEncoding())   _contentEncoding.fill(buffer);

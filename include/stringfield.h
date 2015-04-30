@@ -1,7 +1,7 @@
 #pragma once
 /**
  *  String field types for amqp
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -34,7 +34,14 @@ public:
      *
      *  @param  value   string value
      */
-    StringField(std::string value) : _data(value) {}
+    StringField(const std::string &value) : _data(value) {}
+
+    /**
+     *  Construct based on a std::string
+     *
+     *  @param  value   string value
+     */
+    StringField(std::string &&value) : _data(std::move(value)) {}
 
     /**
      *  Construct based on received data
@@ -44,7 +51,7 @@ public:
     {
         // get the size
         T size(frame);
-        
+
         // allocate string
         _data = std::string(frame.nextData(size.value()), (size_t) size.value());
     }
@@ -69,10 +76,24 @@ public:
      *
      *  @param  value   new value
      */
-    StringField& operator=(const std::string& value)
+    StringField& operator=(const std::string &value)
     {
         // overwrite data
         _data = value;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Assign a new value
+     *
+     *  @param  value   new value
+     */
+    StringField& operator=(std::string &&value)
+    {
+        // overwrite data
+        _data = std::move(value);
 
         // allow chaining
         return *this;
@@ -87,7 +108,7 @@ public:
     {
         // find out size of the size parameter
         T size(_data.size());
-        
+
         // size of the uint8 or uint32 + the actual string size
         return size.size() + _data.size();
     }
@@ -128,7 +149,7 @@ public:
     {
         // create size
         T size(_data.size());
-        
+
         // first, write down the size of the string
         size.fill(buffer);
 

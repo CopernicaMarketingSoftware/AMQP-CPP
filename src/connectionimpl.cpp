@@ -287,6 +287,10 @@ bool ConnectionImpl::send(const Frame &frame)
     // some frames can be sent _after_ the close() function was called
     if (_closed && !frame.partOfShutdown()) return false;
 
+    // if the frame is bigger than we allow on the connection
+    // it is impossible to send out this frame successfully
+    if (frame.totalSize() > _maxFrame) return false;
+
     // we need an output buffer
     OutBuffer buffer(frame.buffer());
 

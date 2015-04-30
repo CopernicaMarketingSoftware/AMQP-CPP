@@ -21,9 +21,9 @@ class OutBuffer
 private:
     /**
      *  Pointer to the beginning of the buffer
-     *  @var char*
+     *  @var std::unique_ptr<char[]>
      */
-    char *_buffer;
+    std::unique_ptr<char[]> _buffer;
 
     /**
      *  Pointer to the buffer to be filled
@@ -49,56 +49,47 @@ public:
      *  Constructor
      *  @param  capacity
      */
-    OutBuffer(uint32_t capacity)
-    {
-        // initialize members
-        _size = 0;
-        _capacity = capacity;
-        _buffer = _current = new char[capacity];
-    }
+    OutBuffer(uint32_t capacity) :
+        _buffer(new char[capacity]),
+        _current(_buffer.get()),
+        _size(0),
+        _capacity(capacity)
+    {}
 
     /**
      *  Copy constructor
      *  @param  that
      */
-    OutBuffer(const OutBuffer &that)
+    OutBuffer(const OutBuffer &that) :
+        _buffer(new char[that._capacity]),
+        _current(_buffer.get() + that._size),
+        _size(that._size),
+        _capacity(that._capacity)
     {
-        // initialize members
-        _size = that._size;
-        _capacity = that._capacity;
-        _buffer = new char[_capacity];
-        _current = _buffer + _size;
-
         // copy memory
-        memcpy(_buffer, that._buffer, _size);
+        memcpy(_buffer.get(), that._buffer.get(), _size);
     }
 
     /**
      *  Move constructor
      *  @param  that
      */
-    OutBuffer(OutBuffer &&that)
+    OutBuffer(OutBuffer &&that) :
+        _buffer(std::move(that._buffer)),
+        _current(that._current),
+        _size(that._size),
+        _capacity(that._capacity)
     {
-        // copy all members
-        _size = that._size;
-        _capacity = that._capacity;
-        _buffer = that._buffer;
-        _current = that._current;
-
         // reset the other object
         that._size = 0;
         that._capacity = 0;
-        that._buffer = nullptr;
         that._current = nullptr;
     }
 
     /**
      *  Destructor
      */
-    virtual ~OutBuffer()
-    {
-        if (_buffer) delete[] _buffer;
-    }
+    virtual ~OutBuffer() {}
 
     /**
      *  Get access to the internal buffer
@@ -106,7 +97,7 @@ public:
      */
     const char *data() const
     {
-        return _buffer;
+        return _buffer.get();
     }
 
     /**

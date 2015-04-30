@@ -53,9 +53,9 @@ protected:
 
     /**
      *  All channels that are active
-     *  @var    map
+     *  @var    std::unordered_map<uint16_t, std::shared_ptr<ChannelImpl>>
      */
-    std::map<uint16_t, std::shared_ptr<ChannelImpl>> _channels;
+    std::unordered_map<uint16_t, std::shared_ptr<ChannelImpl>> _channels;
 
     /**
      *  The last unused channel ID
