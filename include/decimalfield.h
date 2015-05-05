@@ -203,6 +203,16 @@ public:
     }
 
     /**
+     *  We are a decimal field
+     *
+     *  @return true, because we are a decimal field
+     */
+    bool isDecimal() const override
+    {
+        return true;
+    }
+
+    /**
      *  Get the type ID that is used to identify this type of
      *  field in a field table
      */

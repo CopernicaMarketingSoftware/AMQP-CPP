@@ -1,7 +1,7 @@
 #pragma once
 /**
  *  Available field types for AMQP
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -26,7 +26,7 @@ protected:
      *  @return Field*
      */
     static Field *decode(ReceivedFrame &frame);
-    
+
 public:
     /**
      *  Destructor
@@ -58,13 +58,13 @@ public:
      *  @return char
      */
     virtual char typeID() const = 0;
-    
+
     /**
      *  Output the object to a stream
      *  @param std::ostream
      */
     virtual void output(std::ostream &stream) const = 0;
-    
+
     /**
      *  Casting operators
      *  @return mixed
@@ -83,6 +83,18 @@ public:
     virtual operator double () const { return 0; }
     virtual operator const Array& () const;
     virtual operator const Table& () const;
+
+    /**
+     *  Check the field type
+     *
+     *  @return Is the field a specific type?
+     */
+    virtual bool isInteger() const { return false; }
+    virtual bool isDecimal() const { return false; }
+    virtual bool isArray()   const { return false; }
+    virtual bool isTable()   const { return false; }
+    virtual bool isBoolean() const { return false; }
+    virtual bool isString()  const { return false; }
 };
 
 /**

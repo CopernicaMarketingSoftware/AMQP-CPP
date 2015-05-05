@@ -168,6 +168,16 @@ public:
     }
 
     /**
+     *  We are a string
+     *
+     *  @return true, because we are a string
+     */
+    bool isString() const override
+    {
+        return true;
+    }
+
+    /**
      *  Output the object to a stream
      *  @param std::ostream
      */

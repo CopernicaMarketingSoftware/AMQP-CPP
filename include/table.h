@@ -73,6 +73,13 @@ public:
     Table &operator=(Table &&table);
 
     /**
+     *  Retrieve all keys in the table
+     *
+     *  @return Vector with all keys in the table
+     */
+    std::vector<std::string> keys() const;
+
+    /**
      *  Create a new instance on the heap of this object, identical to the object passed
      *  @return Field*
      */
@@ -165,6 +172,16 @@ public:
     virtual char typeID() const override
     {
         return 'F';
+    }
+
+    /**
+     *  We are a table
+     *
+     *  @return true, because we are a table
+     */
+    bool isTable() const override
+    {
+        return true;
     }
 
     /**

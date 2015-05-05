@@ -141,7 +141,7 @@ public:
     {
         return ArrayFieldProxy(this, index);
     }
-    
+
     /**
      *  Get a const field
      *  @param  index   field index
@@ -169,6 +169,16 @@ public:
     }
 
     /**
+     *  We are an array field
+     *
+     *  @return true, because we are an array
+     */
+    bool isArray() const override
+    {
+        return true;
+    }
+
+    /**
      *  Output the object to a stream
      *  @param std::ostream
      */
@@ -176,27 +186,27 @@ public:
     {
         // prefix
         stream << "array(";
-        
+
         // is this the first iteration
         bool first = true;
-        
+
         // loop through all members
-        for (auto &iter : _fields) 
+        for (auto &iter : _fields)
         {
             // split with comma
             if (!first) stream << ",";
-            
+
             // show output
             stream << *iter;
-            
+
             // no longer first iter
             first = false;
         }
-        
+
         // postfix
         stream << ")";
     }
-    
+
     /**
      *  Cast to array
      *  @return Array

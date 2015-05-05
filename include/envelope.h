@@ -79,6 +79,7 @@ public:
      *  @param  envelope    the envelope to move
      */
     Envelope(Envelope &&envelope) :
+        MetaData(std::move(envelope)),
         _str(std::move(envelope._str)),
         _body(_str.data()),
         _bodySize(_str.size())

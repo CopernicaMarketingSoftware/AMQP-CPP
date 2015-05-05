@@ -102,10 +102,14 @@ public:
      *  Get the value
      *  @return mixed
      */
-    virtual operator T () const override
-    {
-        return _value;
-    }
+    operator uint8_t () const override { return _value; }
+    operator uint16_t() const override { return _value; }
+    operator uint32_t() const override { return _value; }
+    operator uint64_t() const override { return _value; }
+    operator int8_t  () const override { return _value; }
+    operator int16_t () const override { return _value; }
+    operator int32_t () const override { return _value; }
+    operator int64_t () const override { return _value; }
 
     /**
      *  Get the value
@@ -115,6 +119,16 @@ public:
     {
         // return internal value
         return _value;
+    }
+
+    /**
+     *  We are an integer field
+     *
+     *  @return true, because we are an integer
+     */
+    bool isInteger() const override
+    {
+        return true;
     }
 
     /**

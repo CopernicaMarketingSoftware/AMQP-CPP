@@ -1,4 +1,5 @@
 #include "includes.h"
+#include <algorithm>
 
 // we live in the copernica namespace
 namespace AMQP {
@@ -89,6 +90,24 @@ Table &Table::operator=(Table &&table)
 
     // done
     return *this;
+}
+
+/**
+ *  Retrieve all keys in the table
+ *
+ *  @return Vector with all keys in the table
+ */
+std::vector<std::string> Table::keys() const
+{
+    // the result vector
+    std::vector<std::string> result;
+    result.reserve(_fields.size());
+
+    // insert all keys into the result vector
+    for (auto &iter : _fields) result.push_back(iter.first);
+
+    // now return the result
+    return result;
 }
 
 /**

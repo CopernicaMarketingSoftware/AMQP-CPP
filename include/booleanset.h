@@ -164,6 +164,16 @@ public:
     }
 
     /**
+     *  We are a boolean field
+     *
+     *  @return true, because we are a boolean
+     */
+    bool isBoolean() const override
+    {
+        return true;
+    }
+
+    /**
      *  Get the size this field will take when
      *  encoded in the AMQP wire-frame format
      */
