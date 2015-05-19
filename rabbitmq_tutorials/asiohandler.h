@@ -31,6 +31,7 @@ private:
 
     boost::asio::io_service& _ioService;
     boost::asio::ip::tcp::socket _socket;
+    boost::asio::deadline_timer _timer;
 
     std::vector<char> _asioInputBuffer;
     std::shared_ptr<AmqpBuffer> _amqpBuffer;

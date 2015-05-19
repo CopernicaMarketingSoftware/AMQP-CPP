@@ -59,6 +59,7 @@ private:
 AsioHandler::AsioHandler(boost::asio::io_service& ioService) :
         _ioService(ioService),
         _socket(ioService),
+        _timer(ioService),
         _asioInputBuffer(ASIO_INPUT_BUFFER_SIZE, 0),
         _amqpBuffer(new AmqpBuffer(ASIO_INPUT_BUFFER_SIZE * 2)),
         _connection(nullptr),
@@ -81,6 +82,15 @@ void AsioHandler::doConnect(const std::string& host, uint16_t port)
 {
     tcp::resolver::query query(host, std::to_string(port));
     tcp::resolver::iterator iter = tcp::resolver(_ioService).resolve(query);
+    _timer.expires_from_now(boost::posix_time::seconds(15));
+    _timer.async_wait([this](const boost::system::error_code& ec){
+        if(!ec && !_connected)
+        {
+            std::cerr<<"Connection timed out";
+            _socket.cancel();
+            exit(1);
+        }
+    });
 
     boost::asio::async_connect(_socket, iter,
             [this](boost::system::error_code ec, tcp::resolver::iterator)
@@ -97,7 +107,8 @@ void AsioHandler::doConnect(const std::string& host, uint16_t port)
                 }
                 else
                 {
-                    std::cerr<<ec<<std::endl;
+                    std::cerr<<"Connection error:"<<ec<<std::endl;
+                    exit(1);
                 }
             });
 
@@ -128,7 +139,7 @@ void AsioHandler::doRead()
                 }
                 else
                 {
-                    std::cerr<<ec<<std::endl;
+                    std::cerr<<"Error reading:"<<ec<<std::endl;
                     exit(1);
                 }
             });
@@ -160,8 +171,9 @@ void AsioHandler::doWrite()
                 }
                 else
                 {
-                    std::cerr<<ec<<std::endl;
+                    std::cerr<<"Error writing:"<<ec<<std::endl;
                     _socket.close();
+                    exit(1);
                 }
             });
 }
@@ -188,7 +200,6 @@ void AsioHandler::parseData()
 
 void AsioHandler::onConnected(AMQP::Connection *connection)
 {
-    //_connected = true;
 }
 bool AsioHandler::connected() const
 {
