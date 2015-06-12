@@ -243,6 +243,9 @@ public:
         // store callback
         _finalizeCallback = callback;
 
+        // if the object is already in a failed state, we call the callback right away
+        if (_failed) callback();
+
         // allow chaining
         return *this;
     }
