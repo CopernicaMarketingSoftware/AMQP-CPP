@@ -1,24 +1,24 @@
 /**
  *  Endian.h
- * 
+ *
  *  On Apple systems, there are no macro's to convert between little
  *  and big endian byte orders. This header file adds the missing macros
- * 
+ *
  *  @author madmongo1 <https://github.com/madmongo1>
- * 
+ *
  *  And we have also copied code from the "portable_endian.h" file by
  *  Mathias Panzenböck. His license:
- * 
+ *
  *  "License": Public Domain
- *      I, Mathias Panzenböck, place this file hereby into the public 
- *      domain. Use it at your own risk for whatever you like. In case 
- *      there are jurisdictions that don't support putting things in the 
- *      public domain you can also consider it to be "dual licensed" 
- *      under the BSD, MIT and Apache licenses, if you want to. This 
- *      code is trivial anyway. Consider it an example on how to get the 
- *      endian conversion functions on different platforms. 
+ *      I, Mathias Panzenböck, place this file hereby into the public
+ *      domain. Use it at your own risk for whatever you like. In case
+ *      there are jurisdictions that don't support putting things in the
+ *      public domain you can also consider it to be "dual licensed"
+ *      under the BSD, MIT and Apache licenses, if you want to. This
+ *      code is trivial anyway. Consider it an example on how to get the
+ *      endian conversion functions on different platforms.
  */
- 
+
 /**
  *  Include guard
  */
@@ -116,7 +116,7 @@
 /**
  *  NetBSD handling
  */
-#elif defined(__NetBSD__) || defined(__FreeBSD__) || defined(__DragonFly__)
+#elif defined(__NetBSD__) || defined(__DragonFly__)
 
 #include <sys/endian.h>
 #define be16toh(x) betoh16(x)
