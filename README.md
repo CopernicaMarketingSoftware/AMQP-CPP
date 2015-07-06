@@ -24,15 +24,20 @@ ABOUT
 =====
 
 This library is created and maintained by Copernica (www.copernica.com), and is
-used inside the MailerQ (www.mailerq.com) application, MailerQ is a tool for
-sending large volumes of email, using AMQP message queues.
+used inside the MailerQ (www.mailerq.com) and AMQPipe (www.amqpipe.com) applications. 
+MailerQ is a tool for sending large volumes of email, using AMQP message queues,
+and AMQPipe is a tool for high-speed processing messages between AMQP pipes
 
 Do you appreciate our work and are you looking for high quality email solutions? 
-Then check out our commercial solutions:
+Then check out our other commercial and open source solutions:
 
 * Copernica Marketing Suite (www.copernica.com)
-* MailerQ MTA (www.mailerq.com)
+* MailerQ on-premise MTA (www.mailerq.com)
+* AMQPipe (www.amqpipe.com)
 * Responsive Email web service (www.responsiveemail.com)
+* SMTPeter cloud based SMTP server (www.smtpeter.com)
+* PHP-CPP bridge between PHP and C++ (www.php-cpp.com)
+* PHP-JS bridge between PHP and Javascript (www.php-js.com)
 
 
 HOW TO USE AMQP-CPP
