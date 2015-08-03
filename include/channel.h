@@ -239,9 +239,9 @@ public:
      *
      *  The onSuccess() callback that you can install should have the following signature:
      *
-     *      void myCallback(AMQP::Channel *channel, const std::string &name, uint32_t messageCount, uint32_t consumerCount);
+     *      void myCallback(const std::string &name, uint32_t messageCount, uint32_t consumerCount);
      *
-     *  For example: channel.declareQueue("myqueue").onSuccess([](AMQP::Channel *channel, const std::string &name, uint32_t messageCount, uint32_t consumerCount) {
+     *  For example: channel.declareQueue("myqueue").onSuccess([](const std::string &name, uint32_t messageCount, uint32_t consumerCount) {
      *
      *      std::cout << "Queue '" << name << "' has been declared with " << messageCount << " messages and " << consumerCount << " consumers" << std::endl;
      *
@@ -291,9 +291,9 @@ public:
      *
      *  The onSuccess() callback that you can install should have the following signature:
      *
-     *      void myCallback(AMQP::Channel *channel, uint32_t messageCount);
+     *      void myCallback(uint32_t messageCount);
      *
-     *  For example: channel.declareQueue("myqueue").onSuccess([](AMQP::Channel *channel, uint32_t messageCount) {
+     *  For example: channel.declareQueue("myqueue").onSuccess([](uint32_t messageCount) {
      *
      *      std::cout << "Queue purged, all " << messageCount << " messages removed" << std::endl;
      *
@@ -317,9 +317,9 @@ public:
      *
      *  The onSuccess() callback that you can install should have the following signature:
      *
-     *      void myCallback(AMQP::Channel *channel, uint32_t messageCount);
+     *      void myCallback(uint32_t messageCount);
      *
-     *  For example: channel.removeQueue("myqueue").onSuccess([](AMQP::Channel *channel, uint32_t messageCount) {
+     *  For example: channel.removeQueue("myqueue").onSuccess([](uint32_t messageCount) {
      *
      *      std::cout << "Queue deleted, along with " << messageCount << " messages" << std::endl;
      *
@@ -385,9 +385,9 @@ public:
      *
      *  The onSuccess() callback that you can install should have the following signature:
      *
-     *      void myCallback(AMQP::Channel *channel, const std::string& tag);
+     *      void myCallback(const std::string& tag);
      *
-     *  For example: channel.consume("myqueue").onSuccess([](AMQP::Channel *channel, const std::string& tag) {
+     *  For example: channel.consume("myqueue").onSuccess([](const std::string& tag) {
      *
      *      std::cout << "Started consuming under tag " << tag << std::endl;
      *
