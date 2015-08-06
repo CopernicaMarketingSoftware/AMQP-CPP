@@ -3,7 +3,7 @@ INCLUDE_DIR             = ${PREFIX}/include
 LIBRARY_DIR             = ${PREFIX}/lib
 export LIBRARY_NAME		= amqpcpp
 export SONAME			= 2.2
-export VERSION			= 2.2.0
+export VERSION			= 2.2.1
 
 all:
 		$(MAKE) -C src all
