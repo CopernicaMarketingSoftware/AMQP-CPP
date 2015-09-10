@@ -145,6 +145,15 @@ public:
     }
 
     /**
+     *  Retrieve the amount of channels this connection has
+     *  @return std::size_t
+     */
+    std::size_t channels() const
+    {
+        return _implementation.channels();
+    }
+
+    /**
      *  Some classes have access to private properties
      */
     friend class ChannelImpl;

@@ -334,6 +334,15 @@ public:
     }
 
     /**
+     *  Retrieve the amount of channels this connection has
+     *  @return std::size_t
+     */
+    std::size_t channels() const
+    {
+        return _channels.size();
+    }
+
+    /**
      *  The actual connection is a friend and can construct this class
      */
     friend class Connection;
