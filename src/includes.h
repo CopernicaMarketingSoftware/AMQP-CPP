@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
+#include <functional>
 
 // forward declarations
 #include "../include/classes.h"
