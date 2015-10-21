@@ -94,6 +94,12 @@ protected:
     std::queue<OutBuffer> _queue;
 
     /**
+    *  Heartbeat delay
+    *  @var uint16_t
+    */
+    uint16_t _heartbeat = 0;
+
+    /**
      *  Helper method to send the close frame
      *  Return value tells if the connection is still valid
      *  @return bool
@@ -340,6 +346,23 @@ public:
     std::size_t channels() const
     {
         return _channels.size();
+    }
+
+    /**
+     *  Heartbeat delay
+     *  @return uint16_t
+    */
+    uint16_t heartbeat() const
+    {
+        return _heartbeat;
+    }
+
+    /**
+     *  Set the heartbeat delay
+    */
+    void setHeartbeat(uint16_t heartbeat)
+    {
+        _heartbeat = heartbeat;
     }
 
     /**

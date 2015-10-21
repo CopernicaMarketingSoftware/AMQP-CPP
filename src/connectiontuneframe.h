@@ -137,6 +137,9 @@ public:
         // theoretically it is possible that the connection object gets destructed between sending the messages
         Monitor monitor(connection);
         
+        // store the heartbeat the server wants 
+        connection->setHeartbeat(heartbeat());
+
         // send it back
         connection->send(ConnectionTuneOKFrame(channelMax(), frameMax(), heartbeat()));
         
