@@ -1,4 +1,3 @@
-#pragma once
 /**
  *  Class describing a (mid-level) AMQP channel implementation
  *
@@ -6,9 +5,19 @@
  */
 
 /**
+ *  Include guard
+ */
+#pragma once
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
+
+/**
+ *  Forward declarations
+ */
+class TcpConnection;
 
 /**
  *  Class definition
@@ -32,7 +41,17 @@ public:
         // attach the connection to the channel
         _implementation->attach(connection);
     }
-
+    
+    /**
+     *  Construct a channel around a wrapped-connection
+     *  @param  connection
+     */
+    Channel(TcpConnection *connection) : _implementation(new ChannelImpl())
+    {
+        // attach the connection to the channel
+        _implementation->attach(connection);
+    }
+    
     /**
      *  Copy'ing of channel objects is not supported
      *  @param  channel

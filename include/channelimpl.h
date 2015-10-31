@@ -18,6 +18,7 @@ namespace AMQP {
  *  Forward declarations
  */
 class ConsumedMessage;
+class TcpConnection;
 
 /**
  *  Class definition
@@ -108,6 +109,12 @@ private:
      *  @param  connection
      */
     void attach(Connection *connection);
+
+    /**
+     *  Attach the connection
+     *  @param  connection
+     */
+    void attach(TcpConnection *connection);
 
     /**
      *  Push a deferred result

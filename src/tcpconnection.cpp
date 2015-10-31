@@ -21,12 +21,12 @@ namespace AMQP {
 /**
  *  Constructor
  *  @param  handler         User implemented handler object
- *  @param  address         AMQP address object
+ *  @param  hostname        The address to connect to
  */
-TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) : 
-    Connection(this, address.login(), address.vhost()),
-    _state(new TcpResolver(this, address.hostname(), address.port(), handler)) {}
-    
+TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
+    _state(new TcpResolver(this, address.hostname(), address.port(), handler)),
+    _connection(this, address.login(), address.vhost()) {}
+
 /**
  *  Destructor
  */

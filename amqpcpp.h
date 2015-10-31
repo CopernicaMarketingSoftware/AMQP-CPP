@@ -67,7 +67,9 @@
 #include <amqpcpp/channelimpl.h>
 #include <amqpcpp/channel.h>
 #include <amqpcpp/login.h>
+#include <amqpcpp/address.h>
 #include <amqpcpp/connectionhandler.h>
 #include <amqpcpp/connectionimpl.h>
 #include <amqpcpp/connection.h>
-
+#include <amqpcpp/tcphandler.h>
+#include <amqpcpp/tcpconnection.h>

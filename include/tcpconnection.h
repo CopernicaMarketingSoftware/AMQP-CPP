@@ -26,16 +26,21 @@ class TcpState;
 /**
  *  Class definition
  */
-class TcpConnection : public Connection, private ConnectionHandler
+class TcpConnection : private ConnectionHandler
 {
 private:
     /**
      *  The state of the TCP connection - this state objecs changes based on 
      *  the state of the connection (resolving, connected or closed)
-     * 
      *  @var    TcpState
      */
     TcpState *_state = nullptr;
+    
+    /**
+     *  The underlying AMQP connection
+     *  @var    Connection
+     */
+    Connection _connection;
     
 
     /**
@@ -64,6 +69,22 @@ private:
      *  @param  connection      The connection that was closed and that is now unusable
      */
     virtual void onClosed(Connection *connection) override;
+
+    /**
+     *  Parse a buffer that was received
+     *  @param  buffer
+     */
+    uint64_t parse(const Buffer &buffer)
+    {
+        // pass to the AMQP connection
+        return _connection.parse(buffer);
+    }
+
+    /**
+     *  Classes that have access to private data
+     */
+    friend class TcpConnected;
+    friend class ChannelImpl;
 
     
 public:

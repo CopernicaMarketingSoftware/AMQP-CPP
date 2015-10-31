@@ -91,6 +91,16 @@ void ChannelImpl::attach(Connection *connection)
 }    
 
 /**
+ *  Initialize the object with an connection
+ *  @param  connection
+ */
+void ChannelImpl::attach(TcpConnection *connection)
+{
+    // pass to the other attach() method
+    attach(&connection->_connection);
+}
+
+/**
  *  Push a deferred result
  *  @param  result          The deferred object to push
  */
