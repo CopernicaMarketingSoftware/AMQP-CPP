@@ -31,6 +31,8 @@ extern const int immediate;
 extern const int redelivered;
 extern const int multiple;
 extern const int requeue;
+extern const int readable;
+extern const int writable;
 
 /**
  *  End of namespace

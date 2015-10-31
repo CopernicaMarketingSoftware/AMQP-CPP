@@ -34,6 +34,12 @@ const int multiple     = 0x4000;
 const int requeue      = 0x8000;
 
 /**
+ *  Flags for event loops
+ */
+const int readable      = 0x1;
+const int writable      = 0x2;
+
+/**
  *  End of namespace
  */
 }

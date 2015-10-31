@@ -21,6 +21,10 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
 
 // forward declarations
 #include "../include/classes.h"
@@ -62,9 +66,12 @@
 #include "../include/channelimpl.h"
 #include "../include/channel.h"
 #include "../include/login.h"
+#include "../include/address.h"
 #include "../include/connectionhandler.h"
 #include "../include/connectionimpl.h"
 #include "../include/connection.h"
+#include "../include/tcphandler.h"
+#include "../include/tcpconnection.h"
 
 // classes that are very commonly used
 #include "exception.h"
@@ -79,6 +86,6 @@
 #include "queueframe.h"
 #include "basicframe.h"
 #include "transactionframe.h"
-
+#include "addressinfo.h"
 
 
