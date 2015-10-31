@@ -150,7 +150,7 @@ uint64_t ConnectionImpl::parse(const Buffer &buffer)
 
     // the close() function was called, but if the close frame was not yet sent
     // if there are no waiting channels, we can do that right now
-    if (!waiting()) sendClose();
+    if (!waitingChannels()) sendClose();
 
     // done
     return processed;
@@ -172,7 +172,7 @@ bool ConnectionImpl::close()
     // after the send operation the object could be dead
     Monitor monitor(this);
 
-    // number of channels that is waiting for an answer and that has further data
+    // number of channels that are waiting for an answer and that have further data
     int waiters = 0;
 
     // loop over all channels, and close them
@@ -184,7 +184,7 @@ bool ConnectionImpl::close()
         // we could be dead now
         if (!monitor.valid()) return true;
 
-        // is this channel waiting for an answer
+        // is this channel waiting for an answer?
         if (iter->second->waiting()) waiters++;
     }
 
@@ -258,10 +258,25 @@ void ConnectionImpl::setConnected()
 }
 
 /**
- *  Is any channel waiting for an answer on a synchronous call?
+ *  Is the connection waiting for an answer from an instruction?
  *  @return bool
  */
 bool ConnectionImpl::waiting() const
+{
+    // some states are implicit waiting states
+    if (_state == state_protocol) return true;
+    if (_state == state_handshake) return true;
+    if (_state == state_closing) return true;
+    
+    // check if there are waiting channels
+    return waitingChannels();
+}
+
+/**
+ *  Is any channel waiting for an answer on a synchronous call?
+ *  @return bool
+ */
+bool ConnectionImpl::waitingChannels() const
 {
     // loop through the channels
     for (auto &iter : _channels)

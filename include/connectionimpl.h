@@ -104,8 +104,13 @@ protected:
      *  Is any channel waiting for an answer on a synchronous call?
      *  @return bool
      */
-    bool waiting() const;
+    bool waitingChannels() const;
 
+    /**
+     *  Is the channel waiting for a response from the peer (server)
+     *  @return bool
+     */
+    bool waiting() const;
 
 private:
     /**

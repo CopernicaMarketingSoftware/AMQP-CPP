@@ -145,12 +145,22 @@ public:
     }
 
     /**
-     *  Retrieve the amount of channels this connection has
+     *  Retrieve the number of channels that are active for this connection
      *  @return std::size_t
      */
     std::size_t channels() const
     {
         return _implementation.channels();
+    }
+    
+    /**
+     *  Is the connection busy waiting for an answer from the server? (in the
+     *  meantime you can already send more instructions over it)
+     *  @return bool
+     */
+    std::size_t waiting() const
+    {
+        return _implementation.waiting();
     }
 
     /**

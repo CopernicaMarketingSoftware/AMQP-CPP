@@ -5,7 +5,7 @@
  *  find out if the buffer is big enough to contain an entire frame, and
  *  it will try to recognize the frame type in the buffer
  *
- *  This is a class that is used internally by the AMQP library. As a used
+ *  This is a class that is used internally by the AMQP library. As a user
  *  of this library, you normally do not have to instantiate it.
  *
  *  @documentation public
