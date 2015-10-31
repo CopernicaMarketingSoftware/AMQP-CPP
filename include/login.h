@@ -30,30 +30,21 @@ private:
      */
     std::string _password;
     
-    
 
 public:
+    /**
+     *  Default constructor
+     */
+    Login() : _user("guest"), _password("guest") {}
+
     /**
      *  Constructor
      *  @param  user
      *  @param  password
      */
-    Login(const std::string &user, const std::string &password) :
-        _user(user), _password(password) {}
+    Login(std::string user, std::string password) :
+        _user(std::move(user)), _password(std::move(password)) {}
 
-    /**
-     *  Copy constructor
-     *  @param  login
-     */
-    Login(const Login &login) :
-        _user(login._user), _password(login._password) {}
-
-    /**
-     *  Constructor
-     */
-    Login() :
-        _user("guest"), _password("guest") {}
-        
     /**
      *  Destructor
      */
