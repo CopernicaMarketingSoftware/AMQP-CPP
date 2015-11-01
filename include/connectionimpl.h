@@ -98,9 +98,9 @@ protected:
     std::queue<OutBuffer> _queue;
 
     /**
-    *  Heartbeat delay
-    *  @var uint16_t
-    */
+     *  Heartbeat delay
+     *  @var uint16_t
+     */
     uint16_t _heartbeat = 0;
 
     /**
@@ -360,7 +360,7 @@ public:
     /**
      *  Heartbeat delay
      *  @return uint16_t
-    */
+     */
     uint16_t heartbeat() const
     {
         return _heartbeat;

@@ -168,9 +168,9 @@ public:
     }
 
     /**
-    *  Retrieve the heartbeat delay used by this connection
-    *  @return uint16_t
-    */
+     *  Retrieve the heartbeat delay used by this connection
+     *  @return uint16_t
+     */
     uint16_t heartbeat() const
     {
         return _implementation.heartbeat();
