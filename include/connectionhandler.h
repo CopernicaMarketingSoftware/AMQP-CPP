@@ -1,4 +1,3 @@
-#pragma once
 /**
  *  ConnectionHandler.h
  *
@@ -9,6 +8,11 @@
  *
  *  @copyright 2014 Copernica BV
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
 
 /**
  *  Set up namespace

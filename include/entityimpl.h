@@ -1,4 +1,3 @@
-#pragma once
 /**
  *  EntityImpl.h
  *
@@ -6,6 +5,11 @@
  *
  *  @copyright 2014 Copernica BV
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
 
 /**
  *  Namespace

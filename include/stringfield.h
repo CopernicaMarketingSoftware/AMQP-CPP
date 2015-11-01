@@ -1,9 +1,13 @@
-#pragma once
 /**
  *  String field types for amqp
  *
  *  @copyright 2014 Copernica BV
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
 
 /**
  *  Set up namespace

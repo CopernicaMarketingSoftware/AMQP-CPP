@@ -1,4 +1,3 @@
-#pragma once
 /**
  *  MetaData.h
  *
@@ -7,6 +6,11 @@
  *
  *  @copyright 2014 Copernica BV
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
 
 /**
  *  Set up namespace

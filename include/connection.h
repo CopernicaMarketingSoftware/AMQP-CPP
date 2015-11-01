@@ -1,9 +1,13 @@
-#pragma once
 /**
  *  Class describing a mid-level Amqp connection
  * 
  *  @copyright 2014 Copernica BV
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
 
 /**
  *  Set up namespace

@@ -1,9 +1,13 @@
-#pragma once
 /**
  *  Decimal field type for AMQP
  * 
  *  @copyright 2014 Copernica BV
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
 
 /**
  *  Set up namespace

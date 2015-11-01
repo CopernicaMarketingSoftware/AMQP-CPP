@@ -1,10 +1,14 @@
-#pragma once
 /**
  *  Classes.h
  *
  *  List of all declared classes
  *
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
 
 /**
  *  Set up namespace

@@ -1,4 +1,3 @@
-#pragma once
 /**
  *  The login information to access a server
  *
@@ -6,6 +5,11 @@
  *
  *  @copyright 2014 Copernica BV
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
 
 /**
  *  Set up namespace
