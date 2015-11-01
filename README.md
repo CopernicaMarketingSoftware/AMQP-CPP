@@ -45,7 +45,7 @@ Then check out our other commercial and open source solutions:
 * SMTPeter cloud based SMTP server (www.smtpeter.com)
 * PHP-CPP bridge between PHP and C++ (www.php-cpp.com)
 * PHP-JS bridge between PHP and Javascript (www.php-js.com)
-
+* Yothalot big data processor (www.yothalot.com)
 
 HOW TO USE AMQP-CPP
 ===================
