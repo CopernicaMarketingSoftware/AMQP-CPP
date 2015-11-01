@@ -22,6 +22,7 @@
 #include <utility>
 #include <iostream>
 #include <algorithm>
+#include <functional>
 
 // base C include files
 #include <stdint.h>

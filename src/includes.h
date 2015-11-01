@@ -25,6 +25,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <functional>
 
 // forward declarations
 #include "../include/classes.h"
