@@ -112,6 +112,17 @@ public:
      *  @param  events          What sort of events occured?
      */
     void process(int fd, int flags);
+    
+    /**
+     *  Close the connection
+     *  This closes all channels and the TCP connection
+     *  @return bool
+     */
+    bool close()
+    {
+        // pass to the underlying connection
+        return _connection.close();
+    }
 };
 
 /**
