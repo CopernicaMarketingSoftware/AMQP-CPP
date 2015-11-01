@@ -84,7 +84,7 @@ private:
      *  Classes that have access to private data
      */
     friend class TcpConnected;
-    friend class ChannelImpl;
+    friend class TcpChannel;
 
     
 public:

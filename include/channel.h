@@ -15,11 +15,6 @@
 namespace AMQP {
 
 /**
- *  Forward declarations
- */
-class TcpConnection;
-
-/**
  *  Class definition
  */
 class Channel
@@ -37,16 +32,6 @@ public:
      *  @param  connection
      */
     Channel(Connection *connection) : _implementation(new ChannelImpl()) 
-    {
-        // attach the connection to the channel
-        _implementation->attach(connection);
-    }
-    
-    /**
-     *  Construct a channel around a wrapped-connection
-     *  @param  connection
-     */
-    Channel(TcpConnection *connection) : _implementation(new ChannelImpl())
     {
         // attach the connection to the channel
         _implementation->attach(connection);

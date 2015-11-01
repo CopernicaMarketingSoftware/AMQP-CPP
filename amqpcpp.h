@@ -73,3 +73,4 @@
 #include <amqpcpp/connection.h>
 #include <amqpcpp/tcphandler.h>
 #include <amqpcpp/tcpconnection.h>
+#include <amqpcpp/tcpchannel.h>
