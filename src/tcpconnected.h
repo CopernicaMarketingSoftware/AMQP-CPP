@@ -26,7 +26,7 @@ namespace AMQP {
 /**
  *  Class definition
  */
-class TcpConnected : public TcpState
+class TcpConnected : public TcpState, private Watchable
 {
 private:
     /**
@@ -108,13 +108,17 @@ public:
             // read data from buffer
             auto result = _in.receivefrom(_socket);
             
+            // because the object might soon be destructed, we create a monitor to check this
+            Monitor monitor(this);
+            
             // is the connection in an error state?
             if (result < 0 && errno != EAGAIN && errno != EWOULDBLOCK && errno != EINTR)
             {
                 // we have an error - report this to the user
                 _handler->onError(_connection, strerror(errno));
                 
-                // @todo object might no longer exist after this error
+                // "this" could be removed by now, check this
+                if (!monitor.valid()) return nullptr;
                 
                 // we have a new state
                 return new TcpClosed(this);
@@ -123,6 +127,9 @@ public:
             {
                 // parse the buffer
                 auto processed = _connection->parse(_in);
+
+                // "this" could be removed by now, check this
+                if (!monitor.valid()) return nullptr;
                 
                 // shrink buffer
                 _in.shrink(processed);

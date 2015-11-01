@@ -50,8 +50,10 @@ void TcpConnection::process(int fd, int flags)
     // pass on the the state, that returns a new impl
     auto *result = _state->process(fd, flags);
     
-    // skip if the same state is continued to be used
-    if (result == _state) return;
+    // skip if the same state is continued to be used, or when the process()
+    // method returns nullptr (which only happens when the object is destructed,
+    // and "this" is no longer valid)
+    if (!result || result == _state) return;
     
     // remove old state
     delete _state;

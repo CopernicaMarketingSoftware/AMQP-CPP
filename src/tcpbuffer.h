@@ -179,6 +179,7 @@ public:
             {
                 // prepare for next iteration
                 pos -= buffer.size();
+                togo -= buffer.size();
             }
         }
         
@@ -186,7 +187,7 @@ public:
         if (empty > 0) _buffers.resize(_buffers.size() - empty);
         
         // done
-        return result->data();
+        return result->data() + pos;
     }
     
     /**
@@ -353,7 +354,10 @@ public:
         
         // check the number of bytes that are available - in case of an error or 
         // when the buffer is very small, we use a lower limit of 512 bytes
-        if (ioctl(socket, FIONREAD, &available) != 0 || available < 512) return available = 512;
+        if (ioctl(socket, FIONREAD, &available) != 0) return -1;
+
+        // no need to read anything if there is no input
+        if (available == 0) return 0;
         
         // add a new buffer
         _buffers.emplace_back(available);
@@ -362,7 +366,16 @@ public:
         auto &buffer = _buffers.back();
             
         // read data into the buffer
-        return read(socket, buffer.data(), available);
+        auto result = read(socket, buffer.data(), available);
+        
+        // update total buffer size
+        if (result > 0) _size += result;
+        
+        // if buffer is not full
+        if (result < available) buffer.resize(std::max(0L, result));
+        
+        // done
+        return result;
     }
 };
     

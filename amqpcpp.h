@@ -15,13 +15,13 @@
 #include <map>
 #include <unordered_map>
 #include <queue>
-#include <set>
 #include <limits>
 #include <cstddef>
 #include <cstring>
 #include <stdexcept>
 #include <utility>
 #include <iostream>
+#include <algorithm>
 
 // base C include files
 #include <stdint.h>

@@ -21,9 +21,9 @@ class Watchable
 private:
     /**
      *  The monitors
-     *  @var set
+     *  @var std::vector
      */
-    std::set<Monitor*> _monitors;
+    std::vector<Monitor*> _monitors;
 
     /**
      *  Add a monitor
@@ -31,7 +31,8 @@ private:
      */
     void add(Monitor *monitor)
     {
-        _monitors.insert(monitor);
+        // add to the vector
+        _monitors.push_back(monitor);
     }
     
     /**
@@ -40,7 +41,11 @@ private:
      */
     void remove(Monitor *monitor)
     {
-        _monitors.erase(monitor);
+        // put the monitor at the end of the vector
+        auto iter = std::remove(_monitors.begin(), _monitors.end(), monitor);
+        
+        // make the vector smaller
+        _monitors.erase(iter, _monitors.end());
     }
 
 public:
