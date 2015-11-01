@@ -5,16 +5,23 @@ AMQP-CPP is a C++ library for communicating with a RabbitMQ message broker. The
 library can be used to parse incoming data from a RabbitMQ server, and to
 generate frames that can be sent to a RabbitMQ server.
 
-Unlike all other AMQP libraries, this AMQP-CPP library does not make a connection to
-RabbitMQ by itself, nor does it create sockets and/or performs IO operations. As
-a user of this library, you first need to set up a socket connection
-to RabbitMQ by yourself, and implement a certain interface that you pass to the
-AMQP-CPP library and that the library will use for IO operations.
+This library has a layered architecture, and allows you - if you like - to 
+completely take care of the network layer. If you want to set up and manage the 
+network connections yourself, the AMQP-CPP library will not make a connection to
+RabbitMQ by itself, nor will it create sockets and/or perform IO operations. As 
+a user of this library, you create the socket connection and implement a certain 
+interface that you pass to the AMQP-CPP library and that the library will use 
+for IO operations.
 
-This architecture makes the library extremely flexible: it does not rely on
-operating system specific IO calls, and it can be easily integrated into any
-event loop. It is fully asynchronous and does not do any blocking (system) calls,
-so it can be used in high performance applications without the need for threads.
+Intercepting the network layer is optional, the AMQP-CPP library also comes 
+with a predefined Tcp module that can be used if you trust the AMQP library to
+take care of the network handling.
+
+This architecture makes the library extremely flexible: it does not necessarily 
+rely on operating system specific IO calls, and it can be easily integrated into 
+any kind of event loop. It is fully asynchronous and does not do any blocking 
+(system) calls, so it can be used in high performance applications without the 
+need for threads.
 
 The AMQP-CPP library uses C++11 features, so if you intend use it, please make 
 sure that your compiler is up-to-date and supports C++11.
@@ -43,12 +50,13 @@ Then check out our other commercial and open source solutions:
 HOW TO USE AMQP-CPP
 ===================
 
-As we mentioned above, the library does not do any IO by itself, and you need
-to pass an object to the library that the library can use for that. So, before
-you can even start using the library, you first you need to create a class that
-extends from the ConnectionHandler base class. This is a class
-with a number of methods that are called by the library every time it wants
-to send out data, or when it needs to inform you that an error occured.
+As we mentioned above, the library can be used in a network-agnostic fashion.
+It then does not do any IO by itself, and you need to pass an object to the 
+library that the library can use for IO. So, before you can even start using the
+library, you first you need to create a class that extends from the 
+ConnectionHandler base class. This is a class with a number of methods that are 
+called by the library every time it wants to send out data, or when it needs to 
+inform you that an error occured.
 
 ````c++
 #include <amqpcpp.h>
@@ -155,20 +163,22 @@ PARSING INCOMING DATA
 
 The ConnectionHandler class has a method onData() that is called by the library
 every time that it wants to send out data. We've explained that it is up to you to
-implement that method. But what about data in the other direction? How does the
+implement that method. Inside your ConnectionHandler::data() method, you probably
+make a call to the "send()" or "write()" system call to send out the data to
+the RabbitMQ server. But what about data in the other direction? How does the
 library receive data back from RabbitMQ?
 
-The AMQP-CPP library does not do any IO by itself and it is therefore of course
-also not possible for the library to receive data from a socket. It is again up
-to you to do this. If, for example, you notice in your event loop that the socket
-that is connected with the RabbitMQ server becomes readable, you should read out
-that socket (for example by using the recv() system call), and pass the received
-bytes to the AMQP-CPP library. This is done by calling the parse() method in the
-Connection object.
+In this raw setup, the AMQP-CPP library does not do any IO by itself and it is 
+therefore of course also not possible for the library to receive data from a 
+socket. It is again up to you to do this. If, for example, you notice in your 
+event loop that the socket that is connected with the RabbitMQ server becomes 
+readable, you should read out that socket (for example by using the recv() system 
+call), and pass the received bytes to the AMQP-CPP library. This is done by 
+calling the parse() method in the Connection object.
 
 The Connection::parse() method gets two parameters, a pointer to a buffer of
-data received from RabbitMQ, and a parameter that holds the size of this buffer.
-The code snippet below comes from the Connection.h C++ header file.
+data that you just read from the socket, and a parameter that holds the size of 
+this buffer. The code snippet below comes from the Connection.h C++ header file.
 
 ````c++
 /**
@@ -201,12 +211,126 @@ make a new call to parse() when more data is available, with a buffer that conta
 both the old data, and the new data.
 
 
+TCP CONNECTIONS
+===============
+
+Although the AMQP-CPP library gives you extreme flexibility by letting you setup
+your own network connections, the reality is that most if not all AMQP connections 
+use the TCP protocol. To help you out, the library therefore also comes with a 
+TCP module that takes care of setting up the network connections, and sending
+and receiving the data. 
+
+If you want to use this TCP module, you should not use the AMQP::Connection
+and AMQP::Channel classes that you saw above, but the alternative AMQP::TcpConnection
+and AMQP::TcpChannel classes instead. You also do not have to create your own class
+that implements the "AMQP::ConnectionHandler" interface - but you do need to to
+create a class that inherits from "AMQP::TcpHandler" instead. You especially need
+to implement the "monitor()" method in that class, as that is needed by the
+AMQP-CPP library to interact with the main event loop:
+
+````c++
+#include <amqpcpp.h>
+
+class MyTcpHandler : public AMQP::TcpHandler
+{
+    /**
+     *  Method that is called by the AMQP library when the login attempt
+     *  succeeded. After this method has been called, the connection is ready
+     *  to use.
+     *  @param  connection      The connection that can now be used
+     */
+    virtual void onConnected(AMQP::TcpConnection *connection)
+    {
+        // @todo
+        //  add your own implementation, for example by creating a channel
+        //  instance, and start publishing or consuming
+    }
+
+    /**
+     *  Method that is called by the AMQP library when a fatal error occurs
+     *  on the connection, for example because data received from RabbitMQ
+     *  could not be recognized.
+     *  @param  connection      The connection on which the error occured
+     *  @param  message         A human readable error message
+     */
+    virtual void onError(AMQP::TcpConnection *connection, const char *message)
+    {
+        // @todo
+        //  add your own implementation, for example by reporting the error
+        //  to the user of your program, log the error, and destruct the
+        //  connection object because it is no longer in a usable state
+    }
+
+    /**
+     *  Method that is called when the connection was closed. This is the
+     *  counter part of a call to Connection::close() and it confirms that the
+     *  connection was correctly closed.
+     *
+     *  @param  connection      The connection that was closed and that is now unusable
+     */
+    virtual void onClosed(AMQP::TcpConnection *connection) {}
+
+    /**
+     *  Method that is called by the AMQP-CPP library when it wants to interact
+     *  with the main event loop. The AMQP-CPP library is completely non-blocking,
+     *  and only make "write()" or "read()" system calls when it knows in advance
+     *  that these calls will not block. To register a filedescriptor in the
+     *  event loop, it calls this "monitor()" method with a filedescriptor and
+     *  flags telling whether the filedescriptor should be checked for reaability
+     *  or writability.
+     *
+     *  @param  connection      The connection that wants to interact with the event loop
+     *  @param  fd              The filedescriptor that should be checked
+     *  @param  flags           Bitwise or of AMQP::readable and/or AMQP::writable
+     */
+    virtual void monitor(AMQP::TcpConnection *connection, int fd, int flags)
+    {
+        // @todo
+        //  add your own implementation, for example by adding the file
+        //  descriptor to the main application event loop (like the select() or
+        //  poll() loop). When the event loop reports that the descriptor becomes
+        //  readable and/or writable, it is up to you to inform the AMQP-CPP
+        //  library that the filedescriptor is active by calling the 
+        //  connection->process(fd, flags) method.
+    }
+};
+````
+
+Using the TCP module of the AMQP-CPP library is easier than using the 
+raw AMQP::Connection and AMQP::Channel objects, because you do not have to 
+create the sockets and connections yourself, and you also do not have to take
+care of buffering network data. However, be aware that the TCP module of the 
+AMQP-CPP library does make its own system calls, and for resolving domain names 
+in a non-blocking way, it even starts up a thread. 
+
+The example that we gave above, looks slightly different if you make use of
+the TCP module:
+
+````c++
+// create an instance of your own tcp handler
+MyTcpHandler myHandler;
+
+// address of the server
+AMQP::Address address("amqp://guest:guest@localhost/vhost");
+
+// create a AMQP connection object
+AMQP::TcpConnection connection(&myHandler, address);
+
+// and create a channel
+AMQP::TcpChannel channel(&connection);
+
+// use the channel object to call the AMQP method you like
+channel.declareExchange("my-exchange", AMQP::fanout);
+channel.declareQueue("my-queue");
+channel.bindQueue("my-exchange", "my-queue");
+````
+
 CHANNELS
 ========
 
-In the example we created a channel object. A channel is a virtual connection over
-a single TCP connection, and it is possible to create many channels that all use
-the same TCP connection.
+In the above example we created a channel object. A channel is a sort of virtual 
+connection, and it is possible to create many channels that all use
+the same connection.
 
 AMQP instructions are always sent over a channel, so before you can send the first
 command to the RabbitMQ server, you first need a channel object. The channel
@@ -216,11 +340,11 @@ and to publish and consume messages. You can best take a look at the channel.h
 C++ header file for a list of all available methods. Every method in it is well
 documented.
 
-The constructor of the Channel object accepts one parameter: the connection object.
-Unlike the connection it does not accept a handler. Instead of a handler object,
-(almost) every method of the Channel class returns an instance of the 'Deferred'
-class. This object can be used to install handlers that will be called in case
-of success or failure.
+All operations that you can perform on a channel are non-blocking. This means
+that it is not possible for a method (like Channel::declareExchange()) to
+immediately return 'true' or 'false'. Instead, almost every method of the Channel 
+class returns an instance of the 'Deferred' class. This 'Deferred' object can be 
+used to install handlers that will be called in case of success or failure.
 
 For example, if you call the channel.declareExchange() method, the AMQP-CPP library
 will send a message to the RabbitMQ message broker to ask it to declare the
@@ -236,7 +360,7 @@ To prevent any blocking calls, the channel.declareExchange() method returns a
 called when the operation succeeds or fails.
 
 ````c++
-// create a channel
+// create a channel (or use TcpChannel if you're using the Tcp module)
 Channel myChannel(&connection);
 
 // declare an exchange, and install callbacks for success and failure
@@ -283,7 +407,7 @@ method, you can also install a callback to be notified when the channel is ready
 for sending the first instruction to RabbitMQ.
 
 ````c++
-// create a channel
+// create a channel (or use TcpChannel if you use the Tcp module)
 Channel myChannel(&connection);
 
 // install a generic channel-error handler that will be called for every
@@ -342,6 +466,27 @@ for the other call. But this comes at a small price: setting up the extra channe
 requires and extra instruction to be sent to the RabbitMQ server, so some extra
 bytes are sent over the network, and some additional resources in both the client
 application and the RabbitMQ server are used (although this is all very limited).
+
+If you can, make use of this feature. For example, if you have an important AMQP 
+connection that you use for consuming messages, and at the same time you want
+to send another instruction to RabbitMQ (like declaring a temporary queue), you
+can set up a new channel to send this 'declare' instruction. If the declare fails,
+it will not stop the consumer, because it was sent over a different channel.
+
+The AMQP-CPP library allows you to create channels on the stack, because it is not
+a problem if a channel object gets destructed before the instruction was received by
+the RabbitMQ server:
+
+````c++
+void myDeclareMethod(AMQP::Connection *connection)
+{
+    // create temporary channel to declare a queue
+    AMQP::Channel channel(connection);
+    
+    // declare the queue
+    channel.declareQueue("my-new-queue");
+}
+````
 
 
 FLAGS AND TABLES
