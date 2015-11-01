@@ -105,6 +105,12 @@ public:
     }
     
     /**
+     *  Constructor based on std::string
+     *  @param  address
+     */
+    Address(const std::string &address) : Address(address.data()) {}
+    
+    /**
      *  Destructor
      */
     virtual ~Address() {}
