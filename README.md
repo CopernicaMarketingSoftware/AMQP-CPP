@@ -13,15 +13,21 @@ a user of this library, you create the socket connection and implement a certain
 interface that you pass to the AMQP-CPP library and that the library will use 
 for IO operations.
 
-Intercepting the network layer is optional, the AMQP-CPP library also comes 
+Intercepting this network layer is optional, the AMQP-CPP library also comes 
 with a predefined Tcp module that can be used if you trust the AMQP library to
-take care of the network handling.
+take care of the network handling. In that case, the AMQP-CPP library takes
+care of doing the system calls to set up network connections and send and
+receive the data.
 
-This architecture makes the library extremely flexible: it does not necessarily 
-rely on operating system specific IO calls, and it can be easily integrated into 
-any kind of event loop. It is fully asynchronous and does not do any blocking 
-(system) calls, so it can be used in high performance applications without the 
-need for threads.
+This layered architecture makes the library extremely flexible and portable: it 
+does not necessarily rely on operating system specific IO calls, and can be 
+easily integrated into any kind of event loop. If you want to implement the AMQP
+protocol on top of some [unusual other communication layer](https://tools.ietf.org/html/rfc1149), 
+this library can be used for that - but if you want to use it with regular TCP 
+connection, setting it up is just as easy. 
+
+AMQP-CPP is fully asynchronous and does not do any blocking (system) calls, so 
+it can be used in high performance applications without the need for threads.
 
 The AMQP-CPP library uses C++11 features, so if you intend use it, please make 
 sure that your compiler is up-to-date and supports C++11.
@@ -46,6 +52,28 @@ Then check out our other commercial and open source solutions:
 * PHP-CPP bridge between PHP and C++ (www.php-cpp.com)
 * PHP-JS bridge between PHP and Javascript (www.php-js.com)
 * Yothalot big data processor (www.yothalot.com)
+
+
+INSTALLING
+==========
+
+If you are on some kind of Linux environment, installing the library is as easy
+as running `make` and `make install`. This will install the full version of
+the AMQP-CPP, including the system specific TCP module. If you do not need the
+additional TCP module (because you take care of handling the network stuff 
+yourself), you can also compile a pure form of the library. Use `make pure` 
+and `make install` for that.
+
+For users on a non-Linux environment: this library is known to work on these
+environments too, but it might take some extra work. Please send in your pull
+requests once you have it running, so that others can benefit from your experiences.
+
+When you write an application that makes use of the AMQP-CPP library, do not
+forget to link with the library. For gcc and clang the linker flag is -lamqpcpp.
+If you use the fullblown version of AMQP-CPP (with the TCP module), you also 
+need to pass a -lpthread linker flag, because the TCP module uses a thread 
+for running an asynchronous and non-blocking DNS hostname lookup.
+
 
 HOW TO USE AMQP-CPP
 ===================
