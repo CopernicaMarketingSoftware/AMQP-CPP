@@ -615,7 +615,7 @@ you're publishing - all these parameters are standard C++ strings.
 
 More extended versions of the publish() method exist that accept additional
 arguments, and that enable you to publish entire Envelope objects. An envelope
-is an object that contains the message plus a list of optional meta information like
+is an object that contains the message plus a list of optional meta properties like
 the content-type, content-encoding, priority, expire time and more. None of these
 meta fields are interpreted by this library, and also the RabbitMQ ignores most
 of them, but the AMQP protocol defines them, and they are free for you to use.
@@ -661,8 +661,8 @@ bool publish(const std::string &exchange, const std::string &routingKey, const c
 ````
 
 Published messages are normally not confirmed by the server, and the RabbitMQ
-will not send a report back to inform us whether the message was succesfully
-published or not. Therefore the publish method does also not return a Deferred
+will not send a report back to inform you whether the message was succesfully
+published or not. Therefore the publish method does not return a Deferred
 object.
 
 As long as no error is reported via the Channel::onError() method, you can safely
@@ -694,6 +694,11 @@ channel.commitTransaction()
         // now we have to do it all over again
     });
 ````
+
+Note that AMQP transactions are not as powerful as transactions that are 
+knows in the database world. It is not possible to wrap all sort of 
+operations in a transaction, they are only meaningful for publishing
+and consuming.
 
 
 CONSUMING MESSAGES
