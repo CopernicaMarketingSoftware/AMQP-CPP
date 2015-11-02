@@ -123,6 +123,16 @@ public:
         // pass to the underlying connection
         return _connection.close();
     }
+
+    /**
+      *  Return the amount of channels this connection has
+      *  @return std::size_t
+      */
+    std::size_t channels() const
+    {
+        // return the amount of channels this connection has
+        return _connection.channels();
+    }
 };
 
 /**

@@ -109,6 +109,17 @@ public:
      *  @param  address
      */
     Address(const std::string &address) : Address(address.data()) {}
+
+    /**
+     *  Constructor based on already known properties
+     *  @param  host
+     *  @param  port
+     *  @param  login
+     *  @param  vhost
+     */
+    Address(std::string host, uint16_t port, Login login, std::string vhost) : _login(std::move(login)),
+                                                                               _hostname(std::move(host)),
+                                                                               _port(port), _vhost(std::move(vhost)) {}
     
     /**
      *  Destructor
