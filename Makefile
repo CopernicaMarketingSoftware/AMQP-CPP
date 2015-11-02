@@ -8,6 +8,9 @@ export VERSION			= 2.2.3
 all:
 		$(MAKE) -C src all
 
+pure:
+		$(MAKE) -C src pure
+
 release:
 		$(MAKE) -C src release
 

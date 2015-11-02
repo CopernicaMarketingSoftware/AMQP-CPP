@@ -1,14 +1,16 @@
-CPP	        = g++
-RM	        = rm -f
-CPPFLAGS	= -Wall -c -I. -std=c++11
-LD	        = g++
-LD_FLAGS	= -Wall -shared
-SHARED_LIB	= lib$(LIBRARY_NAME).so.$(VERSION)
-STATIC_LIB	= lib$(LIBRARY_NAME).a.$(VERSION)
-STATIC_FPIC_LIB = lib$(LIBRARY_NAME)_fpic.a
-SOURCES		= $(wildcard *.cpp)
-SHARED_OBJECTS	= $(SOURCES:%.cpp=%.o)
-STATIC_OBJECTS	= $(SOURCES:%.cpp=%.s.o)
+CPP	        		= g++
+RM	        		= rm -f
+CPPFLAGS			= -Wall -c -I. -std=c++11
+LD	        		= g++
+LD_FLAGS			= -Wall -shared
+SHARED_LIB			= lib$(LIBRARY_NAME).so.$(VERSION)
+STATIC_LIB			= lib$(LIBRARY_NAME).a.$(VERSION)
+STATIC_FPIC_LIB 	= lib$(LIBRARY_NAME)_fpic.a
+SOURCES				= $(wildcard *.cpp)
+SHARED_OBJECTS		= $(SOURCES:%.cpp=%.o)
+STATIC_OBJECTS		= $(SOURCES:%.cpp=%.s.o)
+PURE_SHARED_OBJECTS	= $(filter-out tcpconnection.o, $(SOURCES:%.cpp=%.o))
+PURE_STATIC_OBJECTS	= $(filter-out tcpconnection.s.o, $(SOURCES:%.cpp=%.s.o))
 
 
 ifeq ($(shell uname -s),Darwin)
@@ -18,17 +20,23 @@ else
 endif
 
 
-all:	CPPFLAGS += -g
-all:	LD_FLAGS += -g
-all:	shared static
+all:			CPPFLAGS += -g
+all:			LD_FLAGS += -g
+all:			shared static
 
-release:	CPPFLAGS += -O2
-release:	LD_FLAGS += -O2
-release:	shared static
+pure:			CPPFLAGS += -g
+pure:			LD_FLAGS += -g
+pure:			shared_pure static_pure
 
-shared:	${SHARED_OBJECTS} ${SHARED_LIB}
+release:		CPPFLAGS += -O2
+release:		LD_FLAGS += -O2
+release:		shared static
 
-static:	${STATIC_OBJECTS} ${STATIC_LIB}
+shared:			${SHARED_OBJECTS} ${SHARED_LIB}
+shared_pure:	${PURE_SHARED_OBJECTS} ${SHARED_LIB}
+
+static:			${STATIC_OBJECTS} ${STATIC_LIB}
+static_pure:	${PURE_STATIC_OBJECTS} ${STATIC_LIB}
 
 static_fpic: ${STATIC_FPIC_LIB} ${SHARED_OBJECTS}
 
