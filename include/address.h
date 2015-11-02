@@ -172,7 +172,7 @@ public:
         std::string str("amqp://");
         
         // append login
-        str.append(_login.user()).append("@").append(_login.password()).append("@").append(_hostname);
+        str.append(_login.user()).append(":").append(_login.password()).append("@").append(_hostname);
         
         // do we need a special portnumber?
         if (_port != 5672) str.append(":").append(std::to_string(_port));
