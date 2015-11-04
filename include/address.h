@@ -109,6 +109,17 @@ public:
      *  @param  address
      */
     Address(const std::string &address) : Address(address.data()) {}
+
+    /**
+     *  Constructor based on already known properties
+     *  @param  host
+     *  @param  port
+     *  @param  login
+     *  @param  vhost
+     */
+    Address(std::string host, uint16_t port, Login login, std::string vhost) : _login(std::move(login)),
+                                                                               _hostname(std::move(host)),
+                                                                               _port(port), _vhost(std::move(vhost)) {}
     
     /**
      *  Destructor
@@ -161,7 +172,7 @@ public:
         std::string str("amqp://");
         
         // append login
-        str.append(_login.user()).append("@").append(_login.password()).append("@").append(_hostname);
+        str.append(_login.user()).append(":").append(_login.password()).append("@").append(_hostname);
         
         // do we need a special portnumber?
         if (_port != 5672) str.append(":").append(std::to_string(_port));
