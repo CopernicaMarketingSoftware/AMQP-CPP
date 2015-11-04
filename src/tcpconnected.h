@@ -125,14 +125,21 @@ public:
             }
             else
             {
+                // we need a local copy of the buffer - because it is possible that "this"
+                // object gets destructed halfway through the call to the parse() method
+                TcpBuffer buffer(std::move(_in));
+                
                 // parse the buffer
-                auto processed = _connection->parse(_in);
+                auto processed = _connection->parse(buffer);
 
                 // "this" could be removed by now, check this
                 if (!monitor.valid()) return nullptr;
                 
                 // shrink buffer
-                _in.shrink(processed);
+                buffer.shrink(processed);
+                
+                // restore the buffer as member
+                _in.swap(buffer);
             }
         }
         
