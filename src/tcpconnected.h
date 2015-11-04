@@ -139,7 +139,7 @@ public:
                 buffer.shrink(processed);
                 
                 // restore the buffer as member
-                _in = std::move(buffer);
+                std::swap(_in, buffer);
             }
         }
         

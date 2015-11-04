@@ -74,6 +74,26 @@ public:
     }
     
     /**
+     *  Move assignment operator
+     *  @param  that
+     */
+    TcpBuffer &operator=(TcpBuffer &&that)
+    {
+        // skip self-assignment
+        if (this == &that) return *this;
+        
+        // swap buffers
+        _buffers.swap(that._buffers);
+        
+        // swap integers
+        std::swap(_skip, that._skip);
+        std::swap(_size, that._size);
+        
+        // done
+        return *this;
+    }
+    
+    /**
      *  Does the buffer exist (is it non-empty)
      *  @return bool
      */
