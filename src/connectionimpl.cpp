@@ -300,7 +300,7 @@ bool ConnectionImpl::send(const Frame &frame)
     if (_state == state_closing || _state == state_closed) return false;
 
     // some frames can be sent _after_ the close() function was called
-    if (_closed && !frame.partOfShutdown()) return false;
+    if (_closed && !frame.partOfShutdown() && !frame.partOfHandshake()) return false;
 
     // if the frame is bigger than we allow on the connection
     // it is impossible to send out this frame successfully
