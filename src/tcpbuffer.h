@@ -376,8 +376,9 @@ public:
         // when the buffer is very small, we use a lower limit of 512 bytes
         if (ioctl(socket, FIONREAD, &available) != 0) return -1;
 
-        // no need to read anything if there is no input
-        if (available == 0) return 0;
+        // if no bytes are available, it could mean that the connection was closed
+        // by the remote client, so we do have to call read() anyway, assume a default buffer
+        if (available == 0) available = 1;
         
         // add a new buffer
         _buffers.emplace_back(available);
