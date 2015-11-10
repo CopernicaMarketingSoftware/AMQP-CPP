@@ -152,6 +152,9 @@ public:
     {
         // stop monitoring the pipe filedescriptor
         _handler->monitor(_connection, _pipe.in(), 0);
+
+        // wait for the thread to be ready
+        _thread.join();
     }
     
     /**
@@ -164,9 +167,6 @@ public:
     {
         // only works if the incoming pipe is readable
         if (fd != _pipe.in() || !(flags & readable)) return this;
-        
-        // wait for the thread to be ready
-        _thread.join();
         
         // do we have a valid socket?
         if (_socket >= 0) return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
