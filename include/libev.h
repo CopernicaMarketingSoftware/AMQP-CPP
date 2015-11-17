@@ -95,13 +95,14 @@ private:
         }
     };
 
-
+protected:
     /**
      *  The event loop
      *  @var struct ev_loop*
      */
     struct ev_loop *_loop;
-    
+
+private:
     /**
      *  All I/O watchers that are active, indexed by their filedescriptor
      *  @var std::map<int,Watcher>
