@@ -13,11 +13,10 @@ a user of this library, you create the socket connection and implement a certain
 interface that you pass to the AMQP-CPP library and that the library will use 
 for IO operations.
 
-Intercepting this network layer is optional, the AMQP-CPP library also comes 
-with a predefined Tcp module that can be used if you trust the AMQP library to
-take care of the network handling. In that case, the AMQP-CPP library takes
-care of doing the system calls to set up network connections and send and
-receive the data.
+Intercepting this network layer is however optional, the AMQP-CPP library also 
+comes with a predefined Tcp module that can be used if you trust the AMQP library 
+to take care of the network handling. In that case, the AMQP-CPP library does
+all the system calls to set up network connections and send and receive the data.
 
 This layered architecture makes the library extremely flexible and portable: it 
 does not necessarily rely on operating system specific IO calls, and can be 
@@ -31,6 +30,11 @@ it can be used in high performance applications without the need for threads.
 
 The AMQP-CPP library uses C++11 features, so if you intend use it, please make 
 sure that your compiler is up-to-date and supports C++11.
+
+**Note for the reader** This readme file has a peculiar structure. We start with 
+explaining the pure and hard core low level interface in which you have to
+take care of opening socket connections yourself. In reality, you probably want
+to use the simpler TCP interface that is being described later on.
 
 
 ABOUT
@@ -328,6 +332,10 @@ class MyTcpHandler : public AMQP::TcpHandler
 };
 ````
 
+The "monitor()" method can be used to integrate the AMQP filedescriptors in your
+application's event loop. For some popular event loops (libev), we have already
+added example handler objects (see the next section for that).
+
 Using the TCP module of the AMQP-CPP library is easier than using the 
 raw AMQP::Connection and AMQP::Channel objects, because you do not have to 
 create the sockets and connections yourself, and you also do not have to take
@@ -354,6 +362,69 @@ channel.declareExchange("my-exchange", AMQP::fanout);
 channel.declareQueue("my-queue");
 channel.bindQueue("my-exchange", "my-queue");
 ````
+
+EXISTING EVENT LOOPS
+====================
+
+Both the pure AMQP::Connection as well as the easier AMQP::TcpConnection class
+allow you to integrate AMQP-CPP in your own event loop. Whether you take care
+of running the event loop yourself (for example by using the select() system 
+call), or if you use an existing library for it (like libevent, libev or libuv), 
+you can implement the "monitor()" method to watch the file descriptors and 
+hand over control back to AMQP-CPP when one of the sockets become active.
+
+For libev users, we have even implemented an example implementation, so that 
+you do not even have to do this. Instead of implementing the monitor() method 
+yourself, you can use the AMQP::LibEvHandler class instead:
+
+````c++
+#include <ev.h>
+#include <amqpcpp.h>
+#include <amqpcpp/libev.h>
+
+int main()
+{
+    // access to the event loop
+    auto *loop = EV_DEFAULT;
+    
+    // handler for libev (so we don't have to implement AMQP::TcpHandler!)
+    AMQP::LibEvHandler handler(loop);
+    
+    // make a connection
+    AMQP::TcpConnection connection(&handler, AMQP::Address("amqp://localhost/"));
+    
+    // we need a channel too
+    AMQP::TcpChannel channel(&connection);
+    
+    // create a temporary queue
+    channel.declareQueue(AMQP::exclusive).onSuccess([&connection](const std::string &name, uint32_t messagecount, uint32_t consumercount) {
+        
+        // report the name of the temporary queue
+        std::cout << "declared queue " << name << std::endl;
+        
+        // now we can close the connection
+        connection.close();
+    });
+    
+    // run the loop
+    ev_run(loop, 0);
+
+    // done
+    return 0;
+}
+````
+
+The AMQP::LibEvHandler class is an extended AMQP::TcpHandler class, with an
+implementation of the monitor() method that simply adds the filedescriptor to the
+libev event loop. If you use this class however, it is recommended not to 
+instantiate it directly (like we did in the example), but to create your own
+"MyHandler" class that extends from it, and in which you also implement the 
+onError() method to report possible connection errors to your end users.
+
+Currently, we have only added such an example TcpHandler implementation for libev.
+For other event loops (like libevent, libev and boost asio) we do not yet have
+such examples.
+
 
 CHANNELS
 ========
