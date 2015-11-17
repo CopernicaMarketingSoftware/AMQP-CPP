@@ -20,9 +20,6 @@ static:
 shared:
 		$(MAKE) -C src shared
 
-static_fpic:
-		$(MAKE) -C src static_fpic
-
 clean:
 		$(MAKE) -C src clean
 
@@ -33,7 +30,6 @@ install:
 		cp -f include/*.h ${INCLUDE_DIR}/$(LIBRARY_NAME)
 		-cp -f src/lib$(LIBRARY_NAME).so.$(VERSION) ${LIBRARY_DIR}
 		-cp -f src/lib$(LIBRARY_NAME).a.$(VERSION) ${LIBRARY_DIR}
-		-cp -f src/lib$(LIBRARY_NAME)_fpic.a ${LIBRARY_DIR}
 		ln -s -f $(LIBRARY_DIR)/lib$(LIBRARY_NAME).so.$(VERSION) $(LIBRARY_DIR)/lib$(LIBRARY_NAME).so.$(SONAME)
 		ln -s -f $(LIBRARY_DIR)/lib$(LIBRARY_NAME).so.$(VERSION) $(LIBRARY_DIR)/lib$(LIBRARY_NAME).so
 		ln -s -f $(LIBRARY_DIR)/lib$(LIBRARY_NAME).a.$(VERSION) $(LIBRARY_DIR)/lib$(LIBRARY_NAME).a
