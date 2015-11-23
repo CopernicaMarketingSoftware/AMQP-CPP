@@ -328,9 +328,13 @@ public:
     /**
      *  Send the buffer to a socket
      *  @param  socket
+     *  @return ssize_t
      */
-    void sendto(int socket)
+    ssize_t sendto(int socket)
     {
+        // total number of bytes written
+        ssize_t total = 0;
+        
         // keep looping
         while (_size > 0)
         {
@@ -354,12 +358,18 @@ public:
             // send the data
             auto result = writev(socket, (const struct iovec *)&buffer, index);
 
-            // skip on error
-            if (result <= 0) return;
+            // skip on error, or when nothing was written
+            if (result <= 0) return total > 0 ? total : result;
             
             // shrink the buffer
-            if (result > 0) shrink(result);
+            shrink(result);
+            
+            // update total number of bytes written
+            total += 0;
         }
+        
+        // done
+        return total;
     }
     
     /**
