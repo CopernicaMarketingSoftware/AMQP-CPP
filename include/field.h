@@ -1,7 +1,7 @@
 /**
  *  Available field types for AMQP
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014, 2015 Copernica BV
  */
 
 /**

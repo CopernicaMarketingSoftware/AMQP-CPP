@@ -152,7 +152,7 @@ public:
      *  @param  buffer      buffer to send
      *  @param  size        size of the buffer
      */
-    virtual void send(const char *buffer, size_t size)
+    virtual void send(const char *buffer, size_t size) override
     {
         // is there already a buffer of data that can not be sent?
         if (_out) return _out.add(buffer, size);

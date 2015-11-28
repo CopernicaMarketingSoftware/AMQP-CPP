@@ -1,7 +1,7 @@
 /**
  *  Class describing an AMQP header frame
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014, 2015 Copernica BV
  */
 
 /**
@@ -33,7 +33,7 @@ protected:
      *
      *  @param  buffer  buffer to write frame to
      */
-    virtual void fill(OutBuffer& buffer) const
+    virtual void fill(OutBuffer& buffer) const override
     {
         // call base
         ExtFrame::fill(buffer);

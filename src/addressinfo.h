@@ -45,7 +45,7 @@ public:
         struct addrinfo hints;
         
         // set everything to zero
-        memset(&hints, 0, sizeof(struct AddressInfo));
+        memset(&hints, 0, sizeof(struct addrinfo));
         
         // set hints
         hints.ai_family = AF_UNSPEC;        // allow IPv4 or IPv6

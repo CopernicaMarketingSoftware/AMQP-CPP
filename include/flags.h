@@ -30,6 +30,7 @@ extern const int global;
 extern const int nolocal;
 extern const int noack;
 extern const int exclusive;
+extern const int nowait;
 extern const int mandatory;
 extern const int immediate;
 extern const int redelivered;

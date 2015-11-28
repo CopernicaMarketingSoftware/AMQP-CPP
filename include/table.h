@@ -192,7 +192,7 @@ public:
      *  Output the object to a stream
      *  @param std::ostream
      */
-    virtual void output(std::ostream &stream) const
+    virtual void output(std::ostream &stream) const override
     {
         // prefix
         stream << "table(";
@@ -218,7 +218,7 @@ public:
     }
 
     /**
-     *  Cast to table
+     *  Cast to table (compiler will probably never call this method)
      *  @return Table
      */
     virtual operator const Table& () const override
@@ -226,7 +226,6 @@ public:
         // this already is an array, so no cast is necessary
         return *this;
     }
-
 };
 
 /**

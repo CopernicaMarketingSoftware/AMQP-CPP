@@ -1,7 +1,7 @@
 /**
  *  AMQP field array
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014, 2015 Copernica BV
  */
 
 /**
@@ -186,7 +186,7 @@ public:
      *  Output the object to a stream
      *  @param std::ostream
      */
-    virtual void output(std::ostream &stream) const
+    virtual void output(std::ostream &stream) const override
     {
         // prefix
         stream << "array(";
@@ -212,7 +212,7 @@ public:
     }
 
     /**
-     *  Cast to array
+     *  Cast to array (compiler will probably never call this method)
      *  @return Array
      */
     virtual operator const Array& () const override

@@ -44,7 +44,7 @@ public:
      *  Return the type of frame
      *  @return     uint8_t
      */ 
-    uint8_t type() const
+    virtual uint8_t type() const override
     {
         // the documentation says 4, rabbitMQ sends 8
         return 8;

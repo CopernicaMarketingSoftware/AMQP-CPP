@@ -20,7 +20,7 @@ protected:
      *
      *  @param  buffer  buffer to write frame to
      */
-    virtual void fill(OutBuffer& buffer) const
+    virtual void fill(OutBuffer& buffer) const override
     {
         // call base
         ChannelFrame::fill(buffer);

@@ -1,7 +1,7 @@
 /**
  *  Decimal field type for AMQP
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014, 2015 Copernica BV
  */
 
 /**
@@ -127,7 +127,7 @@ public:
      *
      *  @return  double     value of decimalfield in double format
      */
-    operator double() const
+    virtual operator double() const override
     {
         return _number / pow(10, _places);
     }
@@ -138,7 +138,7 @@ public:
      *
      *  @return  float     value of decimalfield in float format
      */
-    operator float() const
+    virtual operator float() const override
     {
         return static_cast<float>(_number / pow(10, _places));
     }
