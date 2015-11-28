@@ -100,11 +100,11 @@ public:
 
     /**
      *  Set a field
-     *
      *  @param  name    field name
      *  @param  value   field value
+     *  @return Table
      */
-    Table set(const std::string& name, const Field &value)
+    Table &set(const std::string& name, const Field &value)
     {
         // copy to a new pointer and store it
         _fields[name] = value.clone();
@@ -112,6 +112,24 @@ public:
         // allow chaining
         return *this;
     }
+    
+    /**
+     *  Aliases for setting values
+     *  @param  name
+     *  @param  value
+     *  @return Table&
+     */
+    Table &set(const std::string &name, bool value) { return set(name, BooleanSet(value)); }
+    Table &set(const std::string &name, uint8_t value) { return set(name, UOctet(value)); }
+    Table &set(const std::string &name, int8_t value) { return set(name, Octet(value)); }
+    Table &set(const std::string &name, uint16_t value) { return set(name, UShort(value)); }
+    Table &set(const std::string &name, int16_t value) { return set(name, Short(value)); }
+    Table &set(const std::string &name, uint32_t value) { return set(name, ULong(value)); }
+    Table &set(const std::string &name, int32_t value) { return set(name, Long(value)); }
+    Table &set(const std::string &name, uint64_t value) { return set(name, ULongLong(value)); }
+    Table &set(const std::string &name, int64_t value) { return set(name, LongLong(value)); }
+    Table &set(const std::string &name, const std::string &value) { return set(name, LongString(value)); }
+    Table &set(const std::string &name, const char *value) { return set(name, LongString(std::string(value))); }
 
     /**
      *  Get a field
