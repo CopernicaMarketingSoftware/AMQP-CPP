@@ -26,6 +26,27 @@ class ConnectionHandler
 {
 public:
     /**
+     *  Method that is called when the heartbeat frequency is negotiated
+     *  between the server and the client. You normally do not have to
+     *  override this method, because in the default implementation the
+     *  suggested heartbeat is simply accepted by the client.
+     *
+     *  However, if you want to disable heartbeats, or when you want an
+     *  alternative heartbeat interval, you can override this method
+     *  to use an other interval. You should return 0 if you want to
+     *  disable heartbeats.
+     *
+     *  @param  connection      The connection that suggested a heartbeat interval
+     *  @param  interval        The suggested interval from the server
+     *  @return uint16_t        The interval to use
+     */
+    virtual uint16_t onNegotiate(Connection *connection, uint16_t interval)
+    {
+        // default implementation, suggested heartbeat is ok
+        return interval;
+    }
+
+    /**
      *  Method that is called when data needs to be sent over the network
      *
      *  Note that the AMQP library does no buffering by itself. This means
@@ -37,6 +58,17 @@ public:
      *  @param  size            Size of the buffer
      */
     virtual void onData(Connection *connection, const char *buffer, size_t size) = 0;
+
+    /**
+     *  Method that is called when the server sends a heartbeat to the client
+     *
+     *  You do not have to do anything here, the client sends back a heartbeat
+     *  frame automatically, but if you like, you can implement/override this
+     *  method if you want to be notified of such heartbeats
+     *
+     *  @param  connection      The connection over which the heartbeat was received
+     */
+    virtual void onHeartbeat(Connection *connection) {}
 
     /**
      *  When the connection ends up in an error state this method is called.

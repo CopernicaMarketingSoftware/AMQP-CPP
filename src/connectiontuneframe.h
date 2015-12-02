@@ -138,10 +138,10 @@ public:
         Monitor monitor(connection);
         
         // store the heartbeat the server wants 
-        connection->setHeartbeat(heartbeat());
+        uint16_t interval = connection->setHeartbeat(heartbeat());
 
         // send it back
-        connection->send(ConnectionTuneOKFrame(channelMax(), frameMax(), heartbeat()));
+        connection->send(ConnectionTuneOKFrame(channelMax(), frameMax(), interval));
         
         // check if the connection object still exists
         if (!monitor.valid()) return true;

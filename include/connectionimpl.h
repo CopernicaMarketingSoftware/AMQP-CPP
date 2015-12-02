@@ -368,10 +368,22 @@ public:
 
     /**
      *  Set the heartbeat delay
-    */
-    void setHeartbeat(uint16_t heartbeat)
+     *  @param  heartbeat       suggested heartbeat by server
+     *  @return uint16_t        accepted heartbeat by client
+     */
+    uint16_t setHeartbeat(uint16_t heartbeat)
     {
-        _heartbeat = heartbeat;
+        // pass to the handler
+        return _heartbeat = _handler->onNegotiate(_parent, heartbeat);
+    }
+
+    /**
+     *  Report a heartbeat to the connection handler
+     */
+    void reportHeartbeat()
+    {
+        // pass to handler
+        _handler->onHeartbeat(_parent);
     }
 
     /**

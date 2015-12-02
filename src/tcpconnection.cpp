@@ -63,6 +63,18 @@ void TcpConnection::process(int fd, int flags)
 }
 
 /**
+ *  Method that is called when the heartbeat frequency is negotiated.
+ *  @param  connection      The connection that suggested a heartbeat interval
+ *  @param  interval        The suggested interval from the server
+ *  @return uint16_t        The interval to use
+ */
+uint16_t TcpConnection::onNegotiate(Connection *connection, uint16_t interval)
+{
+    // the state object should do this
+    return _state->reportNegotiate(interval);
+}
+
+/**
  *  Method that is called by the connection when data needs to be sent over the network
  *  @param  connection      The connection that created this output
  *  @param  buffer          Data to send
@@ -72,6 +84,16 @@ void TcpConnection::onData(Connection *connection, const char *buffer, size_t si
 {
     // send the data over the connecction
     _state->send(buffer, size);
+}
+
+/**
+ *  Method that is called when the server sends a heartbeat to the client
+ *  @param  connection      The connection over which the heartbeat was received
+ */
+void TcpConnection::onHeartbeat(Connection *connection)
+{
+    // let the state object do this
+    _state->reportHeartbeat();
 }
 
 /**

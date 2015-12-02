@@ -42,6 +42,13 @@ private:
      */
     Connection _connection;
     
+    /**
+     *  Method that is called when the heartbeat frequency is negotiated.
+     *  @param  connection      The connection that suggested a heartbeat interval
+     *  @param  interval        The suggested interval from the server
+     *  @return uint16_t        The interval to use
+     */
+    virtual uint16_t onNegotiate(Connection *connection, uint16_t interval) override;
 
     /**
      *  Method that is called by the connection when data needs to be sent over the network
@@ -50,6 +57,12 @@ private:
      *  @param  size            Size of the buffer
      */
     virtual void onData(Connection *connection, const char *buffer, size_t size) override;
+
+    /**
+     *  Method that is called when the server sends a heartbeat to the client
+     *  @param  connection      The connection over which the heartbeat was received
+     */
+    virtual void onHeartbeat(Connection *connection) override;
 
     /**
      *  Method called when the connection ends up in an error state

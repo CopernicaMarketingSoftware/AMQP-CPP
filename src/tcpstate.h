@@ -78,6 +78,17 @@ public:
     {
         // default does nothing
     }
+
+    /**
+     *  Report that heartbeat negotiation is going on
+     *  @param  heartbeat   suggested heartbeat
+     *  @return uint16_t    accepted heartbeat
+     */
+    uint16_t reportNegotiate(uint16_t heartbeat)
+    {
+        // pass to handler
+        return _handler->onNegotiate(_connection, heartbeat);
+    }
     
     /**
      *  Report to the handler that the object is in an error state
@@ -87,6 +98,15 @@ public:
     {
         // pass to handler
         _handler->onError(_connection, error);
+    }
+
+    /**
+     *  Report that a heartbeat frame was received
+     */
+    void reportHeartbeat()
+    {
+        // pass to handler
+        _handler->onHeartbeat(_connection);
     }
     
     /**

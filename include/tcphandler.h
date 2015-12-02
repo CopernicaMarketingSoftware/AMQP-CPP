@@ -26,10 +26,33 @@ class TcpHandler
 {
 public:
     /**
+     *  Method that is called when the heartbeat frequency is negotiated
+     *  between the server and the client. 
+     *  @param  connection      The connection that suggested a heartbeat interval
+     *  @param  interval        The suggested interval from the server
+     *  @return uint16_t        The interval to use
+     *
+     *  @see ConnectionHandler::onNegotiate
+     */
+    virtual uint16_t onNegotiate(TcpConnection *connection, uint16_t interval)
+    {
+        // default implementation, suggested heartbeat is ok
+        return interval;
+    }
+
+    /**
      *  Method that is called when the TCP connection ends up in a connected state
      *  @param  connection  The TCP connection
      */
     virtual void onConnected(TcpConnection *connection) {}
+
+    /**
+     *  Method that is called when the server sends a heartbeat to the client
+     *  @param  connection      The connection over which the heartbeat was received
+     *
+     *  @see    ConnectionHandler::onHeartbeat
+     */
+    virtual void onHeartbeat(TcpConnection *connection) {}
     
     /**
      *  Method that is called when the TCP connection ends up in an error state
