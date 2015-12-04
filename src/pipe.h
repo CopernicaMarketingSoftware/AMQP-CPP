@@ -42,8 +42,16 @@ public:
     Pipe()
     {
         // construct the pipe
+#ifdef _GNU_SOURCE
         if (pipe2(_fds, O_CLOEXEC) == 0) return;
-        
+#else
+        if (
+            pipe(_fds) == 0 &&
+            fcntl(_fds[0], F_SETFD, FD_CLOEXEC) == 0 &&
+            fcntl(_fds[1], F_SETFD, FD_CLOEXEC) == 0
+        ) return;
+#endif
+
         // something went wrong
         throw std::runtime_error(strerror(errno));
     }
