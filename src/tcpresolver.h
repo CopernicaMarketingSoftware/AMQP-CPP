@@ -110,7 +110,17 @@ private:
             }
             
             // connection succeeded, mark socket as non-blocking
-            if (_socket >= 0) fcntl(_socket, F_SETFL, O_NONBLOCK);
+            if (_socket >= 0) 
+            {
+                // turn socket into a non-blocking socket
+                fcntl(_socket, F_SETFL, O_NONBLOCK);
+
+                // we want to enable "nodelay" on sockets (otherwise all send operations are s-l-o-w
+                int optval = 1;
+                
+                // set the option
+                setsockopt(_socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(int));
+            }
         }
         catch (const std::runtime_error &error)
         {
