@@ -114,6 +114,9 @@ private:
             {
                 // turn socket into a non-blocking socket
                 fcntl(_socket, F_SETFL, O_NONBLOCK);
+                
+                // switch on the close-on-exec bit
+                fcntl(_socket, F_SETFL, O_CLOEXEC);
 
                 // we want to enable "nodelay" on sockets (otherwise all send operations are s-l-o-w
                 int optval = 1;
