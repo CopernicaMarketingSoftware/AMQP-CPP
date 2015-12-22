@@ -112,12 +112,9 @@ private:
             // connection succeeded, mark socket as non-blocking
             if (_socket >= 0) 
             {
-                // turn socket into a non-blocking socket
-                fcntl(_socket, F_SETFL, O_NONBLOCK);
+                // turn socket into a non-blocking socket and set the close-on-exec bit
+                fcntl(_socket, F_SETFL, O_NONBLOCK | O_CLOEXEC);
                 
-                // switch on the close-on-exec bit
-                fcntl(_socket, F_SETFL, O_CLOEXEC);
-
                 // we want to enable "nodelay" on sockets (otherwise all send operations are s-l-o-w
                 int optval = 1;
                 
