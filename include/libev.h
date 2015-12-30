@@ -17,6 +17,11 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include <ev.h>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
