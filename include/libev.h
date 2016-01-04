@@ -100,8 +100,14 @@ private:
          */
         void events(int events)
         {
-            // libev has a function for this
+            // stop the watcher if it was active
+            ev_io_stop(_loop, &_io);
+            
+            // set the events
             ev_io_set(&_io, _io.fd, events);
+            
+            // and restart it
+            ev_io_start(_loop, &_io);
         }
     };
 
