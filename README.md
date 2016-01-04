@@ -172,7 +172,7 @@ AMQP::Channel channel(&connection);
 // use the channel object to call the AMQP method you like
 channel.declareExchange("my-exchange", AMQP::fanout);
 channel.declareQueue("my-queue");
-channel.bindQueue("my-exchange", "my-queue");
+channel.bindQueue("my-exchange", "my-queue", "my-routing-key");
 ````
 
 A number of remarks about the example above. First you may have noticed that we've
@@ -360,7 +360,7 @@ AMQP::TcpChannel channel(&connection);
 // use the channel object to call the AMQP method you like
 channel.declareExchange("my-exchange", AMQP::fanout);
 channel.declareQueue("my-queue");
-channel.bindQueue("my-exchange", "my-queue");
+channel.bindQueue("my-exchange", "my-queue", "my-routing-key");
 ````
 
 EXISTING EVENT LOOPS
