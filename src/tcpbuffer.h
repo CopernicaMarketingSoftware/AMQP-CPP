@@ -403,7 +403,7 @@ public:
         if (result > 0) _size += result;
         
         // if buffer is not full
-        if (result < available) buffer.resize(std::max(0L, result));
+        if (result < available) buffer.resize(std::max(0L, (long int)result));
         
         // done
         return result;
