@@ -47,17 +47,23 @@ TcpConnection::~TcpConnection()
  */
 void TcpConnection::process(int fd, int flags)
 {
+    // monitor the object for destruction
+    Monitor monitor{ this };
+
     // pass on the the state, that returns a new impl
     auto *result = _state->process(fd, flags);
-    
+
+    // are we still valid
+    if (!monitor.valid()) return;
+
     // skip if the same state is continued to be used, or when the process()
     // method returns nullptr (which only happens when the object is destructed,
     // and "this" is no longer valid)
     if (!result || result == _state) return;
-    
+
     // remove old state
     delete _state;
-    
+
     // replace it with the new implementation
     _state = result;
 }
@@ -105,10 +111,10 @@ void TcpConnection::onError(Connection *connection, const char *message)
 {
     // current object is going to be removed, wrap it in a unique pointer to enforce that
     std::unique_ptr<TcpState> ptr(_state);
-    
+
     // object is now in a closed state
     _state = new TcpClosed(_state);
-    
+
     // tell the implementation to report the error
     ptr->reportError(message);
 }
@@ -131,10 +137,10 @@ void TcpConnection::onClosed(Connection *connection)
 {
     // current object is going to be removed, wrap it in a unique pointer to enforce that
     std::unique_ptr<TcpState> ptr(_state);
-    
+
     // object is now in a closed state
     _state = new TcpClosed(_state);
-    
+
     // tell the implementation to report the error
     ptr->reportClosed();
 }

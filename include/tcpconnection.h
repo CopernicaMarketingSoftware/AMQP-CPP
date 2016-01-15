@@ -26,7 +26,9 @@ class TcpState;
 /**
  *  Class definition
  */
-class TcpConnection : private ConnectionHandler
+class TcpConnection :
+    private ConnectionHandler,
+    private Watchable
 {
 private:
     /**

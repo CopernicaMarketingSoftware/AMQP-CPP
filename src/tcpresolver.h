@@ -177,7 +177,7 @@ public:
     {
         // only works if the incoming pipe is readable
         if (fd != _pipe.in() || !(flags & readable)) return this;
-        
+
         // do we have a valid socket?
         if (_socket >= 0) return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
         
