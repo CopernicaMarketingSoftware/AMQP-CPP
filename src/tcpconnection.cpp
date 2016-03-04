@@ -28,15 +28,6 @@ TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
     _connection(this, address.login(), address.vhost()) {}
 
 /**
- *  Destructor
- */
-TcpConnection::~TcpConnection()
-{
-    // remove the state object
-    delete _state;
-}
-
-/**
  *  Process the TCP connection
  *  This method should be called when the filedescriptor that is registered
  *  in the event loop becomes active. You should pass in a flag holding the
@@ -59,13 +50,10 @@ void TcpConnection::process(int fd, int flags)
     // skip if the same state is continued to be used, or when the process()
     // method returns nullptr (which only happens when the object is destructed,
     // and "this" is no longer valid)
-    if (!result || result == _state) return;
-
-    // remove old state
-    delete _state;
+    if (!result || result == _state.get()) return;
 
     // replace it with the new implementation
-    _state = result;
+    _state.reset(result);
 }
 
 /**
@@ -88,7 +76,7 @@ uint16_t TcpConnection::onNegotiate(Connection *connection, uint16_t interval)
  */
 void TcpConnection::onData(Connection *connection, const char *buffer, size_t size)
 {
-    // send the data over the connecction
+    // send the data over the connection
     _state->send(buffer, size);
 }
 
@@ -109,11 +97,11 @@ void TcpConnection::onHeartbeat(Connection *connection)
  */
 void TcpConnection::onError(Connection *connection, const char *message)
 {
-    // current object is going to be removed, wrap it in a unique pointer to enforce that
-    std::unique_ptr<TcpState> ptr(_state);
+    // current object is going to be removed, but we have to keep it for a while
+    auto ptr = std::move(_state);
 
     // object is now in a closed state
-    _state = new TcpClosed(_state);
+    _state.reset(new TcpClosed(ptr.get()));
 
     // tell the implementation to report the error
     ptr->reportError(message);
@@ -135,13 +123,13 @@ void TcpConnection::onConnected(Connection *connection)
  */
 void TcpConnection::onClosed(Connection *connection)
 {
-    // current object is going to be removed, wrap it in a unique pointer to enforce that
-    std::unique_ptr<TcpState> ptr(_state);
+    // current object is going to be removed, but we have to keep it for a while
+    auto ptr = std::move(_state);
 
     // object is now in a closed state
-    _state = new TcpClosed(_state);
+    _state.reset(new TcpClosed(ptr.get()));
 
-    // tell the implementation to report the error
+    // tell the implementation to report that connection is closed now
     ptr->reportClosed();
 }
 

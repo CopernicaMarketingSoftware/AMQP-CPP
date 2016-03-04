@@ -34,16 +34,18 @@ private:
     /**
      *  The state of the TCP connection - this state objecs changes based on 
      *  the state of the connection (resolving, connected or closed)
-     *  @var    TcpState
+     *  a shared pointer is used because we use a forward declaration, which isn't
+     *  allowed in a unique pointer
+     *  @var    std::shared_ptr<TcpState>
      */
-    TcpState *_state = nullptr;
-    
+    std::shared_ptr<TcpState> _state;
+
     /**
      *  The underlying AMQP connection
      *  @var    Connection
      */
     Connection _connection;
-    
+
     /**
      *  Method that is called when the heartbeat frequency is negotiated.
      *  @param  connection      The connection that suggested a heartbeat interval
@@ -113,7 +115,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~TcpConnection();
+    virtual ~TcpConnection() = default;
 
     /**
      *  Process the TCP connection
