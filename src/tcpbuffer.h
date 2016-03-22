@@ -17,6 +17,7 @@
  *  Dependencies
  */
 #include <sys/ioctl.h>
+#include <sys/uio.h>
  
 /**
  *  Set up namespace
