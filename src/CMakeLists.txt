@@ -89,4 +89,5 @@ transactionrollbackokframe.h
 transactionselectframe.h
 transactionselectokframe.h
 watchable.cpp
+tcpconnection.cpp
 )
