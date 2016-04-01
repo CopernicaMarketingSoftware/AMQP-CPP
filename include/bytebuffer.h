@@ -26,7 +26,7 @@ class ByteBuffer : public Buffer
 private:
     /**
      *  The actual byte buffer
-     *  @var const char *
+     *  @var const signed char *
      */
     const int8_t *_data;
     
@@ -61,7 +61,7 @@ public:
     /**
      *  Get access to a single byte
      *  @param  pos         position in the buffer
-     *  @return char        value of the byte in the buffer
+     *  @return signed char        value of the byte in the buffer
      */
     virtual int8_t byte(size_t pos) const override
     {
@@ -72,7 +72,7 @@ public:
      *  Get access to the raw data
      *  @param  pos         position in the buffer
      *  @param  size        number of continuous bytes
-     *  @return char*
+     *  @return signed char*
      */
     virtual const int8_t *data(size_t pos, size_t size) const override
     {

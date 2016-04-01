@@ -17,7 +17,7 @@ class ProtocolHeaderFrame : public Frame
 private:
     /** 
      *  Protocol name (should be null-ended string "AMQP")
-     *  @var char*
+     *  @var signed char*
      */
     const int8_t *_protocol;
 

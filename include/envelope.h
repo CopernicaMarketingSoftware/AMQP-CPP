@@ -32,7 +32,7 @@ protected:
     /**
      *  Pointer to the body data (the memory buffer is not managed by the AMQP
      *  library!)
-     *  @var    const char *
+     *  @var    const signed char *
      */
     const int8_t *_body;
 

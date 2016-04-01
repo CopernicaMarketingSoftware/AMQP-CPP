@@ -25,7 +25,7 @@ class OutBuffer
 private:
     /**
      *  Pointer to the beginning of the buffer
-     *  @var std::unique_ptr<char[]>
+     *  @var std::unique_ptr<signed char[]>
      */
     std::unique_ptr<int8_t[]> _buffer;
 
@@ -97,7 +97,7 @@ public:
 
     /**
      *  Get access to the internal buffer
-     *  @return const char*
+     *  @return const signed char*
      */
     const int8_t *data() const
     {
@@ -115,7 +115,7 @@ public:
 
     /**
      *  Add a binary buffer to the buffer
-     *  @param  string  char* to the string
+     *  @param  string  signed char* to the string
      *  @param  size    size of string
      */
     void add(const int8_t *string, uint32_t size)

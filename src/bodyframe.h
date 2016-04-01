@@ -18,7 +18,7 @@ private:
     /**
      *  Payload of the frame
      *  Payload can be any number of octets
-     *  @var const char *
+     *  @var const singed char *
      */
     const int8_t *_payload;
 
@@ -77,7 +77,7 @@ public:
 
     /**
      *  Return the payload of the body
-     *  @return     const char *
+     *  @return     const signed char *
      */
     const int8_t *payload() const
     {

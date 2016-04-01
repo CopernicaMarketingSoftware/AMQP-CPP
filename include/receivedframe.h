@@ -235,7 +235,7 @@ public:
     /**
      *  Get a pointer to the next binary buffer of a certain size
      *  @param  size
-     *  @return char*
+     *  @return unsigned char*
      */
     const int8_t *nextData(uint32_t size);
 
