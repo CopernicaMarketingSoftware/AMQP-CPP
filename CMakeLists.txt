@@ -30,10 +30,8 @@ install(TARGETS amqp-cpp
         ARCHIVE DESTINATION lib
 )
 
-option(BUILD_TUTORIALS "build rabbitmq tutorials" OFF)
-if(BUILD_TUTORIALS)
-    add_subdirectory(examples/rabbitmq_tutorials)
-endif()
+option(BUILD_TUTORIALS "build rabbitmq tutorials" ON)
+add_subdirectory(examples/rabbitmq_tutorials)
 
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)

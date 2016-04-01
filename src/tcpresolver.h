@@ -193,7 +193,7 @@ public:
      *  @param  buffer      buffer to send
      *  @param  size        size of the buffer
      */
-    virtual void send(const char *buffer, size_t size) override
+    virtual void send(const int8_t *buffer, size_t size) override
     {
         // add data to buffer
         _buffer.add(buffer, size);

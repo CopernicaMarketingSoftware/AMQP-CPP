@@ -60,7 +60,7 @@ private:
      *  @param  buffer          Data to send
      *  @param  size            Size of the buffer
      */
-    virtual void onData(Connection *connection, const char *buffer, size_t size) override;
+    virtual void onData(Connection *connection, const int8_t *buffer, size_t size) override;
 
     /**
      *  Method that is called when the server sends a heartbeat to the client

@@ -34,7 +34,7 @@ protected:
      *  library!)
      *  @var    const char *
      */
-    const char *_body;
+    const int8_t *_body;
 
     /**
      *  Size of the data
@@ -52,19 +52,19 @@ public:
      *  @param  body
      *  @param  size
      */
-    Envelope(const char *body, uint64_t size) : MetaData(), _body(body), _bodySize(size) {}
+    Envelope(const int8_t *body, uint64_t size) : MetaData(), _body(body), _bodySize(size) {}
 
     /**
      *  Constructor based on a string
      *  @param  body
      */
-    Envelope(const std::string &body) : MetaData(), _str(body), _body(_str.data()), _bodySize(_str.size()) {}
+    Envelope(const std::string &body) : MetaData(), _str(body), _body((int8_t*) (_str.data())), _bodySize(_str.size()) {}
 
     /**
      *  Constructor based on a string
      *  @param  body
      */
-    Envelope(std::string &&body) : MetaData(), _str(std::move(body)), _body(_str.data()), _bodySize(_str.size()) {}
+    Envelope(std::string &&body) : MetaData(), _str(std::move(body)), _body((int8_t*)_str.data()), _bodySize(_str.size()) {}
 
     /**
      *  Copy constructor
@@ -73,8 +73,8 @@ public:
      */
     Envelope(const Envelope &envelope) :
         MetaData(envelope),
-        _str(envelope._body, envelope._bodySize),
-        _body(_str.data()),
+        _str((char*)envelope._body, envelope._bodySize),
+        _body((int8_t*)_str.data()),
         _bodySize(_str.size())
     {}
 
@@ -86,7 +86,7 @@ public:
     Envelope(Envelope &&envelope) :
         MetaData(std::move(envelope)),
         _str(std::move(envelope._str)),
-        _body(_str.data()),
+        _body((int8_t*)_str.data()),
         _bodySize(_str.size())
     {
         // if the envelope we moved did not have allocation by string
@@ -94,10 +94,10 @@ public:
         if (_str.empty())
         {
             // assign the data from the other envelope
-            _str.assign(envelope._body, envelope._bodySize);
+            _str.assign((char*)envelope._body, envelope._bodySize);
 
             // and set the correct pointer and size
-            _body = _str.data();
+            _body = (int8_t*)_str.data();
             _bodySize = _str.size();
         }
         else
@@ -125,10 +125,10 @@ public:
     Envelope &operator=(const Envelope &envelope)
     {
         // copy the data from the envelope
-        _str.assign(envelope._body, envelope._bodySize);
+        _str.assign((char*)envelope._body, envelope._bodySize);
 
         // set the data pointer and body size
-        _body = _str.data();
+        _body = (int8_t*) _str.data();
         _bodySize = _str.size();
 
         // allow chaining
@@ -147,7 +147,7 @@ public:
         if (envelope._str.empty())
         {
             // that's a shame, we have to make a full copy
-            _str.assign(envelope._body, envelope._bodySize);
+            _str.assign((char*) envelope._body, envelope._bodySize);
         }
         else
         {
@@ -161,7 +161,7 @@ public:
         }
 
         // we now have a valid string, set the body and
-        _body = _str.data();
+        _body = (int8_t*)_str.data();
         _bodySize = _str.size();
 
         // allow chaining
@@ -172,7 +172,7 @@ public:
      *  Access to the full message data
      *  @return buffer
      */
-    const char *body() const
+    const int8_t *body() const
     {
         return _body;
     }
@@ -192,7 +192,7 @@ public:
      */
     std::string message() const
     {
-        return std::string(_body, static_cast<size_t>(_bodySize));
+        return std::string((char*)_body, static_cast<size_t>(_bodySize));
     }
 };
 

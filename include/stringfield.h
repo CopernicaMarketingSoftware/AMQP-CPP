@@ -57,7 +57,7 @@ public:
         T size(frame);
 
         // allocate string
-        _data = std::string(frame.nextData(size.value()), (size_t) size.value());
+        _data = std::string((char*)frame.nextData(size.value()), (size_t) size.value());
     }
 
     /**

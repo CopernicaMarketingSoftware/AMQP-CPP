@@ -282,7 +282,7 @@ double ReceivedFrame::nextDouble()
  *  @param  size
  *  @return char*
  */
-const char * ReceivedFrame::nextData(uint32_t size)
+const int8_t* ReceivedFrame::nextData(uint32_t size)
 {
     // check if there is enough size
     FrameCheck check(this, size);

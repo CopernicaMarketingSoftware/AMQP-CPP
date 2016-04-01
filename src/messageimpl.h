@@ -55,7 +55,7 @@ public:
      *  @param  size        size of the data
      *  @return bool        true if the message is now complete
      */
-    bool append(const char *buffer, uint64_t size)
+    bool append(const int8_t *buffer, uint64_t size)
     {
         // is this the only data, and also direct complete?
         if (_str.empty() && size >= _bodySize)
@@ -75,7 +75,7 @@ public:
                 _str.reserve(static_cast<size_t>(_bodySize));
 
                 // we now use the data buffer inside the string
-                _body = _str.data();
+                _body = (int8_t*) _str.data();
             }
 
             // safety-check: if the given size exceeds the given message body size
@@ -86,7 +86,7 @@ public:
             // we can not safely append the data to the string, it
             // will not exceed the reserved size so it is guaranteed
             // not to change the data pointer, we can just leave that
-            _str.append(buffer, static_cast<size_t>(size));
+            _str.append((char*)buffer, static_cast<size_t>(size));
 
             // if the string is filled with the given number of characters we are done now
             return _str.size() >= _bodySize;

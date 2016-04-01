@@ -13,7 +13,7 @@ public:
     {
     }
 
-    size_t write(const char* data, size_t size)
+    size_t write(const int8_t* data, size_t size)
     {
         if (_use == _data.size())
         {
@@ -37,7 +37,7 @@ public:
         return _use;
     }
 
-    const char* data() const
+    const int8_t* data() const
     {
         return _data.data();
     }
@@ -52,7 +52,7 @@ public:
     }
 
 private:
-    std::vector<char> _data;
+    std::vector<int8_t> _data;
     size_t _use;
 };
 
@@ -115,11 +115,11 @@ void AsioHandler::doConnect(const std::string& host, uint16_t port)
 }
 
 void AsioHandler::onData(
-        AMQP::Connection *connection, const char *data, size_t size)
+        AMQP::Connection *connection, const int8_t *data, size_t size)
 {
     _connection = connection;
 
-    _outputBuffer.push_back(std::vector<char>(data, data + size));
+    _outputBuffer.push_back(std::vector<int8_t>(data, data + size));
     if (!_writeInProgress && _connected)
     {
         doWrite();

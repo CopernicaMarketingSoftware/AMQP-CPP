@@ -237,7 +237,7 @@ public:
      *  @param  size
      *  @return char*
      */
-    const char *nextData(uint32_t size);
+    const int8_t *nextData(uint32_t size);
 
     /**
      *  Process the received frame

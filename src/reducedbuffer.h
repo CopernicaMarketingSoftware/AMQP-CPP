@@ -62,7 +62,7 @@ public:
      *  @param  pos         position in the buffer
      *  @return char        value of the byte in the buffer
      */
-    virtual char byte(size_t pos) const override
+    virtual int8_t byte(size_t pos) const override
     {
         return _buffer.byte(pos + _skip);
     }
@@ -73,7 +73,7 @@ public:
      *  @param  size        number of continuous bytes
      *  @return char*
      */
-    virtual const char *data(size_t pos, size_t size) const override
+    virtual const int8_t *data(size_t pos, size_t size) const override
     {
         return _buffer.data(pos + _skip, size);
     }

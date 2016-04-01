@@ -74,7 +74,7 @@ public:
      *  @param  buffer      buffer to send
      *  @param  size        size of the buffer
      */
-    virtual void send(const char *buffer, size_t size)
+    virtual void send(const int8_t *buffer, size_t size)
     {
         // default does nothing
     }

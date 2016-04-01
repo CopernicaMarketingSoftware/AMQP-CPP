@@ -46,7 +46,7 @@ public:
      *  @param  pos         position in the buffer
      *  @return char        value of the byte in the buffer
      */
-    virtual char byte(size_t pos) const = 0;
+    virtual int8_t byte(size_t pos) const = 0;
     
     /**
      *  Get access to the raw data
@@ -54,7 +54,7 @@ public:
      *  @param  size        number of continuous bytes
      *  @return char*
      */
-    virtual const char *data(size_t pos, size_t size) const = 0;
+    virtual const int8_t *data(size_t pos, size_t size) const = 0;
     
     /**
      *  Copy bytes to a buffer
