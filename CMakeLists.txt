@@ -29,6 +29,9 @@ target_include_directories(amqp-cpp SYSTEM PUBLIC ${PROJECT_SOURCE_DIR})
 install(TARGETS amqp-cpp
         ARCHIVE DESTINATION lib
 )
+install(DIRECTORY include/ DESTINATION include/amqpcpp
+        FILES_MATCHING PATTERN "*.h")
+install(FILES amqpcpp.h DESTINATION include)
 
 option(BUILD_TUTORIALS "build rabbitmq tutorials" OFF)
 if(BUILD_TUTORIALS)
