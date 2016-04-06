@@ -12,6 +12,11 @@
  */
 
 /**
+ *  Include guard
+ */
+#pragma once
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
