@@ -860,9 +860,9 @@ auto messageCb = [&channel](const AMQP::Message &message, uint64_t deliveryTag, 
 
 // start consuming from the queue, and install the callbacks
 channel.consume("my-queue")
+    .onReceived(messageCb)
     .onSuccess(startCb)
-    .onError(errorCb)
-    .onReceived(messageCb);
+    .onError(errorCb);
 
 ````
 
