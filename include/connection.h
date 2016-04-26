@@ -110,7 +110,7 @@ public:
      *  @param  size        size of the buffer to decode
      *  @return             number of bytes that were processed
      */
-    uint64_t parse(const char *buffer, size_t size)
+    uint64_t parse(const int8_t *buffer, size_t size)
     {
         return _implementation.parse(ByteBuffer(buffer, size));
     }

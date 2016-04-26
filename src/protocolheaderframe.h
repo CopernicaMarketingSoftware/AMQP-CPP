@@ -17,9 +17,9 @@ class ProtocolHeaderFrame : public Frame
 private:
     /** 
      *  Protocol name (should be null-ended string "AMQP")
-     *  @var char*
+     *  @var signed char*
      */
-    const char *_protocol;
+    const int8_t *_protocol;
 
     /**
      *  The protocol major version, should be 0
@@ -74,7 +74,7 @@ public:
      *  @param  revision            revision of version, should be 1
      */
     ProtocolHeaderFrame(uint8_t protocolIDMajor = 0,uint8_t protocolIDMinor = 9,uint8_t revision = 1) :
-        _protocol("AMQP"),
+        _protocol((int8_t*)"AMQP"),
         _protocolIDMajor(protocolIDMajor),
         _protocolIDMinor(protocolIDMinor),
         _revision(revision)

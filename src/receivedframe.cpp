@@ -122,7 +122,7 @@ bool ReceivedFrame::complete() const
 /**
  *  Read the next uint8 from the buffer
  *  
- *  @param  char* buffer    buffer to read from
+ *  @param  signed char* buffer    buffer to read from
  *  @return uint8_t         value read
  */
 uint8_t ReceivedFrame::nextUint8()
@@ -137,7 +137,7 @@ uint8_t ReceivedFrame::nextUint8()
 /**
  *  Read the next int8 from the buffer
  *  
- *  @param  char* buffer    buffer to read from
+ *  @param  signed char* buffer    buffer to read from
  *  @return int8_t          value read
  */
 int8_t ReceivedFrame::nextInt8()
@@ -280,9 +280,9 @@ double ReceivedFrame::nextDouble()
 /**
  *  Get a pointer to the next binary buffer of a certain size
  *  @param  size
- *  @return char*
+ *  @return signed char*
  */
-const char * ReceivedFrame::nextData(uint32_t size)
+const int8_t* ReceivedFrame::nextData(uint32_t size)
 {
     // check if there is enough size
     FrameCheck check(this, size);

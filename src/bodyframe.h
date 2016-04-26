@@ -18,9 +18,9 @@ private:
     /**
      *  Payload of the frame
      *  Payload can be any number of octets
-     *  @var const char *
+     *  @var const singed char *
      */
-    const char *_payload;
+    const int8_t *_payload;
 
 protected:
     /**
@@ -45,7 +45,7 @@ public:
      *  @param  payload     payload of the body
      *  @param  size        size of the payload
      */
-    BodyFrame(uint16_t channel, const char *payload, uint32_t size) :
+    BodyFrame(uint16_t channel, const int8_t *payload, uint32_t size) :
         ExtFrame(channel, size),
         _payload(payload)
     {}
@@ -77,9 +77,9 @@ public:
 
     /**
      *  Return the payload of the body
-     *  @return     const char *
+     *  @return     const signed char *
      */
-    const char *payload() const
+    const int8_t *payload() const
     {
         return _payload;
     }

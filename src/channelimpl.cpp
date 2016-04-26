@@ -434,7 +434,7 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
     uint64_t bytessent = 0;
 
     // the buffer
-    const char *data = envelope.body();
+    const int8_t *data = envelope.body();
     uint64_t bytesleft = envelope.bodySize();
 
     // split up the body in multiple frames depending on the max frame size

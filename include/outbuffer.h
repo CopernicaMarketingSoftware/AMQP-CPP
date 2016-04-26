@@ -25,15 +25,15 @@ class OutBuffer
 private:
     /**
      *  Pointer to the beginning of the buffer
-     *  @var std::unique_ptr<char[]>
+     *  @var std::unique_ptr<signed char[]>
      */
-    std::unique_ptr<char[]> _buffer;
+    std::unique_ptr<int8_t[]> _buffer;
 
     /**
      *  Pointer to the buffer to be filled
      *  @var char*
      */
-    char *_current;
+    int8_t *_current;
 
     /**
      *  Current size of the buffer
@@ -54,7 +54,7 @@ public:
      *  @param  capacity
      */
     OutBuffer(uint32_t capacity) :
-        _buffer(new char[capacity]),
+        _buffer(new int8_t[capacity]),
         _current(_buffer.get()),
         _size(0),
         _capacity(capacity)
@@ -65,7 +65,7 @@ public:
      *  @param  that
      */
     OutBuffer(const OutBuffer &that) :
-        _buffer(new char[that._capacity]),
+        _buffer(new int8_t[that._capacity]),
         _current(_buffer.get() + that._size),
         _size(that._size),
         _capacity(that._capacity)
@@ -97,9 +97,9 @@ public:
 
     /**
      *  Get access to the internal buffer
-     *  @return const char*
+     *  @return const signed char*
      */
-    const char *data() const
+    const int8_t *data() const
     {
         return _buffer.get();
     }
@@ -115,10 +115,10 @@ public:
 
     /**
      *  Add a binary buffer to the buffer
-     *  @param  string  char* to the string
+     *  @param  string  signed char* to the string
      *  @param  size    size of string
      */
-    void add(const char *string, uint32_t size)
+    void add(const int8_t *string, uint32_t size)
     {
         memcpy(_current, string, size);
         _current += size;
@@ -132,7 +132,7 @@ public:
      */
     void add(const std::string &string)
     {
-        add(string.c_str(), string.size());
+        add((int8_t*)string.c_str(), string.size());
     }
 
     /**

@@ -12,9 +12,9 @@ class AsioHandler: public AMQP::ConnectionHandler
 {
 private:
 
-    typedef std::deque<std::vector<char>> OutputBuffers;
+    typedef std::deque<std::vector<int8_t>> OutputBuffers;
 
-    virtual void onData(AMQP::Connection *connection, const char *data, size_t size);
+    virtual void onData(AMQP::Connection *connection, const int8_t *data, size_t size);
     virtual void onConnected(AMQP::Connection *connection);
     virtual void onError(AMQP::Connection *connection, const char *message);
     virtual void onClosed(AMQP::Connection *connection);
@@ -33,7 +33,7 @@ private:
     boost::asio::ip::tcp::socket _socket;
     boost::asio::deadline_timer _timer;
 
-    std::vector<char> _asioInputBuffer;
+    std::vector<int8_t> _asioInputBuffer;
     std::shared_ptr<AmqpBuffer> _amqpBuffer;
     AMQP::Connection* _connection;
     OutputBuffers _outputBuffer;

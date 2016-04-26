@@ -74,7 +74,7 @@ uint16_t TcpConnection::onNegotiate(Connection *connection, uint16_t interval)
  *  @param  buffer          Data to send
  *  @param  size            Size of the buffer
  */
-void TcpConnection::onData(Connection *connection, const char *buffer, size_t size)
+void TcpConnection::onData(Connection *connection, const int8_t *buffer, size_t size)
 {
     // send the data over the connection
     _state->send(buffer, size);

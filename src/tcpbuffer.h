@@ -34,7 +34,7 @@ private:
      *  All output buffers
      *  @var std::deque
      */
-    mutable std::deque<std::vector<char>> _buffers;
+    mutable std::deque<std::vector<int8_t>> _buffers;
 
     /**
      *  Number of bytes in first buffer that is no longer in use
@@ -131,9 +131,9 @@ public:
      *  for bytes that actually exist
      * 
      *  @param  pos         position in the buffer
-     *  @return char        value of the byte in the buffer
+     *  @return signed char        value of the byte in the buffer
      */
-    virtual char byte(size_t pos) const override
+    virtual int8_t byte(size_t pos) const override
     {
         // incorporate the skipped bytes
         pos += _skip;
@@ -156,15 +156,15 @@ public:
      *  Get access to the raw data
      *  @param  pos         position in the buffer
      *  @param  size        number of continuous bytes
-     *  @return char*
+     *  @return signed char* (int8_t*)
      */
-    virtual const char *data(size_t pos, size_t size) const override
+    virtual const int8_t *data(size_t pos, size_t size) const override
     {
         // incorporate the skipped bytes
         pos += _skip;
         
         // the buffer into which all data is going to be merged
-        std::vector<char> *result = nullptr;
+        std::vector<int8_t> *result = nullptr;
         
         // amount of data that we still have to process
         size_t togo = _size + _skip;
@@ -240,7 +240,7 @@ public:
                 size_t tocopy = std::min(buffer.size() - pos, size);
                 
                 // copy data to the buffer
-                memcpy((char *)output + copied, buffer.data() + pos, tocopy);
+                memcpy((int8_t *)output + copied, buffer.data() + pos, tocopy);
                 
                 // update counters
                 copied += tocopy;
@@ -267,7 +267,7 @@ public:
      *  @param  buffer
      *  @param  size
      */
-    void add(const char *buffer, size_t size)
+    void add(const int8_t *buffer, size_t size)
     {
         // add element
         _buffers.emplace_back(buffer, buffer + size);
