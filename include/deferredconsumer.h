@@ -113,7 +113,7 @@ public:
 
     /**
      *  Register a function to be called when a message arrives
-     *  This fuction is also available as onMessage() because I always forget which name I gave to it
+     *  This fuction is also available as onReceived() because I always forget which name I gave to it
      *  @param  callback    the callback to execute
      */
     DeferredConsumer &onMessage(const MessageCallback &callback)

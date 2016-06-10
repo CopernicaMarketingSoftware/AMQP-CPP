@@ -141,7 +141,7 @@ public:
         if (flags & readable)
         {
             // read data from buffer
-            auto result = _in.receivefrom(_socket);
+            ssize_t result = _in.receivefrom(_socket);
             
             // are we in an error state?
             if (result < 0 && reportError()) return nextState(monitor);

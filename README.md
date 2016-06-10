@@ -199,7 +199,7 @@ PARSING INCOMING DATA
 
 The ConnectionHandler class has a method onData() that is called by the library
 every time that it wants to send out data. We've explained that it is up to you to
-implement that method. Inside your ConnectionHandler::data() method, you can for
+implement that method. Inside your ConnectionHandler::onData() method, you can for
 example call the "send()" or "write()" system call to send out the data to
 the RabbitMQ server. But what about data in the other direction? How does the
 library receive data back from RabbitMQ?
@@ -312,7 +312,7 @@ class MyTcpHandler : public AMQP::TcpHandler
      *  and only make "write()" or "read()" system calls when it knows in advance
      *  that these calls will not block. To register a filedescriptor in the
      *  event loop, it calls this "monitor()" method with a filedescriptor and
-     *  flags telling whether the filedescriptor should be checked for reaability
+     *  flags telling whether the filedescriptor should be checked for readability
      *  or writability.
      *
      *  @param  connection      The connection that wants to interact with the event loop

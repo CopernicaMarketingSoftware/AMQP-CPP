@@ -86,6 +86,9 @@ public:
             // we can not safely append the data to the string, it
             // will not exceed the reserved size so it is guaranteed
             // not to change the data pointer, we can just leave that
+            // @todo this is not always necessary; instead, we can refrain from
+            // allocating this buffer entirely and just insert it into the message
+            // directly.
             _str.append(buffer, static_cast<size_t>(size));
 
             // if the string is filled with the given number of characters we are done now

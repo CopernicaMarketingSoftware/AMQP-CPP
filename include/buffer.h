@@ -2,7 +2,7 @@
  *  Buffer.h
  *
  *  Interface that can be implemented by client applications and that
- *  is parsed to the Connection::parse() method.
+ *  is passed to the Connection::parse() method.
  *
  *  Normally, the Connection::parse() method is fed with a byte
  *  array. However, if you're receiving big frames, it may be inconvenient
