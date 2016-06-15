@@ -219,10 +219,20 @@ Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType typ
 {
     // convert exchange type
     std::string exchangeType;
-    if (type == ExchangeType::fanout) exchangeType = "fanout";
-    if (type == ExchangeType::direct) exchangeType = "direct";
-    if (type == ExchangeType::topic)  exchangeType = "topic";
-    if (type == ExchangeType::headers)exchangeType = "headers";
+
+    switch (type)
+    {
+    case ExchangeType::fanout:
+        exchangeType = "fanout";
+    case ExchangeType::direct:
+        exchangeType = "direct";
+    case ExchangeType::topic:
+        exchangeType = "topic";
+    case ExchangeType::headers:
+        exchangeType = "headers";
+    case ExchangeType::consistent_hash:
+        exchangeType = "x-consistent-hash";
+    }
 
     // send declare exchange frame
     return push(ExchangeDeclareFrame(_id, name, exchangeType, (flags & passive) != 0, (flags & durable) != 0, false, arguments));
