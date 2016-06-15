@@ -5,7 +5,7 @@
  *  the hostname was resolved into an IP address
  * 
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 Copernica BV
+ *  @copyright 2015 - 2016 Copernica BV
  */
 
 /**
@@ -17,6 +17,7 @@
  *  Dependencies
  */
 #include "tcpbuffer.h"
+#include "tcpinbuffer.h"
 
 /**
  *  Set up namespace
@@ -43,10 +44,9 @@ private:
     
     /**
      *  An incoming buffer
-     *  @var TcpBuffer
+     *  @var TcpInBuffer
      */
-    TcpBuffer _in;
-    
+    TcpInBuffer _in;
     
     /**
      *  Helper method to report an error
@@ -88,7 +88,8 @@ public:
     TcpConnected(TcpConnection *connection, int socket, TcpBuffer &&buffer, TcpHandler *handler) : 
         TcpState(connection, handler),
         _socket(socket),
-        _out(std::move(buffer))
+        _out(std::move(buffer)),
+        _in(4096)
     {
         // if there is already an output buffer, we have to send out that first
         if (_out) _out.sendto(_socket);
@@ -141,14 +142,14 @@ public:
         if (flags & readable)
         {
             // read data from buffer
-            ssize_t result = _in.receivefrom(_socket);
+            ssize_t result = _in.receivefrom(_socket, _connection->expected());
             
             // are we in an error state?
             if (result < 0 && reportError()) return nextState(monitor);
             
             // we need a local copy of the buffer - because it is possible that "this"
             // object gets destructed halfway through the call to the parse() method
-            TcpBuffer buffer(std::move(_in));
+            TcpInBuffer buffer(std::move(_in));
             
             // parse the buffer
             auto processed = _connection->parse(buffer);
@@ -191,6 +192,20 @@ public:
         
         // start monitoring the socket to find out when it is writable
         _handler->monitor(_connection, _socket, readable | writable);
+    }
+
+    /**
+     *  Report that heartbeat negotiation is going on
+     *  @param  heartbeat   suggested heartbeat
+     *  @return uint16_t    accepted heartbeat
+     */
+    virtual uint16_t reportNegotiate(uint16_t heartbeat) override
+    {
+        // allocate a buffer that is big enough for the biggest possible frame
+        _in.reallocate(_connection->maxFrame());
+        
+        // pass to base
+        return TcpState::reportNegotiate(heartbeat);
     }
 };
     

@@ -23,7 +23,7 @@ namespace AMQP {
  */
 class ByteBuffer : public Buffer
 {
-private:
+protected:
     /**
      *  The actual byte buffer
      *  @var const char *
@@ -45,9 +45,47 @@ public:
     ByteBuffer(const char *data, size_t size) : _data(data), _size(size) {}
     
     /**
+     *  No copy'ing
+     *  @param  that
+     */
+    ByteBuffer(const ByteBuffer &that) = delete;
+    
+    /**
+     *  Move constructor
+     *  @param  that
+     */
+    ByteBuffer(ByteBuffer &&that) : _data(that._data), _size(that._size)
+    {
+        // reset other object
+        that._data = nullptr;
+        that._size = 0;
+    }
+    
+    /**
      *  Destructor
      */
     virtual ~ByteBuffer() {}
+
+    /**
+     *  Move assignment operator
+     *  @param  that
+     */
+    ByteBuffer &operator=(ByteBuffer &&that)
+    {
+        // skip self-assignment
+        if (this == &that) return *this;
+        
+        // copy members
+        _data = that._data;
+        _size = that._size;
+        
+        // reset other object
+        that._data = nullptr;
+        that._size = 0;
+        
+        // done
+        return *this;
+    }
 
     /**
      *  Total size of the buffer

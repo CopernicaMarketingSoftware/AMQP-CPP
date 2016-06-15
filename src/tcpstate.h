@@ -84,7 +84,7 @@ public:
      *  @param  heartbeat   suggested heartbeat
      *  @return uint16_t    accepted heartbeat
      */
-    uint16_t reportNegotiate(uint16_t heartbeat)
+    virtual uint16_t reportNegotiate(uint16_t heartbeat)
     {
         // pass to handler
         return _handler->onNegotiate(_connection, heartbeat);

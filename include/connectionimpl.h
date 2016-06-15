@@ -77,7 +77,7 @@ protected:
      *  Max frame size
      *  @var    uint32_t
      */
-    uint32_t _maxFrame = 10000;
+    uint32_t _maxFrame = 4096;
     
     /**
      *  Number of expected bytes that will hold the next incoming frame

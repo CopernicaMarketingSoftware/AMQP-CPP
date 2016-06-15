@@ -5,7 +5,7 @@
  *  IO between the client application and the RabbitMQ server.
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 Copernica BV
+ *  @copyright 2015 - 2016 Copernica BV
  */
 
 /**
@@ -139,6 +139,24 @@ public:
     {
         // pass to the underlying connection
         return _connection.close();
+    }
+
+    /**
+     *  The max frame size
+     *  @return uint32_t
+     */
+    uint32_t maxFrame() const
+    {
+        return _connection.maxFrame();
+    }
+
+    /**
+     *  The number of bytes that can best be passed to the next call to the parse() method
+     *  @return uint32_t
+     */
+    uint32_t expected() const
+    {
+        return _connection.expected();
     }
 
     /**
