@@ -16,7 +16,7 @@
 /**
  *  Dependencies
  */
-#include "tcpbuffer.h"
+#include "tcpoutbuffer.h"
 #include "tcpinbuffer.h"
 
 /**
@@ -38,9 +38,9 @@ private:
     
     /**
      *  The outgoing buffer
-     *  @var TcpBuffer
+     *  @var TcpOutBuffer
      */
-    TcpBuffer _out;
+    TcpOutBuffer _out;
     
     /**
      *  An incoming buffer
@@ -85,7 +85,7 @@ public:
      *  @param  buffer      The buffer that was already built
      *  @param  handler     User-supplied handler object
      */
-    TcpConnected(TcpConnection *connection, int socket, TcpBuffer &&buffer, TcpHandler *handler) : 
+    TcpConnected(TcpConnection *connection, int socket, TcpOutBuffer &&buffer, TcpHandler *handler) : 
         TcpState(connection, handler),
         _socket(socket),
         _out(std::move(buffer)),

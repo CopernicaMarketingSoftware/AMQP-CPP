@@ -67,7 +67,7 @@ private:
      *  Data that was sent to the connection, while busy resolving the hostname
      *  @var TcpBuffer
      */
-    TcpBuffer _buffer;
+    TcpOutBuffer _buffer;
     
     /**
      *  Thread in which the DNS lookup occurs
