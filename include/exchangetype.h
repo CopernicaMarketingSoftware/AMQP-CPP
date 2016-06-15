@@ -24,7 +24,8 @@ enum ExchangeType
     fanout,
     direct,
     topic,
-    headers
+    headers,
+    consistent_hash
 };
 
 /**
