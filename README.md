@@ -246,6 +246,14 @@ with a buffer filled with the remaining 40 bytes. If the method returns 0, you s
 make a new call to parse() when more data is available, with a buffer that contains
 both the old data, and the new data.
 
+To optimize your calls to the parse() method, you _could_ use the Connection::expected()
+and Connection::maxFrame() methods. The expected() method returns the number of bytes
+that the library prefers to receive next. It is pointless to call the parse() method
+with a smaller buffer, and it is best to call the method with a buffer of exactly this 
+size. The maxFrame() returns the max frame size for AMQP messages. If you read your 
+messages into a reusable buffer, you could allocate this buffer up to this size, so that 
+you never will have to reallocate.
+
 
 TCP CONNECTIONS
 ===============
