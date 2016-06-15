@@ -86,9 +86,10 @@ namespace AMQP {
  */
 ReceivedFrame::ReceivedFrame(const Buffer &buffer, uint32_t max) : _buffer(buffer)
 {
-    // we need enough room for type, channel, the payload size and the end-of-frame byte
-    if (buffer.size() < 8) return;
-
+    // we need enough room for type, channel, the payload size, 
+    // the the end-of-frame byte is not yet necessary
+    if (buffer.size() < 7) return;
+    
     // get the information
     _type = nextUint8();
     _channel = nextUint16();
@@ -98,18 +99,13 @@ ReceivedFrame::ReceivedFrame(const Buffer &buffer, uint32_t max) : _buffer(buffe
     if (max > 0 && _payloadSize > max - 8) throw ProtocolException("frame size exceeded");
 
     // check if the buffer is big enough to contain all data
-    if (buffer.size() >= _payloadSize + 8)
-    {
-        // buffer is big enough, check for a valid end-of-frame marker
-        if ((int)buffer.byte(_payloadSize+7) != END_OF_FRAME) throw ProtocolException("invalid end of frame marker");
-    }
-    else
-    {
-        // frame is not yet valid
-        _type = TYPE_INVALID;
-        _channel = 0;
-        _payloadSize = 0;
-    }
+    if (!complete()) return;
+
+    // buffer is big enough, check for a valid end-of-frame marker
+    if ((int)buffer.byte(_payloadSize+7) == END_OF_FRAME) return;
+
+    // the frame is invalid because it does not end with the expected char
+    throw ProtocolException("invalid end of frame marker");
 }
 
 /**
@@ -127,7 +123,7 @@ bool ReceivedFrame::header() const
  */
 bool ReceivedFrame::complete() const
 {
-    return _type != TYPE_INVALID;
+    return _buffer.size() >= _payloadSize + 8;
 }
 
 /**

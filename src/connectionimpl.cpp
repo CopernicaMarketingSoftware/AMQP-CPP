@@ -3,7 +3,7 @@
  *
  *  Implementation of an AMQP connection
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2016 Copernica BV
  */
 #include "includes.h"
 #include "protocolheaderframe.h"

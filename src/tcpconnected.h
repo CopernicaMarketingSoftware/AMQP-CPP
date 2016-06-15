@@ -146,7 +146,7 @@ public:
             
             // are we in an error state?
             if (result < 0 && reportError()) return nextState(monitor);
-            
+
             // we need a local copy of the buffer - because it is possible that "this"
             // object gets destructed halfway through the call to the parse() method
             TcpInBuffer buffer(std::move(_in));
@@ -161,7 +161,7 @@ public:
             buffer.shrink(processed);
             
             // restore the buffer as member
-            std::swap(_in, buffer);
+            _in = std::move(buffer);
         }
         
         // keep same object

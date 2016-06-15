@@ -1,6 +1,6 @@
 CPP	        		= g++
 RM	        		= rm -f
-CPPFLAGS			= -Wall -c -I. -std=c++11
+CPPFLAGS			= -Wall -c -I. -std=c++11 -MD
 LD	        		= g++
 LD_FLAGS			= -Wall -shared
 SHARED_LIB			= lib$(LIBRARY_NAME).so.$(VERSION)
@@ -8,6 +8,7 @@ STATIC_LIB			= lib$(LIBRARY_NAME).a.$(VERSION)
 SOURCES				= $(wildcard *.cpp)
 SHARED_OBJECTS		= $(SOURCES:%.cpp=%.o)
 STATIC_OBJECTS		= $(SOURCES:%.cpp=%.s.o)
+DEPENDENCIES		= $(SOURCES:%.cpp=%.d)
 PURE_SHARED_OBJECTS	= $(filter-out tcpconnection.o, $(SOURCES:%.cpp=%.o))
 PURE_STATIC_OBJECTS	= $(filter-out tcpconnection.s.o, $(SOURCES:%.cpp=%.s.o))
 
@@ -18,6 +19,7 @@ else
     SONAMEPARAMETER = -soname
 endif
 
+-include ${DEPENDENCIES}
 
 all:			CPPFLAGS += -g
 all:			LD_FLAGS += -g

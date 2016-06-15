@@ -4,7 +4,7 @@
  *  Test program to check AMQP functionality based on LibEV
  * 
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 Copernica BV
+ *  @copyright 2015 - 2016 Copernica BV
  */
 
 /**
@@ -27,7 +27,7 @@ int main()
     AMQP::LibEvHandler handler(loop);
     
     // make a connection
-    AMQP::TcpConnection connection(&handler, AMQP::Address("amqp://localhost/"));
+    AMQP::TcpConnection connection(&handler, AMQP::Address("amqp://guest:guest@localhost/"));
     
     // we need a channel too
     AMQP::TcpChannel channel(&connection);

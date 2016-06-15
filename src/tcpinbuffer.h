@@ -22,19 +22,13 @@ namespace AMQP {
  */
 class TcpInBuffer : public ByteBuffer
 {
-private:
-    /**
-     *  Number of bytes already filled
-     *  @var size_t
-     */
-    size_t _filled = 0;
-
 public:
     /**
      *  Constructor
-     *  @param  size        initial size
+     *  Note that we pass 0 to the constructor because the buffer seems to be empty
+     *  @param  size        initial size to allocated
      */
-    TcpInBuffer(size_t size) : ByteBuffer((char *)malloc(size), size) {}
+    TcpInBuffer(size_t size) : ByteBuffer((char *)malloc(size), 0) {}
     
     /**
      *  No copy'ing
@@ -46,11 +40,7 @@ public:
      *  Move constructor
      *  @param  that
      */
-    TcpInBuffer(TcpInBuffer &&that) : ByteBuffer(std::move(that)), _filled(that._filled)
-    {
-        // reset other object
-        that._filled = 0;
-    }
+    TcpInBuffer(TcpInBuffer &&that) : ByteBuffer(std::move(that)) {}
     
     /**
      *  Destructor
@@ -70,14 +60,8 @@ public:
         // skip self-assignment
         if (this == &that) return *this;
         
-        // copy the filled paramteer
-        _filled = that._filled;
-        
-        // reset other object
-        that._filled = 0;
-        
         // call base
-        ByteBuffer::operator=(std::move(*this));
+        ByteBuffer::operator=(std::move(that));
         
         // done
         return *this;
@@ -91,10 +75,7 @@ public:
     {
         // update data
         _data = (char *)realloc((void *)_data, size);
-
-        // update size
-        _size = size;
-    }
+   }
     
     /**
      *  Receive data from a socket
@@ -109,19 +90,19 @@ public:
         
         // check the number of bytes that are available
         if (ioctl(socket, FIONREAD, &available) != 0) return -1;
-
+        
         // if no bytes are available, it could mean that the connection was closed
         // by the remote client, so we do have to call read() anyway, assume a default buffer
         if (available == 0) available = 1;
         
         // number of bytes to read
-        size_t bytes = std::min(expected, available);
+        size_t bytes = std::min((uint32_t)(expected - _size), available);
         
         // read data into the buffer
-        auto result = read(socket, (void *)(_data + _filled), bytes);
+        auto result = read(socket, (void *)(_data + _size), bytes);
         
         // update total buffer size
-        if (result > 0) _filled += result;
+        if (result > 0) _size += result;
         
         // done
         return result;
@@ -133,8 +114,8 @@ public:
      */
     void shrink(size_t size)
     {
-        // update filled bytes
-        _filled -= size;
+        // update size
+        _size -= size;
     }
 };
 
