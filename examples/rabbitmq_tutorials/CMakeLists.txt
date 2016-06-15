@@ -1,6 +1,6 @@
 set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)  
-set(Boost_USE_STATIC_RUNTIME OFF) 
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.55 REQUIRED COMPONENTS system)
 
 if(NOT Boost_FOUND)
@@ -33,15 +33,6 @@ foreach(item ${PROGS})
     add_executable(${item} "${item}.cpp")
     target_link_libraries(${item} amqp-cpp
                                   asio_handler
-                                  ${CMAKE_THREAD_LIBS_INIT})    
+                                  ${CMAKE_THREAD_LIBS_INIT})
 endforeach(item)
 
-#little hack
-file(GLOB AMQCPP_HEADERS ${PROJECT_SOURCE_DIR}/include/*)
-
-file(COPY ${AMQCPP_HEADERS}
-     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/amqpcpp)
-
-include_directories(${PROJECT_SOURCE_DIR}
-                    ${CMAKE_CURRENT_BINARY_DIR})
-     
