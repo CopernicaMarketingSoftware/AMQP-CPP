@@ -1,6 +1,6 @@
 CPP	        		= g++
 RM	        		= rm -f
-CPPFLAGS			= -Wall -c -I. -std=c++11
+CPPFLAGS			= -Wall -c -I. -I../include -std=c++11
 LD	        		= g++
 LD_FLAGS			= -Wall -shared
 SHARED_LIB			= lib$(LIBRARY_NAME).so.$(VERSION)

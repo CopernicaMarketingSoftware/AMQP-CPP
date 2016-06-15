@@ -2,45 +2,37 @@ cmake_minimum_required(VERSION 2.8)
 
 project(amqp-cpp)
 
-# ensure c++11 on all compilers
-include(set_cxx_norm.cmake)
-set_cxx_norm (${CXX_NORM_CXX11})
+set(amqp-cpp_MAJOR "2")
+set(amqp-cpp_MINOR "5")
+set(amqp-cpp_MICRO "2")
 
-macro (add_sources)
-    file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
-    foreach (_src ${ARGN})
-        if (_relPath)
-            list (APPEND SRCS "${_relPath}/${_src}")
-        else()
-            list (APPEND SRCS "${_src}")
-        endif()
-    endforeach()
-    if (_relPath)
-        # propagate SRCS to parent directory
-        set (SRCS ${SRCS} PARENT_SCOPE)
-    endif()
-endmacro()
+set(CPACK_PACKAGE_VERSION_MAJOR ${amqp-cpp_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${amqp-cpp_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${amqp-cpp_MICRO})
 
-add_subdirectory(src)
-add_subdirectory(include)
+set(CPP_VERSION "c++11" CACHE STRING "C++ version to use")
+set_property(CACHE CPP_VERSION PROPERTY STRINGS "c++11" "c++14" "c++1y")
 
-add_library(amqp-cpp STATIC ${SRCS})
-target_include_directories(amqp-cpp SYSTEM PUBLIC ${PROJECT_SOURCE_DIR})
-install(TARGETS amqp-cpp
-        ARCHIVE DESTINATION lib
-)
-install(DIRECTORY include/ DESTINATION include/amqpcpp
-        FILES_MATCHING PATTERN "*.h")
-install(FILES amqpcpp.h DESTINATION include)
-
-option(BUILD_TUTORIALS "build rabbitmq tutorials" OFF)
-if(BUILD_TUTORIALS)
-    add_subdirectory(examples/rabbitmq_tutorials)
+if (${CMAKE_CXX_COMPILER_ID} MATCHES GNU OR ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
+    include(CheckCXXCompilerFlag)
+    CHECK_CXX_COMPILER_FLAG("-std=${CPP_VERSION}" HAVE_CPP_VERSION)
+    add_definitions("-std=${CPP_VERSION}")
+    add_definitions("-Wextra -Wall -Wno-unused-parameter")
 endif()
-
-set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
 if (WIN32)
     add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
 endif()
+
+include_directories(include/)
+
+add_subdirectory(include)
+add_subdirectory(src)
+
+option(BUILD_TUTORIALS "build rabbitmq tutorials" OFF)
+if(BUILD_TUTORIALS)
+    add_subdirectory(examples/)
+endif()
+
+set(CPACK_GENERATOR "TGZ")
+include(CPack)

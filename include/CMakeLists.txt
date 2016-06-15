@@ -1,37 +1,6 @@
-add_sources(
-array.h
-booleanset.h
-buffer.h
-bytebuffer.h
-callbacks.h
-channel.h
-channelimpl.h
-classes.h
-endian.h
-connection.h
-connectionhandler.h
-connectionimpl.h
-decimalfield.h
-deferred.h
-deferredcancel.h
-deferredconsumer.h
-deferreddelete.h
-deferredget.h
-deferredqueue.h
-entityimpl.h
-envelope.h
-exchangetype.h
-field.h
-fieldproxy.h
-flags.h
-login.h
-message.h
-metadata.h
-monitor.h
-numericfield.h
-outbuffer.h
-receivedframe.h
-stringfield.h
-table.h
-watchable.h
-)
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
+    DESTINATION include
+    COMPONENT includes
+    FILES_MATCHING
+    REGEX "h$"
+    )
