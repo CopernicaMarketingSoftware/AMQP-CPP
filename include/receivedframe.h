@@ -129,8 +129,15 @@ public:
     virtual ~ReceivedFrame() {}
 
     /**
+     *  Have we at least received the full frame header?
+     *  The header contains the frame type, the channel ID and the payload size
+     *  @return bool
+     */
+    bool header() const;
+
+    /**
      *  Is this a complete frame?
-     *  @return integer
+     *  @return bool
      */
     bool complete() const;
 

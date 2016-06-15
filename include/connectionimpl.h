@@ -78,6 +78,13 @@ protected:
      *  @var    uint32_t
      */
     uint32_t _maxFrame = 10000;
+    
+    /**
+     *  Number of expected bytes that will hold the next incoming frame
+     *  We start with seven because that is the header of a frame
+     *  @var    uint32_t
+     */
+    uint32_t _expected = 7;
 
     /**
      *  The login for the server (login, password)
@@ -237,6 +244,15 @@ public:
     {
         // 8 bytes for header and end-of-frame byte
         return _maxFrame - 8;
+    }
+    
+    /**
+     *  The number of bytes that can best be passed to the next call to the parse() method
+     *  @return uint32_t
+     */
+    uint32_t expected() const
+    {
+        return _expected;
     }
 
     /**

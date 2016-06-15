@@ -78,6 +78,7 @@
  *  Set up namespace
  */
 namespace AMQP {
+
 /**
  *  Constructor
  *  @param  buffer      Binary buffer
@@ -109,6 +110,15 @@ ReceivedFrame::ReceivedFrame(const Buffer &buffer, uint32_t max) : _buffer(buffe
         _channel = 0;
         _payloadSize = 0;
     }
+}
+
+/**
+ *  Have we received the header of the frame
+ *  @return bool
+ */
+bool ReceivedFrame::header() const
+{
+    return _buffer.size() >= 7;
 }
 
 /**

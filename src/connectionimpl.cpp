@@ -124,16 +124,30 @@ uint64_t ConnectionImpl::parse(const Buffer &buffer)
         {
             // try to recognize the frame
             ReceivedFrame receivedFrame(ReducedBuffer(buffer, processed), _maxFrame);
-            if (!receivedFrame.complete()) return processed;
+            
+            // do we have the full frame?
+            if (receivedFrame.complete())
+            {
+                // process the frame
+                receivedFrame.process(this);
 
-            // process the frame
-            receivedFrame.process(this);
+                // number of bytes processed
+                uint64_t bytes = receivedFrame.totalSize();
 
-            // number of bytes processed
-            uint64_t bytes = receivedFrame.totalSize();
+                // add bytes
+                processed += bytes;
+            }
+            else
+            {
+                // we do not yet have the complete frame, but if we do at least 
+                // have the initial bytes of the header, we already know how much 
+                // data we need for the next frame, otherwise we need at least 7
+                // bytes for processing the header of the next frame
+                _expected = receivedFrame.header() ? receivedFrame.totalSize() : 7;
 
-            // add bytes
-            processed += bytes;
+                // we're ready for now
+                return processed;
+            }
         }
         catch (const ProtocolException &exception)
         {
@@ -146,7 +160,14 @@ uint64_t ConnectionImpl::parse(const Buffer &buffer)
     }
 
     // leap out if the connection object no longer exists
-    if (!monitor.valid() || !_closed || _state != state_connected) return processed;
+    if (!monitor.valid()) return processed;
+
+    // the entire buffer has been processed, the next call to parse() should at least
+    // contain the size of the frame header to be meaningful for the amqp-cpp library
+    _expected = 7;
+
+    // if the connection is being closed, we have to do more stuff, otherwise we're ready now
+    if (!_closed || _state != state_connected) return processed;
 
     // the close() function was called, but if the close frame was not yet sent
     // if there are no waiting channels, we can do that right now

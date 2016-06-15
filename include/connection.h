@@ -137,6 +137,34 @@ public:
     {
         return _implementation.parse(buffer);
     }
+    
+    /**
+     *  Max frame size
+     *  
+     *  If you allocate memory to receive data that you are going to pass to the parse() method,
+     *  it might be useful to have an insight in the max frame size. The parse() method process
+     *  one frame at a time, so you must at least be able to read in buffers of this specific
+     *  frame size.
+     * 
+     *  @return size_t
+     */
+    uint32_t maxFrame() const
+    {
+        return _implementation.maxFrame();
+    }
+    
+    /**
+     *  Expected number of bytes for the next parse() call.
+     * 
+     *  This method returns the number of bytes that the next call to parse() at least expects to 
+     *  do something meaningful with it.
+     * 
+     *  @return size_t
+     */
+    uint32_t expected() const
+    {
+        return _implementation.expected();
+    }
 
     /**
      *  Close the connection
