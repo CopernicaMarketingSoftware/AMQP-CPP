@@ -49,6 +49,13 @@ private:
     TcpInBuffer _in;
     
     /**
+     *  Cached reallocation instruction
+     *  @var size_t
+     */
+    size_t _reallocate = 0;
+
+    
+    /**
      *  Helper method to report an error
      *  @return bool        Was an error reported?
      */
@@ -162,6 +169,9 @@ public:
             
             // restore the buffer as member
             _in = std::move(buffer);
+            
+            // do we have to reallocate?
+            if (_reallocate) { _in.reallocate(_reallocate); _reallocate = 0; }
         }
         
         // keep same object
@@ -201,8 +211,8 @@ public:
      */
     virtual uint16_t reportNegotiate(uint16_t heartbeat) override
     {
-        // allocate a buffer that is big enough for the biggest possible frame
-        _in.reallocate(_connection->maxFrame());
+        // remember that we have to reallocated (_in member can not be accessed because it is moved away)
+        _reallocate = _connection->maxFrame();
         
         // pass to base
         return TcpState::reportNegotiate(heartbeat);
