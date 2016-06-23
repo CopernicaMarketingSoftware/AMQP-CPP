@@ -73,6 +73,58 @@ public:
 
 public:
     /**
+     *  Register the function to be called when a new message is expected
+     *
+     *  @param  callback    The callback to invoke
+     *  @return Same object for chaining
+     */
+    DeferredConsumer &onBegin(const BeginCallback &callback)
+    {
+        // store callback
+        _beginCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register the function to be called when message headers come in
+     *
+     *  @param  callback    The callback to invoke for message headers
+     *  @return Same object for chaining
+     */
+    DeferredConsumer &onHeaders(const HeaderCallback &callback)
+    {
+        // store callback
+        _headerCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register the function to be called when a chunk of data comes in
+     *
+     *  Note that this function may be called zero, one or multiple times
+     *  for each incoming message depending on the size of the message data.
+     *
+     *  If you install this callback you very likely also want to install
+     *  the onComplete callback so you know when the last data part was
+     *  received.
+     *
+     *  @param  callback    The callback to invoke for chunks of message data
+     *  @return Same object for chaining
+     */
+    DeferredConsumer &onData(const DataCallback &callback)
+    {
+        // store callback
+        _dataCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
      *  Register the function that is called when the consumer starts
      *  @param  callback
      */
@@ -121,6 +173,21 @@ public:
     {
         // store callback
         _messageCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register a funtion to be called when a message was completely received
+     *
+     *  @param  callback    The callback to invoke
+     *  @return Same object for chaining
+     */
+    DeferredConsumer &onComplete(const CompleteCallback &callback)
+    {
+        // store callback
+        _completeCallback = callback;
 
         // allow chaining
         return *this;
