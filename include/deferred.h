@@ -14,6 +14,12 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include <memory>
+#include "callbacks.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -106,11 +112,24 @@ protected:
     }
 
     /**
+     *  Report success for a get operation
+     *
+     *  @param  messagecount    Number of messages left in the queue
+     *  @param  deliveryTag     Delivery tag of the message coming in
+     *  @param  redelivered     Was the message redelivered?
+     */
+    virtual const std::shared_ptr<Deferred> &reportSuccess(uint32_t messagecount, uint64_t deliveryTag, bool redelivered)
+    {
+        // this is the same as a regular success message
+        return reportSuccess();
+    }
+
+    /**
      *  Report success for frames that report cancel operations
      *  @param  name            Consumer tag that is cancelled
      *  @return Deferred
      */
-    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) const
+    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name)
     {
         // this is the same as a regular success message
         return reportSuccess();

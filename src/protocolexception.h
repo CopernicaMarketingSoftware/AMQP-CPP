@@ -8,6 +8,16 @@
  */
 
 /**
+ *  Include guard
+ */
+#pragma once
+
+/**
+ *  Dependencies
+ */
+#include "exception.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {

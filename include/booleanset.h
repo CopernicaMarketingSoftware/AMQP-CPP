@@ -14,10 +14,18 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include <ostream>
+#include "field.h"
+#include "outbuffer.h"
+#include "receivedframe.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
-    
+
 /**
  *  Class definition
  */
@@ -63,7 +71,7 @@ public:
     {
         _byte = frame.nextUint8();
     }
-    
+
     /**
      *  Copy constructor
      *  @param  that
@@ -95,10 +103,10 @@ public:
     {
         // prefix
         stream << "booleanset(";
-        
+
         // the members
         for (int i=0; i<8; i++) stream << (i == 0 ? "" : ",") << (get(i) ? 1 : 0);
-        
+
         // postfix
         stream << ")";
     }

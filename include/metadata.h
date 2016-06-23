@@ -13,6 +13,13 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include "booleanset.h"
+#include "stringfield.h"
+#include "table.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {

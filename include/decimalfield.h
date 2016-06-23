@@ -1,6 +1,6 @@
 /**
  *  Decimal field type for AMQP
- * 
+ *
  *  @copyright 2014, 2015 Copernica BV
  */
 
@@ -8,6 +8,15 @@
  *  Include guard
  */
 #pragma once
+
+/**
+ *  Dependencies
+ */
+#include <cmath>
+#include <ostream>
+#include "field.h"
+#include "outbuffer.h"
+#include "receivedframe.h"
 
 /**
  *  Set up namespace
@@ -44,7 +53,7 @@ private:
      *  The number without the decimals
      */
     uint32_t _number;
-    
+
 protected:
     /**
      *  Write encoded payload to the given buffer.
@@ -67,7 +76,7 @@ public:
         _places(places),
         _number(number)
     {}
-    
+
     /**
      *  Construct based on incoming data
      *  @param  frame
@@ -77,7 +86,7 @@ public:
         _places = frame.nextUint8();
         _number = frame.nextUint32();
     }
-    
+
     /**
      *  Destructor
      */
@@ -161,7 +170,7 @@ public:
      *  Check for inequality between this and another DecimalField
      *
      *  @param  value    value to be checked for inequality
-     *  @return boolean  whether values are inequal    
+     *  @return boolean  whether values are inequal
      */
     bool operator!=(const DecimalField& value) const
     {
@@ -199,7 +208,7 @@ public:
     /**
      *  Return the DecimalField
      *  To preserve precision DecimalField is returned, containing the number and places.
-     *  @return return DecimalField 
+     *  @return return DecimalField
      */
     DecimalField value() const
     {

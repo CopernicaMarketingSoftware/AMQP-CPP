@@ -12,6 +12,11 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include <string>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -33,7 +38,7 @@ private:
      *  @var string
      */
     std::string _password;
-    
+
 
 public:
     /**
@@ -53,7 +58,7 @@ public:
      *  Destructor
      */
     virtual ~Login() {}
-    
+
     /**
      *  Retrieve the user name
      *  @return string
@@ -62,7 +67,7 @@ public:
     {
         return _user;
     }
-    
+
     /**
      *  Retrieve the password
      *  @return string
@@ -71,7 +76,7 @@ public:
     {
         return _password;
     }
-    
+
     /**
      *  String representation in SASL PLAIN mode
      *  @return string
@@ -80,7 +85,7 @@ public:
     {
         // we need an initial string
         std::string result("\0", 1);
-        
+
         // append other elements
         return result.append(_user).append("\0",1).append(_password);
     }

@@ -5,6 +5,18 @@
  */
 
 /**
+ *  Include guard
+ */
+#pragma once
+
+/**
+ *  Dependencies
+ */
+#include "extframe.h"
+#include "../include/connectionimpl.h"
+#include "../include/deferredconsumerbase.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -94,18 +106,11 @@ public:
         // we need the appropriate channel
         auto channel = connection->channel(this->channel());
 
-        // channel does not exist
-        if (!channel) return false;
+        // check if we have a valid channel and consumer
+        if (!channel || !channel->consumer()) return false;
 
-        // is there a current message?
-        MessageImpl *message = channel->message();
-        if (!message) return false;
-
-        // store size
-        if (!message->append(_payload, _size)) return true;
-
-        // the message is complete
-        channel->reportMessage();
+        // the consumer may process the frame
+        channel->consumer()->process(*this);
 
         // done
         return true;

@@ -13,6 +13,11 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include "metadata.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {

@@ -1,7 +1,7 @@
 /**
  *  ReceivedFrame.h
  *
- *  The received frame class is a wrapper around a data buffer, it tries to 
+ *  The received frame class is a wrapper around a data buffer, it tries to
  *  find out if the buffer is big enough to contain an entire frame, and
  *  it will try to recognize the frame type in the buffer
  *
@@ -17,9 +17,20 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include <cstdint>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
+
+/**
+ *  Forward declarations
+ */
+class Buffer;
+class ConnectionImpl;
 
 /**
  *  Class definition
@@ -113,7 +124,7 @@ private:
      *  @return bool
      */
     bool processHeaderFrame(ConnectionImpl *connection);
-    
+
 
 public:
     /**
@@ -171,56 +182,56 @@ public:
 
     /**
      *  Read the next uint8_t from the buffer
-     *  
+     *
      *  @return uint8_t         value read
      */
     uint8_t nextUint8();
 
     /**
      *  Read the next int8_t from the buffer
-     *  
+     *
      *  @return int8_t          value read
      */
     int8_t nextInt8();
 
     /**
      *  Read the next uint16_t from the buffer
-     *  
+     *
      *  @return uint16_t        value read
      */
     uint16_t nextUint16();
 
     /**
      *  Read the next int16_t from the buffer
-     *  
+     *
      *  @return int16_t     value read
      */
     int16_t nextInt16();
 
     /**
      *  Read the next uint32_t from the buffer
-     *  
+     *
      *  @return uint32_t        value read
      */
     uint32_t nextUint32();
 
     /**
      *  Read the next int32_t from the buffer
-     *  
+     *
      *  @return int32_t     value read
      */
     int32_t nextInt32();
 
     /**
      *  Read the next uint64_t from the buffer
-     *  
+     *
      *  @return uint64_t        value read
      */
     uint64_t nextUint64();
 
     /**
      *  Read the next int64_t from the buffer
-     *  
+     *
      *  @return int64_t     value read
      */
     int64_t nextInt64();
@@ -228,7 +239,7 @@ public:
     /**
      *  Read a float from the buffer
      *
-     *  @return float       float read from buffer. 
+     *  @return float       float read from buffer.
      */
     float nextFloat();
 
@@ -248,11 +259,11 @@ public:
 
     /**
      *  Process the received frame
-     * 
+     *
      *  If this method returns false, it means that the frame was not processed,
-     *  because it was an unrecognized frame. This does not mean that the 
+     *  because it was an unrecognized frame. This does not mean that the
      *  connection is now in an invalid state however.
-     * 
+     *
      *  @param  connection  the connection over which the data was received
      *  @return bool        was the frame fully processed
      *  @internal
@@ -271,4 +282,3 @@ public:
  *  End of namespace
  */
 }
-

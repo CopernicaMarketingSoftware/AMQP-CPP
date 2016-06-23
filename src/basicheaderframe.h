@@ -1,8 +1,22 @@
 /**
  *  Class describing an AMQP basic header frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
+
+/**
+ *  Dependencies
+ */
+#include "headerframe.h"
+#include "../include/metadata.h"
+#include "../include/envelope.h"
+#include "../include/connectionimpl.h"
+#include "../include/deferredconsumerbase.h"
 
 /**
  *  Set up namespace
@@ -57,7 +71,7 @@ public:
      *  Construct an empty basic header frame
      *
      *  All options are set using setter functions.
-     * 
+     *
      *  @param  channel     channel we're working on
      *  @param  envelope    the envelope
      */
@@ -71,17 +85,17 @@ public:
      *  Constructor to parse incoming frame
      *  @param  frame
      */
-    BasicHeaderFrame(ReceivedFrame &frame) : 
+    BasicHeaderFrame(ReceivedFrame &frame) :
         HeaderFrame(frame),
         _weight(frame.nextUint16()),
         _bodySize(frame.nextUint64()),
         _metadata(frame)
     {}
-    
+
     /**
      *  Destructor
      */
-    virtual ~BasicHeaderFrame() {}
+    virtual ~BasicHeaderFrame() = default;
 
     /**
      *  Size of the body
@@ -93,6 +107,16 @@ public:
     }
 
     /**
+     *  The metadata sent in this frame
+     *
+     *  @return All the metadata for this message
+     */
+    const MetaData &metaData() const
+    {
+        return _metadata;
+    }
+
+    /**
      *  The class ID
      *  @return uint16_t
      */
@@ -100,7 +124,7 @@ public:
     {
         return 60;
     }
-    
+
     /**
      *  Process the frame
      *  @param  connection      The connection over which it was received
@@ -110,23 +134,13 @@ public:
     {
         // we need the appropriate channel
         auto channel = connection->channel(this->channel());
-        
-        // channel does not exist
-        if (!channel) return false;    
-        
-        // is there a current message?
-        MessageImpl *message = channel->message();
-        if (!message) return false;
-        
-        // store size
-        message->setBodySize(_bodySize);
-        
-        // and copy the meta data
-        message->set(_metadata);
-        
-        // for empty bodies we're ready now
-        if (_bodySize == 0) channel->reportMessage();
-        
+
+        // check if we have a valid channel and consumer
+        if (!channel || !channel->consumer()) return false;
+
+        // the channel can process the frame
+        channel->consumer()->process(*this);
+
         // done
         return true;
     }

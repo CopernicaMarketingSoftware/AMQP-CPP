@@ -10,6 +10,14 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include "field.h"
+#include "fieldproxy.h"
+#include <vector>
+#include <ostream>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -221,6 +229,18 @@ public:
         return *this;
     }
 };
+
+/**
+ *  Custom output stream operator
+ *  @param  stream
+ *  @param  field
+ *  @return ostream
+ */
+inline std::ostream &operator<<(std::ostream &stream, const ArrayFieldProxy &field)
+{
+    // get underlying field, and output that
+    return stream << field.get();
+}
 
 /**
  *  end namespace

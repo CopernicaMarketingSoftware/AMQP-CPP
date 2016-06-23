@@ -1,15 +1,26 @@
 /**
  *  ExtFrame.h
- * 
- *  Class describing an AMQP frame. A frame can be encoded into the AMQP 
- *  wireframe format, so that it can be sent over an open socket, or it can be 
+ *
+ *  Class describing an AMQP frame. A frame can be encoded into the AMQP
+ *  wireframe format, so that it can be sent over an open socket, or it can be
  *  constructed from a buffer containing AMQP wireframe format.
- * 
+ *
  *  The ExtFrame is the base class for all other frames, apart from the
  *  protocol-header-frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
+
+/**
+ *  Dependencies
+ */
+#include "frame.h"
+#include "../include/receivedframe.h"
 
 /**
  *  Set up namespace
@@ -36,13 +47,13 @@ protected:
 
     /**
      *  Constructor for an AMQP Frame
-     * 
-     *  The constructor is protected as you're not supposed  
-     * 
+     *
+     *  The constructor is protected as you're not supposed
+     *
      *  @param  channel         channel we're working on
      *  @param  size            size of the payload
      */
-    ExtFrame(uint16_t channel, uint32_t size) : _channel(channel), _size(size) {} 
+    ExtFrame(uint16_t channel, uint32_t size) : _channel(channel), _size(size) {}
 
     /**
      *  Constructor based on a received not-yet-recognized frame
@@ -141,7 +152,7 @@ public:
     {
         // this is an exception
         throw ProtocolException("unimplemented frame type " + std::to_string(type()));
-        
+
         // unreachable
         return false;
     }

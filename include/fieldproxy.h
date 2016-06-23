@@ -1,7 +1,7 @@
 /**
  *  Field proxy. Returned by the table. Can be casted to the
  *  relevant native type (std::string or numeric)
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -11,9 +11,26 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include <cstdint>
+#include <string>
+#include "stringfield.h"
+#include "booleanset.h"
+#include "decimalfield.h"
+#include "numericfield.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
+
+/**
+ *  Forward declarations
+ */
+class Table;
+class Array;
+class Field;
 
 /**
  *  Class implementation
@@ -200,7 +217,7 @@ public:
         // cast to a string
         return operator=(std::string(value));
     }
-    
+
     /**
      *  Assign an array value
      *  @param  value
@@ -224,7 +241,7 @@ public:
         _source->set(_index, value);
         return *this;
     }
-    
+
     /**
      *  Get the underlying field
      *  @return Field
@@ -247,32 +264,8 @@ public:
 };
 
 // define types for array- and table-based field proxy
-typedef FieldProxy<Table, std::string> AssociativeFieldProxy;
-typedef FieldProxy<Array, uint8_t> ArrayFieldProxy;
-
-/**
- *  Custom output stream operator
- *  @param  stream
- *  @param  field
- *  @return ostream
- */
-inline std::ostream &operator<<(std::ostream &stream, const AssociativeFieldProxy &field)
-{
-    // get underlying field, and output that
-    return stream << field.get();
-}
-
-/**
- *  Custom output stream operator
- *  @param  stream
- *  @param  field
- *  @return ostream
- */
-inline std::ostream &operator<<(std::ostream &stream, const ArrayFieldProxy &field)
-{
-    // get underlying field, and output that
-    return stream << field.get();
-}
+using AssociativeFieldProxy = FieldProxy<Table, std::string>;
+using ArrayFieldProxy       = FieldProxy<Array, uint8_t>;
 
 /**
  *  end namespace

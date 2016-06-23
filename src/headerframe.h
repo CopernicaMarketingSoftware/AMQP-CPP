@@ -5,6 +5,16 @@
  */
 
 /**
+ *  Include guard
+ */
+#pragma once
+
+/**
+ *  Dependencies
+ */
+#include "extframe.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {

@@ -41,7 +41,7 @@ private:
      *  @param  name            Consumer tag that is cancelled
      *  @return Deferred
      */
-    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) const override;
+    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) override;
 
     /**
      *  The channel implementation may call our

@@ -1,8 +1,18 @@
 /**
  *  Class describing an AMQP basic frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
+
+/**
+ *  Dependencies
+ */
+#include "methodframe.h"
 
 /**
  *  Set up namespace
@@ -35,7 +45,7 @@ public:
      */
     virtual ~BasicFrame() {}
 
-    /** 
+    /**
      *  Class id
      *  @return uint16_t
      */

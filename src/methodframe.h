@@ -1,8 +1,18 @@
 /**
  *  Class describing an AMQP method frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
+
+/**
+ *  Dependencies
+ */
+#include "extframe.h"
 
 /**
  *  Set up namespace
@@ -17,18 +27,18 @@ class MethodFrame : public ExtFrame
 protected:
     /**
      *  Constructor for a methodFrame
-     * 
+     *
      *  @param  channel     channel we're working on
      *  @param  size        size of the frame.
      */
     MethodFrame(uint16_t channel, uint32_t size) : ExtFrame(channel, size + 4) {} // size of classID and methodID
-    
+
     /**
      *  Load a method from from a received frame
      *  @param  frame       The received frame
      */
     MethodFrame(ReceivedFrame &frame) : ExtFrame(frame) {}
-    
+
     /**
      *  Fill an output buffer
      *  @param  buffer
@@ -37,7 +47,7 @@ protected:
     {
         // call base
         ExtFrame::fill(buffer);
-        
+
         // add type
         buffer.add(classID());
         buffer.add(methodID());

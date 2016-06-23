@@ -1,8 +1,21 @@
 /**
  *  Class describing a basic deliver frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
+
+/**
+ *  Include guard
+ */
+#pragma once
+
+/**
+ *  Dependencies
+ */
+#include "basicframe.h"
+#include "../include/stringfield.h"
+#include "../include/booleanset.h"
+#include "../include/connectionimpl.h"
 
 /**
  *  Set up namespace
@@ -12,7 +25,7 @@ namespace AMQP{
 /**
  *  Class implementation
  */
-class BasicDeliverFrame : public BasicFrame 
+class BasicDeliverFrame : public BasicFrame
 {
 private:
     /**
@@ -70,7 +83,7 @@ public:
      *  @param  consumerTag     identifier for the consumer, valid within current channel
      *  @param  deliveryTag     server-assigned and channel specific delivery tag
      *  @param  redelivered     indicates whether the message has been previously delivered to this (or another) client
-     *  @param  exchange        name of exchange to publish to   
+     *  @param  exchange        name of exchange to publish to
      *  @param  routingKey      message routing key
      */
     BasicDeliverFrame(uint16_t channel, const std::string& consumerTag, uint64_t deliveryTag, bool redelivered = false, const std::string& exchange = "", const std::string& routingKey = "") :
@@ -86,7 +99,7 @@ public:
     /**
      *  Construct a basic deliver frame from a received frame
      *
-     *  @param  frame   received frame 
+     *  @param  frame   received frame
      */
     BasicDeliverFrame(ReceivedFrame &frame) :
         BasicFrame(frame),
@@ -176,13 +189,13 @@ public:
     {
         // we need the appropriate channel
         auto channel = connection->channel(this->channel());
-        
+
         // channel does not exist
-        if (!channel) return false;    
-        
+        if (!channel) return false;
+
         // construct the message
-        channel->message(*this);
-        
+        channel->process(*this);
+
         // done
         return true;
     }

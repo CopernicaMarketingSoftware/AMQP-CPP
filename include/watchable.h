@@ -13,9 +13,20 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include <vector>
+#include <algorithm>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
+
+/**
+ *  Forward declarations
+ */
+class Monitor;
 
 /**
  *  Class definition
@@ -38,7 +49,7 @@ private:
         // add to the vector
         _monitors.push_back(monitor);
     }
-    
+
     /**
      *  Remove a monitor
      *  @param  monitor
@@ -47,7 +58,7 @@ private:
     {
         // put the monitor at the end of the vector
         auto iter = std::remove(_monitors.begin(), _monitors.end(), monitor);
-        
+
         // make the vector smaller
         _monitors.erase(iter, _monitors.end());
     }
@@ -57,12 +68,12 @@ public:
      *  Destructor
      */
     virtual ~Watchable();
-    
+
     /**
      *  Only a monitor has full access
      */
     friend class Monitor;
-};     
+};
 
 /**
  *  End of namespace

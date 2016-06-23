@@ -13,6 +13,12 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include <memory>
+#include <cstring>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -93,7 +99,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~OutBuffer() {}
+    virtual ~OutBuffer() = default;
 
     /**
      *  Get access to the internal buffer
@@ -256,4 +262,3 @@ public:
  *  End of namespace
  */
 }
-

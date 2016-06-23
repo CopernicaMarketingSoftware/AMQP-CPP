@@ -8,9 +8,25 @@
  */
 
 /**
+ *  Include guard
+ */
+#pragma once
+
+/**
+ *  Dependencies
+ */
+#include "../include/outbuffer.h"
+#include "protocolexception.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
+
+/**
+ *  Forward declarations
+ */
+class ConnectionImpl;
 
 /**
  *  Class definition

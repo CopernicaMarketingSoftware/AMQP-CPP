@@ -10,9 +10,22 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include <memory>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
+
+/**
+ *  Forward declarations
+ */
+class ReceivedFrame;
+class OutBuffer;
+class Array;
+class Table;
 
 /**
  *  Base field class

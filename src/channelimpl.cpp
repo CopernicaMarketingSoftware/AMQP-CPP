@@ -47,14 +47,15 @@
 namespace AMQP {
 
 /**
+ *  Constructor
+ */
+ChannelImpl::ChannelImpl() = default;
+
+/**
  *  Destructor
  */
 ChannelImpl::~ChannelImpl()
 {
-    // remove incoming message
-    if (_message) delete _message;
-    _message = nullptr;
-
     // remove this channel from the connection (but not if the connection is already destructed)
     if (_connection) _connection->remove(this);
 }
@@ -706,40 +707,6 @@ void ChannelImpl::onSynchronized()
 }
 
 /**
- *  Report the received message
- */
-void ChannelImpl::reportMessage()
-{
-    // skip if there is no message
-    if (!_message) return;
-
-    // after the report the channel may be destructed, monitor that
-    Monitor monitor(this);
-
-    // synchronize the channel if this comes from a basic.get frame
-    if (_message->consumer().empty()) onSynchronized();
-
-    // syncing the channel may destruct the channel
-    if (!monitor.valid()) return;
-
-    // look for the consumer
-    auto iter = _consumers.find(_message->consumer());
-    if (iter == _consumers.end()) return;
-
-    // is this a valid callback method
-    if (!iter->second) return;
-
-    // call the callback
-    _message->report(iter->second);
-
-    // skip if channel was destructed
-    if (!monitor.valid()) return;
-
-    // no longer need the message
-    delete _message; _message = nullptr;
-}
-
-/**
  *  Report an error message on a channel
  *  @param  message             the error message
  *  @param  notifyhandler       should the channel-wide handler also be called?
@@ -800,38 +767,47 @@ void ChannelImpl::reportError(const char *message, bool notifyhandler)
     // leap out if object no longer exists
     if (!monitor.valid()) return;
 
-    // the connection now longer has to know that this channel exists,
+    // the connection no longer has to know that this channel exists,
     // because the channel ID is no longer in use
     if (_connection) _connection->remove(this);
 }
 
-
 /**
- *  Create an incoming message from a consume call
- *  @param  frame
- *  @return ConsumedMessage
+ *  Process incoming delivery
+ *
+ *  @param  frame   The frame to process
  */
-ConsumedMessage *ChannelImpl::message(const BasicDeliverFrame &frame)
+void ChannelImpl::process(BasicDeliverFrame &frame)
 {
-    // destruct if message is already set
-    if (_message) delete _message;
+    // find the consumer for this frame
+    auto iter = _consumers.find(frame.consumerTag());
+    if (iter == _consumers.end()) return;
 
-    // construct a message
-    return _message = new ConsumedMessage(frame);
+    // we are going to be receiving a message, store
+    // the handler for the incoming message
+    _consumer = iter->second;
+
+    // let the consumer process the frame
+    _consumer->process(frame);
 }
 
 /**
- *  Create an incoming message from a get call
- *  @param  frame
- *  @return ConsumedMessage
+ *  Retrieve the current consumer handler
+ *
+ *  @return The handler responsible for the current message
  */
-ConsumedMessage *ChannelImpl::message(const BasicGetOKFrame &frame)
+DeferredConsumerBase *ChannelImpl::consumer()
 {
-    // destruct if message is already set
-    if (_message) delete _message;
-    
-    // construct message
-    return _message = new ConsumedMessage(frame);
+    return _consumer.get();
+}
+
+/**
+ *  Mark the current consumer as done
+ */
+void ChannelImpl::complete()
+{
+    // no more consumer
+    _consumer.reset();
 }
 
 /**

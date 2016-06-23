@@ -12,6 +12,11 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include "deferredconsumerbase.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -19,15 +24,9 @@ namespace AMQP {
 /**
  *  We extend from the default deferred and add extra functionality
  */
-class DeferredConsumer : public Deferred
+class DeferredConsumer : public DeferredConsumerBase
 {
 private:
-    /**
-     *  The channel to which the consumer is linked
-     *  @var    ChannelImpl
-     */
-    ChannelImpl *_channel;
-
     /**
      *  Callback to execute when consumption has started
      *  @var    ConsumeCallback
@@ -35,18 +34,20 @@ private:
     ConsumeCallback _consumeCallback;
 
     /**
-     *  Callback for incoming messages
-     *  @var    MessageCallback
-     */
-    MessageCallback _messageCallback;
-
-
-    /**
      *  Report success for frames that report start consumer operations
      *  @param  name            Consumer tag that is started
      *  @return Deferred
      */
-    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) const override;
+    virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) override;
+
+    /**
+     *  Emit a message
+     *
+     *  @param  message The message to emit
+     *  @param  deliveryTag The delivery tag (for ack()ing)
+     *  @param  redelivered Is this a redelivered message
+     */
+    void emit(Message &&message, uint64_t deliveryTag, bool redelivered) const override;
 
     /**
      *  The channel implementation may call our
@@ -68,7 +69,7 @@ public:
      *  @param  failed      are we already failed?
      */
     DeferredConsumer(ChannelImpl *channel, bool failed = false) :
-        Deferred(failed), _channel(channel) {}
+        DeferredConsumerBase(failed, channel) {}
 
 public:
     /**

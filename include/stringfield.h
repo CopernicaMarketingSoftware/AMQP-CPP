@@ -10,6 +10,14 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include "field.h"
+#include "outbuffer.h"
+#include "numericfield.h"
+#include "receivedframe.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -63,7 +71,7 @@ public:
     /**
      *  Clean up memory used
      */
-    virtual ~StringField() {}
+    virtual ~StringField() = default;
 
     /**
      *  Create a new instance of this object

@@ -1,6 +1,6 @@
 /**
  *  Class describing a basic get ok frame
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -12,7 +12,7 @@ namespace AMQP{
 /**
  *  Class implementation
  */
-class BasicGetOKFrame : public BasicFrame 
+class BasicGetOKFrame : public BasicFrame
 {
 private:
     /**
@@ -71,7 +71,7 @@ public:
      *  @param  channel         channel we're working on
      *  @param  deliveryTag     server-assigned and channel specific delivery tag
      *  @param  redelivered     indicates whether the message has been previously delivered to this (or another) client
-     *  @param  exchange        name of exchange to publish to   
+     *  @param  exchange        name of exchange to publish to
      *  @param  routingKey      message routing key
      *  @param  messageCount    number of messages in the queue
      */
@@ -166,20 +166,16 @@ public:
     {
         // we need the appropriate channel
         auto channel = connection->channel(this->channel());
-        
+
         // channel does not exist
-        if (!channel) return false;    
-        
-        // report (if this function returns false, it means that the channel
-        // object no longer is valid)
-        if (!channel->reportSuccess(_messageCount)) return true;
-        
-        // construct the message
-        channel->message(*this);
-        
+        if (!channel) return false;
+
+        // report success for the get operation
+        channel->reportSuccess(messageCount(), deliveryTag(), redelivered());
+
         // notice that the channel is not yet synchronized here, because
         // we first have to receive the entire body
-        
+
         // done
         return true;
     }

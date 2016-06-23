@@ -7,6 +7,16 @@
  */
 
 /**
+ *  Include guard
+ */
+#pragma once
+
+/**
+ *  Dependencies
+ */
+#include <stdexcept>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -23,7 +33,7 @@ protected:
      */
     explicit Exception(const std::string &what) : runtime_error(what) {}
 };
-    
+
 /**
  *  End of namespace
  */

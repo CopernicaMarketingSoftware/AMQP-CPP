@@ -15,9 +15,20 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include <cstdint>
+#include <stddef.h>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
+
+/**
+ *  Forward declarations
+ */
+class Connection;
 
 /**
  *  Class definition

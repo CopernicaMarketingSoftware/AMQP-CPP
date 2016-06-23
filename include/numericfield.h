@@ -10,6 +10,16 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include <memory>
+#include <type_traits>
+#include "receivedframe.h"
+#include "outbuffer.h"
+#include "field.h"
+#include <ostream>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {

@@ -17,6 +17,11 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include "watchable.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {

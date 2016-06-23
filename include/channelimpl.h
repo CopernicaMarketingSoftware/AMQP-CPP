@@ -14,6 +14,19 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include "exchangetype.h"
+#include "watchable.h"
+#include "callbacks.h"
+#include "outbuffer.h"
+#include "deferred.h"
+#include "monitor.h"
+#include <memory>
+#include <queue>
+#include <map>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -21,7 +34,20 @@ namespace AMQP {
 /**
  *  Forward declarations
  */
+class DeferredConsumerBase;
+class BasicDeliverFrame;
+class DeferredConsumer;
+class BasicGetOKFrame;
 class ConsumedMessage;
+class ConnectionImpl;
+class DeferredDelete;
+class DeferredCancel;
+class DeferredQueue;
+class DeferredGet;
+class Connection;
+class Envelope;
+class Table;
+class Frame;
 
 /**
  *  Class definition
@@ -48,10 +74,10 @@ private:
     ErrorCallback _errorCallback;
 
     /**
-     *  Callbacks for all consumers that are active
-     *  @var    std::map<std::string,MessageCallback>
+     *  Handlers for all consumers that are active
+     *  @var    std::map<std::string,std::shared_ptr<DeferredConsumerBase>
      */
-    std::map<std::string,MessageCallback> _consumers;
+    std::map<std::string,std::shared_ptr<DeferredConsumerBase>> _consumers;
 
     /**
      *  Pointer to the oldest deferred result (the first one that is going
@@ -102,10 +128,10 @@ private:
     bool _synchronous = false;
 
     /**
-     *  The message that is now being received
-     *  @var ConsumedMessage
+     *  The current consumer receiving a message
+     *  @var    std::shared_ptr<DeferredConsumerBase>
      */
-    ConsumedMessage *_message = nullptr;
+    std::shared_ptr<DeferredConsumerBase> _consumer;
 
     /**
      *  Attach the connection
@@ -135,7 +161,7 @@ protected:
      *  a friend. By doing this we ensure that nobody can instantiate this
      *  object, and that it can thus only be used inside the library.
      */
-    ChannelImpl() {}
+    ChannelImpl();
 
 public:
     /**
@@ -633,17 +659,15 @@ public:
     void reportError(const char *message, bool notifyhandler = true);
 
     /**
-     *  Install a consumer callback
+     *  Install a consumer
+     *
      *  @param  consumertag     The consumer tag
-     *  @param  callback        The callback to be called
+     *  @param  consumer        The consumer handler
      */
-    void install(const std::string &consumertag, const MessageCallback &callback)
+    void install(std::string consumertag, const std::shared_ptr<DeferredConsumerBase> &consumer)
     {
-        // install the callback if it is assigned
-        if (callback) _consumers[consumertag] = callback;
-
-        // otherwise we erase the previously set callback
-        else _consumers.erase(consumertag);
+        // install the consumer handler
+        _consumers[consumertag] = consumer;
     }
 
     /**
@@ -657,26 +681,23 @@ public:
     }
 
     /**
-     *  Report that a message was received
+     *  Process incoming delivery
+     *
+     *  @param  frame   The frame to process
      */
-    void reportMessage();
+    void process(BasicDeliverFrame &frame);
 
     /**
-     *  Create an incoming message
-     *  @param  frame
-     *  @return ConsumedMessage
+     *  Retrieve the current consumer handler
+     *
+     *  @return The handler responsible for the current message
      */
-    ConsumedMessage *message(const BasicDeliverFrame &frame);
-    ConsumedMessage *message(const BasicGetOKFrame &frame);
+    DeferredConsumerBase *consumer();
 
     /**
-     *  Retrieve the current incoming message
-     *  @return ConsumedMessage
+     *  Mark the current consumer as done
      */
-    ConsumedMessage *message()
-    {
-        return _message;
-    }
+    void complete();
 
     /**
      *  The channel class is its friend, thus can it instantiate this object

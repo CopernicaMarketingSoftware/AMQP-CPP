@@ -14,9 +14,29 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include "watchable.h"
+#include "connectionhandler.h"
+#include "channelimpl.h"
+#include "outbuffer.h"
+#include "monitor.h"
+#include "login.h"
+#include <unordered_map>
+#include <memory>
+#include <queue>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
+
+/**
+ *  Forward declarations
+ */
+class Connection;
+class Buffer;
+class Frame;
 
 /**
  *  Class definition
@@ -78,7 +98,7 @@ protected:
      *  @var    uint32_t
      */
     uint32_t _maxFrame = 4096;
-    
+
     /**
      *  Number of expected bytes that will hold the next incoming frame
      *  We start with seven because that is the header of a frame
@@ -245,7 +265,7 @@ public:
         // 8 bytes for header and end-of-frame byte
         return _maxFrame - 8;
     }
-    
+
     /**
      *  The number of bytes that can best be passed to the next call to the parse() method
      *  @return uint32_t
@@ -334,7 +354,7 @@ public:
     {
         // set connection state to closed
         _state = state_closed;
-        
+
         // monitor because every callback could invalidate the connection
         Monitor monitor(this);
 

@@ -17,19 +17,32 @@ namespace AMQP {
  *  @param  name            Consumer tag that is started
  *  @return Deferred
  */
-const std::shared_ptr<Deferred> &DeferredConsumer::reportSuccess(const std::string &name) const
+const std::shared_ptr<Deferred> &DeferredConsumer::reportSuccess(const std::string &name)
 {
-    // we now know the name, so we can install the message callback on the channel
-    _channel->install(name, _messageCallback);
-    
+    // we now know the name, so install ourselves in the channel
+    _channel->install(name, shared_from_this());
+
     // skip if no special callback was installed
     if (!_consumeCallback) return Deferred::reportSuccess();
-    
+
     // call the callback
     _consumeCallback(name);
-    
+
     // return next object
     return _next;
+}
+
+/**
+ *  Emit a message
+ *
+ *  @param  message The message to emit
+ *  @param  deliveryTag The delivery tag (for ack()ing)
+ *  @param  redelivered Is this a redelivered message
+ */
+void DeferredConsumer::emit(Message &&message, uint64_t deliveryTag, bool redelivered) const
+{
+    // simply execute the message callback
+    _messageCallback(std::move(message), deliveryTag, redelivered);
 }
 
 /**
