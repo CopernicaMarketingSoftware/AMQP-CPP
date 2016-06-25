@@ -108,7 +108,7 @@ public:
     virtual void output(std::ostream &stream) const override
     {
         // output floating point value
-        stream << "decimal(" << _number / pow(10, _places) << ")";
+        stream << "decimal(" << _number / pow(10.0f, _places) << ")";
     }
 
     /**
@@ -138,7 +138,7 @@ public:
      */
     virtual operator double() const override
     {
-        return _number / pow(10, _places);
+        return _number / pow(10.0f, _places);
     }
 
     /**
@@ -149,7 +149,7 @@ public:
      */
     virtual operator float() const override
     {
-        return static_cast<float>(_number / pow(10, _places));
+        return static_cast<float>(_number / pow(10.0f, _places));
     }
 
     /**
