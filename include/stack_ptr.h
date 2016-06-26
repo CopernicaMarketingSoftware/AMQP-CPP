@@ -29,7 +29,8 @@ private:
      *  Storage for the object
      *  @var    std::aligned_storage<sizeof(T), alignof(T)>
      */
-    std::aligned_storage<sizeof(T), alignof(T)> _data;
+    typedef typename std::aligned_storage<sizeof(T), alignof(T)>::type Type;
+    Type _data;
 
     /**
      *  Is the pointer initialized?
@@ -87,6 +88,7 @@ public:
 
         // initialize new object
         new (&_data) T(std::forward<Arguments>(parameters)...);
+        _initialized = true;
     }
 
     /**
