@@ -27,10 +27,9 @@ class stack_ptr
 private:
     /**
      *  Storage for the object
-     *  @var    std::aligned_storage<sizeof(T), alignof(T)>
+     *  @var    typename std::aligned_storage<sizeof(T), alignof(T)>::type
      */
-    typedef typename std::aligned_storage<sizeof(T), alignof(T)>::type Type;
-    Type _data;
+    typename std::aligned_storage<sizeof(T), alignof(T)>::type _data;
 
     /**
      *  Is the pointer initialized?
@@ -88,6 +87,8 @@ public:
 
         // initialize new object
         new (&_data) T(std::forward<Arguments>(parameters)...);
+
+        // we are now initialized
         _initialized = true;
     }
 
