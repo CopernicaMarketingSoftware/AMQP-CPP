@@ -20,6 +20,13 @@
 #include <sys/uio.h>
  
 /**
+ *  FIONREAD on Solaris is defined elsewhere
+ */
+#ifdef __sun
+#include <sys/filio.h>
+#endif
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
