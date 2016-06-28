@@ -17,6 +17,7 @@
  *  Dependencies
  */
 #include <memory>
+#include <stdint.h>
 #include "callbacks.h"
 
 /**

@@ -11,6 +11,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 add_library(asio_handler asiohandler.cpp asiohandler.h)
 target_link_libraries(asio_handler ${Boost_LIBRARIES})
+add_definitions(-std=c++11)
 
 set(PROGS send
           receive
@@ -31,7 +32,7 @@ find_package (Threads)
 
 foreach(item ${PROGS})
     add_executable(${item} "${item}.cpp")
-    target_link_libraries(${item} amqp-cpp
+    target_link_libraries(${item} amqpcpp
                                   asio_handler
                                   ${CMAKE_THREAD_LIBS_INIT})    
 endforeach(item)

@@ -17,6 +17,7 @@
  */
 #include <memory>
 #include <cstring>
+#include "endian.h"
 
 /**
  *  Set up namespace
