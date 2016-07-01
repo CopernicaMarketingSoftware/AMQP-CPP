@@ -37,6 +37,11 @@ class ConnectionHandler
 {
 public:
     /**
+    *  Destructor
+    */
+    virtual ~ConnectionHandler() = default;
+
+    /**
      *  Method that is called when the heartbeat frequency is negotiated
      *  between the server and the client. You normally do not have to
      *  override this method, because in the default implementation the

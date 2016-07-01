@@ -115,7 +115,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~TcpConnection() = default;
+    virtual ~TcpConnection() noexcept {}
 
     /**
      *  Process the TCP connection

@@ -31,6 +31,11 @@ class TcpHandler
 {
 public:
     /**
+    *  Destructor
+    */
+    virtual ~TcpHandler() {}
+
+    /**
      *  Method that is called when the heartbeat frequency is negotiated
      *  between the server and the client. 
      *  @param  connection      The connection that suggested a heartbeat interval

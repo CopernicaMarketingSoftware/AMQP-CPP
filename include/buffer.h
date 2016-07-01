@@ -32,6 +32,11 @@ class Buffer
 {
 public:
     /**
+    *  Destructor
+    */
+    virtual ~Buffer() {}
+    
+    /**
      *  Total size of the buffer
      *  @return size_t
      */

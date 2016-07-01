@@ -41,7 +41,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~TcpClosed() = default;
+    virtual ~TcpClosed() noexcept = default;
 };
     
 /**
