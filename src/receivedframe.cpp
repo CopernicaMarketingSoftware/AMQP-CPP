@@ -72,7 +72,7 @@
 #include "framecheck.h"
 
 #define TYPE_INVALID 0
-#define END_OF_FRAME -50
+#define END_OF_FRAME 206
 
 /**
  *  Set up namespace
@@ -102,7 +102,7 @@ ReceivedFrame::ReceivedFrame(const Buffer &buffer, uint32_t max) : _buffer(buffe
     if (!complete()) return;
 
     // buffer is big enough, check for a valid end-of-frame marker
-    if ((int)buffer.byte(_payloadSize+7) == END_OF_FRAME) return;
+    if ((uint8_t)buffer.byte(_payloadSize+7) == END_OF_FRAME) return;
 
     // the frame is invalid because it does not end with the expected char
     throw ProtocolException("invalid end of frame marker");
