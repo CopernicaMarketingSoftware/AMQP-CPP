@@ -190,7 +190,7 @@ public:
      *  meantime you can already send more instructions over it)
      *  @return bool
      */
-    std::size_t waiting() const
+    bool waiting() const
     {
         return _implementation.waiting();
     }
