@@ -90,6 +90,9 @@ public:
      *
      *  This will stop all incoming messages
      *
+     *  Note that this function does *not* work using RabbitMQ. For more info
+     *  @see https://www.rabbitmq.com/specification.html#method-status-channel.flow
+     *
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
