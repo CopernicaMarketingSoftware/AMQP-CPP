@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <netinet/tcp.h>
 #include <functional>
+#include <stdexcept>
 
 // forward declarations
 #include "../include/classes.h"

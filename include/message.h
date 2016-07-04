@@ -20,6 +20,7 @@
  */
 #include "envelope.h"
 #include <limits>
+#include <stdexcept>
 
 /**
  *  Set up namespace

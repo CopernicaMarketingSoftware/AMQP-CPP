@@ -47,7 +47,7 @@ Table::Table(const Table &table)
         // since a map is always ordered, we know that each element will
         // be inserted at the end of the new map, so we can simply use
         // emplace_hint and hint at insertion at the end of the map
-        _fields.emplace_hint(_fields.end(), std::make_pair(iter->first, iter->second->clone()));
+        _fields.insert(_fields.end(), std::make_pair(iter->first, iter->second->clone()));
     }
 }
 

@@ -108,7 +108,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~TcpConnected()
+    virtual ~TcpConnected() noexcept
     {
         // we no longer have to monitor the socket
         _handler->monitor(_connection, _socket, 0);

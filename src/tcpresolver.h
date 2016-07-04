@@ -158,7 +158,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~TcpResolver()
+    virtual ~TcpResolver() noexcept
     {
         // stop monitoring the pipe filedescriptor
         _handler->monitor(_connection, _pipe.in(), 0);
