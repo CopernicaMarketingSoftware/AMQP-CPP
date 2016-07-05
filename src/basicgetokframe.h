@@ -173,8 +173,11 @@ public:
         // report success for the get operation
         channel->reportSuccess(messageCount(), deliveryTag(), redelivered());
 
-        // notice that the channel is not yet synchronized here, because
-        // we first have to receive the entire body
+        // check if we have a valid consumer
+        if (!channel->consumer()) return false;
+
+        // pass on to consumer
+        channel->consumer()->process(*this);
 
         // done
         return true;

@@ -663,11 +663,15 @@ public:
      *
      *  @param  consumertag     The consumer tag
      *  @param  consumer        The consumer handler
+     *  @param  active          Is this the new active consumer
      */
-    void install(std::string consumertag, const std::shared_ptr<DeferredConsumerBase> &consumer)
+    void install(std::string consumertag, const std::shared_ptr<DeferredConsumerBase> &consumer, bool active = false)
     {
         // install the consumer handler
         _consumers[consumertag] = consumer;
+
+        // should we become the current consumer?
+        if (active) _consumer = consumer;
     }
 
     /**

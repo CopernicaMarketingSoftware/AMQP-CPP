@@ -28,6 +28,7 @@ namespace AMQP {
  *  Forward declarations
  */
 class BasicDeliverFrame;
+class BasicGetOKFrame;
 class BasicHeaderFrame;
 class BodyFrame;
 
@@ -51,6 +52,13 @@ private:
      *  @param  frame   The frame to process
      */
     void process(BasicDeliverFrame &frame);
+
+    /**
+     *  Process a delivery frame from a get request
+     *
+     *  @param  frame   The frame to process
+     */
+    void process(BasicGetOKFrame &frame);
 
     /**
      *  Process the message headers
@@ -85,6 +93,7 @@ private:
      */
     friend class ChannelImpl;
     friend class BasicDeliverFrame;
+    friend class BasicGetOKFrame;
     friend class BasicHeaderFrame;
     friend class BodyFrame;
 protected:

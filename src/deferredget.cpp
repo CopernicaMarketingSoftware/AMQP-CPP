@@ -31,7 +31,7 @@ const std::shared_ptr<Deferred> &DeferredGet::reportSuccess(uint32_t messagecoun
     _redelivered = redelivered;
 
     // install ourselves in the channel
-    _channel->install("", shared_from_this());
+    _channel->install("", shared_from_this(), true);
 
     // report the size (note that this is the size _minus_ the message that is retrieved
     // (and for which the callback will be called later), so it could be zero)

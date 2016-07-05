@@ -12,6 +12,7 @@
  */
 #include "../include/deferredconsumerbase.h"
 #include "basicdeliverframe.h"
+#include "basicgetokframe.h"
 #include "basicheaderframe.h"
 #include "bodyframe.h"
 
@@ -26,6 +27,24 @@ namespace AMQP {
  *  @param  frame   The frame to process
  */
 void DeferredConsumerBase::process(BasicDeliverFrame &frame)
+{
+    // retrieve the delivery tag and whether we were redelivered
+    _deliveryTag = frame.deliveryTag();
+    _redelivered = frame.redelivered();
+
+    // anybody interested in the new message?
+    if (_beginCallback)   _beginCallback();
+
+    // do we have anybody interested in messages?
+    if (_messageCallback) _message.construct(frame.exchange(), frame.routingKey());
+}
+
+/**
+ *  Process a delivery frame from a get request
+ *
+ *  @param  frame   The frame to process
+ */
+void DeferredConsumerBase::process(BasicGetOKFrame &frame)
 {
     // retrieve the delivery tag and whether we were redelivered
     _deliveryTag = frame.deliveryTag();
