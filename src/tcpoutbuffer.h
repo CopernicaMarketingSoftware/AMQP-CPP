@@ -226,6 +226,7 @@ public:
             }
             
             // send the data
+            // @todo use sendmsg() with a MSG_NOSIG flag
             auto result = writev(socket, (const struct iovec *)&buffer, index);
 
             // skip on error, or when nothing was written

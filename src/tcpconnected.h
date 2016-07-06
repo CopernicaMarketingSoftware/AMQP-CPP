@@ -187,10 +187,10 @@ public:
     {
         // is there already a buffer of data that can not be sent?
         if (_out) return _out.add(buffer, size);
-        
+
         // there is no buffer, send the data right away
-        auto result = write(_socket, buffer, size);
-    
+        auto result = ::send(_socket, buffer, size, MSG_NOSIGNAL);
+
         // number of bytes sent
         size_t bytes = result < 0 ? 0 : result;
 
