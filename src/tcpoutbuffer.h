@@ -224,19 +224,28 @@ public:
                 // update counter for next iteration
                 if (++index >= 64) break;
             }
-            
+
+            // create the message header
+            struct msghdr header;
+
+            // make sure the members of the header are empty
+            memset(&header, 0, sizeof(header));
+
+            // save the buffers in the message header
+            header.msg_iov = buffer;
+            header.msg_iovlen = index;
+
             // send the data
-            // @todo use sendmsg() with a MSG_NOSIG flag
-            auto result = writev(socket, (const struct iovec *)&buffer, index);
+            auto result = sendmsg(socket, &header, MSG_NOSIGNAL);
 
             // skip on error, or when nothing was written
             if (result <= 0) return total > 0 ? total : result;
-            
+
             // shrink the buffer
             shrink(result);
-            
+
             // update total number of bytes written
-            total += 0;
+            total += result;
         }
         
         // done
