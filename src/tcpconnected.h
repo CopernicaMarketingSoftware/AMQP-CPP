@@ -189,7 +189,7 @@ public:
         if (_out) return _out.add(buffer, size);
 
         // there is no buffer, send the data right away
-        auto result = ::send(_socket, buffer, size, MSG_NOSIGNAL);
+        auto result = ::send(_socket, buffer, size, AMQP_CPP_MSG_NOSIGNAL);
 
         // number of bytes sent
         size_t bytes = result < 0 ? 0 : result;

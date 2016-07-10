@@ -120,6 +120,10 @@ private:
                 
                 // set the option
                 setsockopt(_socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(int));
+
+#ifdef AMQP_CPP_USE_SO_NOSIGPIPE
+                set_sockopt_nosigpipe(_socket);
+#endif
             }
         }
         catch (const std::runtime_error &error)
