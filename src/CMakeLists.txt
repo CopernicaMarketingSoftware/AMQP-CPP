@@ -44,6 +44,7 @@ connectiontuneokframe.h
 consumedmessage.h
 deferredcancel.cpp
 deferredconsumer.cpp
+deferredconsumerbase.cpp
 deferredget.cpp
 exception.h
 exchangebindframe.h
