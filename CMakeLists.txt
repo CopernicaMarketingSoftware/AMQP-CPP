@@ -24,11 +24,21 @@ endmacro()
 add_subdirectory(src)
 add_subdirectory(include)
 
-add_library(amqp-cpp STATIC ${SRCS})
-include_directories(${PROJECT_SOURCE_DIR})
-install(TARGETS amqp-cpp
-        ARCHIVE DESTINATION lib
-)
+option(BUILD_SHARED "build shared library" OFF)
+
+if(BUILD_SHARED)
+  add_library(amqp-cpp SHARED ${SRCS})
+  set_target_properties(amqp-cpp PROPERTIES SOVERSION 2.6)
+  install(TARGETS amqp-cpp
+          LIBRARY DESTINATION lib
+  )
+else()
+  add_library(amqp-cpp STATIC ${SRCS})
+  install(TARGETS amqp-cpp
+          ARCHIVE DESTINATION lib
+  )
+endif()
+Include_directories(${PROJECT_SOURCE_DIR})
 install(DIRECTORY include/ DESTINATION include/amqpcpp
         FILES_MATCHING PATTERN "*.h")
 install(FILES amqpcpp.h DESTINATION include)
