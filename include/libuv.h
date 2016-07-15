@@ -63,7 +63,7 @@ private:
 
             // tell the connection that its filedescriptor is active
             int fd = -1;
-            uv_fileno(static_cast<uv_handle_t*>(handle), &fd);
+            uv_fileno(reinterpret_cast<uv_handle_t*>(handle), &fd);
             connection->process(fd, uv_to_amqp_events(events));
         }
 
@@ -107,9 +107,9 @@ private:
             uv_poll_stop(_poll);
 
             // close the handle
-            uv_close(static_cast<uv_handle_t*>(_poll), [](uv_handle_t* handle) {
+            uv_close(reinterpret_cast<uv_handle_t*>(_poll), [](uv_handle_t* handle) {
                 // delete memory once closed
-                delete static_cast<uv_poll_t*>(handle);
+                delete reinterpret_cast<uv_poll_t*>(handle);
             });
         }
 
