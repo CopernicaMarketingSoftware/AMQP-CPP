@@ -64,7 +64,7 @@ private:
             // tell the connection that its filedescriptor is active
             int fd = -1;
             uv_fileno(reinterpret_cast<uv_handle_t*>(handle), &fd);
-            connection->process(fd, uv_to_amqp_events(events));
+            connection->process(fd, uv_to_amqp_events(status, events));
         }
 
     public:
@@ -119,10 +119,7 @@ private:
          */
         void events(int events)
         {
-            // stop the watcher if it was active
-            uv_poll_stop(_poll);
-
-            // and restart it
+            // update the events being watched for
             uv_poll_start(_poll, amqp_to_uv_events(events), callback);
         }
 
@@ -131,13 +128,15 @@ private:
         /**
          *  Convert event flags from UV format to AMQP format
          */
-        static int uv_to_amqp_events(int events)
+        static int uv_to_amqp_events(int status, int events)
         {
             int amqp_events = 0;
             if (events & UV_READABLE)
                 amqp_events |= AMQP::readable;
             if (events & UV_WRITABLE)
                 amqp_events |= AMQP::writable;
+            if (status != 0)
+                amqp_events |= AMQP::readable;
             return amqp_events;
         }
 
