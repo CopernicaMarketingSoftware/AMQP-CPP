@@ -130,13 +130,16 @@ private:
          */
         static int uv_to_amqp_events(int status, int events)
         {
+            // if the socket is closed report both so we pick up the error
+            if (status != 0)
+                return AMQP::readable | AMQP::writable;
+
+            // map read or write
             int amqp_events = 0;
             if (events & UV_READABLE)
                 amqp_events |= AMQP::readable;
             if (events & UV_WRITABLE)
                 amqp_events |= AMQP::writable;
-            if (status != 0)
-                amqp_events |= AMQP::readable;
             return amqp_events;
         }
 
