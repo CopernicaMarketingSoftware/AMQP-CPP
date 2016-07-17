@@ -40,15 +40,15 @@ private:
     private:
         /**
          *  The event loop to which it is attached
-         *  @var struct uv_loop_t
+         *  @var uv_loop_t
          */
-        struct uv_loop_t *_loop;
+        uv_loop_t *_loop;
 
         /**
          *  The actual watcher structure
-         *  @var struct uv_poll_t
+         *  @var uv_poll_t
          */
-        struct uv_poll_t *_poll;
+        uv_poll_t *_poll;
 
         /**
          *  Callback method that is called by libuv when a filedescriptor becomes active
@@ -56,7 +56,7 @@ private:
          *  @param  status     LibUV error code UV_*
          *  @param  events     Events triggered
          */
-        static void callback(struct uv_poll_t *handle, int status, int events)
+        static void callback(uv_poll_t *handle, int status, int events)
         {
             // retrieve the connection
             TcpConnection *connection = static_cast<TcpConnection*>(handle->data);
@@ -75,7 +75,7 @@ private:
          *  @param  fd              The filedescriptor being watched
          *  @param  events          The events that should be monitored
          */
-        Watcher(struct uv_loop_t *loop, TcpConnection *connection, int fd, int events) : _loop(loop)
+        Watcher(uv_loop_t *loop, TcpConnection *connection, int fd, int events) : _loop(loop)
         {
             // create a new poll
             _poll = new uv_poll_t();
@@ -157,9 +157,9 @@ private:
 
     /**
      *  The event loop
-     *  @var struct uv_loop_t*
+     *  @var uv_loop_t*
      */
-    struct uv_loop_t *_loop;
+    uv_loop_t *_loop;
 
     /**
      *  All I/O watchers that are active, indexed by their filedescriptor
@@ -205,7 +205,7 @@ public:
      *  Constructor
      *  @param  loop    The event loop to wrap
      */
-    LibUvHandler(struct uv_loop_t *loop) : _loop(loop) {}
+    LibUvHandler(uv_loop_t *loop) : _loop(loop) {}
 
     /**
      *  Destructor
