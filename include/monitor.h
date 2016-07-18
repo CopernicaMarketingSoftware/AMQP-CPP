@@ -58,6 +58,16 @@ public:
     }
 
     /**
+     *  Copy constructor
+     *  @param  monitor
+     */
+    Monitor(const Monitor &monitor) : _watchable(monitor._watchable)
+    {
+        // register with the watchable
+        _watchable->add(this);
+    }
+
+    /**
      *  Destructor
      */
     virtual ~Monitor()
