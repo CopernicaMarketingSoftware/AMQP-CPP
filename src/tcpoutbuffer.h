@@ -236,7 +236,7 @@ public:
             header.msg_iovlen = index;
 
             // send the data
-            auto result = sendmsg(socket, &header, MSG_NOSIGNAL);
+            auto result = sendmsg(socket, &header, AMQP_CPP_MSG_NOSIGNAL);
 
             // skip on error, or when nothing was written
             if (result <= 0) return total > 0 ? total : result;
