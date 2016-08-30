@@ -22,11 +22,26 @@
 namespace AMQP {
 
 /**
+ *  Login mechanism enum
+ */
+typedef enum
+{
+    LOGIN_PLAIN,
+    LOGIN_EXTERNAL
+} LoginMechanism;
+
+/**
  *  Class definition
  */
 class Login
 {
 private:
+    /**
+     *  The login mechanism
+     *  @var LoginMechanism
+     */
+    LoginMechanism _mechanism;
+
     /**
      *  The username
      *  @var string
@@ -44,7 +59,7 @@ public:
     /**
      *  Default constructor
      */
-    Login() : _user("guest"), _password("guest") {}
+    Login() : _mechanism(LOGIN_PLAIN), _user("guest"), _password("guest") {}
 
     /**
      *  Constructor
@@ -52,7 +67,12 @@ public:
      *  @param  password
      */
     Login(std::string user, std::string password) :
-        _user(std::move(user)), _password(std::move(password)) {}
+        _mechanism(LOGIN_PLAIN), _user(std::move(user)), _password(std::move(password)) {}
+
+    /**
+     *  Constructor for EXTERNAL mechanism
+     */
+    Login(LoginMechanism mechanism) : _mechanism(mechanism), _user("guest"), _password("guest") {}
 
     /**
      *  Destructor
@@ -78,16 +98,37 @@ public:
     }
 
     /**
+     *  Retrieve login mechanism string representation
+     *  @return LoginMechanism
+     */
+    std::string mechanismRepr() const
+    {
+        switch (_mechanism)
+        {
+            case LOGIN_PLAIN:
+                return "PLAIN";
+            case LOGIN_EXTERNAL:
+                return "EXTERNAL";
+            default:
+                return "";
+        }
+    }
+
+    /**
      *  String representation in SASL PLAIN mode
      *  @return string
      */
-    std::string saslPlain() const
+    std::string stringRepr() const
     {
         // we need an initial string
         std::string result("\0", 1);
 
-        // append other elements
-        return result.append(_user).append("\0",1).append(_password);
+        if (_mechanism == LOGIN_PLAIN) {
+            // append login and password info for plain login
+            return result.append(_user).append("\0",1).append(_password);
+        }
+
+        return result;
     }
 };
 

@@ -203,8 +203,9 @@ public:
         // move connection to handshake mode
         connection->setProtocolOk();
         
-        // send back a connection start ok frame
-        connection->send(ConnectionStartOKFrame(properties, "PLAIN", connection->login().saslPlain(), "en_US"));
+        // send back a connection start ok frame with authentication data
+        connection->send(ConnectionStartOKFrame(properties, connection->login().mechanismRepr(),
+                                                connection->login().stringRepr(), "en_US"));
         
         // done
         return true;
