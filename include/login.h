@@ -22,15 +22,6 @@
 namespace AMQP {
 
 /**
- *  Login mechanism enum
- */
-typedef enum
-{
-    LOGIN_PLAIN,
-    LOGIN_EXTERNAL
-} LoginMechanism;
-
-/**
  *  Class definition
  */
 class Login
@@ -57,6 +48,15 @@ private:
 
 public:
     /**
+     *  Login mechanism enum
+     */
+    typedef enum
+    {
+        LOGIN_PLAIN,
+        LOGIN_EXTERNAL
+    } LoginMechanism;
+
+    /**
      *  Default constructor
      */
     Login() : _mechanism(LOGIN_PLAIN), _user("guest"), _password("guest") {}
@@ -67,12 +67,12 @@ public:
      *  @param  password
      */
     Login(std::string user, std::string password) :
-        _mechanism(LOGIN_PLAIN), _user(std::move(user)), _password(std::move(password)) {}
+        Login(), _user(std::move(user)), _password(std::move(password)) {}
 
     /**
      *  Constructor for EXTERNAL mechanism
      */
-    Login(LoginMechanism mechanism) : _mechanism(mechanism), _user("guest"), _password("guest") {}
+    Login(LoginMechanism mechanism) : Login(), _mechanism(mechanism) {}
 
     /**
      *  Destructor
