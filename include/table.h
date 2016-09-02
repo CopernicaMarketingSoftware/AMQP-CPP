@@ -242,16 +242,6 @@ public:
         // postfix
         stream << ")";
     }
-
-    /**
-     *  Cast to table (compiler will probably never call this method)
-     *  @return Table
-     */
-    virtual operator const Table& () const override
-    {
-        // this already is an array, so no cast is necessary
-        return *this;
-    }
 };
 
 /**
