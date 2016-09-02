@@ -102,7 +102,7 @@ public:
      *  Return whether to wait for a response
      *  @return  boolean
      */
-    const bool noWait() const
+    bool noWait() const
     {
         return _noWait.get(0);
     }
