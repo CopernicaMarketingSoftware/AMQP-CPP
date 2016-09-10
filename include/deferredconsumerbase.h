@@ -80,13 +80,12 @@ private:
     void complete();
 
     /**
-     *  Emit a message
-     *
-     *  @param  message     The message to emit
+     *  Announce that a message has been received
+     *  @param  message     The message to announce
      *  @param  deliveryTag The delivery tag (for ack()ing)
      *  @param  redelivered Is this a redelivered message
      */
-    virtual void emit(Message &&message, uint64_t deliveryTag, bool redelivered) const = 0;
+    virtual void announce(Message &&message, uint64_t deliveryTag, bool redelivered) const = 0;
 
     /**
      *  Frames may be processed

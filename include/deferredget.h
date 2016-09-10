@@ -2,7 +2,7 @@
  *  DeferredGet.h
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2016 Copernica BV
  */
 
 /**
@@ -44,12 +44,11 @@ private:
 
     /**
      *  Report success for a get operation
-     *
      *  @param  messagecount    Number of messages left in the queue
      *  @param  deliveryTag     Delivery tag of the message coming in
      *  @param  redelivered     Was the message redelivered?
      */
-    const std::shared_ptr<Deferred> &reportSuccess(uint32_t messagecount, uint64_t deliveryTag, bool redelivered) override;
+    virtual const std::shared_ptr<Deferred> &reportSuccess(uint32_t messagecount, uint64_t deliveryTag, bool redelivered) override;
 
     /**
      *  Report success when queue was empty
@@ -58,13 +57,12 @@ private:
     virtual const std::shared_ptr<Deferred> &reportSuccess() const override;
 
     /**
-     *  Emit a message
-     *
-     *  @param  message The message to emit
+     *  Announce that a message has been received
+     *  @param  message The message to announce
      *  @param  deliveryTag The delivery tag (for ack()ing)
      *  @param  redelivered Is this a redelivered message
      */
-    void emit(Message &&message, uint64_t deliveryTag, bool redelivered) const override;
+    virtual void announce(Message &&message, uint64_t deliveryTag, bool redelivered) const override;
 
     /**
      *  The channel implementation may call our

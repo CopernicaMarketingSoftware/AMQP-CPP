@@ -4,7 +4,7 @@
  *  Implementation of the DeferredGet call
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2016 Copernica BV
  */
 
 /**
@@ -58,13 +58,12 @@ const std::shared_ptr<Deferred> &DeferredGet::reportSuccess() const
 }
 
 /**
- *  Emit a message
- *
- *  @param  message The message to emit
+ *  Announce that a message has been received
+ *  @param  message The message to announce
  *  @param  deliveryTag The delivery tag (for ack()ing)
  *  @param  redelivered Is this a redelivered message
  */
-void DeferredGet::emit(Message &&message, uint64_t deliveryTag, bool redelivered) const
+void DeferredGet::announce(Message &&message, uint64_t deliveryTag, bool redelivered) const
 {
     // monitor the channel
     Monitor monitor{ _channel };

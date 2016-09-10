@@ -119,8 +119,8 @@ void DeferredConsumerBase::complete()
     // do we have a message?
     if (_message)
     {
-        // emit the message
-        emit(std::move(*_message), _deliveryTag, _redelivered);
+        // announce the message
+        announce(std::move(*_message), _deliveryTag, _redelivered);
 
         // and destroy it
         _message.reset();
