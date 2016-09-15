@@ -55,6 +55,14 @@ public:
         _user(std::move(user)), _password(std::move(password)) {}
 
     /**
+     *  Constructor
+     *  @param  user
+     *  @param  password
+     */
+    Login(const char *user, const char *password) :
+        _user(user), _password(password) {}
+
+    /**
      *  Destructor
      */
     virtual ~Login() {}
