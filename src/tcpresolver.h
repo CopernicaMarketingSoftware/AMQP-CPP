@@ -5,7 +5,7 @@
  *  server, and to make the initial connection
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 Copernica BV
+ *  @copyright 2015 - 2016 Copernica BV
  */
 
 /**
@@ -173,15 +173,34 @@ public:
     
     /**
      *  Wait for the resolver to be ready
-     *  @param  fd              The filedescriptor that is active
-     *  @param  flags           Flags to indicate that fd is readable and/or writable
-     *  @return                 New implementation object
+     *  @param  fd          The filedescriptor that is active
+     *  @param  flags       Flags to indicate that fd is readable and/or writable
+     *  @return             New implementation object
      */
     virtual TcpState *process(int fd, int flags) override
     {
         // only works if the incoming pipe is readable
         if (fd != _pipe.in() || !(flags & readable)) return this;
 
+        // do we have a valid socket?
+        if (_socket >= 0) return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
+        
+        // report error
+        _handler->onError(_connection, _error.data());
+        
+        // create dummy implementation
+        return new TcpClosed(_connection, _handler);
+    }
+    
+    /**
+     *  Flush state / wait for the connection to complete
+     *  @return             New implementation object
+     */
+    virtual TcpState *flush() override
+    {
+        // just wait for the other thread to be ready
+        _thread.join();
+        
         // do we have a valid socket?
         if (_socket >= 0) return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
         

@@ -83,6 +83,29 @@ private:
         return monitor.valid() ? new TcpClosed(this) : nullptr;
     }
     
+    /**
+     *  Wait until the socket is writable
+     *  @return bool
+     */
+    bool wait4writable()
+    {
+        // we need the fd-sets
+        fd_set readables, writables, exceptions;
+        
+        // initialize all the sets
+        FD_ZERO(&readables);
+        FD_ZERO(&writables);
+        FD_ZERO(&exceptions);
+        
+        // add the one socket
+        FD_SET(_socket, &writables);
+        
+        // wait for the socket
+        auto result = select(_socket + 1, &readables, &writables, &exceptions, nullptr);
+        
+        // check for success
+        return result == 0;
+    }
     
 public:
     /**
@@ -202,6 +225,29 @@ public:
         
         // start monitoring the socket to find out when it is writable
         _handler->monitor(_connection, _socket, readable | writable);
+    }
+    
+    /**
+     *  Flush the connection, sent all buffered data to the socket
+     *  @return TcpState    new tcp state
+     */
+    virtual TcpState *flush() override
+    {
+        // keep running until the out buffer is empty
+        while (_out)
+        {
+            // poll the socket, is it already writable?
+            if (!wait4writable()) return this;
+            
+            // socket is writable, send as much data as possible
+            auto *newstate = process(_socket, writable);
+            
+            // are we done
+            if (newstate != this) return newstate;
+        }
+        
+        // all has been sent
+        return this;
     }
 
     /**

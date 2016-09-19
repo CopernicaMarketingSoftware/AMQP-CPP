@@ -4,7 +4,7 @@
  *  Implementation file for the TCP connection
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 Copernica BV
+ *  @copyright 2015 - 2016 Copernica BV
  */
 
 /**
@@ -54,6 +54,31 @@ void TcpConnection::process(int fd, int flags)
 
     // replace it with the new implementation
     _state.reset(result);
+}
+
+/**
+ *  Flush the tcp connection
+ */
+void TcpConnection::flush()
+{
+    // monitor the object for destruction
+    Monitor monitor(this);
+
+    // keep looping
+    while (true)
+    {
+        // flush the object
+        auto *newstate = _state->flush();
+        
+        // done if object no longer exists
+        if (!monitor.valid()) return;
+        
+        // also done if the object is still in the same state
+        if (newstate == _state.get()) return;
+        
+        // replace the new state
+        _state.reset(newstate);
+    }
 }
 
 /**

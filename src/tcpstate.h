@@ -4,7 +4,7 @@
  *  Base class / interface of the various states of the TCP connection
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 Copernica BV
+ *  @copyright 2015 - 2016 Copernica BV
  */
 
 /**
@@ -89,6 +89,12 @@ public:
         // pass to handler
         return _handler->onNegotiate(_connection, heartbeat);
     }
+    
+    /**
+     *  Flush the connection
+     *  @return TcpState    new implementation object
+     */
+    virtual TcpState *flush() { return this; }
     
     /**
      *  Report to the handler that the object is in an error state

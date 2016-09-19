@@ -4,7 +4,7 @@
  *  Class that is used when the TCP connection ends up in a closed state
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 Copernica BV
+ *  @copyright 2015 - 2016 Copernica BV
  */
 
 /**
