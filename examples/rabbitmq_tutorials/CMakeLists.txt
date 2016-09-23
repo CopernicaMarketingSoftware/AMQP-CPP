@@ -2,6 +2,7 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF) 
 find_package(Boost 1.55 REQUIRED COMPONENTS system)
+add_definitions( " -std=c++11" )
 
 if(NOT Boost_FOUND)
     message( FATAL_ERROR "boost must be installed")
