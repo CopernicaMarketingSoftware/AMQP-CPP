@@ -45,7 +45,7 @@ install(FILES amqpcpp.h DESTINATION include)
 
 option(BUILD_TUTORIALS "build rabbitmq tutorials" OFF)
 if(BUILD_TUTORIALS)
-    add_subdirectory(examples/rabbitmq_tutorials)
+#    add_subdirectory(examples/rabbitmq_tutorials)
 endif()
 
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
