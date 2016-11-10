@@ -48,6 +48,8 @@ if(BUILD_TUTORIALS)
 #    add_subdirectory(examples/rabbitmq_tutorials)
 endif()
 
+option(BUILD_PURE "build in pure mode" OFF)
+
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
 
