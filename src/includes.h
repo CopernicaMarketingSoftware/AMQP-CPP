@@ -22,10 +22,14 @@
 #include <vector>
 #include <queue>
 #include <sys/types.h>
+
+#ifndef AMQP_CPP_BUILD_PURE
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <netinet/tcp.h>
+#endif
+
 #include <functional>
 #include <stdexcept>
 
