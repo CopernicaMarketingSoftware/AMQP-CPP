@@ -16,8 +16,18 @@
 /**
  *  Dependencies
  */
+#ifdef _MSC_VER
+#include <Winsock2.h>
+
+typedef std::make_signed<size_t>::type ssize_t;
+
+#define iovec _WSABUF
+#define iov_base buf
+#define iov_len len
+#else
 #include <sys/ioctl.h>
 #include <sys/uio.h>
+#endif
  
 /**
  *  FIONREAD on Solaris is defined elsewhere
@@ -218,13 +228,18 @@ public:
             for (const auto &str : _buffers)
             {
                 // fill buffer
-                buffer[index].iov_base = (void *)(index == 0 ? str.data() + _skip : str.data());
+                buffer[index].iov_base = (char *) (index == 0 ? str.data() + _skip : str.data());
                 buffer[index].iov_len = index == 0 ? str.size() - _skip : str.size();
                 
                 // update counter for next iteration
                 if (++index >= 64) break;
             }
 
+#ifdef _MSC_VER
+			DWORD result;
+			int error = WSASend(socket, buffer, index, &result, 0, NULL, NULL);
+			if (error) result = -1;
+#else
             // create the message header
             struct msghdr header;
 
@@ -237,6 +252,7 @@ public:
 
             // send the data
             auto result = sendmsg(socket, &header, AMQP_CPP_MSG_NOSIGNAL);
+#endif
 
             // skip on error, or when nothing was written
             if (result <= 0) return total > 0 ? total : result;

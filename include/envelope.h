@@ -45,7 +45,7 @@ protected:
      *  Size of the data
      *  @var    uint64_t
      */
-    uint64_t _bodySize;
+    size_t _bodySize;
 
 public:
     /**
@@ -57,7 +57,7 @@ public:
      *  @param  body
      *  @param  size
      */
-    Envelope(const char *body, uint64_t size) : MetaData(), _body(body), _bodySize(size) {}
+    Envelope(const char *body, size_t size) : MetaData(), _body(body), _bodySize(size) {}
 
     /**
      *  Constructor based on a string
