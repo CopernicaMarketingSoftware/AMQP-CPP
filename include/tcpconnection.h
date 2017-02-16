@@ -91,7 +91,7 @@ private:
      *  Parse a buffer that was received
      *  @param  buffer
      */
-    uint64_t parse(const Buffer &buffer)
+	size_t parse(const Buffer &buffer)
     {
         // pass to the AMQP connection
         return _connection.parse(buffer);

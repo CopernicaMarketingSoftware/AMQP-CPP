@@ -1,5 +1,9 @@
 #pragma once
 
+#if _MSC_VER
+#define MSG_NOSIGNAL 1
+#endif
+
 /**
  * No MSG_NOSIGNAL on OS X.
  * Avoid SIGPIPE by using sockopt call.

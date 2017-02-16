@@ -21,6 +21,7 @@
 #include "envelope.h"
 #include <limits>
 #include <stdexcept>
+#include <algorithm>
 
 /**
  *  Set up namespace
@@ -68,7 +69,7 @@ protected:
         if (std::numeric_limits<size_t>::max() < size) throw std::runtime_error("message is too big for this system");
 
         // store the new size
-        _bodySize = size;
+        _bodySize = (size_t) size;
     }
 
     /**
@@ -77,7 +78,7 @@ protected:
      *  @param  size        size of the data
      *  @return bool        true if the message is now complete
      */
-    bool append(const char *buffer, uint64_t size)
+    bool append(const char *buffer, size_t size)
     {
         // is this the only data, and also direct complete?
         if (_str.empty() && size >= _bodySize)

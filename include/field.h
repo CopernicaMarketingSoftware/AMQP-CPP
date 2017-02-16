@@ -87,7 +87,7 @@ public:
      *  @return mixed
      */
     virtual operator const std::string& () const;
-    virtual operator const char * () const { return nullptr; }
+    //virtual operator const char * () const { return nullptr; } //can not use operaotr[] on subclasses
     virtual operator uint8_t () const { return 0; }
     virtual operator uint16_t () const { return 0; }
     virtual operator uint32_t () const { return 0; }

@@ -91,7 +91,11 @@ private:
             for (size_t i = 0; i < addresses.size(); ++i)
             {
                 // create the socket
+#if _MSC_VER
+				_socket = WSASocket(addresses[i]->ai_family, addresses[i]->ai_socktype, addresses[i]->ai_protocol, NULL, 0, WSA_FLAG_NO_HANDLE_INHERIT);
+#else
                 _socket = socket(addresses[i]->ai_family, addresses[i]->ai_socktype, addresses[i]->ai_protocol);
+#endif
                 
                 // move on on failure
                 if (_socket < -1) continue;
@@ -113,13 +117,18 @@ private:
             if (_socket >= 0) 
             {
                 // turn socket into a non-blocking socket and set the close-on-exec bit
-                fcntl(_socket, F_SETFL, O_NONBLOCK | O_CLOEXEC);
+#if _MSC_VER
+				u_long nonblock = 1;
+				ioctlsocket(_socket, FIONBIO, &nonblock);
+#else
+				fcntl(_socket, F_SETFL, O_NONBLOCK | O_CLOEXEC);
+#endif
                 
                 // we want to enable "nodelay" on sockets (otherwise all send operations are s-l-o-w
                 int optval = 1;
                 
                 // set the option
-                setsockopt(_socket, IPPROTO_TCP, TCP_NODELAY, &optval, sizeof(int));
+                setsockopt(_socket, IPPROTO_TCP, TCP_NODELAY, (const char *) &optval, sizeof(int));
 
 #ifdef AMQP_CPP_USE_SO_NOSIGPIPE
                 set_sockopt_nosigpipe(_socket);
