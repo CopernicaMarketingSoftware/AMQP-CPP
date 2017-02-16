@@ -88,10 +88,10 @@ public:
         // find out how many bytes are available       
         // check the number of bytes that are available
 #if _MSC_VER
-		u_long available = 0;
-		if (ioctlsocket(socket, FIONREAD, &available) != 0) return -1;
+        u_long available = 0;
+        if (ioctlsocket(socket, FIONREAD, &available) != 0) return -1;
 #else
-		uint32_t available = 0;
+        uint32_t available = 0;
         if (ioctl(socket, FIONREAD, &available) != 0) return -1;
 #endif
 

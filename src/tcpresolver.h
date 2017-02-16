@@ -92,7 +92,7 @@ private:
             {
                 // create the socket
 #if _MSC_VER
-				_socket = WSASocket(addresses[i]->ai_family, addresses[i]->ai_socktype, addresses[i]->ai_protocol, NULL, 0, WSA_FLAG_NO_HANDLE_INHERIT);
+                _socket = WSASocket(addresses[i]->ai_family, addresses[i]->ai_socktype, addresses[i]->ai_protocol, NULL, 0, WSA_FLAG_NO_HANDLE_INHERIT);
 #else
                 _socket = socket(addresses[i]->ai_family, addresses[i]->ai_socktype, addresses[i]->ai_protocol);
 #endif
@@ -118,10 +118,10 @@ private:
             {
                 // turn socket into a non-blocking socket and set the close-on-exec bit
 #if _MSC_VER
-				u_long nonblock = 1;
-				ioctlsocket(_socket, FIONBIO, &nonblock);
+                u_long nonblock = 1;
+                ioctlsocket(_socket, FIONBIO, &nonblock);
 #else
-				fcntl(_socket, F_SETFL, O_NONBLOCK | O_CLOEXEC);
+                fcntl(_socket, F_SETFL, O_NONBLOCK | O_CLOEXEC);
 #endif
                 
                 // we want to enable "nodelay" on sockets (otherwise all send operations are s-l-o-w

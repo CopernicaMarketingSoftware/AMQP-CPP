@@ -236,9 +236,9 @@ public:
             }
 
 #ifdef _MSC_VER
-			DWORD result;
-			int error = WSASend(socket, buffer, index, &result, 0, NULL, NULL);
-			if (error) result = -1;
+            DWORD result;
+            int error = WSASend(socket, buffer, index, &result, 0, NULL, NULL);
+            if (error) result = -1;
 #else
             // create the message header
             struct msghdr header;

@@ -110,7 +110,7 @@ size_t ConnectionImpl::parse(const Buffer &buffer)
     if (_state == state_closed) return 0;
 
     // number of bytes processed
-	size_t processed = 0;
+    size_t processed = 0;
 
     // create a monitor object that checks if the connection still exists
     Monitor monitor(this);
