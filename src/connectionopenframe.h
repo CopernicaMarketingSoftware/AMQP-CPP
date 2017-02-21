@@ -60,7 +60,7 @@ public:
      *  @param  vhost   name of virtual host to open
      */
     ConnectionOpenFrame(const std::string &vhost) :
-        ConnectionFrame(vhost.length() + 3), // length of vhost + byte to encode this length + deprecated shortstring size + deprecated bool
+        ConnectionFrame((uint32_t) vhost.length() + 3), // length of vhost + byte to encode this length + deprecated shortstring size + deprecated bool
         _vhost(vhost),
         _deprecatedCapabilities(""),
         _deprecatedInsist()

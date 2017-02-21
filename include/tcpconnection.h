@@ -128,7 +128,7 @@ public:
      *  @param  fd              The filedescriptor that became readable or writable
      *  @param  events          What sort of events occured?
      */
-    void process(int fd, int flags);
+    void process(tcp::Socket fd, int flags);
     
     /**
      *  Flush the connection - all unsent bytes are sent to the socket rigth away

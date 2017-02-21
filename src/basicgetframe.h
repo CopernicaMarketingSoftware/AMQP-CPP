@@ -59,7 +59,7 @@ public:
      *  @param  noAck        whether server expects acknowledgements for messages     
      */
     BasicGetFrame(uint16_t channel, const std::string& queue, bool noAck = false) :
-        BasicFrame(channel, queue.length() + 4), // 1 for bool, 1 for string size, 2 for deprecated field
+        BasicFrame(channel, (uint32_t) queue.length() + 4), // 1 for bool, 1 for string size, 2 for deprecated field
         _queue(queue),
         _noAck(noAck)
     {}

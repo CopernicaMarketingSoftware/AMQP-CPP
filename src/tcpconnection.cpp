@@ -36,7 +36,7 @@ TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
  *  @param  fd              The filedescriptor that became readable or writable
  *  @param  events          What sort of events occured?
  */
-void TcpConnection::process(int fd, int flags)
+void TcpConnection::process(tcp::Socket fd, int flags)
 {
     // monitor the object for destruction
     Monitor monitor{ this };

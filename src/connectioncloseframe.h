@@ -82,7 +82,7 @@ public:
      *  @param  failingMethod   id of the failing method if applicable
      */
     ConnectionCloseFrame(uint16_t code, const std::string &text, uint16_t failingClass = 0, uint16_t failingMethod = 0) :
-        ConnectionFrame(text.length() + 7), // 1 for extra string byte, 2 for each uint16
+        ConnectionFrame((uint32_t) text.length() + 7), // 1 for extra string byte, 2 for each uint16
         _code(code),
         _text(text),
         _failingClass(failingClass),

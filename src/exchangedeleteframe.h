@@ -73,7 +73,7 @@ public:
      *  @param  bool noWait     Do not wait for a response
      */
     ExchangeDeleteFrame(uint16_t channel, const std::string& name, bool ifUnused = false, bool noWait = false) :
-        ExchangeFrame(channel, name.length() + 4), // length of the name, 1 byte for encoding this length, 1 for bools, 2 for deprecated short
+        ExchangeFrame(channel, (uint32_t) name.length() + 4), // length of the name, 1 byte for encoding this length, 1 for bools, 2 for deprecated short
         _name(name),
         _bools(ifUnused, noWait)
     {}

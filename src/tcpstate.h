@@ -63,7 +63,7 @@ public:
      *  @param  flags       AMQP::readable and/or AMQP::writable
      *  @return             New implementation object
      */
-    virtual TcpState *process(int fd, int flags)
+    virtual TcpState *process(tcp::Socket fd, int flags)
     {
         // default implementation does nothing and preserves same implementation
         return this;

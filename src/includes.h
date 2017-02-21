@@ -91,6 +91,7 @@
 #include "../include/tcpconnection.h"
 
 // classes that are very commonly used
+#include "numeric_cast.h"
 #include "exception.h"
 #include "protocolexception.h"
 #include "frame.h"

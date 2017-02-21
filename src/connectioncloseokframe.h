@@ -39,7 +39,7 @@ public:
      *  construct a channelcloseokframe object
      */
     ConnectionCloseOKFrame() :
-        ConnectionFrame(0)
+        ConnectionFrame((uint32_t) 0)
     {}
 
     /**

@@ -43,7 +43,7 @@ public:
      *  @param  consumerTag       consumertag specified by client of provided by server
      */
     BasicConsumeOKFrame(uint16_t channel, const std::string& consumerTag) :
-        BasicFrame(channel, consumerTag.length() + 1), // length of string + 1 for encoding of stringsize
+        BasicFrame(channel, (uint32_t) consumerTag.length() + 1), // length of string + 1 for encoding of stringsize
         _consumerTag(consumerTag)
     {}
 

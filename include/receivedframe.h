@@ -163,7 +163,7 @@ public:
 
     /**
      *  Total size of the frame (headers + payload)
-     *  @return uint32_t
+     *  @return size_t
      */
     size_t totalSize() const
     {

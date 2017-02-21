@@ -17,6 +17,7 @@
  *  Dependencies
  */
 #include "pipe.h"
+#include "tcp.h"
 #include "tcpstate.h"
 #include "tcpclosed.h"
 #include "tcpconnected.h"
@@ -55,7 +56,7 @@ private:
      *  Non-blocking socket that is connected to RabbitMQ
      *  @var int
      */
-    int _socket = -1;
+    tcp::Socket _socket = tcp::InvalidSocket;
     
     /**
      *  Possible error that occured
@@ -88,7 +89,7 @@ private:
             AddressInfo addresses(_hostname.data(), _port);
     
             // iterate over the addresses
-            for (size_t i = 0; i < addresses.size(); ++i)
+            for (unsigned i = 0; i < addresses.size(); ++i)
             {
                 // create the socket
 #if _MSC_VER
@@ -98,19 +99,19 @@ private:
 #endif
                 
                 // move on on failure
-                if (_socket < -1) continue;
+                if (_socket == tcp::InvalidSocket) continue;
                 
                 // connect to the socket
-                if (connect(_socket, addresses[i]->ai_addr, addresses[i]->ai_addrlen) == 0) break;
-                
+                if (connect(_socket, addresses[i]->ai_addr, (int) addresses[i]->ai_addrlen) == 0) break;
+
                 // log the error for the time being
-                _error = strerror(errno);
+                _error = tcp::StrError(tcp::Errno());
 
                 // close socket because connect failed
-                close(_socket);
+                tcp::Close(_socket);
                     
                 // socket no longer is valid
-                _socket = -1;
+                _socket = tcp::InvalidSocket;
             }
             
             // connection succeeded, mark socket as non-blocking
@@ -186,7 +187,7 @@ public:
      *  @param  flags       Flags to indicate that fd is readable and/or writable
      *  @return             New implementation object
      */
-    virtual TcpState *process(int fd, int flags) override
+    virtual TcpState *process(tcp::Socket fd, int flags) override
     {
         // only works if the incoming pipe is readable
         if (fd != _pipe.in() || !(flags & readable)) return this;

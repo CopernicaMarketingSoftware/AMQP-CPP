@@ -80,7 +80,7 @@ public:
      *  @param   arguments   additional arguments, implementation dependant.
      */
     QueueUnbindFrame(uint16_t channel, const std::string& name, const std::string& exchange, const std::string& routingKey = "", const Table& arguments = {} ) :
-        QueueFrame(channel, (name.length() + exchange.length() + routingKey.length() + arguments.size() + 5) ), // 1 per string, 2 for deprecated field
+        QueueFrame(channel, (uint32_t) (name.length() + exchange.length() + routingKey.length() + arguments.size() + 5) ), // 1 per string, 2 for deprecated field
         _name(name),
         _exchange(exchange),
         _routingKey(routingKey),

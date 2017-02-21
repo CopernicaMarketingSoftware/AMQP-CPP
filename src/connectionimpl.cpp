@@ -144,7 +144,7 @@ size_t ConnectionImpl::parse(const Buffer &buffer)
                 // have the initial bytes of the header, we already know how much 
                 // data we need for the next frame, otherwise we need at least 7
                 // bytes for processing the header of the next frame
-                _expected = receivedFrame.header() ? receivedFrame.totalSize() : 7;
+                numeric_cast(_expected, receivedFrame.header() ? receivedFrame.totalSize() : 7);
 
                 // we're ready for now
                 return processed;

@@ -43,7 +43,7 @@ public:
      *  @param  response    the challenge response
      */
     ConnectionSecureOKFrame(const std::string& response) :
-        ConnectionFrame(response.length() + 4), //response length + uint32_t for encoding the length
+        ConnectionFrame((uint32_t) response.length() + 4), //response length + uint32_t for encoding the length
         _response(response)
     {}
 

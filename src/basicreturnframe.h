@@ -67,7 +67,7 @@ public:
      *  @param  routingKey      message routing key
      */
     BasicReturnFrame(uint16_t channel, int16_t replyCode, const std::string& replyText = "", const std::string& exchange = "", const std::string& routingKey = "") :
-        BasicFrame(channel, replyText.length() + exchange.length() + routingKey.length() + 5), // 3 for each string (extra size byte), 2 for uint16_t
+        BasicFrame(channel, (uint32_t) (replyText.length() + exchange.length() + routingKey.length() + 5)), // 3 for each string (extra size byte), 2 for uint16_t
         _replyCode(replyCode),
         _replyText(replyText),
         _exchange(exchange),

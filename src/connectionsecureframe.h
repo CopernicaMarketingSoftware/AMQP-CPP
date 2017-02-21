@@ -43,7 +43,7 @@ public:
      *  @param  challenge   the challenge
      */
     ConnectionSecureFrame(const std::string& challenge) :
-        ConnectionFrame(challenge.length() + 4), // 4 for the length of the challenge (uint32_t)
+        ConnectionFrame((uint32_t) challenge.length() + 4), // 4 for the length of the challenge (uint32_t)
         _challenge(challenge)
     {}
 

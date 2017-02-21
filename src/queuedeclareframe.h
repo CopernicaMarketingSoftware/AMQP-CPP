@@ -80,7 +80,7 @@ public:
      *  @param  Table arguments     additional arguments, implementation dependent
      */
     QueueDeclareFrame(uint16_t channel, const std::string& name = "", bool passive = false, bool durable = false, bool exclusive = false, bool autoDelete = false, bool noWait = false, const Table& arguments = {}) :
-        QueueFrame(channel, (name.length() + arguments.size() + 4 ) ), // 1 extra for string size, 1 for bools, 2 for deprecated value
+        QueueFrame(channel, (uint32_t) (name.length() + arguments.size() + 4 ) ), // 1 extra for string size, 1 for bools, 2 for deprecated value
         _name(name),
         _bools(passive, durable, exclusive, autoDelete, noWait),
         _arguments(arguments)

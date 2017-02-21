@@ -69,7 +69,7 @@ public:
      *  @param   noWait      do not wait on response
      */
     QueueDeleteFrame(uint16_t channel, const std::string& name, bool ifUnused = false, bool ifEmpty = false, bool noWait = false) :
-        QueueFrame(channel, name.length() + 4), // 1 for string length, 1 for bools, 2 for deprecated field
+        QueueFrame(channel, (uint32_t) name.length() + 4), // 1 for string length, 1 for bools, 2 for deprecated field
         _name(name),
         _bools(ifUnused, ifEmpty, noWait)
     {}

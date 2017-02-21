@@ -95,7 +95,7 @@ public:
      *  @param  arguments
      */
     ExchangeUnbindFrame(uint16_t channel, const std::string &destination, const std::string &source, const std::string &routingKey, bool noWait, const Table &arguments) :
-        ExchangeFrame(channel, (destination.length() + source.length() + routingKey.length() + arguments.size() + 6)), // 1 for each string, 1 for booleanset, 2 for deprecated field
+        ExchangeFrame(channel, (uint32_t) (destination.length() + source.length() + routingKey.length() + arguments.size() + 6)), // 1 for each string, 1 for booleanset, 2 for deprecated field
         _destination(destination),
         _source(source),
         _routingKey(routingKey),
