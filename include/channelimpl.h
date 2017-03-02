@@ -218,8 +218,20 @@ public:
         // store callback
         _errorCallback = callback;
 
+        // if the channel is connected, all is ok
+        if (connected()) return;
+        
+        // is the channel closing down?
+        if (_state == state_closing) return callback("Channel is closing down");
+
+        // the channel is closed, but what is the connection doing?
+        if (_connection == nullptr) return callback("Channel is not linked to a connection");
+        
+        // if the connection is valid, this is a pure channel error
+        if (_connection->connected()) return callback("Channel is in an error state, but the connection is valid");
+        
         // direct call if channel is already in error state
-        if (!connected()) callback("Channel is in error state");
+        callback("Channel is in error state because no AMQP connection is available");
     }
 
     /**
