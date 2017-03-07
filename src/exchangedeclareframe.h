@@ -81,7 +81,7 @@ public:
      *  @param  arguments   additional arguments
      */
     ExchangeDeclareFrame(uint16_t channel, const std::string& name, const std::string& type, bool passive, bool durable, bool noWait, const Table& arguments) :
-        ExchangeFrame(channel, (name.length() + type.length() + arguments.size() + 5)), // size of name, type and arguments + 1 (all booleans are stored in 1 byte) + 2 (deprecated short) + 2 (string sizes)
+        ExchangeFrame(channel, (uint32_t) (name.length() + type.length() + arguments.size() + 5)), // size of name, type and arguments + 1 (all booleans are stored in 1 byte) + 2 (deprecated short) + 2 (string sizes)
         _name(name),
         _type(type),
         _bools(passive, durable, false, false, noWait),

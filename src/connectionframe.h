@@ -4,6 +4,8 @@
  *  @copyright 2014 Copernica BV
  */
 
+#pragma once
+
 /**
  *  Class definition
  */

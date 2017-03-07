@@ -43,10 +43,7 @@ public:
         // safety-check: on 32-bit platforms size_t is obviously also a 32-bit dword
         // in which case casting the uint64_t to a size_t could result in truncation
         // here we check whether the given size fits inside a size_t
-        if (std::numeric_limits<size_t>::max() < size) throw std::runtime_error("message is too big for this system");
-
-        // store the new size
-        _bodySize = size;
+        numeric_cast(_bodySize, size);
     }
 
     /**
@@ -55,8 +52,11 @@ public:
      *  @param  size        size of the data
      *  @return bool        true if the message is now complete
      */
-    bool append(const char *buffer, uint64_t size)
+    bool append(const char *buffer, uint64_t size64)
     {
+        size_t size;
+        numeric_cast(size, size64);
+
         // is this the only data, and also direct complete?
         if (_str.empty() && size >= _bodySize)
         {

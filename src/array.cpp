@@ -16,7 +16,7 @@ namespace AMQP {
 Array::Array(ReceivedFrame &frame)
 {
     // use this to see if we've read too many bytes.
-    uint32_t charsToRead = frame.nextUint32();
+    size_t charsToRead = frame.nextUint32();
 
     // keep going until all data is read
     while (charsToRead > 0)
@@ -72,9 +72,9 @@ const Field &Array::get(uint8_t index) const
 
 /**
  *  Number of entries in the array
- *  @return uint32_t
+ *  @return size_t
  */
-uint32_t Array::count() const
+size_t Array::count() const
 {
   return _fields.size();
 }

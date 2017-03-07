@@ -76,7 +76,7 @@ public:
      *  @param  envelope    the envelope
      */
     BasicHeaderFrame(uint16_t channel, const Envelope &envelope) :
-        HeaderFrame(channel, 10 + envelope.size()), // there are at least 10 bytes sent, weight (2), bodySize (8), plus the size of the meta data
+        HeaderFrame(channel, (uint32_t) (10 + envelope.size())), // there are at least 10 bytes sent, weight (2), bodySize (8), plus the size of the meta data
         _bodySize(envelope.bodySize()),
         _metadata(envelope)
     {}

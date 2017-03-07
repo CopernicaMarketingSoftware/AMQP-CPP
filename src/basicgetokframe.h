@@ -76,7 +76,7 @@ public:
      *  @param  messageCount    number of messages in the queue
      */
     BasicGetOKFrame(uint16_t channel, uint64_t deliveryTag, bool redelivered, const std::string& exchange, const std::string& routingKey, uint32_t messageCount) :
-        BasicFrame(channel, (exchange.length() + routingKey.length() + 15)), // string length, +1 for each shortsrting length + 8 (uint64_t) + 4 (uint32_t) + 1 (bool)
+        BasicFrame(channel, (uint32_t) (exchange.length() + routingKey.length() + 15)), // string length, +1 for each shortsrting length + 8 (uint64_t) + 4 (uint32_t) + 1 (bool)
         _deliveryTag(deliveryTag),
         _redelivered(redelivered),
         _exchange(exchange),

@@ -324,7 +324,7 @@ public:
      *  @param  buffer      buffer to decode
      *  @return             number of bytes that were processed
      */
-    uint64_t parse(const Buffer &buffer);
+    size_t parse(const Buffer &buffer);
 
     /**
      *  Close the connection

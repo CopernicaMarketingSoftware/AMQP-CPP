@@ -16,7 +16,11 @@
  *  Dependencies
  */
 #include <fcntl.h>
+#if _MSC_VER
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 
 /**
  *  Set up namespace
@@ -44,6 +48,8 @@ public:
         // construct the pipe
 #ifdef _GNU_SOURCE
         if (pipe2(_fds, O_CLOEXEC) == 0) return;
+#elif _MSC_VER
+        if (_pipe(_fds, 256, O_BINARY | O_NOINHERIT)) return;
 #else
         if (
             pipe(_fds) == 0 &&

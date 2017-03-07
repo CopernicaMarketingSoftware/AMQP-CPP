@@ -59,7 +59,7 @@ public:
      *  @param  noWait          whether to wait for a response.
      */
     BasicCancelFrame(uint16_t channel, const std::string& consumerTag, bool noWait = false) : 
-        BasicFrame(channel, consumerTag.size() + 2),    // 1 for extra string size, 1 for bool
+        BasicFrame(channel, (uint32_t) consumerTag.size() + 2),    // 1 for extra string size, 1 for bool
         _consumerTag(consumerTag),
         _noWait(noWait) {}
 

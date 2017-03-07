@@ -302,20 +302,20 @@ public:
         // the result (2 for the two boolean sets)
         uint32_t result = 2;
 
-        if (hasExpiration())        result += _expiration.size();
-        if (hasReplyTo())           result += _replyTo.size();
-        if (hasCorrelationID())     result += _correlationID.size();
-        if (hasPriority())          result += _priority.size();
-        if (hasDeliveryMode())      result += _deliveryMode.size();
-        if (hasHeaders())           result += _headers.size();
-        if (hasContentEncoding())   result += _contentEncoding.size();
-        if (hasContentType())       result += _contentType.size();
-        if (hasClusterID())         result += _clusterID.size();
-        if (hasAppID())             result += _appID.size();
-        if (hasUserID())            result += _userID.size();
-        if (hasTypeName())          result += _typeName.size();
-        if (hasTimestamp())         result += _timestamp.size();
-        if (hasMessageID())         result += _messageID.size();
+        if (hasExpiration())        result += (uint32_t) _expiration.size();
+        if (hasReplyTo())           result += (uint32_t) _replyTo.size();
+        if (hasCorrelationID())     result += (uint32_t) _correlationID.size();
+        if (hasPriority())          result += (uint32_t) _priority.size();
+        if (hasDeliveryMode())      result += (uint32_t) _deliveryMode.size();
+        if (hasHeaders())           result += (uint32_t) _headers.size();
+        if (hasContentEncoding())   result += (uint32_t) _contentEncoding.size();
+        if (hasContentType())       result += (uint32_t) _contentType.size();
+        if (hasClusterID())         result += (uint32_t) _clusterID.size();
+        if (hasAppID())             result += (uint32_t) _appID.size();
+        if (hasUserID())            result += (uint32_t) _userID.size();
+        if (hasTypeName())          result += (uint32_t) _typeName.size();
+        if (hasTimestamp())         result += (uint32_t) _timestamp.size();
+        if (hasMessageID())         result += (uint32_t) _messageID.size();
 
         // done
         return result;

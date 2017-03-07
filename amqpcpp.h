@@ -8,6 +8,10 @@
 
 #pragma once
 
+#if _MSC_VER
+#define NOMINMAX
+#endif
+
 // base C++ include files
 #include <vector>
 #include <string>

@@ -7,6 +7,14 @@
  *  @documentation private
  */
 
+#ifdef _MSC_VER
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#define _CRT_SECURE_NO_WARNINGS 1
+#pragma warning(disable : 4996)
+#endif //_MSC_VER
+
 // c and c++ dependencies
 #include <stdlib.h>
 #include <string.h>
@@ -22,10 +30,15 @@
 #include <vector>
 #include <queue>
 #include <sys/types.h>
+#if _MSC_VER
+#include <winsock2.h>
+#include <Ws2tcpip.h>
+#else
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <netinet/tcp.h>
+#endif
 #include <functional>
 #include <stdexcept>
 
@@ -78,6 +91,7 @@
 #include "../include/tcpconnection.h"
 
 // classes that are very commonly used
+#include "numeric_cast.h"
 #include "exception.h"
 #include "protocolexception.h"
 #include "frame.h"

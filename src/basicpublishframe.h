@@ -70,7 +70,7 @@ public:
      *  @param  immediate       request immediate delivery       @default = false
      */
     BasicPublishFrame(uint16_t channel, const std::string& exchange = "", const std::string& routingKey = "", bool mandatory = false, bool immediate = false) :
-        BasicFrame(channel, exchange.length() + routingKey.length() + 5), // 1 extra per string (for the size), 1 for bools, 2 for deprecated field
+        BasicFrame(channel, (uint32_t) (exchange.length() + routingKey.length() + 5)), // 1 extra per string (for the size), 1 for bools, 2 for deprecated field
         _exchange(exchange),
         _routingKey(routingKey),
         _bools(mandatory, immediate)

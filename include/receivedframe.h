@@ -163,9 +163,9 @@ public:
 
     /**
      *  Total size of the frame (headers + payload)
-     *  @return uint32_t
+     *  @return size_t
      */
-    uint64_t totalSize() const
+    size_t totalSize() const
     {
         // payload size + size of headers and end of frame byte
         return _payloadSize + 8;

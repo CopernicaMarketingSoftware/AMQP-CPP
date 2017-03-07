@@ -1,5 +1,19 @@
 #pragma once
 
+namespace AMQP {
+    namespace tcp {
+#if _WIN32 || _WIN64 
+        typedef SOCKET Socket;
+#else 
+        typedef int Socket;
+#endif
+    }
+}
+
+#if _MSC_VER
+#define MSG_NOSIGNAL 1
+#endif
+
 /**
  * No MSG_NOSIGNAL on OS X.
  * Avoid SIGPIPE by using sockopt call.

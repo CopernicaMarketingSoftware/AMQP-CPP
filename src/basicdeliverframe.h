@@ -87,7 +87,7 @@ public:
      *  @param  routingKey      message routing key
      */
     BasicDeliverFrame(uint16_t channel, const std::string& consumerTag, uint64_t deliveryTag, bool redelivered = false, const std::string& exchange = "", const std::string& routingKey = "") :
-        BasicFrame(channel, (consumerTag.length() + exchange.length() + routingKey.length() + 12)),
+        BasicFrame(channel, (uint32_t) (consumerTag.length() + exchange.length() + routingKey.length() + 12)),
             // length of strings + 1 byte per string for stringsize, 8 bytes for uint64_t and 1 for bools
         _consumerTag(consumerTag),
         _deliveryTag(deliveryTag),

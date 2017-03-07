@@ -129,7 +129,7 @@ public:
      *
      *  @return array size
      */
-    uint32_t count() const;
+    size_t count() const;
 
     /**
      *  Remove last element from array

@@ -50,7 +50,7 @@ public:
     virtual ~FrameCheck()
     {
         // update the number of bytes to skip
-        _frame->_skip += _size;
+        _frame->_skip += (uint32_t) _size;
     }
 };
 

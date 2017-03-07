@@ -53,7 +53,7 @@ public:
      *  @param  consumerTag holds the consumertag specified by client or server
      */
     BasicCancelOKFrame(uint16_t channel, std::string& consumerTag) :
-        BasicFrame(channel, consumerTag.length() + 1),    // add 1 byte for encoding the size of consumer tag
+        BasicFrame(channel, (uint32_t) consumerTag.length() + 1),    // add 1 byte for encoding the size of consumer tag
         _consumerTag(consumerTag)
     {}
 

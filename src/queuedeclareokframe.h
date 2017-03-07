@@ -62,7 +62,7 @@ public:
      *  @param  failingMethod   failing method id if applicable
      */
     QueueDeclareOKFrame(uint16_t channel, const std::string& name, int32_t messageCount, int32_t consumerCount) :
-        QueueFrame(channel, name.length() + 9), // 4 per int, 1 for string size
+        QueueFrame(channel, (uint32_t) name.length() + 9), // 4 per int, 1 for string size
         _name(name),
         _messageCount(messageCount),
         _consumerCount(consumerCount)

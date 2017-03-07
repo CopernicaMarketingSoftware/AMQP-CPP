@@ -119,7 +119,14 @@ public:
     virtual size_t size() const override
     {
         // find out size of the size parameter
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4267)
+#endif
         T size(_data.size());
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
         // size of the uint8 or uint32 + the actual string size
         return size.size() + _data.size();
@@ -160,7 +167,14 @@ public:
     virtual void fill(OutBuffer& buffer) const override
     {
         // create size
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4267)
+#endif
         T size(_data.size());
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
 
         // first, write down the size of the string
         size.fill(buffer);

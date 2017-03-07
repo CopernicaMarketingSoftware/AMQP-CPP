@@ -82,7 +82,7 @@ public:
      *  @param  failingMethod   failing method id if applicable
      */
     ChannelCloseFrame(uint16_t channel, uint16_t code = 0, const std::string& text = "", uint16_t failingClass = 0, uint16_t failingMethod = 0) :
-        ChannelFrame(channel, (text.length() + 7)), // sizeof code, failingclass, failingmethod (2byte + 2byte + 2byte) + text length + text length byte
+        ChannelFrame(channel, (uint32_t) (text.length() + 7)), // sizeof code, failingclass, failingmethod (2byte + 2byte + 2byte) + text length + text length byte
         _code(code),
         _text(text),
         _failingClass(failingClass),

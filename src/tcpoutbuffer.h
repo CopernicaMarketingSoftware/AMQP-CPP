@@ -16,8 +16,18 @@
 /**
  *  Dependencies
  */
+#ifdef _MSC_VER
+#include <Winsock2.h>
+
+typedef std::make_signed<size_t>::type ssize_t;
+
+#define iovec _WSABUF
+#define iov_base buf
+#define iov_len len
+#else
 #include <sys/ioctl.h>
 #include <sys/uio.h>
+#endif
  
 /**
  *  FIONREAD on Solaris is defined elsewhere
@@ -200,7 +210,7 @@ public:
      *  @param  socket
      *  @return ssize_t
      */
-    ssize_t sendto(int socket)
+    ssize_t sendto(tcp::Socket socket)
     {
         // total number of bytes written
         ssize_t total = 0;
@@ -212,19 +222,37 @@ public:
             struct iovec buffer[64];
             
             // index counter
-            size_t index = 0;
+            long index = 0;
             
             // iterate over the buffers
             for (const auto &str : _buffers)
             {
+#if _WIN64
+                size_t packetSize64 = index == 0 ? str.size() - _skip : str.size();
+                ULONG packetSize = std::numeric_limits<ULONG>::max();
+                if (packetSize > packetSize64)
+                    packetSize = (ULONG) packetSize64;
+#else
+                size_t packetSize = index == 0 ? str.size() - _skip : str.size();
+#endif
+
                 // fill buffer
-                buffer[index].iov_base = (void *)(index == 0 ? str.data() + _skip : str.data());
-                buffer[index].iov_len = index == 0 ? str.size() - _skip : str.size();
+                buffer[index].iov_base = (char *) (index == 0 ? str.data() + _skip : str.data());
+                buffer[index].iov_len = packetSize;
                 
                 // update counter for next iteration
                 if (++index >= 64) break;
+
+#if _WIN64
+                if (packetSize >= std::numeric_limits<ULONG>::max()) break;
+#endif
             }
 
+#ifdef _MSC_VER
+            DWORD result;
+            int error = WSASend(socket, buffer, index, &result, 0, NULL, NULL);
+            if (error) result = -1;
+#else
             // create the message header
             struct msghdr header;
 
@@ -237,6 +265,7 @@ public:
 
             // send the data
             auto result = sendmsg(socket, &header, AMQP_CPP_MSG_NOSIGNAL);
+#endif
 
             // skip on error, or when nothing was written
             if (result <= 0) return total > 0 ? total : result;

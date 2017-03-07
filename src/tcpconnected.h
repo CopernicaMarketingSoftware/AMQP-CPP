@@ -34,7 +34,7 @@ private:
      *  The socket file descriptor
      *  @var int
      */
-    int _socket;
+    tcp::Socket _socket;
     
     /**
      *  The outgoing buffer
@@ -101,7 +101,7 @@ private:
         FD_SET(_socket, &writables);
         
         // wait for the socket
-        auto result = select(_socket + 1, &readables, &writables, &exceptions, nullptr);
+        auto result = select((int) _socket + 1, &readables, &writables, &exceptions, nullptr);
         
         // check for success
         return result == 0;
@@ -115,7 +115,7 @@ public:
      *  @param  buffer      The buffer that was already built
      *  @param  handler     User-supplied handler object
      */
-    TcpConnected(TcpConnection *connection, int socket, TcpOutBuffer &&buffer, TcpHandler *handler) : 
+    TcpConnected(TcpConnection *connection, tcp::Socket socket, TcpOutBuffer &&buffer, TcpHandler *handler) : 
         TcpState(connection, handler),
         _socket(socket),
         _out(std::move(buffer)),
@@ -137,7 +137,7 @@ public:
         _handler->monitor(_connection, _socket, 0);
         
         // close the socket
-        close(_socket);
+        tcp::Close(_socket);
     }
     
     /**
@@ -146,7 +146,7 @@ public:
      *  @param  flags       AMQP::readable and/or AMQP::writable
      *  @return             New state object
      */
-    virtual TcpState *process(int fd, int flags) override
+    virtual TcpState *process(tcp::Socket fd, int flags) override
     {
         // must be the socket
         if (fd != _socket) return this;
@@ -211,8 +211,16 @@ public:
         // is there already a buffer of data that can not be sent?
         if (_out) return _out.add(buffer, size);
 
+#ifdef _WIN64
+        //send only accepts int argument, send(SOCKET s,const char FAR * buf, int len, int flags)
+        int packetSize = (int) size;
+        if (size > INT_MAX) packetSize = INT_MAX;
+#else
+        size_t &packetSize = size;
+#endif
+
         // there is no buffer, send the data right away
-        auto result = ::send(_socket, buffer, size, AMQP_CPP_MSG_NOSIGNAL);
+        auto result = ::send(_socket, buffer, packetSize, AMQP_CPP_MSG_NOSIGNAL);
 
         // number of bytes sent
         size_t bytes = result < 0 ? 0 : result;

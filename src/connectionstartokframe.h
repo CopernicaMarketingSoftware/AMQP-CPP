@@ -82,7 +82,7 @@ public:
      *  @param  locale      selected locale.
      */
     ConnectionStartOKFrame(const Table& properties, const std::string& mechanism, const std::string& response, const std::string& locale) :
-        ConnectionFrame((properties.size() + mechanism.length() + response.length() + locale.length() + 6)), // 1 byte extra per shortstring, 4 per longstring
+        ConnectionFrame((uint32_t) (properties.size() + mechanism.length() + response.length() + locale.length() + 6)), // 1 byte extra per shortstring, 4 per longstring
         _properties(properties),
         _mechanism(mechanism),
         _response(response),

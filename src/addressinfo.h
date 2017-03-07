@@ -7,9 +7,8 @@
  *  @copyright 2015 Copernica BV
  */
 
-/**
- *  Include guard
- */
+#pragma once
+
 namespace AMQP {
 
 /**

@@ -104,13 +104,13 @@ void ConnectionImpl::remove(const ChannelImpl *channel)
  *  @param  buffer      buffer to decode
  *  @return             number of bytes that were processed
  */
-uint64_t ConnectionImpl::parse(const Buffer &buffer)
+size_t ConnectionImpl::parse(const Buffer &buffer)
 {
     // do not parse if already in an error state
     if (_state == state_closed) return 0;
 
     // number of bytes processed
-    uint64_t processed = 0;
+    size_t processed = 0;
 
     // create a monitor object that checks if the connection still exists
     Monitor monitor(this);
@@ -133,7 +133,7 @@ uint64_t ConnectionImpl::parse(const Buffer &buffer)
                 receivedFrame.process(this);
 
                 // number of bytes processed
-                uint64_t bytes = receivedFrame.totalSize();
+                size_t bytes = receivedFrame.totalSize();
 
                 // add bytes
                 processed += bytes;
@@ -144,7 +144,7 @@ uint64_t ConnectionImpl::parse(const Buffer &buffer)
                 // have the initial bytes of the header, we already know how much 
                 // data we need for the next frame, otherwise we need at least 7
                 // bytes for processing the header of the next frame
-                _expected = receivedFrame.header() ? receivedFrame.totalSize() : 7;
+                numeric_cast(_expected, receivedFrame.header() ? receivedFrame.totalSize() : 7);
 
                 // we're ready for now
                 return processed;
