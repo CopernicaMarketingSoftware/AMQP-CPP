@@ -214,6 +214,26 @@ public:
     }
 
     /**
+     *  Are we closing down?
+     *  @return bool
+     */
+    bool closing() const
+    {
+        // state must be connected
+        return _state == state_closing;
+    }
+
+    /**
+     *  Are we closed?
+     *  @return bool
+     */
+    bool closed() const
+    {
+        // state must be connected
+        return _state == state_closed;
+    }
+
+    /**
      *  Mark the connection as connected
      */
     void setConnected();
