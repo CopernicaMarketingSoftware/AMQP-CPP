@@ -91,15 +91,6 @@ public:
     {
         return _bodySize;
     }
-
-    /**
-     *  Body as a string
-     *  @return string
-     */
-    std::string message() const
-    {
-        return std::string(_body, static_cast<size_t>(_bodySize));
-    }
 };
 
 /**
