@@ -1,7 +1,7 @@
 /**
  *  Class describing an AMQP basic header frame
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2017 Copernica BV
  */
 
 /**

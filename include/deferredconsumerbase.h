@@ -4,7 +4,7 @@
  *  Base class for the deferred consumer and the
  *  deferred get.
  *
- *  @copyright 2016 Copernica B.V.
+ *  @copyright 2016 - 2017 Copernica B.V.
  */
 
 /**
@@ -85,7 +85,7 @@ private:
      *  @param  deliveryTag The delivery tag (for ack()ing)
      *  @param  redelivered Is this a redelivered message
      */
-    virtual void announce(Message &&message, uint64_t deliveryTag, bool redelivered) const = 0;
+    virtual void announce(const Message &message, uint64_t deliveryTag, bool redelivered) const = 0;
 
     /**
      *  Frames may be processed

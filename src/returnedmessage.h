@@ -5,7 +5,7 @@
  *  was published with the immediate or mandatory flag, and could not be
  *  delivered according to those rules.
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2017 Copernica BV
  */
 
 /**
@@ -16,7 +16,7 @@ namespace AMQP {
 /**
  *  Class definition
  */
-class ReturnedMessage : public MessageImpl
+class ReturnedMessage : public Message
 {
 private:
     /**
@@ -38,13 +38,13 @@ public:
      *  @param  frame
      */
     ReturnedMessage(const BasicReturnFrame &frame) :
-        MessageImpl(frame.exchange(), frame.routingKey()),
+        Message(frame.exchange(), frame.routingKey()),
         _replyCode(frame.replyCode()), _replyText(frame.replyText()) {}
 
     /**
      *  Destructor
      */
-    virtual ~ReturnedMessage() {}
+    virtual ~ReturnedMessage() = default;
 };
 
 /**

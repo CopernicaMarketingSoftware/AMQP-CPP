@@ -3,7 +3,7 @@
  *
  *  Implementation of the ReceivedFrame class
  *
- *  @documentation private
+ *  @copyright 2014 - 2017 Copernica BV
  */
 #include "includes.h"
 #include "heartbeatframe.h"
@@ -65,7 +65,6 @@
 #include "transactioncommitokframe.h"
 #include "transactionrollbackframe.h"
 #include "transactionrollbackokframe.h"
-#include "messageimpl.h"
 #include "consumedmessage.h"
 #include "bodyframe.h"
 #include "basicheaderframe.h"

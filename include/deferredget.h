@@ -2,7 +2,7 @@
  *  DeferredGet.h
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2014 - 2016 Copernica BV
+ *  @copyright 2014 - 2017 Copernica BV
  */
 
 /**
@@ -62,7 +62,7 @@ private:
      *  @param  deliveryTag The delivery tag (for ack()ing)
      *  @param  redelivered Is this a redelivered message
      */
-    virtual void announce(Message &&message, uint64_t deliveryTag, bool redelivered) const override;
+    virtual void announce(const Message &message, uint64_t deliveryTag, bool redelivered) const override;
 
     /**
      *  The channel implementation may call our

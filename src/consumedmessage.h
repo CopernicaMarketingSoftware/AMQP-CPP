@@ -1,7 +1,7 @@
 /**
  *  Base class for a message implementation
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2017 Copernica BV
  */
 
 /**
@@ -12,7 +12,7 @@ namespace AMQP {
 /**
  *  Class definition
  */
-class ConsumedMessage : public MessageImpl
+class ConsumedMessage : public Message
 {
 private:
     /**
@@ -40,7 +40,7 @@ public:
      *  @param  frame
      */
     ConsumedMessage(const BasicDeliverFrame &frame) :
-        MessageImpl(frame.exchange(), frame.routingKey()),
+        Message(frame.exchange(), frame.routingKey()),
         _consumerTag(frame.consumerTag()), _deliveryTag(frame.deliveryTag()), _redelivered(frame.redelivered())
     {}
 
@@ -49,7 +49,7 @@ public:
      *  @param  frame
      */
     ConsumedMessage(const BasicGetOKFrame &frame) :
-        MessageImpl(frame.exchange(), frame.routingKey()),
+        Message(frame.exchange(), frame.routingKey()),
         _deliveryTag(frame.deliveryTag()), _redelivered(frame.redelivered())
     {}
 
@@ -75,7 +75,7 @@ public:
     void report(const MessageCallback &callback)
     {
         // send ourselves to the consumer
-        if (callback) callback(std::move(*this), _deliveryTag, _redelivered);
+        if (callback) callback(*this, _deliveryTag, _redelivered);
     }
 };
 

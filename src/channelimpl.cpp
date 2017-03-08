@@ -3,13 +3,12 @@
  *
  *  Implementation for a channel
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2017 Copernica BV
  */
 #include "includes.h"
 #include "basicdeliverframe.h"
 #include "basicgetokframe.h"
 #include "basicreturnframe.h"
-#include "messageimpl.h"
 #include "consumedmessage.h"
 #include "returnedmessage.h"
 #include "channelopenframe.h"

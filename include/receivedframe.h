@@ -8,7 +8,7 @@
  *  This is a class that is used internally by the AMQP library. As a user
  *  of this library, you normally do not have to instantiate it.
  *
- *  @documentation public
+ *  @copyright 2014 - 2017 Copernica BV
  */
 
 /**

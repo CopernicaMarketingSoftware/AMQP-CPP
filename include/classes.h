@@ -3,6 +3,7 @@
  *
  *  List of all declared classes
  *
+ *  @copyright 2014 - 2017 Copernica BV
  */
 
 /**
@@ -31,7 +32,6 @@ class ConnectionImpl;
 class Exchange;
 class Frame;
 class Login;
-class MessageImpl;
 class Monitor;
 class OutBuffer;
 class ReceivedFrame;

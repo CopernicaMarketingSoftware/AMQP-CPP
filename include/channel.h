@@ -1,7 +1,7 @@
 /**
  *  Class describing a (mid-level) AMQP channel implementation
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2017 Copernica BV
  */
 
 /**
@@ -344,10 +344,7 @@ public:
      *  @param  size        size of the message
      */
     bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope) { return _implementation->publish(exchange, routingKey, envelope); }
-    bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message) { return _implementation->publish(exchange, routingKey, Envelope(message)); }
-    bool publish(const std::string &exchange, const std::string &routingKey, std::string &&message) { return _implementation->publish(exchange, routingKey, Envelope(std::move(message))); }
     bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size) { return _implementation->publish(exchange, routingKey, Envelope(message, size)); }
-    bool publish(const std::string &exchange, const std::string &routingKey, const char *message) { return _implementation->publish(exchange, routingKey, Envelope(message, strlen(message))); }
 
     /**
      *  Set the Quality of Service (QOS) for this channel

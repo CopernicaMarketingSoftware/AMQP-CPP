@@ -3,7 +3,7 @@
  *
  *  Implementation file for the DeferredConsumer class
  *
- *  @copyright 2014 - 2016 Copernica BV
+ *  @copyright 2014 - 2017 Copernica BV
  */
 #include "includes.h"
 
@@ -38,10 +38,10 @@ const std::shared_ptr<Deferred> &DeferredConsumer::reportSuccess(const std::stri
  *  @param  deliveryTag The delivery tag (for ack()ing)
  *  @param  redelivered Is this a redelivered message
  */
-void DeferredConsumer::announce(Message &&message, uint64_t deliveryTag, bool redelivered) const
+void DeferredConsumer::announce(const Message &message, uint64_t deliveryTag, bool redelivered) const
 {
     // simply execute the message callback
-    _messageCallback(std::move(message), deliveryTag, redelivered);
+    _messageCallback(message, deliveryTag, redelivered);
 }
 
 /**

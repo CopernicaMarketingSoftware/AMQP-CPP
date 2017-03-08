@@ -4,7 +4,7 @@
  *  With every published message a set of meta data is passed to. This class
  *  holds all that meta data.
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2017 Copernica BV
  */
 
 /**

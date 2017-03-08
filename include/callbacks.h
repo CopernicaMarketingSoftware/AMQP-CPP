@@ -3,7 +3,7 @@
  *
  *  Class storing deferred callbacks of different type.
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2017 Copernica BV
  */
 
 /**
@@ -41,7 +41,7 @@ using EmptyCallback     =   std::function<void()>;
 using BeginCallback     =   std::function<void()>;
 using HeaderCallback    =   std::function<void(const MetaData &metaData)>;
 using DataCallback      =   std::function<void(const char *data, size_t size)>;
-using MessageCallback   =   std::function<void(Message &&message, uint64_t deliveryTag, bool redelivered)>;
+using MessageCallback   =   std::function<void(const Message &message, uint64_t deliveryTag, bool redelivered)>;
 using CompleteCallback  =   std::function<void(uint64_t deliveryTag, bool redelivered)>;
 using QueueCallback     =   std::function<void(const std::string &name, uint32_t messagecount, uint32_t consumercount)>;
 using DeleteCallback    =   std::function<void(uint32_t deletedmessages)>;

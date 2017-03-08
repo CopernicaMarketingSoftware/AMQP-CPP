@@ -5,7 +5,7 @@
  *  that has a private constructor so that it can not be used from outside
  *  the AMQP library
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2017 Copernica BV
  */
 
 /**

@@ -4,7 +4,7 @@
  *  Base class for the deferred consumer and the
  *  deferred get.
  *
- *  @copyright 2016 Copernica B.V.
+ *  @copyright 2016 - 2017 Copernica B.V.
  */
 
 /**
@@ -120,7 +120,7 @@ void DeferredConsumerBase::complete()
     if (_message)
     {
         // announce the message
-        announce(std::move(*_message), _deliveryTag, _redelivered);
+        announce(*_message, _deliveryTag, _redelivered);
 
         // and destroy it
         _message.reset();

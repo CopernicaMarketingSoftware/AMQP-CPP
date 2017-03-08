@@ -7,7 +7,7 @@
  *  Message objects can not be constructed by end users, they are only constructed
  *  by the AMQP library, and passed to user callbacks.
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2017 Copernica BV
  */
 
 /**
@@ -48,8 +48,15 @@ protected:
      *  The routing key that was originally used
      *  @var    string
      */
-    std::string _routingKey;
+    std::string _routingkey;
+    
+    /**
+     *  Number of bytes already filled
+     *  @var    size_t
+     */
+    size_t _filled = 0;
 
+    
     /**
      *  We are an open book to the consumer handler
      */
@@ -79,43 +86,41 @@ protected:
      */
     bool append(const char *buffer, uint64_t size)
     {
-        // is this the only data, and also direct complete?
-        if (_str.empty() && size >= _bodySize)
+        // is the body already allocated?
+        if (_allocated)
         {
-            // we have everything
-            _body = buffer;
-
-            // done
-            return true;
+            // prevent overflow
+            size = std::min(size, _bodySize - _filled);
+            
+            // append more data
+            memcpy(_body + _filled, buffer, size);
+            
+            // update filled data
+            _filled += size;
+        }
+        else if (size >= _bodySize)
+        {
+            // we do not have to combine multiple frames, so we can store
+            // the buffer pointer in the message 
+            _body = (char *)buffer;
         }
         else
         {
-            // it does not fit yet, do we have to allocate
-            if (!_body)
-            {
-                // allocate memory in the string
-                _str.reserve(static_cast<size_t>(_bodySize));
-
-                // we now use the data buffer inside the string
-                _body = _str.data();
-            }
-
-            // safety-check: if the given size exceeds the given message body size
-            // we truncate it, this should never happen because it indicates a bug
-            // in the AMQP server implementation, should we report this?
-            size = std::min(size, _bodySize - _str.size());
-
-            // we can not safely append the data to the string, it
-            // will not exceed the reserved size so it is guaranteed
-            // not to change the data pointer, we can just leave that
-            // @todo this is not always necessary; instead, we can refrain from
-            // allocating this buffer entirely and just insert it into the message
-            // directly.
-            _str.append(buffer, static_cast<size_t>(size));
-
-            // if the string is filled with the given number of characters we are done now
-            return _str.size() >= _bodySize;
+            // allocate the buffer
+            _body = (char *)malloc(_bodySize);
+            
+            // remember that the buffer was allocated, so that the destructor can get rid of it
+            _allocated = true;
+            
+            // append more data
+            memcpy(_body, buffer, std::min(size, _bodySize));
+            
+            // update filled data
+            _filled = std::min(size, _bodySize);
         }
+            
+        // check if we're done
+        return _filled >= _bodySize;
     }
 
 public:
@@ -125,32 +130,15 @@ public:
      *  @param  exchange
      *  @param  routingKey
      */
-    Message(const std::string &exchange, const std::string &routingKey) :
-        Envelope(nullptr, 0), _exchange(exchange), _routingKey(routingKey)
+    Message(std::string exchange, std::string routingkey) :
+        Envelope(nullptr, 0), _exchange(std::move(exchange)), _routingkey(std::move(routingkey))
     {}
 
-
     /**
-     *  Copy constructor
-     *
+     *  Disabled copy constructor
      *  @param  message the message to copy
      */
-    Message(const Message &message) :
-        Envelope(message),
-        _exchange(message._exchange),
-        _routingKey(message._routingKey)
-    {}
-
-    /**
-     *  Move constructor
-     *
-     *  @param  message the message to move
-     */
-    Message(Message &&message) :
-        Envelope(std::move(message)),
-        _exchange(std::move(message._exchange)),
-        _routingKey(std::move(message._routingKey))
-    {}
+    Message(const Message &message) = delete;
 
     /**
      *  Destructor
@@ -158,49 +146,12 @@ public:
     virtual ~Message() = default;
 
     /**
-     *  Assignment operator
-     *
-     *  @param  message the message to copy
-     *  @return same object for chaining
-     */
-    Message &operator=(const Message &message)
-    {
-        // call the base assignment
-        Envelope::operator=(message);
-
-        // move the exchange and routing key
-        _exchange   = message._exchange;
-        _routingKey = message._routingKey;
-
-        // allow chaining
-        return *this;
-    }
-
-    /**
-     *  Move assignment operator
-     *
-     *  @param  message the message to move
-     *  @return same object for chaining
-     */
-    Message &operator=(Message &&message)
-    {
-        // call the base assignment
-        Envelope::operator=(std::move(message));
-
-        // move the exchange and routing key
-        _exchange   = std::move(message._exchange);
-        _routingKey = std::move(message._routingKey);
-
-        // allow chaining
-        return *this;
-    }
-
-    /**
      *  The exchange to which it was originally published
      *  @var    string
      */
     const std::string &exchange() const
     {
+        // expose member
         return _exchange;
     }
 
@@ -208,9 +159,10 @@ public:
      *  The routing key that was originally used
      *  @var    string
      */
-    const std::string &routingKey() const
+    const std::string &routingkey() const
     {
-        return _routingKey;
+        // expose member
+        return _routingkey;
     }
 };
 
