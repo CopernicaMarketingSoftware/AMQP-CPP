@@ -29,6 +29,7 @@ class Channel;
 class Connection;
 class ConnectionHandler;
 class ConnectionImpl;
+class CopiedBuffer;
 class Exchange;
 class Frame;
 class Login;

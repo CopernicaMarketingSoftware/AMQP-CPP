@@ -19,7 +19,7 @@
 #include "exchangetype.h"
 #include "watchable.h"
 #include "callbacks.h"
-#include "outbuffer.h"
+#include "copiedbuffer.h"
 #include "deferred.h"
 #include "monitor.h"
 #include <memory>
@@ -119,7 +119,7 @@ private:
      *
      *  @var std::queue
      */
-    std::queue<std::pair<bool, OutBuffer>> _queue;
+    std::queue<std::pair<bool, CopiedBuffer>> _queue;
 
     /**
      *  Are we currently operating in synchronous mode?

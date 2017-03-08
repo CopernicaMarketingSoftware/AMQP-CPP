@@ -694,7 +694,7 @@ bool ChannelImpl::send(const Frame &frame)
     {
         // we need to wait until the synchronous frame has
         // been processed, so queue the frame until it was
-        _queue.emplace(frame.synchronous(), frame.buffer());
+        _queue.emplace(frame.synchronous(), frame);
 
         // it was of course not actually sent but we pretend
         // that it was, because no error occured
@@ -724,19 +724,22 @@ void ChannelImpl::onSynchronized()
     Monitor monitor(this);
 
     // send all frames while not in synchronous mode
-    while (monitor.valid() && _connection && !_synchronous && !_queue.empty())
+    while (_connection && !_synchronous && !_queue.empty())
     {
         // retrieve the first buffer and synchronous
-        auto pair = std::move(_queue.front());
-
-        // remove from the list
-        _queue.pop();
+        const auto &pair = _queue.front();
 
         // mark as synchronous if necessary
         _synchronous = pair.first;
 
         // send it over the connection
-        _connection->send(std::move(pair.second));
+        _connection->send(pair.second);
+
+        // the user space handler may have destructed the channel
+        if (!monitor.valid()) return;
+
+        // remove from the list
+        _queue.pop();
     }
 }
 

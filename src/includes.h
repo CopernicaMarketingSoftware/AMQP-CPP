@@ -38,6 +38,7 @@
 #include "../include/bytebuffer.h"
 #include "../include/receivedframe.h"
 #include "../include/outbuffer.h"
+#include "../include/copiedbuffer.h"
 #include "../include/watchable.h"
 #include "../include/monitor.h"
 #include "../include/tcpdefines.h"

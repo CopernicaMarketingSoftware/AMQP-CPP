@@ -19,7 +19,7 @@
 #include "watchable.h"
 #include "connectionhandler.h"
 #include "channelimpl.h"
-#include "outbuffer.h"
+#include "copiedbuffer.h"
 #include "monitor.h"
 #include "login.h"
 #include <unordered_map>
@@ -122,7 +122,7 @@ protected:
      *  Queued messages that should be sent after the connection has been established
      *  @var    queue
      */
-    std::queue<OutBuffer> _queue;
+    std::queue<CopiedBuffer> _queue;
 
     /**
      *  Heartbeat delay
@@ -348,7 +348,7 @@ public:
      *
      *  @param  buffer      the buffer with data to send
      */
-    bool send(OutBuffer &&buffer);
+    bool send(const CopiedBuffer &buffer);
 
     /**
      *  Get a channel by its identifier
