@@ -18,7 +18,6 @@
 #include <memory>
 #include <cstring>
 #include "endian.h"
-#include "frame.h"
 
 /**
  *  Set up namespace

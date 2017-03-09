@@ -79,9 +79,9 @@
 #include "../include/tcpconnection.h"
 
 // classes that are very commonly used
-#include "exception.h"
-#include "protocolexception.h"
-#include "frame.h"
+#include "../include/exception.h"
+#include "../include/protocolexception.h"
+#include "../include/frame.h"
 #include "extframe.h"
 #include "methodframe.h"
 #include "headerframe.h"
