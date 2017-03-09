@@ -348,7 +348,7 @@ public:
      *
      *  @param  buffer      the buffer with data to send
      */
-    bool send(const CopiedBuffer &buffer);
+    bool send(CopiedBuffer &&buffer);
 
     /**
      *  Get a channel by its identifier

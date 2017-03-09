@@ -82,17 +82,10 @@ public:
     }
 
     /**
-     *  Copy constructor
+     *  Disabled copy constructor to prevent expensive copy operations
      *  @param  that
      */
-    CopiedBuffer(const CopiedBuffer &that) :
-        _capacity(that._capacity),
-        _buffer((char *)malloc(_capacity)),
-        _size(that._size)
-    {
-        // copy the data
-        memcpy(_buffer, that._buffer, _size);
-    }
+    CopiedBuffer(const CopiedBuffer &that) = delete;
 
     /**
      *  Move constructor

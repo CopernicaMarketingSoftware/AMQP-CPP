@@ -353,7 +353,7 @@ bool ConnectionImpl::send(const Frame &frame)
  *
  *  @param  buffer      the buffer with data to send
  */
-bool ConnectionImpl::send(const CopiedBuffer &buffer)
+bool ConnectionImpl::send(CopiedBuffer &&buffer)
 {
     // this only works when we are already connected
     if (_state != state_connected) return false;
@@ -367,7 +367,7 @@ bool ConnectionImpl::send(const CopiedBuffer &buffer)
     else
     {
         // add to the list of waiting buffers
-        _queue.push(buffer);
+        _queue.emplace(std::move(buffer));
     }
 
     // done

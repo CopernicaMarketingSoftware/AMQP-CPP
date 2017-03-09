@@ -727,15 +727,15 @@ void ChannelImpl::onSynchronized()
     while (_connection && !_synchronous && !_queue.empty())
     {
         // retrieve the first buffer and synchronous
-        const auto &pair = _queue.front();
+        auto &pair = _queue.front();
 
         // mark as synchronous if necessary
         _synchronous = pair.first;
 
         // send it over the connection
-        _connection->send(pair.second);
+        _connection->send(std::move(pair.second));
 
-        // the user space handler may have destructed the channel
+        // the user space handler may have destructed this channel object
         if (!monitor.valid()) return;
 
         // remove from the list
