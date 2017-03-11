@@ -649,7 +649,7 @@ auto callback = [](const std::string &name, int msgcount, int consumercount) {
 
     // @todo add your own implementation
 
-}
+};
 
 // declare the queue, and install the callback that is called on success
 channel.declareQueue("myQueue").onSuccess(callback);
