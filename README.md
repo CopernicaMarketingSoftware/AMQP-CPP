@@ -855,7 +855,7 @@ auto startCb = [](const std::string &consumertag) {
 auto errorCb = [](const char *message) {
 
     std::cout << "consume operation failed" << std::endl;
-}
+};
 
 // callback operation when a message was received
 auto messageCb = [&channel](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
@@ -864,7 +864,7 @@ auto messageCb = [&channel](const AMQP::Message &message, uint64_t deliveryTag, 
 
     // acknowledge the message
     channel.ack(deliveryTag);
-}
+};
 
 // start consuming from the queue, and install the callbacks
 channel.consume("my-queue")
