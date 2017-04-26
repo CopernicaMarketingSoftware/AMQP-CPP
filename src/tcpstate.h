@@ -127,7 +127,7 @@ public:
     /**
      *  Report to the handler that the connection was nicely closed
      */
-    void reportClosed()
+    virtual void reportClosed()
     {
         // pass to handler
         _handler->onClosed(_connection);

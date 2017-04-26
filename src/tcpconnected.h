@@ -133,6 +133,9 @@ public:
      */
     virtual ~TcpConnected() noexcept
     {
+        // skip if handler is already forgotten
+        if (_handler == nullptr) return;
+        
         // we no longer have to monitor the socket
         _handler->monitor(_connection, _socket, 0);
         
@@ -262,6 +265,30 @@ public:
         
         // pass to base
         return TcpState::reportNegotiate(heartbeat);
+    }
+
+    /**
+     *  Report to the handler that the connection was nicely closed
+     */
+    virtual void reportClosed() override
+    {
+        // we no longer have to monitor the socket
+        _handler->monitor(_connection, _socket, 0);
+
+        // close the socket
+        close(_socket);
+        
+        // socket is closed now
+        _socket = -1;
+        
+        // copy the handler (if might destruct this object)
+        auto *handler = _handler;
+        
+        // reset member before the handler can make a mess of it
+        _handler = nullptr;
+        
+        // notify to handler
+        handler->onClosed(_connection);
     }
 };
     
