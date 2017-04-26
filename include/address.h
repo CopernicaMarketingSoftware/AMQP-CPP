@@ -186,6 +186,37 @@ public:
         // done
         return str;
     }
+    
+    /**
+     *  Comparison operator
+     *  @param  that
+     *  @return bool
+     */
+    bool operator==(const Address &that) const
+    {
+        // logins must match
+        if (_login != that._login) return false;
+        
+        // hostname must match, but are nt case sensitive
+        if (strcasecmp(_hostname.data(), that._hostname.data()) != 0) return false;
+        
+        // portnumber must match
+        if (_port != that._port) return false;
+        
+        // and finally the vhosts, they must match too
+        return _vhost == that._vhost;
+    }
+    
+    /**
+     *  Comparison operator
+     *  @param  that
+     *  @return bool
+     */
+    bool operator!=(const Address &that) const
+    {
+        // the opposite of operator==
+        return !operator==(that);
+    }
 };
 
 /**
