@@ -92,7 +92,7 @@ public:
         const char *slash = (const char *)memchr(data, '/', last - data);
         
         // was a vhost set?
-        if (slash != nullptr && last - data > 1) _vhost.assign(slash + 1, last - data - 1);
+        if (slash != nullptr && last - data > 1) _vhost.assign(slash + 1, last - slash - 1);
         
         // the hostname is everything until the slash, check is portnumber was set
         const char *colon = (const char *)memchr(data, ':', last - data);
