@@ -1,4 +1,5 @@
 add_sources(
+addressinfo.h
 array.cpp
 basicackframe.h
 basiccancelframe.h
@@ -46,7 +47,6 @@ deferredcancel.cpp
 deferredconsumer.cpp
 deferredconsumerbase.cpp
 deferredget.cpp
-exception.h
 exchangebindframe.h
 exchangebindokframe.h
 exchangedeclareframe.h
@@ -59,14 +59,13 @@ exchangeunbindokframe.h
 extframe.h
 field.cpp
 flags.cpp
-frame.h
 framecheck.h
 headerframe.h
 heartbeatframe.h
 includes.h
-messageimpl.h
 methodframe.h
-protocolexception.h
+passthroughbuffer.h
+pipe.h
 protocolheaderframe.h
 queuebindframe.h
 queuebindokframe.h
@@ -80,8 +79,16 @@ queuepurgeokframe.h
 queueunbindframe.h
 queueunbindokframe.h
 receivedframe.cpp
+reducedbuffer.h
 returnedmessage.h
 table.cpp
+tcpclosed.h
+tcpconnected.h
+tcpconnection.cpp
+tcpinbuffer.h
+tcpoutbuffer.h
+tcpresolver.h
+tcpstate.h
 transactioncommitframe.h
 transactioncommitokframe.h
 transactionframe.h
@@ -90,5 +97,4 @@ transactionrollbackokframe.h
 transactionselectframe.h
 transactionselectokframe.h
 watchable.cpp
-tcpconnection.cpp
 )

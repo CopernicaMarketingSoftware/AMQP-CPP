@@ -28,7 +28,7 @@ option(BUILD_SHARED "build shared library" OFF)
 
 if(BUILD_SHARED)
   add_library(amqp-cpp SHARED ${SRCS})
-  set_target_properties(amqp-cpp PROPERTIES SOVERSION 2.6)
+  set_target_properties(amqp-cpp PROPERTIES SOVERSION 2.7)
   install(TARGETS amqp-cpp
           LIBRARY DESTINATION lib
   )
