@@ -17,7 +17,6 @@
  */
 #include <memory>
 #include <cstring>
-#include "endian.h"
 #include "../include/frame.h"
 
 /**
