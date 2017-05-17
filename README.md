@@ -768,7 +768,7 @@ channel.commitTransaction()
     .onSuccess([]() {
         // all messages were successfully published
     })
-    .onError([]() {
+    .onError([](const char *message) {
         // none of the messages were published
         // now we have to do it all over again
     });
