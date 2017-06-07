@@ -41,6 +41,7 @@ Field *Field::decode(ReceivedFrame &frame)
         case 'A':   return new Array(frame);
         case 'T':   return new Timestamp(frame);
         case 'F':   return new Table(frame);
+		case 'x':	return new LongString(frame); // for Qpid/Rabbit
         default:    return nullptr;
     }
 }
