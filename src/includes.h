@@ -90,6 +90,7 @@
 #include "exchangeframe.h"
 #include "queueframe.h"
 #include "basicframe.h"
+#include "confirmframe.h"
 #include "transactionframe.h"
 #include "addressinfo.h"
 

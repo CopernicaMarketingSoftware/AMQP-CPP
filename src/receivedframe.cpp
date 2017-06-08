@@ -7,6 +7,8 @@
  */
 #include "includes.h"
 #include "heartbeatframe.h"
+#include "confirmselectframe.h"
+#include "confirmselectokframe.h"
 #include "connectionstartokframe.h"
 #include "connectionstartframe.h"
 #include "connectionsecureframe.h"
@@ -336,6 +338,7 @@ bool ReceivedFrame::processMethodFrame(ConnectionImpl *connection)
         case 40:    return processExchangeFrame(connection);
         case 50:    return processQueueFrame(connection);
         case 60:    return processBasicFrame(connection);
+        case 85:    return processConfirmFrame(connection);
         case 90:    return processTransactionFrame(connection);
     }
 
@@ -491,6 +494,27 @@ bool ReceivedFrame::processBasicFrame(ConnectionImpl *connection)
 
     // this is a problem
     throw ProtocolException("unrecognized basic frame method " + std::to_string(methodID));
+}
+
+/**
+ *  Process a confirm frame
+ *  @param  connection
+ *  @return bool
+ */
+bool ReceivedFrame::processConfirmFrame(ConnectionImpl *connection)
+{
+    // read the method id
+    uint16_t methodID = nextUint16();
+
+    // construct frame based on method id
+    switch (methodID)
+    {
+        case 10:    return ConfirmSelectFrame(*this).process(connection);
+        case 11:    return ConfirmSelectOKFrame(*this).process(connection);
+    }
+
+    // this is a problem
+    throw ProtocolException("unrecognized confirm frame method " + std::to_string(methodID));
 }
 
 /**

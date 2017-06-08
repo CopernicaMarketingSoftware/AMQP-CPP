@@ -30,6 +30,8 @@ channelframe.h
 channelimpl.cpp
 channelopenframe.h
 channelopenokframe.h
+confirmselectframe.h
+confirmselectokframe.h
 connectioncloseframe.h
 connectioncloseokframe.h
 connectionframe.h

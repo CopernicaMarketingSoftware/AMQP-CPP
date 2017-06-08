@@ -112,6 +112,13 @@ private:
     bool processBasicFrame(ConnectionImpl *connection);
 
     /**
+     *  Process a confirm frame
+     *  @param  connection
+     *  @return bool
+     */
+    bool processConfirmFrame(ConnectionImpl *connection);
+
+    /**
      *  Process a transaction frame
      *  @param  connection
      *  @return bool
