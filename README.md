@@ -779,6 +779,42 @@ knows in the database world. It is not possible to wrap all sort of
 operations in a transaction, they are only meaningful for publishing
 and consuming.
 
+PUBLISHER CONFIRMS
+===================
+
+RabbitMQ supports lightweight method of confirming that broker received and processed
+a message. For this method to work, the channel needs to be put in so-called _confirm mode_.
+This is done using setConfirmMode() method. When channel is successfully put in 
+confirm mode, the server and client count messages (starting from 1) and server sends
+acknowledgments for every message it processed (it can also acknowledge multiple message at
+once). 
+
+If server is unable to process a message, it will send send negative acknowledgments. Both 
+positive and negative acknowledgments handling are implemented as callbacks for Channel object.
+There is also helper method messageCounter() that returns number of messages send so far 
+(note that this value is reset when channel is put in confirm mode).
+
+````c++
+// put channel in confirm mode
+channel.setConfirmMode().onSuccess([&]() {
+    channel.publish("my-exchange", "my-key", "my first message");
+    // channel.messageCounter() is now 1
+
+    channel.publish("my-exchange", "my-key", "my second message");
+    // channel.messageCounter() is now 2
+})
+
+channel.onAck([&](uint64_t deliverTag, bool multiple) {
+    // called with deliverTag 1 and 2 if message is processed by broker
+});
+
+channel.onNack([&](uint64 deliveryTag, bool multiple, bool requeue) {
+    // called with deliveryTag 1 and 2 if message is not processed by broker
+});
+````
+
+
+For more information, see http://www.rabbitmq.com/confirms.html.
 
 CONSUMING MESSAGES
 ==================
@@ -912,7 +948,6 @@ need additional attention:
 
     -   ability to set up secure connections (or is this fully done on the IO level)
     -   login with other protocols than login/password
-    -   publish confirms
     -   returned messages
 
 We also need to add more safety checks so that strange or invalid data from
