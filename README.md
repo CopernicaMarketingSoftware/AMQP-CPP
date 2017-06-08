@@ -795,26 +795,29 @@ There is also helper method messageCounter() that returns number of messages sen
 (note that this value is reset when channel is put in confirm mode).
 
 ````c++
-// put channel in confirm mode
-channel.setConfirmMode().onSuccess([&]() {
-    channel.publish("my-exchange", "my-key", "my first message");
-    // channel.messageCounter() is now 1
-
-    channel.publish("my-exchange", "my-key", "my second message");
-    // channel.messageCounter() is now 2
-})
-
+// setup ack and nack callbacks
 channel.onAck([&](uint64_t deliverTag, bool multiple) {
-    // called with deliverTag 1 and 2 if message is processed by broker
+    // deliverTag is message number
+    // multiple is set to true, if all messages UP TO deliverTag have been processed
 });
 
 channel.onNack([&](uint64 deliveryTag, bool multiple, bool requeue) {
-    // called with deliveryTag 1 and 2 if message is not processed by broker
+    // deliverTag is message number
+    // multiple is set to true, if all messages UP TO deliverTag have not been processed
+    // requeue is to be ignored
+});
+
+// put channel in confirm mode
+channel.setConfirmMode().onSuccess([&]() {
+    channel.publish("my-exchange", "my-key", "my first message");
+    // channel.messageCounter() is now 1, will call onAck/onNack with deliverTag=1
+
+    channel.publish("my-exchange", "my-key", "my second message");
+    // channel.messageCounter() is now 2, will call onAck/onNack with deliverTag=2
 });
 ````
 
-
-For more information, see http://www.rabbitmq.com/confirms.html.
+For more information, please see http://www.rabbitmq.com/confirms.html.
 
 CONSUMING MESSAGES
 ==================
