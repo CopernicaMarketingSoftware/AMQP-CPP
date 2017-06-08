@@ -108,6 +108,26 @@ public:
     {
         return _bits.get(1);
     }
+
+    /**
+     *  Process the frame
+     *  @param  connection      The connection over which it was received
+     *  @return bool            Was it succesfully processed?
+     */
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // we need the appropriate channel
+        auto channel = connection->channel(this->channel());
+
+        // channel does not exist
+        if(!channel) return false;
+
+        // start message counter
+        channel->reportNack(deliveryTag(), multiple(), requeue());
+
+        // done
+        return true;
+    }
 };
 
 /**

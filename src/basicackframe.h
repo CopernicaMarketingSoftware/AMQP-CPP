@@ -110,6 +110,26 @@ public:
     {
         return _multiple.get(0);
     }
+
+    /**
+     *  Process the frame
+     *  @param  connection      The connection over which it was received
+     *  @return bool            Was it succesfully processed?
+     */
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // we need the appropriate channel
+        auto channel = connection->channel(this->channel());
+
+        // channel does not exist
+        if(!channel) return false;
+
+        // start message counter
+        channel->reportAck(deliveryTag(), multiple());
+
+        // done
+        return true;
+    }
 };
 
 /**
