@@ -134,6 +134,12 @@ private:
     std::shared_ptr<DeferredConsumerBase> _consumer;
 
     /**
+     * Number of messages sent. Used in confirm mode
+     * @var     uint64_t
+     */
+    uint64_t _messageCounter = 0;
+
+    /**
      *  Attach the connection
      *  @param  connection
      */
@@ -242,6 +248,19 @@ public:
     bool connected()
     {
         return _state == state_connected || _state == state_ready;
+    }
+
+    /**
+     *  Put channel in a confirm mode (RabbitMQ specific)
+     */
+    Deferred &setConfirmMode();
+
+    /**
+     * Return number of messages sent.
+     */
+    uint64_t messageCounter() const
+    {
+        return _messageCounter;
     }
 
     /**
@@ -695,6 +714,14 @@ public:
      *  Mark the current consumer as done
      */
     void complete();
+
+    /**
+     * Start message counter
+     */
+    void startMessageCounter()
+    {
+        _messageCounter = 1;
+    }
 
     /**
      *  The channel class is its friend, thus can it instantiate this object

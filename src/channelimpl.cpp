@@ -15,6 +15,7 @@
 #include "channelflowframe.h"
 #include "channelcloseokframe.h"
 #include "channelcloseframe.h"
+#include "confirmselectframe.h"
 #include "transactionselectframe.h"
 #include "transactioncommitframe.h"
 #include "transactionrollbackframe.h"
@@ -180,6 +181,18 @@ Deferred &ChannelImpl::resume()
 {
     // send a channel flow frame
     return push(ChannelFlowFrame(_id, true));
+}
+
+/**
+ *  Put channel in a confirm mode
+ *
+ *  This function returns a deferred handler. Callbacks can be installed
+ *  using onSuccess(), onError() and onFinalize() methods.
+ */
+Deferred &ChannelImpl::setConfirmMode()
+{
+    // send a transaction frame
+    return push(ConfirmSelectFrame(_id));
 }
 
 /**
@@ -491,6 +504,10 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
         bytessent += chunksize;
         bytesleft -= chunksize;
     }
+
+    // increment message counter if we're in confirm mode
+    if (_messageCounter)
+        _messageCounter++;
 
     // done
     return true;
