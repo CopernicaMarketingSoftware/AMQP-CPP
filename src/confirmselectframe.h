@@ -53,7 +53,7 @@ public:
      *  @return  newly created confirm select frame
      */
     ConfirmSelectFrame(uint16_t channel, bool noWait = false) :
-        ConfirmFrame(channel, 0),
+        ConfirmFrame(channel, 1),   //sizeof bool
         _noWait(noWait)
     {}
 
