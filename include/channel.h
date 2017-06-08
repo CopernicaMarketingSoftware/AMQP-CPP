@@ -137,8 +137,8 @@ public:
     /**
      * Return number of messages sent.
      *
-     * This functions returns number of messages sent. It's incremented only
-     * when channel is in confirm mode.
+     * This functions returns number of messages sent. It's reset to zero when channel is
+     * put into confirm mode.
      */
     uint64_t messageCounter() const
     {

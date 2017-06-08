@@ -74,8 +74,8 @@ public:
         // channel does not exist
         if(!channel) return false;
 
-        // start message counter
-        channel->startMessageCounter();
+        // reset message counter
+        channel->resetMessageCounter();
 
         // report that the channel is open
         if (channel->reportSuccess()) channel->onSynchronized();

@@ -764,11 +764,11 @@ public:
     void complete();
 
     /**
-     * Start message counter
+     * Reset message counter
      */
-    void startMessageCounter()
+    void resetMessageCounter()
     {
-        _messageCounter = 1;
+        _messageCounter = 0;
     }
 
     /**

@@ -505,9 +505,8 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
         bytesleft -= chunksize;
     }
 
-    // increment message counter if we're in confirm mode
-    if (_messageCounter)
-        _messageCounter++;
+    // increment message counter
+    _messageCounter++;
 
     // done
     return true;
