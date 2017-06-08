@@ -140,6 +140,18 @@ private:
     uint64_t _messageCounter = 0;
 
     /**
+     *  Callback when broker confirmed message publication
+     *  @var    SuccessCallback
+     */
+    AckCallback _ackCallback;
+
+    /**
+     *  Callback when broker denied message publication
+     *  @var    ErrorCallback
+     */
+    NackCallback _nackCallback;
+
+    /**
      *  Attach the connection
      *  @param  connection
      */
@@ -220,6 +232,26 @@ public:
      *  @param  callback    the callback to execute
      */
     void onError(const ErrorCallback &callback);
+
+    /**
+     *  Callback that is called when the broker confirmed message publication
+     *  @param  callback    the callback to execute
+     */
+    void onAck(const AckCallback &callback)
+    {
+        // store callback
+        _ackCallback = callback;
+    }
+
+    /**
+     *  Callback that is called when the broker denied message publication
+     *  @param  callback    the callback to execute
+     */
+    void onNack(const NackCallback &callback)
+    {
+        // store callback
+        _nackCallback = callback;
+    }
 
     /**
      *  Pause deliveries on a channel
@@ -575,6 +607,22 @@ public:
      *  After this operation, waiting frames can be sent out.
      */
     void onSynchronized();
+
+    /**
+     * Report to the handler that message has been published
+     */
+    void reportAck(uint64_t deliveryTag, bool multiple)
+    {
+        if (_ackCallback) _ackCallback(deliveryTag, multiple);
+    }
+
+    /**
+     * Report to the handler that message has not been published
+     */
+    void reportNack(uint64_t deliveryTag, bool multiple, bool requeue)
+    {
+        if (_nackCallback) _nackCallback(deliveryTag, multiple, requeue);
+    }
 
     /**
      *  Report to the handler that the channel is opened

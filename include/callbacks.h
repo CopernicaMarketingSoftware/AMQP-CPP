@@ -48,6 +48,8 @@ using DeleteCallback    =   std::function<void(uint32_t deletedmessages)>;
 using SizeCallback      =   std::function<void(uint32_t messagecount)>;
 using ConsumeCallback   =   std::function<void(const std::string &consumer)>;
 using CancelCallback    =   std::function<void(const std::string &consumer)>;
+using AckCallback       =   std::function<void(uint64_t deliveryTag, bool multiple)>;
+using NackCallback      =   std::function<void(uint64_t deliveryTag, bool multiple, bool requeue)>;
 
 /**
  *  End namespace
