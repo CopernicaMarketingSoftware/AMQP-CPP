@@ -434,6 +434,66 @@ libevent. For other event loops (like libuv and boost asio) we do not yet have
 such examples.
 
 
+HEARTBEATS
+==========
+
+The AMQP protocol supports *heartbeats*. If this heartbeat feature is enabled, the 
+client and the server negotiate a heartbeat interval during connection setup, and 
+they agree to send at least *some kind of data* over the connection during every 
+iteration of that interval. The normal data that is sent over the connection (like 
+publishing or consuming messages) is normally sufficient to keep the connection alive, 
+but if the client or server was idle during the negotiated interval time, a dummy
+heartbeat message must be sent instead.
+
+The default behavior of the AMQP-CPP library is to disable heartbeats. The 
+proposed heartbeat interval of the server during connection setup (the server
+normally suggests an interval of 60 seconds) is vetoed by the AMQP-CPP library so
+no heartbeats are ever needed to be sent over the connection. This means that you
+can safely keep your AMQP connection idle for as long as you like, and/or run long
+lasting algorithms after you've consumed a message from RabbitMQ, without having
+to worry about the connection being idle for too long.
+
+You can however choose to enable these heartbeats. If you want to enable heartbeats,
+simple implement the onNegotiate() method inside your ConnectionHandler or 
+TcpHandler class and have it return the interval that you find appropriate.
+
+````c++
+#include <amqpcpp.h>
+
+class MyTcpHandler : public AMQP::TcpHandler
+{
+    /**
+     *  Method that is called when the server tries to negotiate a heartbeat
+     *  interval, and that is overridden to get rid of the default implementation
+     *  (which vetoes the suggested heartbeat interval), and accept the interval
+     *  instead.
+     *  @param  connection      The connection on which the error occured
+     *  @param  interval        The suggested interval in seconds
+     */
+    virtual void onNegotiate(AMQP::TcpConnection *connection, uint16_t interval)
+    {
+        // we accept the suggestion from the server, but if the interval is smaller 
+        // that one minute, we will use a one minute interval instead
+        if (interval < 60) interval = 60;
+
+        // @todo
+        //  set a timer in your event loop, and make sure that you call
+        //  connection->heartbeat() every _interval_ seconds.
+        
+        // return the interval that we want to use
+        return interval;
+    }
+};
+````
+
+If you have enabled heartbeats, it is your own responsibility to ensure that the
+```connection->heartbeat()``` method is called at least once during this period,
+or that you call one of the other channel or connection methods to send data
+over the connection.
+
+In the libev event loop implementation the heartbeats are enabled by default.
+
+
 CHANNELS
 ========
 

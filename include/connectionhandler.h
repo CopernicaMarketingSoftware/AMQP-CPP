@@ -62,8 +62,8 @@ public:
      */
     virtual uint16_t onNegotiate(Connection *connection, uint16_t interval)
     {
-        // default implementation, suggested heartbeat is ok
-        return interval;
+        // default implementation, disable heartbeats
+        return 0;
     }
 
     /**

@@ -258,16 +258,13 @@ protected:
      */
     virtual uint16_t onNegotiate(TcpConnection *connection, uint16_t interval) override
     {
-        // call base to find out the timeout that the client wants
-        interval = TcpHandler::onNegotiate(connection, interval);
-        
-        // skip if base does not want a timeout
+        // skip if no heartbeats are needed
         if (interval == 0) return 0;
         
         // set the timer
         _timer.set(connection, interval);
         
-        // done
+        // we agree with the interval
         return interval;
     }
 
