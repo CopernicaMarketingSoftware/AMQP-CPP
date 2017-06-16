@@ -3,7 +3,7 @@
  *
  *  Implementation of an AMQP connection
  *
- *  @copyright 2014 - 2016 Copernica BV
+ *  @copyright 2014 - 2017 Copernica BV
  */
 #include "includes.h"
 #include "protocolheaderframe.h"
@@ -11,6 +11,7 @@
 #include "connectioncloseframe.h"
 #include "reducedbuffer.h"
 #include "passthroughbuffer.h"
+#include "heartbeatframe.h"
 
 /**
  *  set namespace
@@ -372,6 +373,16 @@ bool ConnectionImpl::send(CopiedBuffer &&buffer)
 
     // done
     return true;
+}
+
+/**
+ *  Send a ping / heartbeat frame to keep the connection alive
+ *  @return bool
+ */
+bool ConnectionImpl::heartbeat()
+{
+    // send a frame
+    return send(HeartbeatFrame());
 }
 
 /**

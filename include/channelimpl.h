@@ -508,7 +508,7 @@ public:
      *  @return bool
      */
     bool reject(uint64_t deliveryTag, int flags);
-
+    
     /**
      *  Recover messages that were not yet ack'ed
      *  @param  flags               optional flags

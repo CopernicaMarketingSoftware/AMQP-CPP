@@ -125,12 +125,6 @@ protected:
     std::queue<CopiedBuffer> _queue;
 
     /**
-     *  Heartbeat delay
-     *  @var uint16_t
-     */
-    uint16_t _heartbeat = 0;
-
-    /**
      *  Helper method to send the close frame
      *  Return value tells if the connection is still valid
      *  @return bool
@@ -414,15 +408,6 @@ public:
     }
 
     /**
-     *  Heartbeat delay
-     *  @return uint16_t
-     */
-    uint16_t heartbeat() const
-    {
-        return _heartbeat;
-    }
-
-    /**
      *  Set the heartbeat delay
      *  @param  heartbeat       suggested heartbeat by server
      *  @return uint16_t        accepted heartbeat by client
@@ -430,7 +415,7 @@ public:
     uint16_t setHeartbeat(uint16_t heartbeat)
     {
         // pass to the handler
-        return _heartbeat = _handler->onNegotiate(_parent, heartbeat);
+        return _handler->onNegotiate(_parent, heartbeat);
     }
 
     /**
@@ -441,6 +426,12 @@ public:
         // pass to handler
         _handler->onHeartbeat(_parent);
     }
+    
+    /**
+     *  Send a heartbeat to keep the connection alive
+     *  @return bool
+     */
+    bool heartbeat();
 
     /**
      *  The actual connection is a friend and can construct this class

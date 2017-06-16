@@ -39,7 +39,6 @@
 #include "basicrejectframe.h"
 #include "basicgetframe.h"
 
-
 /**
  *  Set up namespace
  */

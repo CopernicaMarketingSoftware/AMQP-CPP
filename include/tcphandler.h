@@ -33,7 +33,7 @@ public:
     /**
     *  Destructor
     */
-    virtual ~TcpHandler() {}
+    virtual ~TcpHandler() = default;
 
     /**
      *  Method that is called when the heartbeat frequency is negotiated
@@ -96,8 +96,6 @@ public:
      *  @param  flags       Should the object be monitored for readability or writability?
      */
     virtual void monitor(TcpConnection *connection, int fd, int flags) = 0;
-
-
 };
     
 /**

@@ -95,6 +95,15 @@ public:
     }
 
     /**
+     *  Send a ping/heartbeat to the channel to keep it alive
+     *  @return bool
+     */
+    bool ping()
+    {
+        return _implementation.ping();
+    }
+
+    /**
      *  Parse data that was recevied from RabbitMQ
      *  
      *  Every time that data comes in from RabbitMQ, you should call this method to parse
@@ -193,15 +202,6 @@ public:
     bool waiting() const
     {
         return _implementation.waiting();
-    }
-
-    /**
-     *  Retrieve the heartbeat delay used by this connection
-     *  @return uint16_t
-     */
-    uint16_t heartbeat() const
-    {
-        return _implementation.heartbeat();
     }
 
     /**
