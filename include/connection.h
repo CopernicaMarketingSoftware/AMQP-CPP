@@ -98,9 +98,9 @@ public:
      *  Send a ping/heartbeat to the channel to keep it alive
      *  @return bool
      */
-    bool ping()
+    bool heartbeat()
     {
-        return _implementation.ping();
+        return _implementation.heartbeat();
     }
 
     /**

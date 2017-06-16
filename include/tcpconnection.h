@@ -176,6 +176,15 @@ public:
         // return the amount of channels this connection has
         return _connection.channels();
     }
+    
+    /**
+     *  Send a heartbeat
+     *  @return bool
+     */
+    bool heartbeat()
+    {
+        return _connection.heartbeat();
+    }
 };
 
 /**
