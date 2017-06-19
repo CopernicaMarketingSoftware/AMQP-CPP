@@ -268,6 +268,9 @@ void ConnectionImpl::setConnected()
     {
         // get the next message
         const auto &buffer = _queue.front();
+        
+        // data is going to be sent, thus connection is not idle
+        _idle = false;
 
         // send it
         _handler->onData(_parent, buffer.data(), buffer.size());
@@ -336,6 +339,9 @@ bool ConnectionImpl::send(const Frame &frame)
     // are we still setting up the connection?
     if ((_state == state_connected && _queue.empty()) || frame.partOfHandshake())
     {
+        // the data will be sent, so connection is not idle
+        _idle = false;
+        
         // we need an output buffer (this will immediately send the data)
         PassthroughBuffer buffer(_parent, _handler, frame);
     }
@@ -362,6 +368,9 @@ bool ConnectionImpl::send(CopiedBuffer &&buffer)
     // are we waiting for other frames to be sent before us?
     if (_queue.empty())
     {
+        // data will be sent, thus connection is not empty
+        _idle = false;
+        
         // send it directly
         _handler->onData(_parent, buffer.data(), buffer.size());
     }
@@ -377,12 +386,20 @@ bool ConnectionImpl::send(CopiedBuffer &&buffer)
 
 /**
  *  Send a ping / heartbeat frame to keep the connection alive
+ *  @param  force       also send heartbeat if connection is not idle
  *  @return bool
  */
-bool ConnectionImpl::heartbeat()
+bool ConnectionImpl::heartbeat(bool force)
 {
+    // do nothing if the connection is not idle (but we do reset the idle state to ensure
+    // that the next heartbeat will be sent if nothing is going to change from now on)
+    if (!force && !_idle) return _idle = true;
+    
     // send a frame
-    return send(HeartbeatFrame());
+    if (!send(HeartbeatFrame())) return false;
+    
+    // frame has been sent, we treat the connection as idle now until some other data is sent over it
+    return _idle = true;
 }
 
 /**

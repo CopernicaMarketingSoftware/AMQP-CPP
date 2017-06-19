@@ -123,6 +123,12 @@ protected:
      *  @var    queue
      */
     std::queue<CopiedBuffer> _queue;
+    
+    /**
+     *  Is the connection idle (meaning: a heartbeat is necessary)
+     *  @var    bool
+     */
+    bool _idle = true;
 
     /**
      *  Helper method to send the close frame
@@ -429,9 +435,11 @@ public:
     
     /**
      *  Send a heartbeat to keep the connection alive
+     *  By default, this function does nothing if the connection is not in an idle state
+     *  @param  force           always send the heartbeat, even if the connection is not idle
      *  @return bool
      */
-    bool heartbeat();
+    bool heartbeat(bool force=false);
 
     /**
      *  The actual connection is a friend and can construct this class
