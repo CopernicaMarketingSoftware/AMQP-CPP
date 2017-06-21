@@ -236,6 +236,30 @@ public:
         // the opposite of operator==
         return !operator==(that);
     }
+    
+    /**
+     *  Friend function to allow writing the address to a stream
+     *  @param  stream
+     *  @param  address
+     *  @return std::ostream
+     */
+    friend std::ostream &operator<<(std::ostream &stream, const Address &address)
+    {
+        // start with the protocol and login
+        stream << "amqp://" << address._login;
+
+        // do we need a special portnumber?
+        if (address._port != 5672) stream << ":" << address._port;
+
+        // append default vhost
+        stream << "/";
+
+        // do we have a special vhost?
+        if (address._vhost != "/") stream << address._vhost;
+
+        // done
+        return stream;
+    }
 };
 
 /**

@@ -120,6 +120,18 @@ public:
         return !operator==(that);
     }
 
+    /**
+     *  Friend function to allow writing the login to a stream
+     *  @param  stream
+     *  @param  login
+     *  @return std::ostream
+     */
+    friend std::ostream &operator<<(std::ostream &stream, const Login &login)
+    {
+        // write username and password
+        return stream << login._user << "@" << login._password;
+    }
+
 };
 
 /**
