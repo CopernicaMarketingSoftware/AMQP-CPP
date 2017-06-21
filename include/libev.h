@@ -151,6 +151,24 @@ private:
             // send the heartbeat
             connection->heartbeat();
         }
+        
+        /**
+         *  Stop the timer
+         */
+        void stop()
+        {
+            // do nothing if it was never set
+            if (_timer.data == nullptr) return;
+
+            // restore loop refcount
+            ev_ref(_loop);
+
+            // stop the timer
+            ev_timer_stop(_loop, &_timer);
+            
+            // restore data nullptr to indicate that timer is not set
+            _timer.data = nullptr;
+        }
 
     public:
         /**
@@ -159,6 +177,9 @@ private:
          */
         Timer(struct ev_loop *loop) : _loop(loop)
         {
+            // there is no data yet
+            _timer.data = nullptr;
+            
             // initialize the libev structure
             ev_timer_init(&_timer, callback, 60.0, 60.0);
         }
@@ -177,7 +198,7 @@ private:
         virtual ~Timer()
         {
             // stop the timer
-            ev_timer_stop(_loop, &_timer);
+            stop();
         }
 
         /**
@@ -187,6 +208,9 @@ private:
          */
         void set(TcpConnection *connection, uint16_t timeout)
         {
+            // stop timer in case it was already set
+            stop();
+            
             // store the connection in the data "void*"
             _timer.data = connection;
 
@@ -195,6 +219,9 @@ private:
 
             // and start it
             ev_timer_start(_loop, &_timer);
+
+            // the timer should not keep the event loop active
+            ev_unref(_loop);
         }
     };
 
