@@ -134,7 +134,7 @@ Deferred &ChannelImpl::push(const std::shared_ptr<Deferred> &deferred)
     if (!_oldestCallback) _oldestCallback = deferred;
 
     // do we already have a newest?
-    if (_newestCallback) _newestCallback->add(deferred);
+    if (_newestCallback) deferred->add(_newestCallback);
 
     // store newest callback
     _newestCallback = deferred;
