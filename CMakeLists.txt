@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(amqp-cpp)
+project(amqpcpp)
 
 # ensure c++11 on all compilers
 include(set_cxx_norm.cmake)
@@ -27,14 +27,14 @@ add_subdirectory(include)
 option(BUILD_SHARED "build shared library" OFF)
 
 if(BUILD_SHARED)
-  add_library(amqp-cpp SHARED ${SRCS})
-  set_target_properties(amqp-cpp PROPERTIES SOVERSION 2.7)
-  install(TARGETS amqp-cpp
+  add_library(amqpcpp SHARED ${SRCS})
+  set_target_properties(amqpcpp PROPERTIES SOVERSION 2.7)
+  install(TARGETS amqpcpp
           LIBRARY DESTINATION lib
   )
 else()
-  add_library(amqp-cpp STATIC ${SRCS})
-  install(TARGETS amqp-cpp
+  add_library(amqpcpp STATIC ${SRCS})
+  install(TARGETS amqpcpp
           ARCHIVE DESTINATION lib
   )
 endif()
