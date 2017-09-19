@@ -17,7 +17,7 @@
  */
 #include <memory>
 #include <cstring>
-#include "../include/frame.h"
+#include "../include/amqpcpp/frame.h"
 
 /**
  *  Set up namespace
