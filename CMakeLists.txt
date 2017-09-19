@@ -38,10 +38,9 @@ else()
           ARCHIVE DESTINATION lib
   )
 endif()
-Include_directories(${PROJECT_SOURCE_DIR})
-install(DIRECTORY include/ DESTINATION include/amqpcpp
-        FILES_MATCHING PATTERN "*.h")
-install(FILES amqpcpp.h DESTINATION include)
+target_include_directories(amqpcpp PUBLIC include)
+install(DIRECTORY include/amqpcpp/ DESTINATION include/amqpcpp FILES_MATCHING PATTERN "*.h")
+install(FILES include/amqpcpp.h DESTINATION include)
 
 option(BUILD_TUTORIALS "build rabbitmq tutorials" OFF)
 if(BUILD_TUTORIALS)
