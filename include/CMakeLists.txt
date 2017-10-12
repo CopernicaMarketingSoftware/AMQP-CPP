@@ -30,6 +30,7 @@ field.h
 fieldproxy.h
 flags.h
 frame.h
+libboostasio.h
 libev.h
 libevent.h
 libuv.h
