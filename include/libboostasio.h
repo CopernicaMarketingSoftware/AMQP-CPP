@@ -33,8 +33,8 @@
     if (!apStrand)                                                                              \
     {                                                                                           \
         fn(boost::system::errc::make_error_code(boost::system::errc::operation_canceled),std::size_t{0}); \
-		return;                                                                                 \
-	}                                                                                           \
+        return;                                                                                 \
+    }                                                                                           \
                                                                                                 \
     apStrand->dispatch(boost::bind(fn,ec,bytes_transferred));                                   \
 }
@@ -47,8 +47,8 @@
     if (!apStrand)                                                                              \
     {                                                                                           \
         fn(boost::system::errc::make_error_code(boost::system::errc::operation_canceled));      \
-		return;                                                                                 \
-	}                                                                                           \
+        return;                                                                                 \
+    }                                                                                           \
                                                                                                 \
     apStrand->dispatch(boost::bind(fn,ec));                                                     \
 }
