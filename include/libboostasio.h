@@ -120,6 +120,7 @@ private:
         /**
          *  Handler method that is called by boost's io_service when the socket pumps a read event.
          *  @param  ec          The status of the callback.
+         *  @param  bytes_transferred The number of bytes transferred.
          *  @param  awpWatcher  A weak pointer to this object.
          *  @param  connection  The connection being watched.
          *  @param  fd          The file descriptor being watched.
@@ -164,6 +165,7 @@ private:
         /**
          *  Handler method that is called by boost's io_service when the socket pumps a write event.
          *  @param  ec          The status of the callback.
+         *  @param  bytes_transferred The number of bytes transferred.
          *  @param  awpWatcher  A weak pointer to this object.
          *  @param  connection  The connection being watched.
          *  @param  fd          The file descriptor being watched.
@@ -210,6 +212,7 @@ private:
          *  Constructor- initialises the watcher and assigns the filedescriptor to 
          *  a boost socket for monitoring.
          *  @param  io_service      The boost io_service
+         *  @param  strand          A weak pointer to a io_service::strand instance.
          *  @param  fd              The filedescriptor being watched
          */
         Watcher(boost::asio::io_service &io_service,
@@ -378,7 +381,8 @@ private:
     public:
         /**
          *  Constructor
-         *  @param  loop            The current event loop
+         *  @param  io_service The boost asio io_service.
+         *  @param  strand     A weak pointer to a io_service::strand instance.
          */
         Timer(boost::asio::io_service &io_service,
               const std::weak_ptr<boost::asio::io_service::strand> strand) :
