@@ -3,9 +3,11 @@
  *
  *  Implementation for the AMQP::TcpHandler that is optimized for boost::asio. You can
  *  use this class instead of a AMQP::TcpHandler class, just pass the boost asio service
- *  to the constructor and you're all set
+ *  to the constructor and you're all set.  See tests/libboostasio.cpp for example.
  *
  *  @author Gavin Smith <gavin.smith@coralbay.tv>
+ *
+ *
  */
 
 /**
@@ -19,9 +21,10 @@
 #include <memory>
 
 #include <boost/asio/io_service.hpp>
+#include <boost/asio/strand.hpp>
+#include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/posix/stream_descriptor.hpp>
 #include <boost/bind.hpp>
-#include <boost/function.hpp>
 
 
 ///////////////////////////////////////////////////////////////////
@@ -78,7 +81,7 @@ private:
          *  @var class boost::asio::io_service&
          */
         boost::asio::io_service & _ioservice;
-        
+
         /**
          *  The boost asio io_service::strand managed pointer.
          *  @var class std::shared_ptr<boost::asio::io_service>
@@ -127,7 +130,7 @@ private:
          *  @note   The handler will get called if a read is cancelled.
          */
         void read_handler(const boost::system::error_code &ec,
-						  const std::size_t bytes_transferred,
+                          const std::size_t bytes_transferred,
                           const std::weak_ptr<Watcher> awpWatcher,
                           TcpConnection *const connection,
                           const int fd)
@@ -144,8 +147,8 @@ private:
                 connection->process(fd, AMQP::readable);
 
                 _read_pending = true;
-                
-                _socket.async_read_some(boost::asio::null_buffers(), 
+
+                _socket.async_read_some(boost::asio::null_buffers(),
                                         STRAND_SOCKET_HANDLER(
                                             boost::bind(&Watcher::read_handler,
                                             this,
@@ -313,13 +316,13 @@ private:
          *  @var class boost::asio::io_service&
          */
         boost::asio::io_service & _ioservice;
-        
+
         /**
          *  The boost asio io_service::strand managed pointer.
          *  @var class std::shared_ptr<boost::asio::io_service>
          */
         std::weak_ptr<boost::asio::io_service::strand> _strand;
-        
+
         /**
          *  The boost asynchronous deadline timer.
          *  @var class boost::asio::deadline_timer
@@ -483,7 +486,7 @@ private:
 				std::make_shared<Watcher>(_ioservice, _strand, fd);
 
             _watchers[fd] = apWatcher;
-            
+
             // explicitly set the events to monitor
             apWatcher->events(connection, fd, flags);
         }
