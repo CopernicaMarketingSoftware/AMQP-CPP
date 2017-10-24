@@ -156,7 +156,7 @@ private:
                                             boost::placeholders::_2,
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
-                                            weak_from_this()
+                                            weak_from_this(),
 #else
                                             shared_from_this(),
 #endif
@@ -201,7 +201,7 @@ private:
                                                          boost::placeholders::_2,
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
-                                                         weak_from_this()
+                                                         weak_from_this(),
 #else
                                                          shared_from_this(),
 #endif
@@ -270,7 +270,7 @@ private:
                                                         boost::placeholders::_2,
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
-                                                        weak_from_this()
+                                                        weak_from_this(),
 #else
                                                         shared_from_this(),
 #endif
@@ -294,7 +294,7 @@ private:
                                                          boost::placeholders::_2,
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
-                                                         weak_from_this()
+                                                         weak_from_this(),
 #else
                                                          shared_from_this(),
 #endif
@@ -363,7 +363,7 @@ private:
                                                   boost::placeholders::_1,
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
-                                                   weak_from_this()
+                                                   weak_from_this(),
 #else
                                                    shared_from_this(),
 #endif
@@ -430,7 +430,7 @@ private:
                                               boost::placeholders::_1,
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
-                                              weak_from_this()
+                                              weak_from_this(),
 #else
                                               shared_from_this(),
 #endif
