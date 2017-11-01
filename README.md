@@ -429,10 +429,16 @@ instantiate it directly (like we did in the example), but to create your own
 "MyHandler" class that extends from it, and in which you also implement the 
 onError() method to report possible connection errors to your end users.
 
-Currently, we have only added such an example TcpHandler implementation for libev and
-libevent. For other event loops (like libuv and boost asio) we do not yet have
+Currently, we have example TcpHandler implementations for libev,
+libevent, and Boost's asio. For other event loops (like libuv) we do not yet have
 such examples.
 
+| TCP Handler Impl        | Header File Location   |  Sample File Location |
+| ----------------------- | ---------------------- | --------------------- |
+| Boost asio (io_service) | include/libboostasio.h | tests/libboostasio.cpp |  
+| libev                   | include/libev.h        | tests/libev.cpp       |
+| libevent                | include/libevent.h     | tests/libevent.cpp    |
+| libuv                   | include/libuv.h        |  (Not available)      |
 
 HEARTBEATS
 ==========
