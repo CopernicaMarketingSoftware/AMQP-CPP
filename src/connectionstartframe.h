@@ -121,7 +121,7 @@ public:
      *  Major AMQP version number
      *  @return uint8_t
      */
-    uint8_t major() const
+    uint8_t majorVersion() const
     {
         return _major;
     }
@@ -130,7 +130,7 @@ public:
      *  Minor AMQP version number
      *  @return uint8_t
      */
-    uint8_t minor() const
+    uint8_t minorVersion() const
     {
         return _minor;
     }
