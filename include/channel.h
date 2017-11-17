@@ -29,6 +29,10 @@ private:
 public:
     /**
      *  Construct a channel object
+     * 
+     *  The passed in connection pointer must remain valid for the 
+     *  lifetime of the channel.
+     * 
      *  @param  connection
      */
     Channel(Connection *connection) : _implementation(new ChannelImpl()) 
