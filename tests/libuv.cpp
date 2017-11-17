@@ -1,7 +1,7 @@
 /**
- *  LibEV.cpp
+ *  LibUV.cpp
  * 
- *  Test program to check AMQP functionality based on LibEV
+ *  Test program to check AMQP functionality based on LibUV
  * 
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
  *  @copyright 2015 - 2017 Copernica BV
@@ -10,14 +10,14 @@
 /**
  *  Dependencies
  */
-#include <ev.h>
+#include <uv.h>
 #include <amqpcpp.h>
-#include <amqpcpp/libev.h>
+#include <amqpcpp/libuv.h>
 
 /**
  *  Custom handler
  */
-class MyHandler : public AMQP::LibEvHandler
+class MyHandler : public AMQP::LibUvHandler
 {
 private:
     /**
@@ -42,9 +42,9 @@ private:
 public:
     /**
      *  Constructor
-     *  @param  ev_loop
+     *  @param  uv_loop
      */
-    MyHandler(struct ev_loop *loop) : AMQP::LibEvHandler(loop) {}
+    MyHandler(uv_loop_t *loop) : AMQP::LibUvHandler(loop) {}
 
     /**
      *  Destructor
@@ -59,7 +59,7 @@ public:
 int main()
 {
     // access to the event loop
-    auto *loop = EV_DEFAULT;
+    auto *loop = uv_default_loop();
     
     // handler for libev
     MyHandler handler(loop);
@@ -78,7 +78,7 @@ int main()
     });
     
     // run the loop
-    ev_run(loop, 0);
+    uv_run(loop, UV_RUN_DEFAULT);
 
     // done
     return 0;
