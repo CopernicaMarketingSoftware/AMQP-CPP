@@ -72,7 +72,86 @@ public:
 
 public:
     /**
-     *  Register the function to be called when a new message is expected
+     *  Register a callback function that gets called when the consumer is
+     *  started. In the callback you will for receive the consumer-tag
+     *  that you need to later stop the consumer
+     *  @param  callback
+     */
+    DeferredConsumer &onSuccess(const ConsumeCallback &callback)
+    {
+        // store the callback
+        _consumeCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register the function that is called when the consumer starts.
+     *  It is recommended to use the onSuccess() method mentioned above
+     *  since that will also pass the consumer-tag as parameter.
+     *  @param  callback
+     */
+    DeferredConsumer &onSuccess(const SuccessCallback &callback)
+    {
+        // call base
+        Deferred::onSuccess(callback);
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register a function to be called when a full message is received
+     *  @param  callback    the callback to execute
+     */
+    DeferredConsumer &onReceived(const MessageCallback &callback)
+    {
+        // store callback
+        _messageCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Alias for onReceived() (see above)
+     *  @param  callback    the callback to execute
+     */
+    DeferredConsumer &onMessage(const MessageCallback &callback)
+    {
+        // store callback
+        _messageCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  RabbitMQ sends a message in multiple frames to its consumers.
+     *  The AMQP-CPP library collects these frames and merges them into a 
+     *  single AMQP::Message object that is passed to the callback that
+     *  you can set with the onReceived() or onMessage() methods (see above).
+     * 
+     *  However, you can also write your own algorithm to merge the frames.
+     *  In that case you can install callbacks to handle the frames. Every
+     *  message is sent in a number of frames:
+     * 
+     *      - a begin frame that marks the start of the message
+     *      - an optional header if the message was sent with an envelope
+     *      - zero or more data frames (usually 1, but more for large messages)
+     *      - an end frame to mark the end of the message.
+     *  
+     *  To install handlers for these frames, you can use the onBegin(), 
+     *  onHeaders(), onData() and onComplete() methods.
+     * 
+     *  If you just rely on the onReceived() or onMessage() callbacks, you
+     *  do not need any of the methods below this line.
+     */
+
+    /**
+     *  Register the function that is called when the start frame of a new 
+     *  consumed message is received
      *
      *  @param  callback    The callback to invoke
      *  @return Same object for chaining
@@ -87,7 +166,7 @@ public:
     }
 
     /**
-     *  Register the function to be called when message headers come in
+     *  Register the function that is called when message headers come in
      *
      *  @param  callback    The callback to invoke for message headers
      *  @return Same object for chaining
@@ -118,60 +197,6 @@ public:
     {
         // store callback
         _dataCallback = callback;
-
-        // allow chaining
-        return *this;
-    }
-
-    /**
-     *  Register the function that is called when the consumer starts
-     *  @param  callback
-     */
-    DeferredConsumer &onSuccess(const ConsumeCallback &callback)
-    {
-        // store the callback
-        _consumeCallback = callback;
-
-        // allow chaining
-        return *this;
-    }
-
-    /**
-     *  Register the function that is called when the consumer starts
-     *  @param  callback
-     */
-    DeferredConsumer &onSuccess(const SuccessCallback &callback)
-    {
-        // call base
-        Deferred::onSuccess(callback);
-
-        // allow chaining
-        return *this;
-    }
-
-    /**
-     *  Register a function to be called when a message arrives
-     *  This fuction is also available as onMessage() because I always forget which name I gave to it
-     *  @param  callback    the callback to execute
-     */
-    DeferredConsumer &onReceived(const MessageCallback &callback)
-    {
-        // store callback
-        _messageCallback = callback;
-
-        // allow chaining
-        return *this;
-    }
-
-    /**
-     *  Register a function to be called when a message arrives
-     *  This fuction is also available as onReceived() because I always forget which name I gave to it
-     *  @param  callback    the callback to execute
-     */
-    DeferredConsumer &onMessage(const MessageCallback &callback)
-    {
-        // store callback
-        _messageCallback = callback;
 
         // allow chaining
         return *this;
