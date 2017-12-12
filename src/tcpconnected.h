@@ -142,6 +142,12 @@ public:
         // close the socket
         close(_socket);
     }
+
+    /**
+     *  The filedescriptor of this connection
+     *  @return int
+     */
+    virtual int fileno() const override { return _socket; }
     
     /**
      *  Process the filedescriptor in the object

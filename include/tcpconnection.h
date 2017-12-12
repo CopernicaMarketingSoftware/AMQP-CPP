@@ -118,6 +118,12 @@ public:
     virtual ~TcpConnection() noexcept {}
 
     /**
+     *  The filedescriptor that is used for this connection
+     *  @return int
+     */
+    int fileno() const;
+
+    /**
      *  Process the TCP connection
      * 
      *  This method should be called when the filedescriptor that is registered

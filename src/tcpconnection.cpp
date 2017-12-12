@@ -28,6 +28,16 @@ TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
     _connection(this, address.login(), address.vhost()) {}
 
 /**
+ *  The filedescriptor that is used for this connection
+ *  @return int
+ */
+int TcpConnection::fileno() const
+{
+    // pass on to the state object
+    return _state->fileno();
+}
+
+/**
  *  Process the TCP connection
  *  This method should be called when the filedescriptor that is registered
  *  in the event loop becomes active. You should pass in a flag holding the

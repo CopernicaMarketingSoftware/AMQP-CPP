@@ -58,6 +58,12 @@ public:
     virtual ~TcpState() = default;
 
     /**
+     *  The filedescriptor of this connection
+     *  @return int
+     */
+    virtual int fileno() const { return -1; }
+
+    /**
      *  Process the filedescriptor in the object    
      *  @param  fd          The filedescriptor that is active
      *  @param  flags       AMQP::readable and/or AMQP::writable
