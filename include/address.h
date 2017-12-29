@@ -216,7 +216,7 @@ public:
         // logins must match
         if (_login != that._login) return false;
 
-        // hostname must match, but are nt case sensitive
+        // hostname must match, but are not case sensitive
         if (strcasecmp(_hostname.data(), that._hostname.data()) != 0) return false;
 
         // portnumber must match
@@ -235,6 +235,29 @@ public:
     {
         // the opposite of operator==
         return !operator==(that);
+    }
+    
+    /**
+     *  Comparison operator that is useful if addresses have to be ordered
+     *  @param  that
+     *  @return bool
+     */
+    bool operator<(const Address &that) const
+    {
+        // compare logins
+        if (_login != that._login) return _login < that._login;
+        
+        // hostname must match, but are not case sensitive
+        int result = strcasecmp(_hostname.data(), that._hostname.data());
+        
+        // if hostnames are not equal, we know the result
+        if (result != 0) return result < 0;
+
+        // portnumber must match
+        if (_port != that._port) return _port < that._port;
+
+        // and finally compare the vhosts
+        return _vhost < that._vhost;
     }
     
     /**

@@ -119,6 +119,20 @@ public:
         // the opposite of operator==
         return !operator==(that);
     }
+    
+    /**
+     *  Comparison operator
+     *  @param  that
+     *  @return bool
+     */
+    bool operator<(const Login &that) const
+    {
+        // compare users
+        if (_user != that._user) return _user < that._user;
+        
+        // compare passwords
+        return _password < that._password;
+    }
 
     /**
      *  Friend function to allow writing the login to a stream
