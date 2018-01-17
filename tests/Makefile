@@ -1,6 +1,6 @@
-CPP				= g++
-CPPFLAGS		= -Wall -c -I. -O2 -flto -std=c++11 -g
-LD				= g++
+CPP			= g++
+CPPFLAGS		= -Wall -c -I. -O2 -flto -std=c++14 -g
+LD			= g++
 LDFLAGS			= -lamqpcpp -lcopernica_event -lcopernica_network -lev
 RESULT			= a.out
 SOURCES			= $(wildcard *.cpp)
