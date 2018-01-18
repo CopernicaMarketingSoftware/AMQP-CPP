@@ -152,8 +152,8 @@ private:
                                         STRAND_SOCKET_HANDLER(
                                             boost::bind(&Watcher::read_handler,
                                             this,
-                                            _1,
-                                            _2,
+                                            boost::arg<1>(),
+                                            boost::arg<2>(),
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
                                             weak_from_this(),
@@ -197,8 +197,8 @@ private:
                                          STRAND_SOCKET_HANDLER(
                                              boost::bind(&Watcher::write_handler,
                                                          this,
-                                                         _1,
-                                                         _2,
+                                                         boost::arg<1>(),
+                                                         boost::arg<2>(),
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
                                                          weak_from_this(),
@@ -266,8 +266,8 @@ private:
                                         STRAND_SOCKET_HANDLER(
                                             boost::bind(&Watcher::read_handler,
                                                         this,
-                                                        _1,
-                                                        _2,
+                                                        boost::arg<1>(),
+                                                        boost::arg<2>(),
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
                                                         weak_from_this(),
@@ -290,8 +290,8 @@ private:
                                          STRAND_SOCKET_HANDLER(
                                              boost::bind(&Watcher::write_handler,
                                                          this,
-                                                         _1,
-                                                         _2,
+                                                         boost::arg<1>(),
+                                                         boost::arg<2>(),
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
                                                          weak_from_this(),
@@ -360,7 +360,7 @@ private:
                 _timer.async_wait(STRAND_TIMER_HANDLER(
                                       boost::bind(&Timer::timeout,
                                                   this,
-                                                  _1,
+                                                  boost::arg<1>(),
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
                                                    weak_from_this(),
@@ -427,7 +427,7 @@ private:
             _timer.async_wait(STRAND_TIMER_HANDLER(
                                   boost::bind(&Timer::timeout,
                                               this,
-                                              _1,
+                                              boost::arg<1>(),
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
                                               weak_from_this(),
