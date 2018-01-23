@@ -24,28 +24,16 @@ matrix:
   - os: linux
     compiler: gcc
     env:
-      - COMPILER=g++-4.9
-      - CXXFLAGS=-std=c++11
-    addons:
-      apt:
-        sources: ['ubuntu-toolchain-r-test']
-        packages: ['g++-4.9', 'ninja-build']
-
-  - os: linux
-    compiler: gcc
-    env:
       - COMPILER=g++-5
-      - CXXFLAGS=-std=c++11
     addons:
       apt:
-        sources: ['ubuntu-toolchain-r-test']
+        #sources: ['ubuntu-toolchain-r-test']
         packages: ['g++-5', 'ninja-build']
 
   - os: linux
     compiler: gcc
     env:
       - COMPILER=g++-6
-      - CXXFLAGS=-std=c++11
     addons:
       apt:
         sources: ['ubuntu-toolchain-r-test']
@@ -55,7 +43,6 @@ matrix:
     compiler: gcc
     env:
       - COMPILER=g++-7
-      - CXXFLAGS=-std=c++11
     addons:
       apt:
         sources: ['ubuntu-toolchain-r-test']
@@ -68,18 +55,7 @@ matrix:
   - os: linux
     compiler: clang
     env:
-      - COMPILER=clang++-3.9
-      - CXXFLAGS=-std=c++11
-    addons:
-      apt:
-        sources: ['ubuntu-toolchain-r-test']
-        packages: ['g++-6', 'clang-3.9', 'ninja-build']
-
-  - os: linux
-    compiler: clang
-    env:
       - COMPILER=clang++-4.0
-      - CXXFLAGS=-std=c++11
     addons:
       apt:
         sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-4.0']
@@ -89,7 +65,6 @@ matrix:
     compiler: clang
     env:
       - COMPILER=clang++-5.0
-      - CXXFLAGS=-std=c++11
     addons:
       apt:
         sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-5.0']
