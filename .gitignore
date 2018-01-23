@@ -15,3 +15,5 @@
 *.a.*
 /build
 /.vscode
+.atom-build.cson
+.atom-dbg.cson
