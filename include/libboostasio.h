@@ -1,5 +1,4 @@
-/**
- *  LibBoostAsio.h
+bBoostAsio.h
  *
  *  Implementation for the AMQP::TcpHandler that is optimized for boost::asio. You can
  *  use this class instead of a AMQP::TcpHandler class, just pass the boost asio service
@@ -27,33 +26,35 @@
 #include <boost/bind.hpp>
 
 
-///////////////////////////////////////////////////////////////////
-#define STRAND_SOCKET_HANDLER(_fn)                                                              \
-[fn = _fn, strand = _strand](const boost::system::error_code &ec,                               \ 
-                             const std::size_t bytes_transferred)                               \
-{                                                                                               \
-    const std::shared_ptr<boost::asio::io_service::strand> apStrand = strand.lock();            \
-    if (!apStrand)                                                                              \
-    {                                                                                           \
-        fn(boost::system::errc::make_error_code(boost::system::errc::operation_canceled),std::size_t{0}); \
-        return;                                                                                 \
-    }                                                                                           \
-                                                                                                \
-    apStrand->dispatch(boost::bind(fn,ec,bytes_transferred));                                   \
+template<class Func>
+void strand_sock_dispatch_func(
+    Func fn,
+    std::weak_ptr<boost::asio::io_service::strand> strand,
+    const boost::system::error_code &ec,
+    const std::size_t bytes_transferred
+) {
+    const std::shared_ptr<boost::asio::io_service::strand> apStrand = strand.lock();
+    if (!apStrand)
+    {
+        fn(boost::system::errc::make_error_code(boost::system::errc::operation_canceled), std::size_t{0});
+        return;
+    }
+    apStrand->dispatch(boost::bind(fn, ec, bytes_transferred));
 }
 
-///////////////////////////////////////////////////////////////////
-#define STRAND_TIMER_HANDLER(_fn)                                                               \
-[fn = _fn, strand = _strand](const boost::system::error_code &ec)                               \
-{                                                                                               \
-    const std::shared_ptr<boost::asio::io_service::strand> apStrand = strand.lock();            \
-    if (!apStrand)                                                                              \
-    {                                                                                           \
-        fn(boost::system::errc::make_error_code(boost::system::errc::operation_canceled));      \
-        return;                                                                                 \
-    }                                                                                           \
-                                                                                                \
-    apStrand->dispatch(boost::bind(fn,ec));                                                     \
+template<class Func>
+void strand_timer_dispatch_func(
+    Func fn,
+    std::weak_ptr<boost::asio::io_service::strand> strand,
+    const boost::system::error_code &ec
+) {
+    const std::shared_ptr<boost::asio::io_service::strand> apStrand = strand.lock();
+    if (!apStrand)
+    {
+        fn(boost::system::errc::make_error_code(boost::system::errc::operation_canceled));
+        return;
+    }
+    apStrand->dispatch(boost::bind(fn,ec));
 }
 
 /**
@@ -148,9 +149,7 @@ private:
 
                 _read_pending = true;
 
-                _socket.async_read_some(boost::asio::null_buffers(),
-                                        STRAND_SOCKET_HANDLER(
-                                            boost::bind(&Watcher::read_handler,
+                auto func = boost::bind(&Watcher::read_handler,
                                             this,
                                             boost::arg<1>(),
                                             boost::arg<2>(),
@@ -161,7 +160,13 @@ private:
                                             shared_from_this(),
 #endif
                                             connection,
-                                            fd)));
+                                            fd);
+                _socket.async_read_some(
+                    boost::asio::null_buffers(),
+                    [f = func, strand = _strand](const boost::system::error_code &ec, const std::size_t bytes_transferred) {
+                        strand_sock_dispatch_func(f, strand, ec, bytes_transferred);
+                    }
+                );
             }
         }
 
@@ -193,9 +198,7 @@ private:
 
                 _write_pending = true;
 
-                _socket.async_write_some(boost::asio::null_buffers(),
-                                         STRAND_SOCKET_HANDLER(
-                                             boost::bind(&Watcher::write_handler,
+                auto func = boost::bind(&Watcher::write_handler,
                                                          this,
                                                          boost::arg<1>(),
                                                          boost::arg<2>(),
@@ -206,7 +209,13 @@ private:
                                                          shared_from_this(),
 #endif
                                                          connection,
-                                                         fd)));
+                                                         fd);
+                _socket.async_write_some(
+                    boost::asio::null_buffers(),
+                    [f = func, strand = _strand](const boost::system::error_code &ec, const std::size_t bytes_transferred) {
+                        strand_sock_dispatch_func(f, strand, ec, bytes_transferred);
+                    }
+                );
             }
         }
 
@@ -262,9 +271,7 @@ private:
             {
                 _read_pending = true;
 
-                _socket.async_read_some(boost::asio::null_buffers(),
-                                        STRAND_SOCKET_HANDLER(
-                                            boost::bind(&Watcher::read_handler,
+                auto func = boost::bind(&Watcher::read_handler,
                                                         this,
                                                         boost::arg<1>(),
                                                         boost::arg<2>(),
@@ -275,7 +282,13 @@ private:
                                                         shared_from_this(),
 #endif
                                                         connection,
-                                                        fd)));
+                                                        fd);
+                _socket.async_read_some(
+                    boost::asio::null_buffers(),
+                    [f = func, strand = _strand](const boost::system::error_code &ec, const std::size_t bytes_transferred) {
+                        strand_sock_dispatch_func(f, strand, ec, bytes_transferred);
+                    }
+                );
             }
 
             // 2. Handle writes?
@@ -286,9 +299,7 @@ private:
             {
                 _write_pending = true;
 
-                _socket.async_write_some(boost::asio::null_buffers(),
-                                         STRAND_SOCKET_HANDLER(
-                                             boost::bind(&Watcher::write_handler,
+                auto func = boost::bind(&Watcher::write_handler,
                                                          this,
                                                          boost::arg<1>(),
                                                          boost::arg<2>(),
@@ -299,7 +310,13 @@ private:
                                                          shared_from_this(),
 #endif
                                                          connection,
-                                                         fd)));
+                                                         fd);
+                _socket.async_write_some(
+                    boost::asio::null_buffers(),
+                    [f = func, strand = _strand](const boost::system::error_code &ec, const std::size_t bytes_transferred) {
+                        strand_sock_dispatch_func(f, strand, ec, bytes_transferred);
+                    }
+                );
             }
         }
     };
@@ -353,12 +370,7 @@ private:
                     connection->heartbeat();
                 }
 
-                // Reschedule the timer for the future:
-                _timer.expires_at(_timer.expires_at() + boost::posix_time::seconds(timeout));
-
-                // Posts the timer event
-                _timer.async_wait(STRAND_TIMER_HANDLER(
-                                      boost::bind(&Timer::timeout,
+                auto func = boost::bind(&Timer::timeout,
                                                   this,
                                                   boost::arg<1>(),
 // C++17 has 'weak_from_this()' support.
@@ -368,7 +380,17 @@ private:
                                                    shared_from_this(),
 #endif
                                                    connection,
-                                                   timeout)));
+                                                   timeout);
+
+                // Reschedule the timer for the future:
+                _timer.expires_at(_timer.expires_at() + boost::posix_time::seconds(timeout));
+
+                // Posts the timer event
+                _timer.async_wait(
+                    [f = func, strand = _strand](const boost::system::error_code &ec) {
+                        strand_timer_dispatch_func(f, strand, ec);
+                    }
+                );
             }
         }
 
@@ -423,9 +445,7 @@ private:
             // stop timer in case it was already set
             stop();
 
-            _timer.expires_from_now(boost::posix_time::seconds(timeout));
-            _timer.async_wait(STRAND_TIMER_HANDLER(
-                                  boost::bind(&Timer::timeout,
+            auto func = boost::bind(&Timer::timeout,
                                               this,
                                               boost::arg<1>(),
 // C++17 has 'weak_from_this()' support.
@@ -435,7 +455,13 @@ private:
                                               shared_from_this(),
 #endif
                                               connection, 
-                                              timeout)));
+                                              timeout);
+            _timer.expires_from_now(boost::posix_time::seconds(timeout));
+            _timer.async_wait(
+                [f = func, strand = _strand](const boost::system::error_code &ec) {
+                    strand_timer_dispatch_func(f, strand, ec);
+                }
+            );
         }
     };
 
