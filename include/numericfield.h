@@ -1,6 +1,6 @@
 /**
  *  Numeric field types for AMQP
- * 
+ *
  *  @copyright 2014 Copernica BV
  */
 
@@ -215,4 +215,3 @@ typedef NumericField<double, 'd'>   Double;
  *  end namespace
  */
 }
-
