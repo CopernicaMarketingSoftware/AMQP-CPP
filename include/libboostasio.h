@@ -1,4 +1,5 @@
-bBoostAsio.h
+/**
+ *  LibBoostAsio.h
  *
  *  Implementation for the AMQP::TcpHandler that is optimized for boost::asio. You can
  *  use this class instead of a AMQP::TcpHandler class, just pass the boost asio service
