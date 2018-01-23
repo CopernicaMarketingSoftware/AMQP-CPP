@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.1)
 # project name
 project(amqpcpp)
 
+# build options
+option(BUILD_PURE "build in pure mode" OFF)
+
 # set output directory
 set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
@@ -24,13 +27,20 @@ macro (add_sources)
     endif()
 endmacro()
 
+# add source files
 add_subdirectory(src)
-if(BUILD_TCP)
-    add_subdirectory(src/tcpconnection)
+if(NOT NO_LINUX_TCP)
+    add_subdirectory(src/linux_tcp)
 endif()
 
-option(BUILD_SHARED "build shared library" OFF)
+# we have to prevent windows from defining the max macro. TODO more
+if (WIN32)
+    add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
+endif()
 
+
+# TODO Cleanup into this part of the cmakefile
+option(BUILD_SHARED "build shared library" OFF)
 if(BUILD_SHARED)
     add_library(${PROJECT_NAME} SHARED ${SRCS})
     set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 2.7) # TODO version incorrect
@@ -50,7 +60,3 @@ install(FILES amqpcpp.h DESTINATION include)
 
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
-
-if (WIN32)
-    add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
-endif()
