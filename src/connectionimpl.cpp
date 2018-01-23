@@ -125,7 +125,7 @@ uint64_t ConnectionImpl::parse(const Buffer &buffer)
         try
         {
             // try to recognize the frame
-            ReducedBuffer reduced_buf(buffer, processed);
+            ReducedBuffer reduced_buf(buffer, (size_t)processed);
             ReceivedFrame receivedFrame(reduced_buf, _maxFrame);
             
             // do we have the full frame?
