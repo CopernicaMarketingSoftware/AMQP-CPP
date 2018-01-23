@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.1)
 
+# project name
 project(amqpcpp)
+
+# set output directory
+set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
 # ensure c++11 on all compilers
 set (CMAKE_CXX_STANDARD 11)

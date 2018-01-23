@@ -17,3 +17,4 @@
 /.vscode
 .atom-build.cson
 .atom-dbg.cson
+/bin
