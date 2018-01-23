@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.1)
 project(amqpcpp)
 
 # build options
-option(BUILD_PURE "build in pure mode" OFF)
+option(LINUX_TCP "Build linux sockets implementation" OFF)
 
 # set output directory
 set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
@@ -29,7 +29,7 @@ endmacro()
 
 # add source files
 add_subdirectory(src)
-if(NOT NO_LINUX_TCP)
+if(LINUX_TCP)
     add_subdirectory(src/linux_tcp)
 endif()
 
