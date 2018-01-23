@@ -23,17 +23,15 @@ matrix:
 
   - os: linux
     compiler: gcc
-    env:
-      - COMPILER=g++-5
+    env: COMPILER=g++-5
     addons:
       apt:
-        #sources: ['ubuntu-toolchain-r-test']
+        sources: ['ubuntu-toolchain-r-test']
         packages: ['g++-5', 'ninja-build']
 
   - os: linux
     compiler: gcc
-    env:
-      - COMPILER=g++-6
+    env: COMPILER=g++-6
     addons:
       apt:
         sources: ['ubuntu-toolchain-r-test']
@@ -41,8 +39,7 @@ matrix:
 
   - os: linux
     compiler: gcc
-    env:
-      - COMPILER=g++-7
+    env: COMPILER=g++-7
     addons:
       apt:
         sources: ['ubuntu-toolchain-r-test']
@@ -54,8 +51,7 @@ matrix:
 
   - os: linux
     compiler: clang
-    env:
-      - COMPILER=clang++-4.0
+    env: COMPILER=clang++-4.0
     addons:
       apt:
         sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-4.0']
@@ -63,8 +59,7 @@ matrix:
 
   - os: linux
     compiler: clang
-    env:
-      - COMPILER=clang++-5.0
+    env: COMPILER=clang++-5.0
     addons:
       apt:
         sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-5.0']
