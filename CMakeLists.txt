@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 project(amqpcpp)
 
 # ensure c++11 on all compilers
-include(set_cxx_norm.cmake)
-set_cxx_norm (${CXX_NORM_CXX11})
+set (CMAKE_CXX_STANDARD 11)
 
 macro (add_sources)
     file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -22,7 +21,9 @@ macro (add_sources)
 endmacro()
 
 add_subdirectory(src)
-add_subdirectory(include)
+if(AMQPCPP_BUILD_TCP)
+    add_subdirectory(src/tcpconnection)
+endif()
 
 option(BUILD_SHARED "build shared library" OFF)
 

@@ -42,6 +42,8 @@ private:
     T _value;
 
 public:
+    using Type = T;
+
     /**
      *  Default constructor, assign 0
      */
@@ -116,14 +118,14 @@ public:
      *  Get the value
      *  @return mixed
      */
-    operator uint8_t () const override { return _value; }
-    operator uint16_t() const override { return _value; }
-    operator uint32_t() const override { return _value; }
-    operator uint64_t() const override { return _value; }
-    operator int8_t  () const override { return _value; }
-    operator int16_t () const override { return _value; }
-    operator int32_t () const override { return _value; }
-    operator int64_t () const override { return _value; }
+    operator uint8_t () const override { return (uint8_t)_value; }
+    operator uint16_t() const override { return (uint16_t)_value; }
+    operator uint32_t() const override { return (uint32_t)_value; }
+    operator uint64_t() const override { return (uint64_t)_value; }
+    operator int8_t  () const override { return (int8_t)_value; }
+    operator int16_t () const override { return (int16_t)_value; }
+    operator int32_t () const override { return (int32_t)_value; }
+    operator int64_t () const override { return (int64_t)_value; }
 
     /**
      *  Get the value

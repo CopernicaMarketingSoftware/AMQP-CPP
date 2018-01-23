@@ -29,7 +29,7 @@ Array::Array(ReceivedFrame &frame)
         if (!field) continue;
 
         // less bytes to read
-        charsToRead -= field->size();
+        charsToRead -= (uint32_t)field->size();
 
         // add the additional field
         _fields.push_back(std::shared_ptr<Field>(field));
@@ -76,7 +76,7 @@ const Field &Array::get(uint8_t index) const
  */
 uint32_t Array::count() const
 {
-  return _fields.size();
+  return (uint32_t)_fields.size();
 }
 
 /**

@@ -81,7 +81,7 @@ public:
      *  @param  locales     available locales
      */
     ConnectionStartFrame(uint8_t major, uint8_t minor, const Table& properties, const std::string& mechanisms, const std::string& locales) :
-        ConnectionFrame((properties.size() + mechanisms.length() + locales.length() + 10)), // 4 for each longstring (size-uint32), 2 major/minor
+        ConnectionFrame((uint32_t)(properties.size() + mechanisms.length() + locales.length() + 10)), // 4 for each longstring (size-uint32), 2 major/minor
         _major(major),
         _minor(minor),
         _properties(properties),

@@ -13,3 +13,5 @@
 *.la
 *.a
 *.a.*
+/build
+/.vscode

@@ -9,7 +9,7 @@
 
 // c and c++ dependencies
 #include <stdlib.h>
-#include <string.h> // TODO cstring
+#include <string.h>
 #include <stdint.h>
 #include <string>
 #include <memory>
@@ -21,18 +21,13 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
-
-#include <sys/types.h> // TODO is this needed
-
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <netinet/tcp.h>
 #include <functional>
 #include <stdexcept>
-
-// TODO make this nice
-#ifdef _MSC_VER 
-//not #if defined(_WIN32) || defined(_WIN64) because we have strncasecmp in mingw
-#define strncasecmp _strnicmp
-#define strcasecmp _stricmp
-#endif
 
 // forward declarations
 #include "../include/classes.h"
@@ -46,6 +41,7 @@
 #include "../include/copiedbuffer.h"
 #include "../include/watchable.h"
 #include "../include/monitor.h"
+#include "../include/tcpdefines.h"
 
 // amqp types
 #include "../include/field.h"
@@ -79,6 +75,8 @@
 #include "../include/connectionhandler.h"
 #include "../include/connectionimpl.h"
 #include "../include/connection.h"
+#include "../include/tcphandler.h"
+#include "../include/tcpconnection.h"
 
 // classes that are very commonly used
 #include "../include/exception.h"
@@ -93,5 +91,6 @@
 #include "queueframe.h"
 #include "basicframe.h"
 #include "transactionframe.h"
+#include "addressinfo.h"
 
 
