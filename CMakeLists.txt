@@ -21,33 +21,28 @@ macro (add_sources)
 endmacro()
 
 add_subdirectory(src)
-if(AMQPCPP_BUILD_TCP)
+if(BUILD_TCP)
     add_subdirectory(src/tcpconnection)
 endif()
 
 option(BUILD_SHARED "build shared library" OFF)
 
 if(BUILD_SHARED)
-  add_library(amqpcpp SHARED ${SRCS})
-  set_target_properties(amqpcpp PROPERTIES SOVERSION 2.7)
-  install(TARGETS amqpcpp
-          LIBRARY DESTINATION lib
-  )
+    add_library(${PROJECT_NAME} SHARED ${SRCS})
+    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 2.7) # TODO version incorrect
+    install(TARGETS ${PROJECT_NAME}
+            LIBRARY DESTINATION lib
+    )
 else()
-  add_library(amqpcpp STATIC ${SRCS})
-  install(TARGETS amqpcpp
-          ARCHIVE DESTINATION lib
-  )
+    add_library(${PROJECT_NAME} STATIC ${SRCS})
+    install(TARGETS ${PROJECT_NAME}
+            ARCHIVE DESTINATION lib
+    )
 endif()
 Include_directories(${PROJECT_SOURCE_DIR})
 install(DIRECTORY include/ DESTINATION include/amqpcpp
         FILES_MATCHING PATTERN "*.h")
 install(FILES amqpcpp.h DESTINATION include)
-
-option(BUILD_TUTORIALS "build rabbitmq tutorials" OFF)
-if(BUILD_TUTORIALS)
-#    add_subdirectory(examples/rabbitmq_tutorials)
-endif()
 
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
