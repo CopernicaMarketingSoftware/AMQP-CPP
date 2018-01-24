@@ -17,11 +17,11 @@
 #include <netinet/tcp.h>
 
 // utility classes
-#include "../../include/linux_tcp/tcpdefines.h"
+#include "amqpcpp/linux_tcp/tcpdefines.h"
 
 // mid level includes
-#include "../../include/linux_tcp/tcphandler.h"
-#include "../../include/linux_tcp/tcpconnection.h"
+#include "amqpcpp/linux_tcp/tcphandler.h"
+#include "amqpcpp/linux_tcp/tcpconnection.h"
 
 // classes that are very commonly used
 #include "addressinfo.h"
