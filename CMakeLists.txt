@@ -36,7 +36,7 @@ if(LINUX_TCP)
     add_subdirectory(src/linux_tcp)
 endif()
 
-# we have to prevent windows from defining the max macro. TODO more
+# we have to prevent windows from defining the max macro. TODO why WIN32_LEAN_AND_MEAN?
 if (WIN32)
     add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
 endif()
