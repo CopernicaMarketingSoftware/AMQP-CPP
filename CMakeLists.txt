@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.1)
 project(amqpcpp)
 
 # build options
-option(LINUX_TCP "Build linux sockets implementation" OFF)
+option(BUILD_SHARED "Build shared library. If off, build will be static." OFF)
+option(LINUX_TCP "Build linux sockets implementation." OFF)
 
 # set output directory
 set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
@@ -43,10 +44,9 @@ endif()
 
 
 # TODO Cleanup into this part of the cmakefile
-option(BUILD_SHARED "build shared library" OFF)
 if(BUILD_SHARED)
     add_library(${PROJECT_NAME} SHARED ${SRCS})
-    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 2.7) # TODO version incorrect
+    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 2.8) # TODO version incorrect
     install(TARGETS ${PROJECT_NAME}
             LIBRARY DESTINATION lib
     )
