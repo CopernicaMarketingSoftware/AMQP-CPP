@@ -13,9 +13,9 @@
  *  Dependencies
  */
 #include "basicframe.h"
-#include "../include/stringfield.h"
-#include "../include/booleanset.h"
-#include "../include/connectionimpl.h"
+#include "amqpcpp/stringfield.h"
+#include "amqpcpp/booleanset.h"
+#include "amqpcpp/connectionimpl.h"
 
 /**
  *  Set up namespace

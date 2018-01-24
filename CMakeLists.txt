@@ -12,6 +12,9 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 # ensure c++11 on all compilers
 set (CMAKE_CXX_STANDARD 11)
 
+# set include/ as include directory
+include_directories(${CMAKE_SOURCE_DIR}/include)
+
 macro (add_sources)
     file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     foreach (_src ${ARGN})

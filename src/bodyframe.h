@@ -13,8 +13,8 @@
  *  Dependencies
  */
 #include "extframe.h"
-#include "../include/connectionimpl.h"
-#include "../include/deferredconsumerbase.h"
+#include "amqpcpp/connectionimpl.h"
+#include "amqpcpp/deferredconsumerbase.h"
 
 /**
  *  Set up namespace
