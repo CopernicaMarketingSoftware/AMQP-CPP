@@ -90,6 +90,6 @@ else()
     )
 endif()
 # copy header files
-install(DIRECTORY include/amqpcpp DESTINATION include/amqpcpp
+install(DIRECTORY include/amqpcpp/ DESTINATION include/amqpcpp
         FILES_MATCHING PATTERN "*.h")
-install(FILES amqpcpp.h DESTINATION include)
+install(FILES include/amqpcpp.h DESTINATION include)
