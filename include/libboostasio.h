@@ -127,7 +127,13 @@ private:
          */
         handler_cb get_read_handler(TcpConnection *const connection, const int fd)
         {
-            auto fn = boost::bind(&Watcher::read_handler, this, _1, _2, PTR_FROM_THIS(), connection, fd);
+            auto fn = boost::bind(&Watcher::read_handler,
+                                  this,
+                                  _1,
+                                  _2,
+                                  PTR_FROM_THIS(),
+                                  connection,
+                                  fd);
             return get_dispatch_wrapper(fn);
         }
 
@@ -139,7 +145,13 @@ private:
          */
         handler_cb get_write_handler(TcpConnection *const connection, const int fd)
         {
-            auto fn = boost::bind(&Watcher::write_handler, this, _1, _2, PTR_FROM_THIS(), connection, fd);
+            auto fn = boost::bind(&Watcher::write_handler,
+                                  this,
+                                  _1,
+                                  _2,
+                                  PTR_FROM_THIS(),
+                                  connection,
+                                  fd);
             return get_dispatch_wrapper(fn);
         }
 
@@ -171,7 +183,9 @@ private:
 
                 _read_pending = true;
                 
-                _socket.async_read_some(boost::asio::null_buffers(), get_read_handler(connection, fd));
+                _socket.async_read_some(
+                    boost::asio::null_buffers(),
+                    get_read_handler(connection, fd));
             }
         }
 
@@ -203,7 +217,9 @@ private:
 
                 _write_pending = true;
 
-                _socket.async_write_some(boost::asio::null_buffers(), get_write_handler(connection, fd));
+                _socket.async_write_some(
+                    boost::asio::null_buffers(),
+                    get_write_handler(connection, fd));
             }
         }
 
@@ -259,7 +275,9 @@ private:
             {
                 _read_pending = true;
 
-                _socket.async_read_some(boost::asio::null_buffers(), get_read_handler(connection, fd));
+                _socket.async_read_some(
+                    boost::asio::null_buffers(),
+                    get_read_handler(connection, fd));
             }
 
             // 2. Handle writes?
@@ -270,7 +288,9 @@ private:
             {
                 _write_pending = true;
 
-                _socket.async_write_some(boost::asio::null_buffers(), get_write_handler(connection, fd));
+                _socket.async_write_some(
+                    boost::asio::null_buffers(),
+                    get_write_handler(connection, fd));
             }
         }
     };
@@ -310,14 +330,14 @@ private:
         handler_fn get_handler(TcpConnection *const connection, const uint16_t timeout)
         {
             auto fn = boost::bind(&Timer::timeout,
-                                    this,
-                                    _1,
-                                    PTR_FROM_THIS(),
-                                    connection,
-                                    timeout);
-            return [fn, this](const boost::system::error_code &ec)
+                                  this,
+                                  _1,
+                                  PTR_FROM_THIS(),
+                                  connection,
+                                  timeout);
+            return [fn, strand = _strand](const boost::system::error_code &ec)
             {
-                const std::shared_ptr<boost::asio::io_service::strand> apStrand = _strand.lock();
+                const std::shared_ptr<boost::asio::io_service::strand> apStrand = strand.lock();
                 if (!apStrand)
                 {
                     fn(boost::system::errc::make_error_code(boost::system::errc::operation_canceled));
