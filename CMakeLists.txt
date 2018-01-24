@@ -1,3 +1,15 @@
+# Builds AMQP-CPP
+#
+# Options:
+#
+# - BUILD_SHARED (default OFF)
+#       ON:  Build shared lib
+#       OFF: Build static lib
+#
+# - LINUX_TCP (default OFF)
+#       ON:  Build posix handler implementation
+#       OFF: Don't build posix handler implementation
+
 cmake_minimum_required(VERSION 3.1)
 
 # project name
@@ -7,15 +19,17 @@ project(amqpcpp)
 option(BUILD_SHARED "Build shared library. If off, build will be static." OFF)
 option(LINUX_TCP "Build linux sockets implementation." OFF)
 
-# set output directory
-set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
-
 # ensure c++11 on all compilers
 set (CMAKE_CXX_STANDARD 11)
+
+# add source files
+# ------------------------------------------------------------------------------------------------------
 
 # set include/ as include directory
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
+# macro that adds a list of provided source files to a list called SRCS.
+# if variable SRCS does not yet exist, it is created.
 macro (add_sources)
     file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     foreach (_src ${ARGN})
@@ -37,29 +51,45 @@ if(LINUX_TCP)
     add_subdirectory(src/linux_tcp)
 endif()
 
+# settings for specific compilers
+# ------------------------------------------------------------------------------------------------------
+
 # we have to prevent windows from defining the max macro. TODO why WIN32_LEAN_AND_MEAN?
 if (WIN32)
     add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
 endif()
 
+# build targets
+# ------------------------------------------------------------------------------------------------------
 
-# TODO Cleanup into this part of the cmakefile
+# set output directory
+set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
+
 if(BUILD_SHARED)
+    # create shared lib
     add_library(${PROJECT_NAME} SHARED ${SRCS})
-    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 2.8) # TODO version incorrect
+    # set shared lib version
+    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 2.8)
+else()
+    # create static lib
+    add_library(${PROJECT_NAME} STATIC ${SRCS})
+endif()
+
+# install rules
+# ------------------------------------------------------------------------------------------------------
+
+if(BUILD_SHARED)
+    # copy static lib
     install(TARGETS ${PROJECT_NAME}
             LIBRARY DESTINATION lib
     )
 else()
-    add_library(${PROJECT_NAME} STATIC ${SRCS})
+    # copy shared lib and its static counter part
     install(TARGETS ${PROJECT_NAME}
             ARCHIVE DESTINATION lib
     )
 endif()
-Include_directories(${PROJECT_SOURCE_DIR})
-install(DIRECTORY include/ DESTINATION include/amqpcpp
+# copy header files
+install(DIRECTORY include/amqpcpp DESTINATION include/amqpcpp
         FILES_MATCHING PATTERN "*.h")
 install(FILES amqpcpp.h DESTINATION include)
-
-set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
