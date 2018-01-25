@@ -1,3 +1,7 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/4fnbmx32chf3h3f7?svg=true)](https://ci.appveyor.com/project/surgura/amqp-cpp) VC++
+
+[![Build Status](https://travis-ci.org/surgura/AMQP-CPP.svg?branch=master)](https://travis-ci.org/surgura/AMQP-CPP) GCC & Clang
+
 AMQP-CPP
 ========
 
