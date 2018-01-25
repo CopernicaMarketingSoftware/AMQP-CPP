@@ -22,10 +22,14 @@
 #include <vector>
 #include <queue>
 #include <sys/types.h>
+
+#ifndef AMQP_CPP_BUILD_PURE
 #include <sys/socket.h>
 #include <netdb.h>
 #include <unistd.h>
 #include <netinet/tcp.h>
+#endif
+
 #include <functional>
 #include <stdexcept>
 
@@ -41,7 +45,6 @@
 #include "../include/copiedbuffer.h"
 #include "../include/watchable.h"
 #include "../include/monitor.h"
-#include "../include/tcpdefines.h"
 
 // amqp types
 #include "../include/field.h"
@@ -91,6 +94,5 @@
 #include "queueframe.h"
 #include "basicframe.h"
 #include "transactionframe.h"
-#include "addressinfo.h"
 
 

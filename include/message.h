@@ -21,6 +21,7 @@
 #include "envelope.h"
 #include <limits>
 #include <stdexcept>
+#include <algorithm>
 
 /**
  *  Set up namespace

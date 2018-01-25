@@ -20,6 +20,7 @@
 #include "tcpstate.h"
 #include "tcpclosed.h"
 #include "tcpconnected.h"
+#include "addressinfo.h"
 #include <thread>
 
 /**
