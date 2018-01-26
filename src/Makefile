@@ -5,7 +5,7 @@ LD	        		= g++
 LD_FLAGS			= -Wall -shared
 SHARED_LIB			= lib$(LIBRARY_NAME).so.$(VERSION)
 STATIC_LIB			= lib$(LIBRARY_NAME).a.$(VERSION)
-SOURCES				= $(wildcard *.cpp)
+SOURCES				= $(wildcard *.cpp) $(wildcard linux_tcp/*.cpp)
 SHARED_OBJECTS		= $(SOURCES:%.cpp=%.o)
 STATIC_OBJECTS		= $(SOURCES:%.cpp=%.s.o)
 DEPENDENCIES		= $(SOURCES:%.cpp=%.d)
@@ -53,4 +53,3 @@ ${SHARED_OBJECTS}:
 
 ${STATIC_OBJECTS}:
 	${CPP} ${CPPFLAGS} -o $@ ${@:%.s.o=%.cpp}
-
