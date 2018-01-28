@@ -196,8 +196,8 @@ public:
         properties["product"] = "Copernica AMQP library";
         properties["version"] = "Unknown";
         properties["platform"] = "Unknown";
-        properties["copyright"] = "Copyright 2015 Copernica BV";
-        properties["information"] = "http://www.copernica.com";
+        properties["copyright"] = "Copyright 2015 - 2018 Copernica BV";
+        properties["information"] = "https://www.copernica.com";
         properties["capabilities"] = capabilities;
         
         // move connection to handshake mode

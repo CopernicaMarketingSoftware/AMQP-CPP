@@ -5,7 +5,7 @@
  * 
  *  @author Gavin Smith <gavin.smith@coralbay.tv>
  *
- *  Compile with g++ libboostasio.cpp -o boost_test -lpthread -lboost_system -lamqpcpp
+ *  Compile with g++ -std=c++14 libboostasio.cpp -o boost_test -lpthread -lboost_system -lamqpcpp
  */
 
 /**

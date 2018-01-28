@@ -1,3 +1,7 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/4fnbmx32chf3h3f7?svg=true)](https://ci.appveyor.com/project/surgura/amqp-cpp) VC++
+
+[![Build Status](https://travis-ci.org/surgura/AMQP-CPP.svg?branch=master)](https://travis-ci.org/surgura/AMQP-CPP) GCC & Clang
+
 AMQP-CPP
 ========
 
@@ -34,7 +38,7 @@ sure that your compiler is up-to-date and supports C++11.
 **Note for the reader:** This readme file has a peculiar structure. We start 
 explaining the pure and hard core low level interface in which you have to
 take care of opening socket connections yourself. In reality, you probably want
-to use the simpler TCP interface that is being described later on.
+to use the simpler TCP interface that is being described [later on](#tcp-connections).
 
 
 ABOUT
