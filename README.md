@@ -65,7 +65,7 @@ INSTALLING
 
 There are two methods to compile AMQP-CPP, CMake and Make. CMake is platform portable, but the Makefile only works on Linux.
 ## CMake
-The CMake file supports both building and installing. You can choose not to use the install functionality, and instead manually use the build output at bin/. Keep in mind that the TCP module is only supported for Linux. An example install method would be:
+The CMake file supports both building and installing. You can choose not to use the install functionality, and instead manually use the build output at `bin/`. Keep in mind that the TCP module is only supported for Linux. An example install method would be:
 ``` bash
 mkdir build
 cd build
