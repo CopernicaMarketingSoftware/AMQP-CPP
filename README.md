@@ -73,10 +73,10 @@ cmake .. [-DBUILD_SHARED] [-DLINUX_TCP]
 cmake --build .. --target install
 ```
 
-Option|Default|ON|OFF
-------|-------|--|---
-BUILD_SHARED|OFF|Build shared library|Build static library
-LINUX_TCP|OFF|Build linux-only TCP module|Don't build linux-only TCP module
+Option|Default|Meaning
+------|-------|-------
+BUILD_SHARED|OFF|Static lib(ON) or shared lib(OFF)?
+LINUX_TCP|OFF|Is the linux-only TCP module built?
 
 ## Make
 Installing the library is as easy
