@@ -75,12 +75,16 @@ cmake --build .. --target install
 
 ### BUILD_SHARED
 Default OFF
+
 ON:  Build shared library
+
 OFF: Build static library
 
 ### LINUX_TCP
 Default OFF
+
 ON:  Build linux-only TCP module
+
 OFF: Do not build the module.
 
 ## Make
