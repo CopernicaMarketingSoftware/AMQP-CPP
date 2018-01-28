@@ -82,7 +82,7 @@ cmake --build .. --target install
 Option|Default|Meaning
 ------|-------|-------
 BUILD_SHARED|OFF|Static lib(ON) or shared lib(OFF)?
-LINUX_TCP|OFF|Should the linux-only TCP module be built?
+LINUX_TCP|OFF|Should the Linux-only TCP module be built?
 
 ## Make
 Installing the library is as easy
