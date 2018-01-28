@@ -62,6 +62,7 @@ Then check out our other commercial and open source solutions:
 
 INSTALLING
 ==========
+AMQP-CPP comes with an optional Linux-only TCP module that takes care of the network part required for the AMQP-CPP core library.
 
 There are two methods to compile AMQP-CPP: CMake and Make. CMake is platform portable, but the Makefile only works on Linux. After building there are two relevant files to include when using the library.
 
