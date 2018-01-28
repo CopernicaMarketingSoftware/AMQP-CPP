@@ -16,8 +16,8 @@ cmake_minimum_required(VERSION 3.1)
 project(amqpcpp)
 
 # build options
-option(BUILD_SHARED "Build shared library. If off, build will be static." OFF)
-option(LINUX_TCP "Build linux sockets implementation." OFF)
+option(AMQP-CPP_BUILD_SHARED "Build shared library. If off, build will be static." OFF)
+option(AMQP-CPP_LINUX_TCP "Build linux sockets implementation." OFF)
 
 # ensure c++11 on all compilers
 set (CMAKE_CXX_STANDARD 11)
@@ -47,16 +47,16 @@ endmacro()
 
 # add source files
 add_subdirectory(src)
-if(LINUX_TCP)
+if(AMQP-CPP_LINUX_TCP)
     add_subdirectory(src/linux_tcp)
 endif()
 
 # settings for specific compilers
 # ------------------------------------------------------------------------------------------------------
 
-# we have to prevent windows from defining the max macro. TODO why WIN32_LEAN_AND_MEAN?
+# we have to prevent windows from defining the max macro.
 if (WIN32)
-    add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
+    add_definitions(-DNOMINMAX)
 endif()
 
 # build targets
@@ -65,7 +65,7 @@ endif()
 # set output directory
 set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
-if(BUILD_SHARED)
+if(AMQP-CPP_BUILD_SHARED)
     # create shared lib
     add_library(${PROJECT_NAME} SHARED ${SRCS})
     # set shared lib version
@@ -78,13 +78,15 @@ endif()
 # install rules
 # ------------------------------------------------------------------------------------------------------
 
-if(BUILD_SHARED)
-    # copy static lib
+if(AMQP-CPP_BUILD_SHARED)
+    # copy shared lib and its static counter part
     install(TARGETS ${PROJECT_NAME}
+            ARCHIVE DESTINATION lib
             LIBRARY DESTINATION lib
+            RUNTIME DESTINATION lib
     )
 else()
-    # copy shared lib and its static counter part
+    # copy static lib
     install(TARGETS ${PROJECT_NAME}
             ARCHIVE DESTINATION lib
     )
