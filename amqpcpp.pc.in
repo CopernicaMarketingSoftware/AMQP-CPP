@@ -6,5 +6,5 @@ Name: ${PROJECT_NAME}
 Description: AMQP-CPP is a C++ library for communicating with a RabbitMQ message broker
 Version: @PACKAGE_VERSION@
 
-Libs: -L${libdir} @PRIVATE_LIBS@
+Libs: -L${libdir} -l${LIBRARY_NAME}
 Cflags: -I${includedir}
