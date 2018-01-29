@@ -6,6 +6,7 @@ project(amqpcpp)
 include(set_cxx_norm.cmake)
 set_cxx_norm (${CXX_NORM_CXX11})
 
+
 macro (add_sources)
     file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     foreach (_src ${ARGN})
@@ -38,6 +39,24 @@ else()
           ARCHIVE DESTINATION lib
   )
 endif()
+
+# if UNIX build package file
+if(UNIX)
+    set(DEST_DIR "${CMAKE_INSTALL_PREFIX}")
+
+    include(FindPkgConfig QUIET)
+    if(PKG_CONFIG_FOUND)
+        foreach(LIB ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES} ${PLATFORM_LIBS})
+            set(PRIVATE_LIBS "${PRIVATE_LIBS} -l${LIB}")
+        endforeach()
+        # Produce a pkg-config file for linking against the shared lib
+        configure_file("amqpcpp.pc.in" "amqpcpp.pc" @ONLY)
+        install(FILES       "${CMAKE_CURRENT_BINARY_DIR}/amqpcpp.pc"
+                DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
+     endif()
+endif()
+
+
 Include_directories(${PROJECT_SOURCE_DIR})
 install(DIRECTORY include/ DESTINATION include/amqpcpp
         FILES_MATCHING PATTERN "*.h")
