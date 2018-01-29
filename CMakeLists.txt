@@ -44,7 +44,7 @@ endif()
 if(UNIX)
     set(DEST_DIR "${CMAKE_INSTALL_PREFIX}")
 
-    include(FindPkgConfig QUIET)
+    include(FindPkgConfig REQUIRED)
     if(PKG_CONFIG_FOUND)
         foreach(LIB ${CMAKE_CXX_IMPLICIT_LINK_LIBRARIES} ${PLATFORM_LIBS})
             set(PRIVATE_LIBS "${PRIVATE_LIBS} -l${LIB}")
