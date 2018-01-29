@@ -6,6 +6,7 @@ project(amqpcpp)
 include(set_cxx_norm.cmake)
 set_cxx_norm (${CXX_NORM_CXX11})
 
+
 macro (add_sources)
     file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     foreach (_src ${ARGN})
@@ -27,17 +28,32 @@ add_subdirectory(include)
 option(BUILD_SHARED "build shared library" OFF)
 
 if(BUILD_SHARED)
-  add_library(amqpcpp SHARED ${SRCS})
-  set_target_properties(amqpcpp PROPERTIES SOVERSION 2.7)
-  install(TARGETS amqpcpp
+  add_library(${PROJECT_NAME} SHARED ${SRCS})
+  set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 2.7)
+  install(TARGETS ${PROJECT_NAME}
           LIBRARY DESTINATION lib
   )
 else()
-  add_library(amqpcpp STATIC ${SRCS})
-  install(TARGETS amqpcpp
+  add_library(${PROJECT_NAME} STATIC ${SRCS})
+  install(TARGETS ${PROJECT_NAME}
           ARCHIVE DESTINATION lib
   )
 endif()
+
+# if UNIX build package file
+if(UNIX)
+    set(DEST_DIR "${CMAKE_INSTALL_PREFIX}")
+
+    include(FindPkgConfig QUIET)
+    if(PKG_CONFIG_FOUND)
+        # Produce a pkg-config file for linking against the shared lib
+        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc.in" "${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc")
+        install(FILES        "${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc"
+                DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
+     endif()
+endif()
+
+
 Include_directories(${PROJECT_SOURCE_DIR})
 install(DIRECTORY include/ DESTINATION include/amqpcpp
         FILES_MATCHING PATTERN "*.h")
