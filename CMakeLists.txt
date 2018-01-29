@@ -47,8 +47,8 @@ if(UNIX)
     include(FindPkgConfig QUIET)
     if(PKG_CONFIG_FOUND)
         # Produce a pkg-config file for linking against the shared lib
-        configure_file("amqpcpp.pc.in" "amqpcpp.pc")
-        install(FILES        "amqpcpp.pc"
+        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc.in" "${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc")
+        install(FILES        "${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc"
                 DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
      endif()
 endif()
