@@ -64,7 +64,7 @@ INSTALLING
 ==========
 AMQP-CPP comes with an optional Linux-only TCP module that takes care of the network part required for the AMQP-CPP core library. If you use this module, you are required to link with `pthread`.
 
-There are two methods to compile AMQP-CPP: CMake and Make. CMake is platform portable, but the Makefile only works on Linux. 
+There are two methods to compile AMQP-CPP: CMake and Make. CMake is platform portable, but the Makefile only works on Linux. Building of a shared library is currently not supported on Windows.
 
 After building there are two relevant files to include when using the library.
 
@@ -86,7 +86,7 @@ cmake --build .. --target install
 
 Option|Default|Meaning
 ------|-------|-------
-BUILD_SHARED|OFF|Static lib(ON) or shared lib(OFF)?
+BUILD_SHARED|OFF|Static lib(ON) or shared lib(OFF)? Shared is not supported on Windows.
 LINUX_TCP|OFF|Should the Linux-only TCP module be built?
 
 ## Make
