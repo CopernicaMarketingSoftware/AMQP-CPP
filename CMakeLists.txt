@@ -2,11 +2,11 @@
 #
 # Options:
 #
-# - BUILD_SHARED (default OFF)
+# - AMQP-CPP_BUILD_SHARED (default OFF)
 #       ON:  Build shared lib
 #       OFF: Build static lib
 #
-# - LINUX_TCP (default OFF)
+# - AMQP-CPP_LINUX_TCP (default OFF)
 #       ON:  Build posix handler implementation
 #       OFF: Don't build posix handler implementation
 
