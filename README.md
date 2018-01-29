@@ -34,7 +34,7 @@ sure that your compiler is up-to-date and supports C++11.
 **Note for the reader:** This readme file has a peculiar structure. We start 
 explaining the pure and hard core low level interface in which you have to
 take care of opening socket connections yourself. In reality, you probably want
-to use the simpler TCP interface that is being described later on.
+to use the simpler TCP interface that is being described [later on](#tcp-connections).
 
 
 ABOUT

@@ -1,0 +1,82 @@
+################
+# project config
+################
+
+# C++ project
+language: cpp
+
+dist: trusty
+sudo: required
+group: edge
+
+
+################
+# build matrix
+################
+
+matrix:
+  include:
+
+  ################
+  # Linux / GCC
+  ################
+
+  - os: linux
+    compiler: gcc
+    env: COMPILER=g++-5
+    addons:
+      apt:
+        sources: ['ubuntu-toolchain-r-test']
+        packages: ['g++-5', 'ninja-build']
+
+  - os: linux
+    compiler: gcc
+    env: COMPILER=g++-6
+    addons:
+      apt:
+        sources: ['ubuntu-toolchain-r-test']
+        packages: ['g++-6', 'ninja-build']
+
+  - os: linux
+    compiler: gcc
+    env: COMPILER=g++-7
+    addons:
+      apt:
+        sources: ['ubuntu-toolchain-r-test']
+        packages: ['g++-7', 'ninja-build']
+
+  ################
+  # Linux / Clang
+  ################
+
+  - os: linux
+    compiler: clang
+    env: COMPILER=clang++-4.0
+    addons:
+      apt:
+        sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-4.0']
+        packages: ['clang-4.0', 'ninja-build']
+
+  - os: linux
+    compiler: clang
+    env: COMPILER=clang++-5.0
+    addons:
+      apt:
+        sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-5.0']
+        packages: ['clang-5.0', 'ninja-build']
+
+################
+# build / test
+################
+
+script:
+
+  # show OS/compiler version
+  - uname -a
+  - $CXX --version
+
+  # compile and execute unit tests
+  - mkdir -p build.release && cd build.release
+  - cmake .. ${CMAKE_OPTIONS} -GNinja && cmake --build . --config Release
+  - cd ..
+
