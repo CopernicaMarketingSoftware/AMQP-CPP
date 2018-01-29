@@ -71,6 +71,8 @@ File|Include when?
 amqpcpp.h|Always
 amqpcpp/linux_tcp.h|If using the Linux-only TCP module
 
+On Windows you are required to define NOMINMAX when compiling code that includes public AMQP-CPP header files.
+
 ## CMake
 The CMake file supports both building and installing. You can choose not to use the install functionality, and instead manually use the build output at `bin/`. Keep in mind that the TCP module is only supported for Linux. An example install method would be:
 ``` bash
