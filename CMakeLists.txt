@@ -51,7 +51,7 @@ if(UNIX)
         endforeach()
         # Produce a pkg-config file for linking against the shared lib
         configure_file("amqpcpp.pc.in" "amqpcpp.pc")
-        install(FILES       "${CMAKE_CURRENT_BINARY_DIR}/amqpcpp.pc"
+        install(FILES        "amqpcpp.pc"
                 DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
      endif()
 endif()
