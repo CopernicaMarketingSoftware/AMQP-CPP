@@ -1,0 +1,11 @@
+prefix=@prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: @PACKAGE_NAME@
+Description: AMQP-CPP is a C++ library for communicating with a RabbitMQ message broker
+Version: @PACKAGE_VERSION@
+URL: @PACKAGE_URL@
+
+Libs: -L${libdir} -lamqpcp
+Cflags: -I${includedir}
