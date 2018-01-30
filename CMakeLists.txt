@@ -42,7 +42,7 @@ option(BUILD_SHARED "build shared library" OFF)
 
 if(BUILD_SHARED)
   add_library(amqpcpp SHARED ${SRCS})
-  set_target_properties(amqpcpp PROPERTIES SOVERSION 2.7)
+  set_target_properties(amqpcpp PROPERTIES SOVERSION ${VERSION_SONAME})
   install(TARGETS amqpcpp
           LIBRARY DESTINATION lib
   )
@@ -60,7 +60,7 @@ if(UNIX)
     include(FindPkgConfig QUIET)
     if(PKG_CONFIG_FOUND)
         # Produce a pkg-config file for linking against the shared lib
-        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc.in" "${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc")
+        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc.in" "${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc" @ONLY)
         install(FILES        "${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc"
                 DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig")
      endif()
