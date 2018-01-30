@@ -80,7 +80,5 @@
 #include "amqpcpp/connection.h"
 
 // tcp level includes
-#include "amqpcpp/tcphandler.h"
-#include "amqpcpp/tcpconnection.h"
-#include "amqpcpp/tcpchannel.h"
+#include "amqpcpp/linux_tcp.h"
 
