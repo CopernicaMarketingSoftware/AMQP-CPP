@@ -1,7 +1,7 @@
 PREFIX                  ?= /usr
 INCLUDE_DIR             = ${PREFIX}/include
 LIBRARY_DIR             = ${PREFIX}/lib
-export LIBRARY_NAME		= amqpcpp
+export LIBRARY_NAME		= ${PROJECT_NAME}
 export SONAME			= ${VERSION_SONAME}
 export VERSION			= ${VERSION_SHORT}
 
