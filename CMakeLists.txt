@@ -7,16 +7,15 @@ include(set_cxx_norm.cmake)
 set_cxx_norm (${CXX_NORM_CXX11})
 
 include(GetGitRevisionDescription.cmake)
-git_describe(GIT_REVISION_DESCRIPTION --tags --match v*)
-if(GIT_REVISION_DESCRIPTION)
-    string(REPLACE "v" ""
-        GIT_REVISION_DESCRIPTION
-        "${GIT_REVISION_DESCRIPTION}")
-    set(VERSION_SHORT "${GIT_REVISION_DESCRIPTION}")
-    message(STATUS "Git reports version ${GIT_REVISION_DESCRIPTION}")
-else()
-    message(STATUS "Could not get revision information from Git! Calling this just version ${CPACK_PACKAGE_VERSION}!")
-endif()
+git_describe(VERSION --tags --dirty=-dirty)
+
+#parse the version information into pieces.
+string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" VERSION_PATCH "${VERSION}")
+string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1" VERSION_SHA1 "${VERSION}")
+set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+set(VERSION_SONAME "${VERSION_MAJOR}.${VERSION_MINOR}")
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Makefile.in" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile")
 
