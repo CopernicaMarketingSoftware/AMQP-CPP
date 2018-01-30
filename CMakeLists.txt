@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # get version automatically using last tag
-include(GetGitRevisionDescription)
+include(GetGitRevisionDescription.cmake)
 git_describe(VERSION --tags --dirty=-d)
 
 #parse the version information into pieces.
@@ -17,6 +17,8 @@ project(amqpcpp)
 # ensure c++11 on all compilers
 include(set_cxx_norm.cmake)
 set_cxx_norm (${CXX_NORM_CXX11})
+
+
 
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Makefile.in" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile")
