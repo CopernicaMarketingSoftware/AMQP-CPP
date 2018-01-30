@@ -25,6 +25,7 @@
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/posix/stream_descriptor.hpp>
 #include <boost/bind.hpp>
+#include <boost/function.hpp>
 
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
