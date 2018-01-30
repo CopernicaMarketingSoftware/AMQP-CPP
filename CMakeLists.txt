@@ -12,11 +12,14 @@ if(GIT_REVISION_DESCRIPTION)
     string(REPLACE "v" ""
         GIT_REVISION_DESCRIPTION
         "${GIT_REVISION_DESCRIPTION}")
-    #set(CPACK_PACKAGE_VERSION "${GIT_REVISION_DESCRIPTION}")
+    set(VERSION_SHORT "${GIT_REVISION_DESCRIPTION}")
     message(STATUS "Git reports version ${GIT_REVISION_DESCRIPTION}")
 else()
     message(STATUS "Could not get revision information from Git! Calling this just version ${CPACK_PACKAGE_VERSION}!")
 endif()
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Makefile.in" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile")
+
 
 macro (add_sources)
     file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
