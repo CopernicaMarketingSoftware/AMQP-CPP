@@ -10,7 +10,7 @@
 /**
  *  Dependencies
  */
-#include "../include/deferredconsumerbase.h"
+#include "amqpcpp/deferredconsumerbase.h"
 #include "basicdeliverframe.h"
 #include "basicgetokframe.h"
 #include "basicheaderframe.h"

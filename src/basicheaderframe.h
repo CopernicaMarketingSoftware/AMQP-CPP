@@ -13,10 +13,10 @@
  *  Dependencies
  */
 #include "headerframe.h"
-#include "../include/metadata.h"
-#include "../include/envelope.h"
-#include "../include/connectionimpl.h"
-#include "../include/deferredconsumerbase.h"
+#include "amqpcpp/metadata.h"
+#include "amqpcpp/envelope.h"
+#include "amqpcpp/connectionimpl.h"
+#include "amqpcpp/deferredconsumerbase.h"
 
 /**
  *  Set up namespace

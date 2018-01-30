@@ -481,7 +481,7 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
         uint64_t chunksize = std::min(static_cast<uint64_t>(maxpayload), bytesleft);
 
         // send out a body frame
-        if (!send(BodyFrame(_id, data + bytessent, chunksize))) return false;
+        if (!send(BodyFrame(_id, data + bytessent, (uint32_t)chunksize))) return false;
 
         // channel still valid?
         if (!monitor.valid()) return false;
