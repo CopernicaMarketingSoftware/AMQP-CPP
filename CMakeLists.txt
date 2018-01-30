@@ -6,10 +6,13 @@ project(amqpcpp)
 include(set_cxx_norm.cmake)
 set_cxx_norm (${CXX_NORM_CXX11})
 
-include(GetGitRevisionDescription.cmake)
-git_describe(VERSION --tags --dirty=-dirty)
 
-#parse the version information into pieces.
+# get version from TAG  on git
+include(GetGitRevisionDescription.cmake)
+git_describe(VERSION --tags --dirty=-d)
+
+# parse the version information into pieces.
+# http://ipenguin.ws/2012/11/cmake-automatically-use-git-tags-as.html
 string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${VERSION}")
 string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${VERSION}")
 string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" VERSION_PATCH "${VERSION}")
