@@ -28,11 +28,11 @@
 #include <boost/function.hpp>
 
 // C++17 has 'weak_from_this()' support.
-#if __cplusplus >= 201701L
-#define PTR_FROM_THIS weak_from_this
-#else
+//#if __cplusplus >= 201701L
+//#define PTR_FROM_THIS weak_from_this
+//#else
 #define PTR_FROM_THIS shared_from_this
-#endif
+//#endif
 
 /**
  *  Set up namespace
