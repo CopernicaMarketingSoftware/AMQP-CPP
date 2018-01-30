@@ -18,6 +18,7 @@ project(amqpcpp)
 # build options
 option(AMQP-CPP_BUILD_SHARED "Build shared library. If off, build will be static." OFF)
 option(AMQP-CPP_LINUX_TCP "Build linux sockets implementation." OFF)
+option(AMQP-CPP_BUILD_EXAMPLES "Build amqpcpp examples" OFF)
 
 # ensure c++11 on all compilers
 set (CMAKE_CXX_STANDARD 11)
@@ -49,6 +50,11 @@ endmacro()
 add_subdirectory(src)
 if(AMQP-CPP_LINUX_TCP)
     add_subdirectory(src/linux_tcp)
+endif()
+
+# potentially build the examples
+if(AMQP-CPP_BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
 # settings for specific compilers
@@ -91,6 +97,7 @@ else()
             ARCHIVE DESTINATION lib
     )
 endif()
+
 # copy header files
 install(DIRECTORY include/amqpcpp/ DESTINATION include/amqpcpp
         FILES_MATCHING PATTERN "*.h")

@@ -1,3 +1,12 @@
 add_sources(
+    addressinfo.h
+    includes.h
+    pipe.h
+    tcpclosed.h
+    tcpconnected.h
     tcpconnection.cpp
+    tcpinbuffer.h
+    tcpoutbuffer.h
+    tcpresolver.h
+    tcpstate.h
 )
