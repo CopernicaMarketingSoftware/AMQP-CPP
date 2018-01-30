@@ -3,7 +3,8 @@
  *
  *  Starting point for all includes of the Copernica AMQP library
  *
- *  @documentation public
+ *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
 #pragma once
@@ -77,3 +78,9 @@
 #include "amqpcpp/connectionhandler.h"
 #include "amqpcpp/connectionimpl.h"
 #include "amqpcpp/connection.h"
+
+// tcp level includes
+#include "amqpcpp/tcphandler.h"
+#include "amqpcpp/tcpconnection.h"
+#include "amqpcpp/tcpchannel.h"
+
