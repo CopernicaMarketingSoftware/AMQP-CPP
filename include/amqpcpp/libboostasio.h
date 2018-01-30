@@ -24,7 +24,6 @@
 #include <boost/asio/strand.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/posix/stream_descriptor.hpp>
-#include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
 
