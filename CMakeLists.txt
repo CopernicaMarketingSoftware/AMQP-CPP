@@ -19,6 +19,9 @@ include(set_cxx_norm.cmake)
 set_cxx_norm (${CXX_NORM_CXX11})
 
 
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Makefile.in" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile")
+
+
 macro (add_sources)
     file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     foreach (_src ${ARGN})
@@ -41,7 +44,7 @@ option(BUILD_SHARED "build shared library" OFF)
 
 if(BUILD_SHARED)
   add_library(amqpcpp SHARED ${SRCS})
-  set_target_properties(amqpcpp PROPERTIES SOVERSION 2.7)
+  set_target_properties(amqpcpp PROPERTIES SOVERSION ${VERSION_SONAME})
   install(TARGETS amqpcpp
           LIBRARY DESTINATION lib
   )
