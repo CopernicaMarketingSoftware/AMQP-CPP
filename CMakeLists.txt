@@ -44,14 +44,14 @@ add_subdirectory(include)
 option(BUILD_SHARED "build shared library" OFF)
 
 if(BUILD_SHARED)
-  add_library(amqpcpp SHARED ${SRCS})
-  set_target_properties(amqpcpp PROPERTIES SOVERSION ${VERSION_SONAME})
-  install(TARGETS amqpcpp
+  add_library(${PROJECT_NAME} SHARED ${SRCS})
+  set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${VERSION_SONAME})
+  install(TARGETS ${PROJECT_NAME}
           LIBRARY DESTINATION lib
   )
 else()
-  add_library(amqpcpp STATIC ${SRCS})
-  install(TARGETS amqpcpp
+  add_library(${PROJECT_NAME} STATIC ${SRCS})
+  install(TARGETS ${PROJECT_NAME}
           ARCHIVE DESTINATION lib
   )
 endif()
