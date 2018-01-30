@@ -52,6 +52,11 @@ if(AMQP-CPP_LINUX_TCP)
     add_subdirectory(src/linux_tcp)
 endif()
 
+# potentially build the examples
+if(AMQP-CPP_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
+
 # settings for specific compilers
 # ------------------------------------------------------------------------------------------------------
 
@@ -91,10 +96,6 @@ else()
     install(TARGETS ${PROJECT_NAME}
             ARCHIVE DESTINATION lib
     )
-endif()
-
-if(AMQP-CPP_BUILD_EXAMPLES)
-    add_subdirectory(examples)
 endif()
 
 # copy header files
