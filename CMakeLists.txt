@@ -1,28 +1,22 @@
 cmake_minimum_required(VERSION 2.8)
 
-# get version automatically using last tag
-include(GetGitRevisionDescription.cmake)
-git_describe(VERSION --tags --dirty=-d)
-
-#parse the version information into pieces.
-string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${VERSION}")
-string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" VERSION_MINOR "${VERSION}")
-string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" VERSION_PATCH "${VERSION}")
-string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+(.*)" "\\1" VERSION_SHA1 "${VERSION}")
-set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}") 
-set(VERSION_SONAME "${VERSION_MAJOR}.${VERSION_MINOR}") 
-
 project(amqpcpp)
 
 # ensure c++11 on all compilers
 include(set_cxx_norm.cmake)
 set_cxx_norm (${CXX_NORM_CXX11})
 
-
-
-
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/Makefile.in" "${CMAKE_CURRENT_SOURCE_DIR}/Makefile")
-
+include(GetGitRevisionDescription.cmake)
+git_describe(GIT_REVISION_DESCRIPTION --tags --match v*)
+if(GIT_REVISION_DESCRIPTION)
+    string(REPLACE "v" ""
+        GIT_REVISION_DESCRIPTION
+        "${GIT_REVISION_DESCRIPTION}")
+    #set(CPACK_PACKAGE_VERSION "${GIT_REVISION_DESCRIPTION}")
+    message(STATUS "Git reports version ${GIT_REVISION_DESCRIPTION}")
+else()
+    message(STATUS "Could not get revision information from Git! Calling this just version ${CPACK_PACKAGE_VERSION}!")
+endif()
 
 macro (add_sources)
     file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -46,7 +40,7 @@ option(BUILD_SHARED "build shared library" OFF)
 
 if(BUILD_SHARED)
   add_library(amqpcpp SHARED ${SRCS})
-  set_target_properties(amqpcpp PROPERTIES SOVERSION ${VERSION_SONAME})
+  set_target_properties(amqpcpp PROPERTIES SOVERSION 2.7)
   install(TARGETS amqpcpp
           LIBRARY DESTINATION lib
   )
