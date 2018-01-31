@@ -1,37 +1,37 @@
 /**
- *  Includes.h
+ *  AMQP.h
  *
- *  The includes that are necessary to compile the AMQP library
- *  This file also holds includes that may not be necessary for including the library
+ *  Starting point for all includes of the Copernica AMQP library
  *
- *  @documentation private
+ *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
-// c and c++ dependencies
-#include <stdlib.h>
-#include <string.h> // TODO cstring
-#include <stdint.h>
+#pragma once
+
+// base C++ include files
+#include <vector>
 #include <string>
 #include <memory>
-#include <limits>
-#include <ostream>
-#include <math.h>
 #include <map>
-#include <algorithm>
 #include <unordered_map>
-#include <vector>
 #include <queue>
-
-#include <sys/types.h> // TODO is this needed
-
-#include <functional>
+#include <limits>
+#include <cstddef>
+#include <cstring>
 #include <stdexcept>
+#include <utility>
+#include <iostream>
+#include <algorithm>
+#include <functional>
 
-// TODO make this nice
-#ifdef _MSC_VER 
-//not #if defined(_WIN32) || defined(_WIN64) because we have strncasecmp in mingw
-#define strncasecmp _strnicmp
-#define strcasecmp _stricmp
+// base C include files
+#include <stdint.h>
+#include <math.h>
+
+// fix strcasecmp on non linux platforms
+#if (defined(_WIN16) || defined(_WIN32) || defined(_WIN64) || defined(__WINDOWS__)) && !defined(__CYGWIN__)
+    #define strcasecmp _stricmp 
 #endif
 
 // forward declarations
@@ -43,7 +43,6 @@
 #include "amqpcpp/bytebuffer.h"
 #include "amqpcpp/receivedframe.h"
 #include "amqpcpp/outbuffer.h"
-#include "amqpcpp/copiedbuffer.h"
 #include "amqpcpp/watchable.h"
 #include "amqpcpp/monitor.h"
 
@@ -80,18 +79,6 @@
 #include "amqpcpp/connectionimpl.h"
 #include "amqpcpp/connection.h"
 
-// classes that are very commonly used
-#include "amqpcpp/exception.h"
-#include "amqpcpp/protocolexception.h"
-#include "amqpcpp/frame.h"
-#include "extframe.h"
-#include "methodframe.h"
-#include "headerframe.h"
-#include "connectionframe.h"
-#include "channelframe.h"
-#include "exchangeframe.h"
-#include "queueframe.h"
-#include "basicframe.h"
-#include "transactionframe.h"
-
+// tcp level includes
+#include "amqpcpp/linux_tcp.h"
 

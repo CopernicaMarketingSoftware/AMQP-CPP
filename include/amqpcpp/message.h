@@ -21,6 +21,7 @@
 #include "envelope.h"
 #include <limits>
 #include <stdexcept>
+#include <algorithm>
 
 /**
  *  Set up namespace
@@ -93,10 +94,10 @@ protected:
             size = std::min(size, _bodySize - _filled);
             
             // append more data
-            memcpy(_body + _filled, buffer, size);
+            memcpy(_body + _filled, buffer, (size_t)size);
             
             // update filled data
-            _filled += size;
+            _filled += (size_t)size;
         }
         else if (size >= _bodySize)
         {
@@ -107,16 +108,16 @@ protected:
         else
         {
             // allocate the buffer
-            _body = (char *)malloc(_bodySize);
+            _body = (char *)malloc((size_t)_bodySize);
             
             // remember that the buffer was allocated, so that the destructor can get rid of it
             _allocated = true;
             
             // append more data
-            memcpy(_body, buffer, std::min(size, _bodySize));
+            memcpy(_body, buffer, std::min((size_t)size, (size_t)_bodySize));
             
             // update filled data
-            _filled = std::min(size, _bodySize);
+            _filled = std::min((size_t)size, (size_t)_bodySize);
         }
             
         // check if we're done

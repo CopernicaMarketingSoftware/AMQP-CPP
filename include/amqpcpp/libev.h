@@ -8,7 +8,7 @@
  *  Compile with: "g++ -std=c++11 libev.cpp -lamqpcpp -lev -lpthread"
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
 /**
@@ -20,6 +20,8 @@
  *  Dependencies
  */
 #include <ev.h>
+
+#include "amqpcpp/linux_tcp.h"
 
 /**
  *  Set up namespace

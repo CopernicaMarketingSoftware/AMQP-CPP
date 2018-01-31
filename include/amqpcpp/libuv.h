@@ -21,6 +21,8 @@
  */
 #include <uv.h>
 
+#include "amqpcpp/linux_tcp.h"
+
 /**
  *  Set up namespace
  */
