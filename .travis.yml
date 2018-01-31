@@ -29,6 +29,14 @@ matrix:
   ################
 
   - os: linux
+    compiler: gcc
+    env:
+      - COMPILER_PACKAGE=g++-5
+      - C_COMPILER=gcc-5
+      - CXX_COMPILER=g++-5
+      - CXXFLAGS=-std=c++11
+
+  - os: linux
     env:
       - COMPILER_PACKAGE=g++-6
       - C_COMPILER=gcc-6
@@ -86,6 +94,6 @@ script:
     export CC=/usr/bin/$C_COMPILER &&
     export CXX=/usr/bin/$CXX_COMPILER &&
     mkdir build.release && cd build.release &&
-    cmake .. ${CMAKE_OPTIONS} -DAMQP-CPP_BUILD_EXAMPLES=ON -DAMQP-CPP_LINUX_TCP=ON -GNinja &&
-    cmake --build . --config Release &&
+    cmake ${CMAKE_OPTIONS} -DAMQP-CPP_BUILD_EXAMPLES=ON -DAMQP-CPP_LINUX_TCP=ON -GNinja .. &&
+    cmake --config Release --build . &&
     cd .."
