@@ -47,7 +47,7 @@ namespace AMQP {
  */
 class LibBoostAsioHandler : public virtual TcpHandler
 {
-private:
+protected:
 
     /**
      *  Helper class that wraps a boost io_service socket monitor.
@@ -478,12 +478,6 @@ private:
     std::shared_ptr<Timer> _timer;
 
     /**
-     * The heartbeat timer interval (in seconds).
-     * @var uint16_t
-     */
-    uint16_t _timer_interval;
-
-    /**
      *  Method that is called by AMQP-CPP to register a filedescriptor for readability or writability
      *  @param  connection  The TCP connection object that is reporting
      *  @param  fd          The filedescriptor to be monitored
@@ -535,9 +529,6 @@ protected:
         // skip if no heartbeats are needed
         if (interval == 0) return 0;
 
-        // choose heartbeat interval to use (user-specified or rabbit server default).
-        interval = (_timer_interval > 0) ? _timer_interval : interval;
-
         // set the timer
         _timer->set(connection, interval);
 
@@ -563,20 +554,6 @@ public:
         _strand(std::make_shared<boost::asio::io_service::strand>(_ioservice)),
         _timer(std::make_shared<Timer>(_ioservice,_strand)),
         _timer_interval(0)
-    {
-
-    }
-
-    /**
-     *  Constructor
-     *  @param  io_service    The boost io_service to wrap
-     *  @param  interval      The interval to use when negotiating heartbeat with rabbit server.
-     */
-    explicit LibBoostAsioHandler(boost::asio::io_service &io_service, uint16_t interval) :
-        _ioservice(io_service),
-        _strand(std::make_shared<boost::asio::io_service::strand>(_ioservice)),
-        _timer(std::make_shared<Timer>(_ioservice,_strand)),
-        _timer_interval(interval)
     {
 
     }
