@@ -552,8 +552,7 @@ public:
     explicit LibBoostAsioHandler(boost::asio::io_service &io_service) :
         _ioservice(io_service),
         _strand(std::make_shared<boost::asio::io_service::strand>(_ioservice)),
-        _timer(std::make_shared<Timer>(_ioservice,_strand)),
-        _timer_interval(0)
+        _timer(std::make_shared<Timer>(_ioservice,_strand))
     {
 
     }
