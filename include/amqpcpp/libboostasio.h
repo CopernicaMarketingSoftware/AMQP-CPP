@@ -62,7 +62,7 @@ private:
          */
         boost::asio::io_service & _ioservice;
 
-        typedef std::weak_ptr<boost::asio::io_service::strand> strand_weak_ptr;
+        using strand_weak_ptr = std::weak_ptr<boost::asio::io_service::strand>;
         
         /**
          *  The boost asio io_service::strand managed pointer.
@@ -76,7 +76,6 @@ private:
          *  @note https://stackoverflow.com/questions/38906711/destroying-boost-asio-socket-without-closing-native-handler
          */
         boost::asio::posix::stream_descriptor _socket;
-
 
         /**
          *  A boolean that indicates if the watcher is monitoring for read events.
@@ -315,7 +314,7 @@ private:
          */
         boost::asio::io_service & _ioservice;
 
-        typedef std::weak_ptr<boost::asio::io_service::strand> strand_weak_ptr;
+        using strand_weak_ptr = std::weak_ptr<boost::asio::io_service::strand>;
 
         /**
          *  The boost asio io_service::strand managed pointer.
@@ -330,6 +329,7 @@ private:
         boost::asio::deadline_timer _timer;
 
         using handler_fn = boost::function<void(boost::system::error_code)>;
+
         /**
          * Binds and returns a lamba function handler for the io operation.
          * @param  connection   The connection being watched.
@@ -457,7 +457,7 @@ private:
      */
     boost::asio::io_service & _ioservice;
 
-    typedef std::shared_ptr<boost::asio::io_service::strand> strand_shared_ptr;
+    using strand_shared_ptr = std::shared_ptr<boost::asio::io_service::strand>;
 
     /**
      *  The boost asio io_service::strand managed pointer.
@@ -465,16 +465,23 @@ private:
      */
     strand_shared_ptr _strand;
 
-
     /**
      *  All I/O watchers that are active, indexed by their filedescriptor
      *  @var std::map<int,Watcher>
      */
     std::map<int, std::shared_ptr<Watcher> > _watchers;
 
-
+    /**
+     * The boost asio io_service::deadline_timer managed pointer.
+     * @var class std::shared_ptr<Timer>
+     */
     std::shared_ptr<Timer> _timer;
 
+    /**
+     * The heartbeat timer interval (in seconds).
+     * @var uint16_t
+     */
+    uint16_t _timer_interval;
 
     /**
      *  Method that is called by AMQP-CPP to register a filedescriptor for readability or writability
@@ -528,6 +535,9 @@ protected:
         // skip if no heartbeats are needed
         if (interval == 0) return 0;
 
+        // use the most frequent heartbeat interval (user-specified or rabbit server default).
+        interval = (_timer_interval > 0 && _timer_interval < interval) ? _timer_interval : interval;
+
         // set the timer
         _timer->set(connection, interval);
 
@@ -551,7 +561,22 @@ public:
     explicit LibBoostAsioHandler(boost::asio::io_service &io_service) :
         _ioservice(io_service),
         _strand(std::make_shared<boost::asio::io_service::strand>(_ioservice)),
-        _timer(std::make_shared<Timer>(_ioservice,_strand))
+        _timer(std::make_shared<Timer>(_ioservice,_strand)),
+        _timer_interval(0)
+    {
+
+    }
+
+    /**
+     *  Constructor
+     *  @param  io_service    The boost io_service to wrap
+     *  @param  interval      The interval to use when negotiating heartbeat with rabbit server.
+     */
+    explicit LibBoostAsioHandler(boost::asio::io_service &io_service, uint16_t interval) :
+        _ioservice(io_service),
+        _strand(std::make_shared<boost::asio::io_service::strand>(_ioservice)),
+        _timer(std::make_shared<Timer>(_ioservice,_strand)),
+        _timer_interval(interval)
     {
 
     }
@@ -584,4 +609,3 @@ public:
  *  End of namespace
  */
 }
-
