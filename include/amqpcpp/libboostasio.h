@@ -535,7 +535,7 @@ protected:
         // skip if no heartbeats are needed
         if (interval == 0) return 0;
 
-        // use the most frequent heartbeat interval (user-specified or rabbit server default).
+        // choose heartbeat interval to use (user-specified or rabbit server default).
         interval = (_timer_interval > 0) ? _timer_interval : interval;
 
         // set the timer
