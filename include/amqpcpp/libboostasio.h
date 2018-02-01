@@ -536,7 +536,7 @@ protected:
         if (interval == 0) return 0;
 
         // use the most frequent heartbeat interval (user-specified or rabbit server default).
-        interval = (_timer_interval > 0 && _timer_interval < interval) ? _timer_interval : interval;
+        interval = (_timer_interval > 0) ? _timer_interval : interval;
 
         // set the timer
         _timer->set(connection, interval);
