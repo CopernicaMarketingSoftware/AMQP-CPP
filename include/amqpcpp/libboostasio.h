@@ -47,7 +47,7 @@ namespace AMQP {
  */
 class LibBoostAsioHandler : public virtual TcpHandler
 {
-private:
+protected:
 
     /**
      *  Helper class that wraps a boost io_service socket monitor.
@@ -62,7 +62,7 @@ private:
          */
         boost::asio::io_service & _ioservice;
 
-        typedef std::weak_ptr<boost::asio::io_service::strand> strand_weak_ptr;
+        using strand_weak_ptr = std::weak_ptr<boost::asio::io_service::strand>;
         
         /**
          *  The boost asio io_service::strand managed pointer.
@@ -76,7 +76,6 @@ private:
          *  @note https://stackoverflow.com/questions/38906711/destroying-boost-asio-socket-without-closing-native-handler
          */
         boost::asio::posix::stream_descriptor _socket;
-
 
         /**
          *  A boolean that indicates if the watcher is monitoring for read events.
@@ -315,7 +314,7 @@ private:
          */
         boost::asio::io_service & _ioservice;
 
-        typedef std::weak_ptr<boost::asio::io_service::strand> strand_weak_ptr;
+        using strand_weak_ptr = std::weak_ptr<boost::asio::io_service::strand>;
 
         /**
          *  The boost asio io_service::strand managed pointer.
@@ -330,6 +329,7 @@ private:
         boost::asio::deadline_timer _timer;
 
         using handler_fn = boost::function<void(boost::system::error_code)>;
+
         /**
          * Binds and returns a lamba function handler for the io operation.
          * @param  connection   The connection being watched.
@@ -457,7 +457,7 @@ private:
      */
     boost::asio::io_service & _ioservice;
 
-    typedef std::shared_ptr<boost::asio::io_service::strand> strand_shared_ptr;
+    using strand_shared_ptr = std::shared_ptr<boost::asio::io_service::strand>;
 
     /**
      *  The boost asio io_service::strand managed pointer.
@@ -465,16 +465,17 @@ private:
      */
     strand_shared_ptr _strand;
 
-
     /**
      *  All I/O watchers that are active, indexed by their filedescriptor
      *  @var std::map<int,Watcher>
      */
     std::map<int, std::shared_ptr<Watcher> > _watchers;
 
-
+    /**
+     * The boost asio io_service::deadline_timer managed pointer.
+     * @var class std::shared_ptr<Timer>
+     */
     std::shared_ptr<Timer> _timer;
-
 
     /**
      *  Method that is called by AMQP-CPP to register a filedescriptor for readability or writability
@@ -584,4 +585,3 @@ public:
  *  End of namespace
  */
 }
-
