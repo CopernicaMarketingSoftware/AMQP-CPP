@@ -1,7 +1,7 @@
 /**
  *  Class describing a (mid-level) AMQP channel implementation
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -170,6 +170,7 @@ public:
      *      -   durable     exchange survives a broker restart
      *      -   autodelete  exchange is automatically removed when all connected queues are removed
      *      -   passive     only check if the exchange exist
+     *      -   internal    create an internal exchange
      *
      *  @param  name        name of the exchange
      *  @param  type        exchange type

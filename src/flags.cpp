@@ -3,7 +3,7 @@
  *
  *  The various flags that are supported
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 #include "includes.h"
  
@@ -32,6 +32,7 @@ const int immediate    = 0x1000;
 const int redelivered  = 0x2000;
 const int multiple     = 0x4000;
 const int requeue      = 0x8000;
+const int internal     = 0x10000;
 
 /**
  *  Flags for event loops

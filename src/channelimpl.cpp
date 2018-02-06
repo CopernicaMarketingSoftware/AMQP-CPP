@@ -252,7 +252,7 @@ Deferred &ChannelImpl::close()
 Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType type, int flags, const Table &arguments)
 {
     // convert exchange type
-    std::string exchangeType;
+    const char *exchangeType = "";
     
     // convert the exchange type into a string
     if      (type == ExchangeType::fanout)          exchangeType = "fanout";
@@ -261,8 +261,15 @@ Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType typ
     else if (type == ExchangeType::headers)         exchangeType = "headers";
     else if (type == ExchangeType::consistent_hash) exchangeType = "x-consistent-hash";
 
+    // the boolean options
+    bool passive = flags & AMQP::passive;
+    bool durable = flags & AMQP::durable;
+    bool autodelete = flags & AMQP::autodelete;
+    bool internal = flags & AMQP::internal;
+    bool nowait = flags & AMQP::nowait;
+
     // send declare exchange frame
-    return push(ExchangeDeclareFrame(_id, name, exchangeType, (flags & passive) != 0, (flags & durable) != 0, false, arguments));
+    return push(ExchangeDeclareFrame(_id, name, exchangeType, passive, durable, autodelete, internal, nowait, arguments));
 }
 
 /**
