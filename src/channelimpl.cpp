@@ -3,7 +3,7 @@
  *
  *  Implementation for a channel
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 #include "includes.h"
 #include "basicdeliverframe.h"
@@ -693,7 +693,7 @@ bool ChannelImpl::send(const Frame &frame)
     // added to the list of deferred objects. it will be notified about
     // the error when the close operation succeeds
     if (_state == state_closing) return true;
-
+    
     // are we currently in synchronous mode or are there
     // other frames waiting for their turn to be sent?
     if (_synchronous || !_queue.empty())
