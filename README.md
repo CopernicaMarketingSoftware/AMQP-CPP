@@ -82,14 +82,14 @@ The CMake file supports both building and installing. You can choose not to use 
 ``` bash
 mkdir build
 cd build
-cmake .. [-DBUILD_SHARED] [-DLINUX_TCP]
+cmake .. [-DAMQP-CPP_AMQBUILD_SHARED] [-DAMQP-CPP_LINUX_TCP]
 cmake --build .. --target install
 ```
 
 Option|Default|Meaning
 ------|-------|-------
-BUILD_SHARED|OFF|Static lib(ON) or shared lib(OFF)? Shared is not supported on Windows.
-LINUX_TCP|OFF|Should the Linux-only TCP module be built?
+AMQP-CPP_BUILD_SHARED|OFF|Static lib(ON) or shared lib(OFF)? Shared is not supported on Windows.
+AMQP-CPP_LINUX_TCP|OFF|Should the Linux-only TCP module be built?
 
 ## Make
 Installing the library is as easy
