@@ -3,7 +3,7 @@
  *
  *  Implementation for a channel
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 #include "includes.h"
 #include "basicdeliverframe.h"
@@ -252,7 +252,7 @@ Deferred &ChannelImpl::close()
 Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType type, int flags, const Table &arguments)
 {
     // convert exchange type
-    std::string exchangeType;
+    const char *exchangeType = "";
     
     // convert the exchange type into a string
     if      (type == ExchangeType::fanout)          exchangeType = "fanout";
@@ -261,8 +261,15 @@ Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType typ
     else if (type == ExchangeType::headers)         exchangeType = "headers";
     else if (type == ExchangeType::consistent_hash) exchangeType = "x-consistent-hash";
 
+    // the boolean options
+    bool passive = flags & AMQP::passive;
+    bool durable = flags & AMQP::durable;
+    bool autodelete = flags & AMQP::autodelete;
+    bool internal = flags & AMQP::internal;
+    bool nowait = flags & AMQP::nowait;
+
     // send declare exchange frame
-    return push(ExchangeDeclareFrame(_id, name, exchangeType, (flags & passive) != 0, (flags & durable) != 0, false, arguments));
+    return push(ExchangeDeclareFrame(_id, name, exchangeType, passive, durable, autodelete, internal, nowait, arguments));
 }
 
 /**
@@ -686,7 +693,7 @@ bool ChannelImpl::send(const Frame &frame)
     // added to the list of deferred objects. it will be notified about
     // the error when the close operation succeeds
     if (_state == state_closing) return true;
-
+    
     // are we currently in synchronous mode or are there
     // other frames waiting for their turn to be sent?
     if (_synchronous || !_queue.empty())
