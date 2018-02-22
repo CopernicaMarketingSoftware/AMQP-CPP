@@ -36,6 +36,7 @@ namespace AMQP {
  */
 class DeferredConsumerBase;
 class BasicDeliverFrame;
+class BasicReturnFrame;
 class DeferredConsumer;
 class BasicGetOKFrame;
 class ConsumedMessage;
@@ -135,6 +136,12 @@ private:
     std::shared_ptr<DeferredConsumerBase> _consumer;
 
     /**
+     *  The returned consumer
+     *  @var    std::shared_ptr<DeferredConsumerBase>
+     */
+    std::shared_ptr<DeferredConsumerBase> _returnConsumer;
+
+    /**
      *  Attach the connection
      *  @param  connection
      */
@@ -215,6 +222,16 @@ public:
      *  @param  callback    the callback to execute
      */
     void onError(const ErrorCallback &callback);
+
+    /**
+     *  Callback that is called when a message publish fail occurs.
+     *
+     *  Only one callback can be registered. Calling this function
+     *  multiple times will remove the old callback.
+     *
+     *  @param  callback    the callback to execute
+     */
+    void onReturn(const ReturnCallback &callback);
 
     /**
      *  Pause deliveries on a channel
@@ -404,8 +421,9 @@ public:
      *  @param  envelope    the full envelope to send
      *  @param  message     the message to send
      *  @param  size        size of the message
+     *  @param  flags       message publish flags
      */
-    bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope);
+    bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0);
 
     /**
      *  Set the Quality of Service (QOS) of the entire connection
@@ -689,6 +707,13 @@ public:
      *  @param  frame   The frame to process
      */
     void process(BasicDeliverFrame &frame);
+
+    /**
+     *  Process incoming returned
+     *
+     *  @param frame The frame to process
+     */
+    void process(BasicReturnFrame &frame);
 
     /**
      *  Retrieve the current consumer handler

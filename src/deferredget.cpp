@@ -82,6 +82,32 @@ void DeferredGet::announce(const Message &message, uint64_t deliveryTag, bool re
 }
 
 /**
+ *  Announce that a message has been returned
+ *  @param returnCode The return code
+ *  @param returnText The return text
+ *  @param exchange The exchange the message was published to
+ *  @param routingKey The routing key
+ *  @param message The returned message
+ */
+void DeferredGet::announce_return(int16_t replyCode, const std::string &replyText, const std::string &exchange, const std::string &routingKey, const Message &message) const
+{
+    // monitor the channel
+    Monitor monitor{ _channel };
+
+    // the channel is now synchronized
+    _channel->onSynchronized();
+
+    // simply execute the returned callback
+    _returnCallback(replyCode, replyText, exchange, routingKey, std::move(message));
+
+    // check if the channel is still valid
+    if (!monitor.valid()) return;
+
+    // stop consuming now
+    _channel->uninstall({});
+}
+
+/**
  *  End of namespace
  */
 }

@@ -45,6 +45,38 @@ void DeferredConsumer::announce(const Message &message, uint64_t deliveryTag, bo
 }
 
 /**
+ *  Announce that a message has been returned
+ *  @param returnCode The return code
+ *  @param returnText The return text
+ *  @param exchange The exchange the message was published to
+ *  @param routingKey The routing key
+ *  @param message The returned message
+ */
+void DeferredConsumer::announce_return(int16_t replyCode, const std::string &replyText, const std::string &exchange, const std::string &routingKey, const Message &message) const
+{
+	if (_returnCallback)
+	{
+    	// simply execute the return callback
+    	_returnCallback(replyCode, replyText, exchange, routingKey, message);
+	}
+}
+
+/**
+ *  Register a function to be called when a message was unroutable by the server
+ *
+ *  @param callback The callback to invoke
+ *  @return Same object for chaining
+ */
+DeferredConsumer &DeferredConsumer::onReturn(const ReturnCallback &callback)
+{
+    // store callback
+    _returnCallback = callback;
+
+    // allow chaining
+    return *this;
+}
+
+/**
  *  End namespace
  */
 }

@@ -48,6 +48,7 @@ using DeleteCallback    =   std::function<void(uint32_t deletedmessages)>;
 using SizeCallback      =   std::function<void(uint32_t messagecount)>;
 using ConsumeCallback   =   std::function<void(const std::string &consumer)>;
 using CancelCallback    =   std::function<void(const std::string &consumer)>;
+using ReturnCallback    =   std::function<void(int16_t replyCode, const std::string &replyText, const std::string &exchange, const std::string &routingKey, const Message &message)>;
 
 /**
  *  End namespace

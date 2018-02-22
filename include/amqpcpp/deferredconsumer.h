@@ -49,6 +49,16 @@ private:
     virtual void announce(const Message &message, uint64_t deliveryTag, bool redelivered) const override;
 
     /**
+     *  Announce that a message has been returned
+     *  @param replyCode The reply code
+     *  @param replyText The reply text
+     *  @param exchange The exchange the message was published to
+     *  @param routingKey The routing key
+     *  @param message The returned message
+     */
+    virtual void announce_return(int16_t replyCode, const std::string &replyText, const std::string &exchange, const std::string &routingKey, const Message &message) const override;
+
+    /**
      *  The channel implementation may call our
      *  private members and construct us
      */
@@ -216,6 +226,14 @@ public:
         // allow chaining
         return *this;
     }
+
+    /**
+     *  Register a function to be called when a message was unroutable by the server
+     *
+     *  @param callback The callback to invoke
+     *  @return Same object for chaining
+     */
+    DeferredConsumer &onReturn(const ReturnCallback &callback);
 };
 
 /**
