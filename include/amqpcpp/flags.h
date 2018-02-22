@@ -3,7 +3,7 @@
  *
  *  The various flags that are supported
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -38,6 +38,7 @@ extern const int multiple;
 extern const int requeue;
 extern const int readable;
 extern const int writable;
+extern const int internal;
 
 /**
  *  End of namespace

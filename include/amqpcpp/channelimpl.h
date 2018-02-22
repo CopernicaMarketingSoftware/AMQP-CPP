@@ -5,7 +5,7 @@
  *  that has a private constructor so that it can not be used from outside
  *  the AMQP library
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -122,7 +122,8 @@ private:
     std::queue<std::pair<bool, CopiedBuffer>> _queue;
 
     /**
-     *  Are we currently operating in synchronous mode?
+     *  Are we currently operating in synchronous mode? Meaning: do we first have
+     *  to wait for the answer to previous instructions before we send a new instruction?
      *  @var bool
      */
     bool _synchronous = false;
@@ -567,6 +568,9 @@ public:
 
         // if we are still in connected state we are now ready
         if (_state == state_connected) _state = state_ready;
+        
+        // the last (possibly synchronous) operation was received, so we're no longer in synchronous mode
+        if (_synchronous && _queue.empty()) _synchronous = false;
 
         // inform handler
         if (_readyCallback) _readyCallback();
@@ -586,7 +590,6 @@ public:
     {
         // change state
         _state = state_closed;
-        _synchronous = false;
 
         // create a monitor, because the callbacks could destruct the current object
         Monitor monitor(this);
@@ -620,6 +623,9 @@ public:
     {
         // skip if there is no oldest callback
         if (!_oldestCallback) return true;
+        
+        // the last (possibly synchronous) operation was received, so we're no longer in synchronous mode
+        if (_synchronous && _queue.empty()) _synchronous = false;
 
         // we are going to call callbacks that could destruct the channel
         Monitor monitor(this);
