@@ -30,6 +30,7 @@ namespace AMQP {
 class BasicDeliverFrame;
 class BasicGetOKFrame;
 class BasicHeaderFrame;
+class BasicReturnFrame;
 class BodyFrame;
 
 /**
@@ -68,6 +69,13 @@ private:
     void process(BasicHeaderFrame &frame);
 
     /**
+     *  Process incoming return
+     *
+     *  @param  frame   The frame to process
+     */
+    void process(BasicReturnFrame &frame);
+
+    /**
      *  Process the message data
      *
      *  @param  frame   The frame to process
@@ -86,6 +94,16 @@ private:
      *  @param  redelivered Is this a redelivered message
      */
     virtual void announce(const Message &message, uint64_t deliveryTag, bool redelivered) const = 0;
+
+    /**
+     *  Announce that a message has been returned
+     *  @param replyCode The reply code
+     *  @param replyText The reply text
+     *  @param exchange The exchange the message was published to
+     *  @param routingKey The routing key
+     *  @param message The returned message
+     */
+    virtual void announce_return(int16_t replyCode, const std::string &replyText, const std::string &exchange, const std::string &routingKey, const Message &message) const = 0;
 
     /**
      *  Frames may be processed
@@ -107,6 +125,18 @@ protected:
      *  @var    bool
      */
     bool _redelivered = false;
+
+    /**
+     *  The reply code for the current message
+     *  @var    int16_t
+     */
+    int16_t _replyCode = 0;
+
+    /**
+     *  The reply text for the current message
+     *  @var std::string
+     */
+    std::string _replyText;
 
     /**
      *  The channel to which the consumer is linked
@@ -143,6 +173,12 @@ protected:
      *  @var    CompleteCallback
      */
     CompleteCallback _completeCallback;
+
+    /**
+     *  Callback for when a message was returned and undelivered
+     *  @var    ReturnedCallback
+     */
+    ReturnCallback _returnCallback;
 
     /**
      *  The message that we are currently receiving

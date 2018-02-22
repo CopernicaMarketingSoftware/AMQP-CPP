@@ -94,6 +94,24 @@ void ChannelImpl::onError(const ErrorCallback &callback)
 }
 
 /**
+ *  Callback that is called when a message publish fail occurs.
+ *
+ *  Only one callback can be registered. Calling this function
+ *  multiple times will remove the old callback.
+ *
+ *  @param  callback    the callback to execute
+ */
+void ChannelImpl::onReturn(const ReturnCallback &callback)
+{
+    // create deferred object
+    auto deferred = std::make_shared<DeferredConsumer>(this);
+
+    _returnConsumer = deferred;
+
+    deferred->onReturn(callback);
+}
+
+/**
  *  Initialize the object with an connection
  *  @param  connection
  */
@@ -452,8 +470,9 @@ DeferredDelete &ChannelImpl::removeQueue(const std::string &name, int flags)
  *  @param  envelope    the full envelope to send
  *  @param  message     the message to send
  *  @param  size        size of the message
+ *  @param  flags       message publish flags
  */
-bool ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope)
+bool ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
 {
     // we are going to send out multiple frames, each one will trigger a call to the handler,
     // which in turn could destruct the channel object, we need to monitor that
@@ -462,7 +481,7 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
     // @todo do not copy the entire buffer to individual frames
 
     // send the publish frame
-    if (!send(BasicPublishFrame(_id, exchange, routingKey))) return false;
+    if (!send(BasicPublishFrame(_id, exchange, routingKey, (flags & mandatory) != 0, (flags & immediate) != 0))) return false;
 
     // channel still valid?
     if (!monitor.valid()) return false;
@@ -832,6 +851,25 @@ void ChannelImpl::process(BasicDeliverFrame &frame)
 
     // let the consumer process the frame
     _consumer->process(frame);
+}
+
+/**
+ *  Process incoming return
+ *
+ *  @param frame The frame to process
+*/
+void ChannelImpl::process(BasicReturnFrame &frame)
+{
+    // is there a registered return consumer
+    if (_returnConsumer)
+    {
+        // we are going to be receiving a message, store
+        // the handler for the incoming message
+        _consumer = _returnConsumer;
+
+        // let the consumer process the frame
+        _consumer->process(frame);
+    }
 }
 
 /**

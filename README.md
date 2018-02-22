@@ -803,15 +803,13 @@ in almost any form:
  *  The following flags can be used
  *
  *      -   mandatory   if set, an unroutable message will be sent back to
- *                      the client (currently not supported)
+ *                      the client
  *
  *      -   immediate   if set, a message that could not immediately be consumed
- *                      is returned to the client (currently not supported)
+ *                      is returned to the client
  *
  *  If either of the two flags is set, and the message could not immediately
- *  be published, the message is returned by the server to the client. However,
- *  at this moment in time, the AMQP-CPP library does not support catching
- *  such returned messages.
+ *  be published, the message is returned by the server to the client.
  *
  *  @param  exchange    the exchange to publish to
  *  @param  routingkey  the routing key
@@ -820,13 +818,26 @@ in almost any form:
  *  @param  message     the message to send
  *  @param  size        size of the message
  */
-bool publish(const std::string &exchange, const std::string &routingKey, int flags, const AMQP::Envelope &envelope);
-bool publish(const std::string &exchange, const std::string &routingKey, const AMQP::Envelope &envelope);
-bool publish(const std::string &exchange, const std::string &routingKey, int flags, const std::string &message);
-bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message);
-bool publish(const std::string &exchange, const std::string &routingKey, int flags, const char *message, size_t size);
-bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size);
+bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0);
+bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0);
+bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0);
+bool publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0);
 ````
+
+To get notified of any unroutable messages you can register a callback to be
+invoked for every unroutable message. It is registered in the callbacks.h
+file as ReturnCallback.
+
+````c++
+ReturnCallback cb = [](int16_t replyCode, const std::string &replyText,
+    const std::string &exchange, const std::string &routingKey,
+    const Message &message) {
+        // process unroutable message
+    }
+
+channel.onReturn(cb);
+````
+
 
 Published messages are normally not confirmed by the server, and the RabbitMQ
 will not send a report back to inform you whether the message was succesfully
@@ -1002,7 +1013,6 @@ need additional attention:
     -   ability to set up secure connections (or is this fully done on the IO level)
     -   login with other protocols than login/password
     -   publish confirms
-    -   returned messages
 
 We also need to add more safety checks so that strange or invalid data from
 RabbitMQ does not break the library (although in reality RabbitMQ only sends

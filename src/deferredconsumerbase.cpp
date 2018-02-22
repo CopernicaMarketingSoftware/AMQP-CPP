@@ -14,6 +14,7 @@
 #include "basicdeliverframe.h"
 #include "basicgetokframe.h"
 #include "basicheaderframe.h"
+#include "basicreturnframe.h"
 #include "bodyframe.h"
 
 /**
@@ -83,6 +84,21 @@ void DeferredConsumerBase::process(BasicHeaderFrame &frame)
 }
 
 /**
+ *  Process incoming return
+ *
+ *  @param  frame   The frame to process
+ */
+void DeferredConsumerBase::process(BasicReturnFrame &frame)
+{
+    // store the return code and text
+    _replyCode = frame.replyCode();
+    _replyText = frame.replyText();
+
+    // do we have anybody interested in messages?
+    if (_returnCallback) _message.construct(frame.exchange(), frame.routingKey());
+}
+
+/**
  *  Process the message data
  *
  *  @param  frame   The frame to process
@@ -119,15 +135,27 @@ void DeferredConsumerBase::complete()
     // do we have a message?
     if (_message)
     {
-        // announce the message
-        announce(*_message, _deliveryTag, _redelivered);
+        // is this a returned message
+        if (_replyCode)
+        {
+            // announce the return
+            announce_return(_replyCode, _replyText, _message->exchange(), _message->routingkey(), *_message);
+        }
+        else
+        {
+            // announce the message
+            announce(*_message, _deliveryTag, _redelivered);
+        }
 
         // and destroy it
         _message.reset();
     }
 
-    // do we have to inform anyone about completion?
-    if (_completeCallback) _completeCallback(_deliveryTag, _redelivered);
+    if (!_replyCode)
+    {
+        // do we have to inform anyone about completion?
+        if (_completeCallback) _completeCallback(_deliveryTag, _redelivered);
+    }
 
     // do we still have a valid channel
     if (!monitor.valid()) return;
