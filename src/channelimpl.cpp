@@ -828,20 +828,20 @@ void ChannelImpl::process(BasicDeliverFrame &frame)
 
     // we are going to be receiving a message, store
     // the handler for the incoming message
-    _consumer = iter->second;
+    _receiver = iter->second;
 
     // let the consumer process the frame
-    _consumer->process(frame);
+    _receiver->process(frame);
 }
 
 /**
- *  Retrieve the current consumer handler
+ *  Retrieve the current receiver handler
  *
  *  @return The handler responsible for the current message
  */
-DeferredConsumerBase *ChannelImpl::consumer()
+DeferredReceiver *ChannelImpl::receiver()
 {
-    return _consumer.get();
+    return _receiver.get();
 }
 
 /**
@@ -849,8 +849,8 @@ DeferredConsumerBase *ChannelImpl::consumer()
  */
 void ChannelImpl::complete()
 {
-    // no more consumer
-    _consumer.reset();
+    // no more receiver
+    _receiver.reset();
 }
 
 /**

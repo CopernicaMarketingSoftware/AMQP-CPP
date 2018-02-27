@@ -34,7 +34,7 @@ namespace AMQP {
 /**
  *  Forward declarations
  */
-class DeferredConsumerBase;
+class DeferredReceiver;
 class BasicDeliverFrame;
 class DeferredConsumer;
 class BasicGetOKFrame;
@@ -75,9 +75,9 @@ private:
 
     /**
      *  Handlers for all consumers that are active
-     *  @var    std::map<std::string,std::shared_ptr<DeferredConsumerBase>
+     *  @var    std::map<std::string,std::shared_ptr<DeferredReceiver>
      */
-    std::map<std::string,std::shared_ptr<DeferredConsumerBase>> _consumers;
+    std::map<std::string,std::shared_ptr<DeferredReceiver>> _consumers;
 
     /**
      *  Pointer to the oldest deferred result (the first one that is going
@@ -129,10 +129,10 @@ private:
     bool _synchronous = false;
 
     /**
-     *  The current consumer receiving a message
-     *  @var    std::shared_ptr<DeferredConsumerBase>
+     *  The current object that is busy receiving a message
+     *  @var    std::shared_ptr<DeferredReceiver>
      */
-    std::shared_ptr<DeferredConsumerBase> _consumer;
+    std::shared_ptr<DeferredReceiver> _receiver;
 
     /**
      *  Attach the connection
@@ -664,13 +664,13 @@ public:
      *  @param  consumer        The consumer handler
      *  @param  active          Is this the new active consumer
      */
-    void install(std::string consumertag, const std::shared_ptr<DeferredConsumerBase> &consumer, bool active = false)
+    void install(std::string consumertag, const std::shared_ptr<DeferredReceiver> &consumer, bool active = false)
     {
         // install the consumer handler
         _consumers[consumertag] = consumer;
 
         // should we become the current consumer?
-        if (active) _consumer = consumer;
+        if (active) _receiver = consumer;
     }
 
     /**
@@ -691,11 +691,11 @@ public:
     void process(BasicDeliverFrame &frame);
 
     /**
-     *  Retrieve the current consumer handler
+     *  Retrieve the current object that is receiving a message
      *
      *  @return The handler responsible for the current message
      */
-    DeferredConsumerBase *consumer();
+    DeferredReceiver *receiver();
 
     /**
      *  Mark the current consumer as done

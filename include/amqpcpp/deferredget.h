@@ -2,7 +2,7 @@
  *  DeferredGet.h
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -13,7 +13,7 @@
 /**
  *  Dependencies
  */
-#include "deferredconsumerbase.h"
+#include "deferredreceiver.h"
 
 /**
  *  Set up namespace
@@ -27,7 +27,7 @@ namespace AMQP {
  *  it grabs a self-pointer when the callback is running, otherwise the onFinalize()
  *  is called before the actual message is consumed.
  */
-class DeferredGet : public DeferredConsumerBase
+class DeferredGet : public DeferredReceiver
 {
 private:
     /**
@@ -84,7 +84,7 @@ public:
      *  @param  failed      are we already failed?
      */
     DeferredGet(ChannelImpl *channel, bool failed = false) :
-        DeferredConsumerBase(failed, channel) {}
+        DeferredReceiver(failed, channel) {}
 
 public:
     /**

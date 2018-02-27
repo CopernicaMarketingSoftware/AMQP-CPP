@@ -1,7 +1,7 @@
 /**
  *  Class describing a basic get ok frame
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -173,11 +173,14 @@ public:
         // report success for the get operation
         channel->reportSuccess(messageCount(), deliveryTag(), redelivered());
 
-        // check if we have a valid consumer
-        if (!channel->consumer()) return false;
+        // get the current receiver object
+        auto *receiver = channel->receiver();
+
+        // check if we have a valid receiver
+        if (receiver == nullptr) return false;
 
         // pass on to consumer
-        channel->consumer()->process(*this);
+        receiver->process(*this);
 
         // done
         return true;

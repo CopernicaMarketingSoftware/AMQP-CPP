@@ -3,7 +3,7 @@
  *
  *  Deferred callback for consumers
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -14,7 +14,7 @@
 /**
  *  Dependencies
  */
-#include "deferredconsumerbase.h"
+#include "deferredreceiver.h"
 
 /**
  *  Set up namespace
@@ -24,7 +24,7 @@ namespace AMQP {
 /**
  *  We extend from the default deferred and add extra functionality
  */
-class DeferredConsumer : public DeferredConsumerBase
+class DeferredConsumer : public DeferredReceiver
 {
 private:
     /**
@@ -68,7 +68,7 @@ public:
      *  @param  failed      are we already failed?
      */
     DeferredConsumer(ChannelImpl *channel, bool failed = false) :
-        DeferredConsumerBase(failed, channel) {}
+        DeferredReceiver(failed, channel) {}
 
 public:
     /**
