@@ -33,6 +33,9 @@ void DeferredPublisher::process(BasicReturnFrame &frame)
 
     // initialize the object for the next message
     initialize(frame.exchange(), frame.routingKey());
+
+    // do we have anybody interested in messages? in that case we construct the message
+    if (_bounceCallback) _message.construct(frame.exchange(), frame.routingKey());
 }
 
 /**
