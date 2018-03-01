@@ -75,9 +75,9 @@ private:
 
     /**
      *  Handlers for all consumers that are active
-     *  @var    std::map<std::string,std::shared_ptr<DeferredReceiver>
+     *  @var    std::map<std::string,std::shared_ptr<DeferredConsumer>
      */
-    std::map<std::string,std::shared_ptr<DeferredReceiver>> _consumers;
+    std::map<std::string,std::shared_ptr<DeferredConsumer>> _consumers;
 
     /**
      *  Pointer to the oldest deferred result (the first one that is going
@@ -130,7 +130,7 @@ private:
 
     /**
      *  The current object that is busy receiving a message
-     *  @var    std::shared_ptr<DeferredReceiver>
+     *  @var std::shared_ptr<DeferredReceiver>
      */
     std::shared_ptr<DeferredReceiver> _receiver;
 
@@ -659,18 +659,23 @@ public:
 
     /**
      *  Install a consumer
-     *
      *  @param  consumertag     The consumer tag
-     *  @param  consumer        The consumer handler
-     *  @param  active          Is this the new active consumer
+     *  @param  consumer        The consumer object
      */
-    void install(std::string consumertag, const std::shared_ptr<DeferredReceiver> &consumer, bool active = false)
+    void install(const std::string &consumertag, const std::shared_ptr<DeferredConsumer> &consumer)
     {
         // install the consumer handler
         _consumers[consumertag] = consumer;
+    }
 
-        // should we become the current consumer?
-        if (active) _receiver = consumer;
+    /**
+     *  Install the current consumer
+     *  @param  receiver        The receiver object
+     */
+    void install(const std::shared_ptr<DeferredReceiver> &receiver)
+    {
+        // store object as current receiver
+        _receiver = receiver;
     }
 
     /**
@@ -684,23 +689,17 @@ public:
     }
 
     /**
-     *  Process incoming delivery
-     *
-     *  @param  frame   The frame to process
+     *  Fetch the receiver for a specific consumer tag
+     *  @param  consumertag the consumer tag
+     *  @return             the receiver object
      */
-    void process(BasicDeliverFrame &frame);
+    DeferredConsumer *consumer(const std::string &consumertag) const;
 
     /**
      *  Retrieve the current object that is receiving a message
-     *
      *  @return The handler responsible for the current message
      */
-    DeferredReceiver *receiver();
-
-    /**
-     *  Mark the current consumer as done
-     */
-    void complete();
+    DeferredReceiver *receiver() const { return _receiver.get(); }
 
     /**
      *  The channel class is its friend, thus can it instantiate this object

@@ -27,7 +27,7 @@ namespace AMQP {
  *  it grabs a self-pointer when the callback is running, otherwise the onFinalize()
  *  is called before the actual message is consumed.
  */
-class DeferredGet : public DeferredReceiver
+class DeferredGet : public DeferredReceiver, public std::enable_shared_from_this<DeferredGet>
 {
 private:
     /**
@@ -57,12 +57,15 @@ private:
     virtual const std::shared_ptr<Deferred> &reportSuccess() const override;
 
     /**
-     *  Announce that a message has been received
-     *  @param  message The message to announce
-     *  @param  deliveryTag The delivery tag (for ack()ing)
-     *  @param  redelivered Is this a redelivered message
+     *  Get reference to self to prevent that object falls out of scope
+     *  @return std::shared_ptr
      */
-    virtual void announce(const Message &message, uint64_t deliveryTag, bool redelivered) const override;
+    virtual std::shared_ptr<DeferredReceiver> lock() override { return shared_from_this(); }
+
+    /**
+     *  Extended implementation of the complete method that is called when a message was fully received
+     */
+    virtual void complete() override;
 
     /**
      *  The channel implementation may call our

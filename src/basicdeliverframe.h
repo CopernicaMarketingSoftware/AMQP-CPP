@@ -1,7 +1,7 @@
 /**
  *  Class describing a basic deliver frame
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -16,6 +16,7 @@
 #include "amqpcpp/stringfield.h"
 #include "amqpcpp/booleanset.h"
 #include "amqpcpp/connectionimpl.h"
+#include "amqpcpp/deferredconsumer.h"
 
 /**
  *  Set up namespace
@@ -193,8 +194,14 @@ public:
         // channel does not exist
         if (!channel) return false;
 
-        // construct the message
-        channel->process(*this);
+        // get the appropriate consumer object
+        auto consumer = channel->consumer(_consumerTag);
+
+        // skip if there was no consumer for this tag
+        if (consumer == nullptr) return false;
+        
+        // initialize the object, because we're about to receive a message
+        consumer->process(*this);
 
         // done
         return true;

@@ -170,8 +170,8 @@ public:
         // channel does not exist
         if (!channel) return false;
 
-        // report success for the get operation
-        channel->reportSuccess(messageCount(), deliveryTag(), redelivered());
+        // report success for the get operation (this will also update the current receiver!)
+        channel->reportSuccess(messageCount(), _deliveryTag, redelivered());
 
         // get the current receiver object
         auto *receiver = channel->receiver();
@@ -179,8 +179,8 @@ public:
         // check if we have a valid receiver
         if (receiver == nullptr) return false;
 
-        // pass on to consumer
-        receiver->process(*this);
+        // initialize the receiver for the upcoming message
+        receiver->initialize(_exchange, _routingKey);
 
         // done
         return true;

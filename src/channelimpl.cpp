@@ -6,7 +6,6 @@
  *  @copyright 2014 - 2018 Copernica BV
  */
 #include "includes.h"
-#include "basicdeliverframe.h"
 #include "basicgetokframe.h"
 #include "basicreturnframe.h"
 #include "consumedmessage.h"
@@ -816,41 +815,17 @@ void ChannelImpl::reportError(const char *message, bool notifyhandler)
 }
 
 /**
- *  Process incoming delivery
- *
- *  @param  frame   The frame to process
+ *  Get the current receiver for a given consumer tag
+ *  @param  consumertag     the consumer frame
+ *  @return DeferredConsumer
  */
-void ChannelImpl::process(BasicDeliverFrame &frame)
+DeferredConsumer *ChannelImpl::consumer(const std::string &consumertag) const
 {
-    // find the consumer for this frame
-    auto iter = _consumers.find(frame.consumerTag());
-    if (iter == _consumers.end()) return;
-
-    // we are going to be receiving a message, store
-    // the handler for the incoming message
-    _receiver = iter->second;
-
-    // let the consumer process the frame
-    _receiver->process(frame);
-}
-
-/**
- *  Retrieve the current receiver handler
- *
- *  @return The handler responsible for the current message
- */
-DeferredReceiver *ChannelImpl::receiver()
-{
-    return _receiver.get();
-}
-
-/**
- *  Mark the current consumer as done
- */
-void ChannelImpl::complete()
-{
-    // no more receiver
-    _receiver.reset();
+    // look in the map
+    auto iter = _consumers.find(consumertag);
+    
+    // return the result
+    return iter == _consumers.end() ? nullptr : iter->second.get();
 }
 
 /**

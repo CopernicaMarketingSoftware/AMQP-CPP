@@ -20,11 +20,16 @@
  *  Set up namespace
  */
 namespace AMQP {
+    
+/**
+ *  Forward declararions
+ */
+class BasicDeliverFrame;
 
 /**
  *  We extend from the default deferred and add extra functionality
  */
-class DeferredConsumer : public DeferredReceiver
+class DeferredConsumer : public DeferredReceiver, public std::enable_shared_from_this<DeferredConsumer>
 {
 private:
     /**
@@ -34,6 +39,13 @@ private:
     ConsumeCallback _consumeCallback;
 
     /**
+     *  Process a delivery frame
+     *
+     *  @param  frame   The frame to process
+     */
+    void process(BasicDeliverFrame &frame);
+
+    /**
      *  Report success for frames that report start consumer operations
      *  @param  name            Consumer tag that is started
      *  @return Deferred
@@ -41,12 +53,10 @@ private:
     virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) override;
 
     /**
-     *  Announce that a message has been received
-     *  @param  message The message to announce
-     *  @param  deliveryTag The delivery tag (for ack()ing)
-     *  @param  redelivered Is this a redelivered message
+     *  Get reference to self to prevent that object falls out of scope
+     *  @return std::shared_ptr
      */
-    virtual void announce(const Message &message, uint64_t deliveryTag, bool redelivered) const override;
+    virtual std::shared_ptr<DeferredReceiver> lock() override { return shared_from_this(); }
 
     /**
      *  The channel implementation may call our
@@ -54,6 +64,7 @@ private:
      */
     friend class ChannelImpl;
     friend class ConsumedMessage;
+    friend class BasicDeliverFrame;
 
 public:
     /**

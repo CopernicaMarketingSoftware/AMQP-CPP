@@ -4,7 +4,7 @@
  *  Implementation of the DeferredGet call
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -19,19 +19,18 @@ namespace AMQP {
 
 /**
  *  Report success for a get operation
- *
  *  @param  messagecount    Number of messages left in the queue
  *  @param  deliveryTag     Delivery tag of the message coming in
  *  @param  redelivered     Was the message redelivered?
  */
 const std::shared_ptr<Deferred> &DeferredGet::reportSuccess(uint32_t messagecount, uint64_t deliveryTag, bool redelivered)
 {
+    // install this object as the handler for the upcoming header and body frames
+    _channel->install(shared_from_this());
+    
     // store delivery tag and redelivery status
     _deliveryTag = deliveryTag;
     _redelivered = redelivered;
-
-    // install ourselves in the channel
-    _channel->install("", shared_from_this(), true);
 
     // report the size (note that this is the size _minus_ the message that is retrieved
     // (and for which the callback will be called later), so it could be zero)
@@ -58,27 +57,15 @@ const std::shared_ptr<Deferred> &DeferredGet::reportSuccess() const
 }
 
 /**
- *  Announce that a message has been received
- *  @param  message The message to announce
- *  @param  deliveryTag The delivery tag (for ack()ing)
- *  @param  redelivered Is this a redelivered message
+ *  Extended implementation of the complete method that is called when a message was fully received
  */
-void DeferredGet::announce(const Message &message, uint64_t deliveryTag, bool redelivered) const
+void DeferredGet::complete()
 {
-    // monitor the channel
-    Monitor monitor{ _channel };
-
-    // the channel is now synchronized
+    // the channel is now synchronized, delayed frames may now be sent
     _channel->onSynchronized();
-
-    // simply execute the message callback
-    _messageCallback(std::move(message), deliveryTag, redelivered);
-
-    // check if the channel is still valid
-    if (!monitor.valid()) return;
-
-    // stop consuming now
-    _channel->uninstall({});
+    
+    // pass on to normal implementation
+    DeferredReceiver::complete();
 }
 
 /**

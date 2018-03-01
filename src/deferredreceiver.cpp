@@ -21,39 +21,17 @@
 namespace AMQP {
 
 /**
- *  Process a delivery frame
- *
- *  @param  frame   The frame to process
+ *  Initialize the object: we are going to receive a message, next frames will be header and data 
+ *  @param  exchange
+ *  @param  routingkey
  */
-void DeferredReceiver::process(BasicDeliverFrame &frame)
+void DeferredReceiver::initialize(const std::string &exchange, const std::string &routingkey)
 {
-    // retrieve the delivery tag and whether we were redelivered
-    _deliveryTag = frame.deliveryTag();
-    _redelivered = frame.redelivered();
-
     // anybody interested in the new message?
-    if (_beginCallback)   _beginCallback();
+    if (_beginCallback) _beginCallback(exchange, routingkey);
 
-    // do we have anybody interested in messages?
-    if (_messageCallback) _message.construct(frame.exchange(), frame.routingKey());
-}
-
-/**
- *  Process a delivery frame from a get request
- *
- *  @param  frame   The frame to process
- */
-void DeferredReceiver::process(BasicGetOKFrame &frame)
-{
-    // retrieve the delivery tag and whether we were redelivered
-    _deliveryTag = frame.deliveryTag();
-    _redelivered = frame.redelivered();
-
-    // anybody interested in the new message?
-    if (_beginCallback)   _beginCallback();
-
-    // do we have anybody interested in messages?
-    if (_messageCallback) _message.construct(frame.exchange(), frame.routingKey());
+    // do we have anybody interested in messages? in that case we construct the message
+    if (_messageCallback) _message.construct(exchange, routingkey);
 }
 
 /**
@@ -63,6 +41,9 @@ void DeferredReceiver::process(BasicGetOKFrame &frame)
  */
 void DeferredReceiver::process(BasicHeaderFrame &frame)
 {
+    // make sure we stay in scope
+    auto self = lock();
+
     // store the body size
     _bodySize = frame.bodySize();
 
@@ -78,7 +59,7 @@ void DeferredReceiver::process(BasicHeaderFrame &frame)
     if (_headerCallback) _headerCallback(frame.metaData());
 
     // no body data expected? then we are now complete
-    if (!_bodySize) complete();
+    if (_bodySize == 0) complete();
 }
 
 /**
@@ -89,7 +70,7 @@ void DeferredReceiver::process(BasicHeaderFrame &frame)
 void DeferredReceiver::process(BodyFrame &frame)
 {
     // make sure we stay in scope
-    auto self = shared_from_this();
+    auto self = lock();
 
     // update the bytes still to receive
     _bodySize -= frame.payloadSize();
@@ -101,7 +82,7 @@ void DeferredReceiver::process(BodyFrame &frame)
     if (_message) _message->append(frame.payload(), frame.payloadSize());
 
     // if all bytes were received we are now complete
-    if (!_bodySize) complete();
+    if (_bodySize == 0) complete();
 }
 
 /**
@@ -109,30 +90,23 @@ void DeferredReceiver::process(BodyFrame &frame)
  */
 void DeferredReceiver::complete()
 {
-    // make sure we stay in scope
-    auto self = shared_from_this();
-
     // also monitor the channel
-    Monitor monitor{ _channel };
+    Monitor monitor(_channel);
 
     // do we have a message?
-    if (_message)
-    {
-        // announce the message
-        announce(*_message, _deliveryTag, _redelivered);
-
-        // and destroy it
-        _message.reset();
-    }
+    if (_message) _messageCallback(*_message, _deliveryTag, _redelivered);
 
     // do we have to inform anyone about completion?
     if (_completeCallback) _completeCallback(_deliveryTag, _redelivered);
+    
+    // for the next iteration we want a new message
+    _message.reset();
 
     // do we still have a valid channel
     if (!monitor.valid()) return;
 
-    // we are now done executing
-    _channel->complete();
+    // we are now done executing, so the channel can forget the current receiving object
+    _channel->install(nullptr);
 }
 
 /**
