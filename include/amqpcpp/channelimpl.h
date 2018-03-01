@@ -410,9 +410,10 @@ public:
      *  @param  envelope    the full envelope to send
      *  @param  message     the message to send
      *  @param  size        size of the message
+     *  @param  flags       optional flags
      *  @return DeferredPublisher
      */
-    DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope);
+    DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags);
 
     /**
      *  Set the Quality of Service (QOS) of the entire connection
@@ -707,6 +708,12 @@ public:
      *  @return The handler responsible for the current message
      */
     DeferredReceiver *receiver() const { return _receiver.get(); }
+    
+    /**
+     *  Retrieve the deferred publisher that handles returned messages
+     *  @return The deferred publisher object
+     */
+    DeferredPublisher *publisher() const { return _publisher.get(); }
 
     /**
      *  The channel class is its friend, thus can it instantiate this object

@@ -61,6 +61,13 @@ private:
     ReturnedCallback _completeCallback;
 
     /**
+     *  Process a return frame
+     *
+     *  @param  frame   The frame to process
+     */
+    void process(BasicReturnFrame &frame);
+
+    /**
      *  Get reference to self to prevent that object falls out of scope
      *  @return std::shared_ptr
      */
@@ -70,6 +77,11 @@ private:
      *  Extended implementation of the complete method that is called when a message was fully received
      */
     virtual void complete() override;
+    
+    /**
+     *  Classes that can access private members
+     */
+    friend class BasicReturnFrame;
 
 public:
     /**

@@ -451,9 +451,10 @@ DeferredDelete &ChannelImpl::removeQueue(const std::string &name, int flags)
  *  @param  envelope    the full envelope to send
  *  @param  message     the message to send
  *  @param  size        size of the message
+ *  @param  flags
  *  @return DeferredPublisher
  */
-DeferredPublisher &ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope)
+DeferredPublisher &ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
 {
     // we are going to send out multiple frames, each one will trigger a call to the handler,
     // which in turn could destruct the channel object, we need to monitor that
@@ -465,7 +466,7 @@ DeferredPublisher &ChannelImpl::publish(const std::string &exchange, const std::
     if (!_publisher) _publisher.reset(new DeferredPublisher(this));
 
     // send the publish frame
-    if (!send(BasicPublishFrame(_id, exchange, routingKey))) return *_publisher;
+    if (!send(BasicPublishFrame(_id, exchange, routingKey, (flags & mandatory) != 0, (flags & immediate) != 0))) return *_publisher;
 
     // channel still valid?
     if (!monitor.valid()) return *_publisher;
