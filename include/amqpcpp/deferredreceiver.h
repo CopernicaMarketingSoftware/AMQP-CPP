@@ -51,18 +51,18 @@ protected:
      *  @param  exchange            the exchange to which the message was published
      *  @param  routingkey          the routing key that was used to publish the message
      */
-    void initialize(const std::string &exchange, const std::string &routingkey);
+    virtual void initialize(const std::string &exchange, const std::string &routingkey);
     
     /**
      *  Get reference to self to prevent that object falls out of scope
      *  @return std::shared_ptr
      */
     virtual std::shared_ptr<DeferredReceiver> lock() = 0;
-
+    
     /**
      *  Indicate that a message was done
      */
-    virtual void complete();
+    virtual void complete() = 0;
 
 private:
     /**
@@ -89,18 +89,6 @@ private:
 
 protected:
     /**
-     *  The delivery tag for the current message
-     *  @var    uint64_t
-     */
-    uint64_t _deliveryTag = 0;
-
-    /**
-     *  Is this a redelivered message
-     *  @var    bool
-     */
-    bool _redelivered = false;
-
-    /**
      *  The channel to which the consumer is linked
      *  @var    ChannelImpl
      */
@@ -125,12 +113,6 @@ protected:
     DataCallback _dataCallback;
 
     /**
-     *  Callback for incoming messages
-     *  @var    MessageCallback
-     */
-    MessageCallback _messageCallback;
-
-    /**
      *  Callback for when a message was complete finished
      *  @var    CompleteCallback
      */
@@ -144,12 +126,17 @@ protected:
 
     /**
      *  Constructor
-     *
      *  @param  failed  Have we already failed?
      *  @param  channel The channel we are consuming on
      */
-    DeferredReceiver(bool failed, ChannelImpl *channel) : Deferred(failed), _channel(channel) {}
+    DeferredReceiver(bool failed, ChannelImpl *channel) : 
+        Deferred(failed), _channel(channel) {}
+
 public:
+    /**
+     *  Destructor
+     */
+    virtual ~DeferredReceiver() = default;
 };
 
 /**

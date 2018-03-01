@@ -13,7 +13,7 @@
 /**
  *  Dependencies
  */
-#include "deferredreceiver.h"
+#include "deferredextreceiver.h"
 
 /**
  *  Set up namespace
@@ -27,7 +27,7 @@ namespace AMQP {
  *  it grabs a self-pointer when the callback is running, otherwise the onFinalize()
  *  is called before the actual message is consumed.
  */
-class DeferredGet : public DeferredReceiver, public std::enable_shared_from_this<DeferredGet>
+class DeferredGet : public DeferredExtReceiver, public std::enable_shared_from_this<DeferredGet>
 {
 private:
     /**
@@ -87,7 +87,7 @@ public:
      *  @param  failed      are we already failed?
      */
     DeferredGet(ChannelImpl *channel, bool failed = false) :
-        DeferredReceiver(failed, channel) {}
+        DeferredExtReceiver(failed, channel) {}
 
 public:
     /**

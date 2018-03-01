@@ -29,9 +29,6 @@ void DeferredReceiver::initialize(const std::string &exchange, const std::string
 {
     // anybody interested in the new message?
     if (_beginCallback) _beginCallback(exchange, routingkey);
-
-    // do we have anybody interested in messages? in that case we construct the message
-    if (_messageCallback) _message.construct(exchange, routingkey);
 }
 
 /**
@@ -83,30 +80,6 @@ void DeferredReceiver::process(BodyFrame &frame)
 
     // if all bytes were received we are now complete
     if (_bodySize == 0) complete();
-}
-
-/**
- *  Indicate that a message was done
- */
-void DeferredReceiver::complete()
-{
-    // also monitor the channel
-    Monitor monitor(_channel);
-
-    // do we have a message?
-    if (_message) _messageCallback(*_message, _deliveryTag, _redelivered);
-
-    // do we have to inform anyone about completion?
-    if (_completeCallback) _completeCallback(_deliveryTag, _redelivered);
-    
-    // for the next iteration we want a new message
-    _message.reset();
-
-    // do we still have a valid channel
-    if (!monitor.valid()) return;
-
-    // we are now done executing, so the channel can forget the current receiving object
-    _channel->install(nullptr);
 }
 
 /**

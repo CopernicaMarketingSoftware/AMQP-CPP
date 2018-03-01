@@ -14,7 +14,7 @@
 /**
  *  Dependencies
  */
-#include "deferredreceiver.h"
+#include "deferredextreceiver.h"
 
 /**
  *  Set up namespace
@@ -29,7 +29,7 @@ class BasicDeliverFrame;
 /**
  *  We extend from the default deferred and add extra functionality
  */
-class DeferredConsumer : public DeferredReceiver, public std::enable_shared_from_this<DeferredConsumer>
+class DeferredConsumer : public DeferredExtReceiver, public std::enable_shared_from_this<DeferredConsumer>
 {
 private:
     /**
@@ -79,7 +79,7 @@ public:
      *  @param  failed      are we already failed?
      */
     DeferredConsumer(ChannelImpl *channel, bool failed = false) :
-        DeferredReceiver(failed, channel) {}
+        DeferredExtReceiver(failed, channel) {}
 
 public:
     /**

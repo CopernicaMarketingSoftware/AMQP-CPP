@@ -5,6 +5,11 @@
  */
 
 /**
+ *  Dependencies
+ */
+#include "basicdeliverframe.h"
+
+/**
  *  Set up namespace
  */
 namespace AMQP {

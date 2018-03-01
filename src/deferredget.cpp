@@ -65,7 +65,7 @@ void DeferredGet::complete()
     _channel->onSynchronized();
     
     // pass on to normal implementation
-    DeferredReceiver::complete();
+    DeferredExtReceiver::complete();
 }
 
 /**
