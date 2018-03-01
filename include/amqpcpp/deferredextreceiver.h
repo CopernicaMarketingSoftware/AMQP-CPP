@@ -50,6 +50,12 @@ protected:
      */
     MessageCallback _messageCallback;
 
+    /**
+     *  Callback for when a message was complete finished
+     *  @var    DeliveredCallback
+     */
+    DeliveredCallback _deliveredCallback;
+
 
     /**
      *  Initialize the object to send out a message

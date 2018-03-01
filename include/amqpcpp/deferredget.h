@@ -40,7 +40,7 @@ private:
      *  Callback with the number of messages still in the queue
      *  @var    SizeCallback
      */
-    SizeCallback _sizeCallback;
+    SizeCallback _countCallback;
 
     /**
      *  Report success for a get operation
@@ -90,58 +90,6 @@ public:
         DeferredExtReceiver(failed, channel) {}
 
 public:
-    /**
-     *  Register the function to be called when a new message is expected
-     *
-     *  @param  callback    The callback to invoke
-     *  @return Same object for chaining
-     */
-    DeferredGet &onBegin(const BeginCallback &callback)
-    {
-        // store callback
-        _beginCallback = callback;
-
-        // allow chaining
-        return *this;
-    }
-
-    /**
-     *  Register the function to be called when message headers come in
-     *
-     *  @param  callback    The callback to invoke for message headers
-     *  @return Same object for chaining
-     */
-    DeferredGet &onHeaders(const HeaderCallback &callback)
-    {
-        // store callback
-        _headerCallback = callback;
-
-        // allow chaining
-        return *this;
-    }
-
-    /**
-     *  Register the function to be called when a chunk of data comes in
-     *
-     *  Note that this function may be called zero, one or multiple times
-     *  for each incoming message depending on the size of the message data.
-     *
-     *  If you install this callback you very likely also want to install
-     *  the onComplete callback so you know when the last data part was
-     *  received.
-     *
-     *  @param  callback    The callback to invoke for chunks of message data
-     *  @return Same object for chaining
-     */
-    DeferredGet &onData(const DataCallback &callback)
-    {
-        // store callback
-        _dataCallback = callback;
-
-        // allow chaining
-        return *this;
-    }
-
     /**
      *  Register a function to be called when a message arrives
      *  This fuction is also available as onReceived() and onMessage() because I always forget which name I gave to it
@@ -198,13 +146,95 @@ public:
     }
 
     /**
-     *  Register a function to be called when size information is known
+     *  Register a function to be called when queue size information is known
      *  @param  callback    the callback to execute
+     */
+    DeferredGet &onCount(const SizeCallback &callback)
+    {
+        // store callback
+        _countCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register the function to be called when a new message is expected
+     *
+     *  @param  callback    The callback to invoke
+     *  @return Same object for chaining
+     */
+    DeferredGet &onBegin(const StartCallback &callback)
+    {
+        // store callback
+        _startCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register the function to be called when a new message is expected
+     *
+     *  @param  callback    The callback to invoke
+     *  @return Same object for chaining
+     */
+    DeferredGet &onStart(const StartCallback &callback)
+    {
+        // store callback
+        _startCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register a function that is called when the message size is known
+     * 
+     *  @param  callback    The callback to invoke for message headers
+     *  @return Same object for chaining
      */
     DeferredGet &onSize(const SizeCallback &callback)
     {
         // store callback
         _sizeCallback = callback;
+        
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register the function to be called when message headers come in
+     *
+     *  @param  callback    The callback to invoke for message headers
+     *  @return Same object for chaining
+     */
+    DeferredGet &onHeaders(const HeaderCallback &callback)
+    {
+        // store callback
+        _headerCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register the function to be called when a chunk of data comes in
+     *
+     *  Note that this function may be called zero, one or multiple times
+     *  for each incoming message depending on the size of the message data.
+     *
+     *  If you install this callback you very likely also want to install
+     *  the onComplete callback so you know when the last data part was
+     *  received.
+     *
+     *  @param  callback    The callback to invoke for chunks of message data
+     *  @return Same object for chaining
+     */
+    DeferredGet &onData(const DataCallback &callback)
+    {
+        // store callback
+        _dataCallback = callback;
 
         // allow chaining
         return *this;
@@ -216,10 +246,25 @@ public:
      *  @param  callback    The callback to invoke
      *  @return Same object for chaining
      */
-    DeferredGet &onComplete(const CompleteCallback &callback)
+    DeferredGet &onComplete(const DeliveredCallback &callback)
     {
         // store callback
-        _completeCallback = callback;
+        _deliveredCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register a funtion to be called when a message was completely received
+     *
+     *  @param  callback    The callback to invoke
+     *  @return Same object for chaining
+     */
+    DeferredGet &onDelivered(const DeliveredCallback &callback)
+    {
+        // store callback
+        _deliveredCallback = callback;
 
         // allow chaining
         return *this;

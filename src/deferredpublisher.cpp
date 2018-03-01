@@ -22,7 +22,7 @@ void DeferredPublisher::complete()
     Monitor monitor(_channel);
 
     // do we have a message?
-    if (_message) _bounceCallback(*_message, 0, "");
+    if (_message) _bounceCallback(*_message, _code, _description);
 
     // do we have to inform anyone about completion?
     if (_completeCallback) _completeCallback();

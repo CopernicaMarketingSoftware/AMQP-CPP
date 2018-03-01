@@ -44,6 +44,7 @@ class DeferredDelete;
 class DeferredCancel;
 class DeferredQueue;
 class DeferredGet;
+class DeferredPublisher;
 class Connection;
 class Envelope;
 class Table;
@@ -72,6 +73,12 @@ private:
      *  @var    ErrorCallback
      */
     ErrorCallback _errorCallback;
+
+    /**
+     *  Handler that deals with incoming messages as a result of publish operations
+     *  @var    std::shared_ptr<DeferredPublisher>
+     */
+    std::shared_ptr<DeferredPublisher> _publisher;
 
     /**
      *  Handlers for all consumers that are active
@@ -396,16 +403,16 @@ public:
      *  Publish a message to an exchange
      *
      *  If the mandatory or immediate flag is set, and the message could not immediately
-     *  be published, the message will be returned to the client. However, the AMQP-CPP
-     *  library does not yet report such returned messages.
+     *  be published, the message will be returned to the client.
      *
      *  @param  exchange    the exchange to publish to
      *  @param  routingkey  the routing key
      *  @param  envelope    the full envelope to send
      *  @param  message     the message to send
      *  @param  size        size of the message
+     *  @return DeferredPublisher
      */
-    bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope);
+    DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope);
 
     /**
      *  Set the Quality of Service (QOS) of the entire connection

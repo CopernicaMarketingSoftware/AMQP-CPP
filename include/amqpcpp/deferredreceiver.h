@@ -96,9 +96,15 @@ protected:
 
     /**
      *  Callback for new message
-     *  @var    BeginCallback
+     *  @var    StartCallback
      */
-    BeginCallback _beginCallback;
+    StartCallback _startCallback;
+
+    /**
+     *  Callback that is called when size of the message is known
+     *  @var    SizeCallback
+     */
+    SizeCallback _sizeCallback;
 
     /**
      *  Callback for incoming headers
@@ -111,12 +117,6 @@ protected:
      *  @var    DataCallback
      */
     DataCallback _dataCallback;
-
-    /**
-     *  Callback for when a message was complete finished
-     *  @var    CompleteCallback
-     */
-    CompleteCallback _completeCallback;
 
     /**
      *  The message that we are currently receiving

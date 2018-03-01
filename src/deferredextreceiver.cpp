@@ -26,7 +26,7 @@ namespace AMQP {
 void DeferredExtReceiver::initialize(const std::string &exchange, const std::string &routingkey)
 {
     // call base
-    DeferredExtReceiver::initialize(exchange, routingkey);
+    DeferredReceiver::initialize(exchange, routingkey);
     
     // do we have anybody interested in messages? in that case we construct the message
     if (_messageCallback) _message.construct(exchange, routingkey);
@@ -44,7 +44,7 @@ void DeferredExtReceiver::complete()
     if (_message) _messageCallback(*_message, _deliveryTag, _redelivered);
 
     // do we have to inform anyone about completion?
-    if (_completeCallback) _completeCallback(_deliveryTag, _redelivered);
+    if (_deliveredCallback) _deliveredCallback(_deliveryTag, _redelivered);
     
     // for the next iteration we want a new message
     _message.reset();

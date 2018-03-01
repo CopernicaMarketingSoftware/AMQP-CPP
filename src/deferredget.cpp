@@ -34,7 +34,7 @@ const std::shared_ptr<Deferred> &DeferredGet::reportSuccess(uint32_t messagecoun
 
     // report the size (note that this is the size _minus_ the message that is retrieved
     // (and for which the callback will be called later), so it could be zero)
-    if (_sizeCallback) _sizeCallback(messagecount);
+    if (_countCallback) _countCallback(messagecount);
 
     // return next handler
     return _next;
@@ -47,7 +47,7 @@ const std::shared_ptr<Deferred> &DeferredGet::reportSuccess(uint32_t messagecoun
 const std::shared_ptr<Deferred> &DeferredGet::reportSuccess() const
 {
     // report the size
-    if (_sizeCallback) _sizeCallback(0);
+    if (_countCallback) _countCallback(0);
 
     // check if a callback was set
     if (_emptyCallback) _emptyCallback();

@@ -28,7 +28,7 @@ namespace AMQP {
 void DeferredReceiver::initialize(const std::string &exchange, const std::string &routingkey)
 {
     // anybody interested in the new message?
-    if (_beginCallback) _beginCallback(exchange, routingkey);
+    if (_startCallback) _startCallback(exchange, routingkey);
 }
 
 /**
@@ -43,6 +43,9 @@ void DeferredReceiver::process(BasicHeaderFrame &frame)
 
     // store the body size
     _bodySize = frame.bodySize();
+    
+    // is user interested in the size?
+    if (_sizeCallback) _sizeCallback(_bodySize);
 
     // do we have a message?
     if (_message)

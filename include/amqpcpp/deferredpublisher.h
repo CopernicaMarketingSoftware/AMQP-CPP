@@ -18,14 +18,58 @@
  *  Begin of namespace
  */
 namespace AMQP {
+    
+/**
+ *  Forward declarations
+ */
+class ChannelImpl;
 
 /**
  *  Class definition
  */
-class DeferredPublisher : public DeferredReceiver
+class DeferredPublisher : public DeferredReceiver, public std::enable_shared_from_this<DeferredPublisher>
 {
 private:
+    /**
+     *  The error code
+     *  @var int16_t
+     */
+    int16_t _code = 0;
+    
+    /**
+     *  The error message
+     *  @var std::string
+     */
+    std::string _description;
 
+    /**
+     *  Callback that is called when a message is returned
+     *  @var BounceCallback
+     */
+    BounceCallback _bounceCallback;
+
+    /**
+     *  Begin of a bounced message
+     *  @var ReturnCallback
+     */
+    ReturnCallback _beginCallback;
+    
+    /**
+     *  End of a bounced message
+     *  @var ReturnedCallback
+     */
+    ReturnedCallback _completeCallback;
+
+    /**
+     *  Get reference to self to prevent that object falls out of scope
+     *  @return std::shared_ptr
+     */
+    virtual std::shared_ptr<DeferredReceiver> lock() override { return shared_from_this(); }
+
+    /**
+     *  Extended implementation of the complete method that is called when a message was fully received
+     */
+    virtual void complete() override;
 
 public:
     /**
@@ -38,7 +82,7 @@ public:
      *  @param  channel     the channel implementation
      *  @param  failed      are we already failed?
      */
-    DeferredConsumer(ChannelImpl *channel, bool failed = false) :
+    DeferredPublisher(ChannelImpl *channel, bool failed = false) :
         DeferredReceiver(failed, channel) {}
         
 public:
@@ -46,10 +90,10 @@ public:
      *  Register a function to be called when a full message is returned
      *  @param  callback    the callback to execute
      */
-    DeferredConsumer &onReceived(const ReturnCallback &callback)
+    DeferredPublisher &onReceived(const BounceCallback &callback)
     {
         // store callback
-        _returnCallback = callback;
+        _bounceCallback = callback;
 
         // allow chaining
         return *this;
@@ -59,10 +103,10 @@ public:
      *  Alias for onReceived() (see above)
      *  @param  callback    the callback to execute
      */
-    DeferredConsumer &onMessage(const ReturnCallback &callback)
+    DeferredPublisher &onMessage(const BounceCallback &callback)
     {
         // store callback
-        _returnCallback = callback;
+        _bounceCallback = callback;
 
         // allow chaining
         return *this;
@@ -72,36 +116,27 @@ public:
      *  Alias for onReceived() (see above)
      *  @param  callback    the callback to execute
      */
-    DeferredConsumer &onReturned(const ReturnCallback &callback)
+    DeferredPublisher &onReturned(const BounceCallback &callback)
     {
         // store callback
-        _returnCallback = callback;
+        _bounceCallback = callback;
 
         // allow chaining
         return *this;
     }
 
     /**
-     *  RabbitMQ sends a message in multiple frames to its consumers.
-     *  The AMQP-CPP library collects these frames and merges them into a 
-     *  single AMQP::Message object that is passed to the callback that
-     *  you can set with the onReceived() or onMessage() methods (see above).
-     * 
-     *  However, you can also write your own algorithm to merge the frames.
-     *  In that case you can install callbacks to handle the frames. Every
-     *  message is sent in a number of frames:
-     * 
-     *      - a begin frame that marks the start of the message
-     *      - an optional header if the message was sent with an envelope
-     *      - zero or more data frames (usually 1, but more for large messages)
-     *      - an end frame to mark the end of the message.
-     *  
-     *  To install handlers for these frames, you can use the onBegin(), 
-     *  onHeaders(), onData() and onComplete() methods.
-     * 
-     *  If you just rely on the onReceived() or onMessage() callbacks, you
-     *  do not need any of the methods below this line.
+     *  Alias for onReceived() (see above)
+     *  @param  callback    the callback to execute
      */
+    DeferredPublisher &onBounced(const BounceCallback &callback)
+    {
+        // store callback
+        _bounceCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
 
     /**
      *  Register the function that is called when the start frame of a new 
@@ -110,11 +145,26 @@ public:
      *  @param  callback    The callback to invoke
      *  @return Same object for chaining
      */
-    DeferredConsumer &onBegin(const BeginCallback &callback)
+    DeferredPublisher &onBegin(const ReturnCallback &callback)
     {
         // store callback
         _beginCallback = callback;
 
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register a function that is called when the message size is known
+     * 
+     *  @param  callback    The callback to invoke for message headers
+     *  @return Same object for chaining
+     */
+    DeferredPublisher &onSize(const SizeCallback &callback)
+    {
+        // store callback
+        _sizeCallback = callback;
+        
         // allow chaining
         return *this;
     }
@@ -125,7 +175,7 @@ public:
      *  @param  callback    The callback to invoke for message headers
      *  @return Same object for chaining
      */
-    DeferredConsumer &onHeaders(const HeaderCallback &callback)
+    DeferredPublisher &onHeaders(const HeaderCallback &callback)
     {
         // store callback
         _headerCallback = callback;
@@ -147,7 +197,7 @@ public:
      *  @param  callback    The callback to invoke for chunks of message data
      *  @return Same object for chaining
      */
-    DeferredConsumer &onData(const DataCallback &callback)
+    DeferredPublisher &onData(const DataCallback &callback)
     {
         // store callback
         _dataCallback = callback;
@@ -162,7 +212,7 @@ public:
      *  @param  callback    The callback to invoke
      *  @return Same object for chaining
      */
-    DeferredConsumer &onComplete(const CompleteCallback &callback)
+    DeferredPublisher &onComplete(const ReturnedCallback &callback)
     {
         // store callback
         _completeCallback = callback;
