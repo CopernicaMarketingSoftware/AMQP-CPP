@@ -65,8 +65,9 @@ int main()
     MyHandler handler(loop);
     
     // make a connection
-    AMQP::TcpConnection connection(&handler, AMQP::Address("amqp://guest:guest@localhost/"));
-    
+    AMQP::Address address("amqps://guest:guest@localhost/");
+    AMQP::TcpConnection connection(&handler, address);
+        
     // we need a channel too
     AMQP::TcpChannel channel(&connection);
     

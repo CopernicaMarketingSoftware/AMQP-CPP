@@ -73,7 +73,7 @@ public:
         else throw std::runtime_error("AMQP address should start with \"amqp://\" or \"amqps://\"");
 
         // begin of the string was parsed
-        data += 7;
+        data += _authmethod.length();
 
         // do we have a '@' to split user-data and hostname?
         const char *at = (const char *)memchr(data, '@', last - data);
