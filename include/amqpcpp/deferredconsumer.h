@@ -3,7 +3,7 @@
  *
  *  Deferred callback for consumers
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -14,17 +14,22 @@
 /**
  *  Dependencies
  */
-#include "deferredconsumerbase.h"
+#include "deferredextreceiver.h"
 
 /**
  *  Set up namespace
  */
 namespace AMQP {
+    
+/**
+ *  Forward declararions
+ */
+class BasicDeliverFrame;
 
 /**
  *  We extend from the default deferred and add extra functionality
  */
-class DeferredConsumer : public DeferredConsumerBase
+class DeferredConsumer : public DeferredExtReceiver, public std::enable_shared_from_this<DeferredConsumer>
 {
 private:
     /**
@@ -34,6 +39,13 @@ private:
     ConsumeCallback _consumeCallback;
 
     /**
+     *  Process a delivery frame
+     *
+     *  @param  frame   The frame to process
+     */
+    void process(BasicDeliverFrame &frame);
+
+    /**
      *  Report success for frames that report start consumer operations
      *  @param  name            Consumer tag that is started
      *  @return Deferred
@@ -41,12 +53,10 @@ private:
     virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) override;
 
     /**
-     *  Announce that a message has been received
-     *  @param  message The message to announce
-     *  @param  deliveryTag The delivery tag (for ack()ing)
-     *  @param  redelivered Is this a redelivered message
+     *  Get reference to self to prevent that object falls out of scope
+     *  @return std::shared_ptr
      */
-    virtual void announce(const Message &message, uint64_t deliveryTag, bool redelivered) const override;
+    virtual std::shared_ptr<DeferredReceiver> lock() override { return shared_from_this(); }
 
     /**
      *  The channel implementation may call our
@@ -54,11 +64,11 @@ private:
      */
     friend class ChannelImpl;
     friend class ConsumedMessage;
+    friend class BasicDeliverFrame;
 
 public:
     /**
-     *  Protected constructor that can only be called
-     *  from within the channel implementation
+     *  Constructor that should only be called from within the channel implementation
      *
      *  Note: this constructor _should_ be protected, but because make_shared
      *  will then not work, we have decided to make it public after all,
@@ -68,7 +78,7 @@ public:
      *  @param  failed      are we already failed?
      */
     DeferredConsumer(ChannelImpl *channel, bool failed = false) :
-        DeferredConsumerBase(failed, channel) {}
+        DeferredExtReceiver(failed, channel) {}
 
 public:
     /**
@@ -156,11 +166,42 @@ public:
      *  @param  callback    The callback to invoke
      *  @return Same object for chaining
      */
-    DeferredConsumer &onBegin(const BeginCallback &callback)
+    DeferredConsumer &onBegin(const StartCallback &callback)
     {
         // store callback
-        _beginCallback = callback;
+        _startCallback = callback;
 
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register the function that is called when the start frame of a new 
+     *  consumed message is received
+     *
+     *  @param  callback    The callback to invoke
+     *  @return Same object for chaining
+     */
+    DeferredConsumer &onStart(const StartCallback &callback)
+    {
+        // store callback
+        _startCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+    
+    /**
+     *  Register a function that is called when the message size is known
+     * 
+     *  @param  callback    The callback to invoke for message headers
+     *  @return Same object for chaining
+     */
+    DeferredConsumer &onSize(const SizeCallback &callback)
+    {
+        // store callback
+        _sizeCallback = callback;
+        
         // allow chaining
         return *this;
     }
@@ -208,10 +249,25 @@ public:
      *  @param  callback    The callback to invoke
      *  @return Same object for chaining
      */
-    DeferredConsumer &onComplete(const CompleteCallback &callback)
+    DeferredConsumer &onComplete(const DeliveredCallback &callback)
     {
         // store callback
-        _completeCallback = callback;
+        _deliveredCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Register a funtion to be called when a message was completely received
+     *
+     *  @param  callback    The callback to invoke
+     *  @return Same object for chaining
+     */
+    DeferredConsumer &onDelivered(const DeliveredCallback &callback)
+    {
+        // store callback
+        _deliveredCallback = callback;
 
         // allow chaining
         return *this;

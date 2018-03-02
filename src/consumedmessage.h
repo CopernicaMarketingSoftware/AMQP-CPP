@@ -1,8 +1,13 @@
 /**
  *  Base class for a message implementation
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
+
+/**
+ *  Dependencies
+ */
+#include "basicdeliverframe.h"
 
 /**
  *  Set up namespace

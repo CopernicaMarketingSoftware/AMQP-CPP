@@ -1,10 +1,10 @@
 /**
- *  deferredconsumerbase.h
+ *  DeferredReceiver.h
  *
- *  Base class for the deferred consumer and the
- *  deferred get.
+ *  Base class for the deferred consumer, the deferred get and the
+ *  deferred publisher (that may receive returned messages)
  *
- *  @copyright 2016 - 2017 Copernica B.V.
+ *  @copyright 2016 - 2018 Copernica B.V.
  */
 
 /**
@@ -35,9 +35,7 @@ class BodyFrame;
 /**
  *  Base class for deferred consumers
  */
-class DeferredConsumerBase :
-    public Deferred,
-    public std::enable_shared_from_this<DeferredConsumerBase>
+class DeferredReceiver : public Deferred
 {
 private:
     /**
@@ -46,20 +44,27 @@ private:
      */
     uint64_t _bodySize = 0;
 
-    /**
-     *  Process a delivery frame
-     *
-     *  @param  frame   The frame to process
-     */
-    void process(BasicDeliverFrame &frame);
 
+protected:
     /**
-     *  Process a delivery frame from a get request
-     *
-     *  @param  frame   The frame to process
+     *  Initialize the object to send out a message
+     *  @param  exchange            the exchange to which the message was published
+     *  @param  routingkey          the routing key that was used to publish the message
      */
-    void process(BasicGetOKFrame &frame);
+    virtual void initialize(const std::string &exchange, const std::string &routingkey);
+    
+    /**
+     *  Get reference to self to prevent that object falls out of scope
+     *  @return std::shared_ptr
+     */
+    virtual std::shared_ptr<DeferredReceiver> lock() = 0;
+    
+    /**
+     *  Indicate that a message was done
+     */
+    virtual void complete() = 0;
 
+private:
     /**
      *  Process the message headers
      *
@@ -75,39 +80,14 @@ private:
     void process(BodyFrame &frame);
 
     /**
-     *  Indicate that a message was done
-     */
-    void complete();
-
-    /**
-     *  Announce that a message has been received
-     *  @param  message     The message to announce
-     *  @param  deliveryTag The delivery tag (for ack()ing)
-     *  @param  redelivered Is this a redelivered message
-     */
-    virtual void announce(const Message &message, uint64_t deliveryTag, bool redelivered) const = 0;
-
-    /**
      *  Frames may be processed
      */
     friend class ChannelImpl;
-    friend class BasicDeliverFrame;
     friend class BasicGetOKFrame;
     friend class BasicHeaderFrame;
     friend class BodyFrame;
+
 protected:
-    /**
-     *  The delivery tag for the current message
-     *  @var    uint64_t
-     */
-    uint64_t _deliveryTag = 0;
-
-    /**
-     *  Is this a redelivered message
-     *  @var    bool
-     */
-    bool _redelivered = false;
-
     /**
      *  The channel to which the consumer is linked
      *  @var    ChannelImpl
@@ -116,9 +96,15 @@ protected:
 
     /**
      *  Callback for new message
-     *  @var    BeginCallback
+     *  @var    StartCallback
      */
-    BeginCallback _beginCallback;
+    StartCallback _startCallback;
+
+    /**
+     *  Callback that is called when size of the message is known
+     *  @var    SizeCallback
+     */
+    SizeCallback _sizeCallback;
 
     /**
      *  Callback for incoming headers
@@ -133,18 +119,6 @@ protected:
     DataCallback _dataCallback;
 
     /**
-     *  Callback for incoming messages
-     *  @var    MessageCallback
-     */
-    MessageCallback _messageCallback;
-
-    /**
-     *  Callback for when a message was complete finished
-     *  @var    CompleteCallback
-     */
-    CompleteCallback _completeCallback;
-
-    /**
      *  The message that we are currently receiving
      *  @var    stack_ptr<Message>
      */
@@ -152,12 +126,17 @@ protected:
 
     /**
      *  Constructor
-     *
      *  @param  failed  Have we already failed?
      *  @param  channel The channel we are consuming on
      */
-    DeferredConsumerBase(bool failed, ChannelImpl *channel) : Deferred(failed), _channel(channel) {}
+    DeferredReceiver(bool failed, ChannelImpl *channel) : 
+        Deferred(failed), _channel(channel) {}
+
 public:
+    /**
+     *  Destructor
+     */
+    virtual ~DeferredReceiver() = default;
 };
 
 /**

@@ -18,6 +18,7 @@
  *  @param  argv
  *  @return int
  */
+/*
 int main(int argc, const char *argv[])
 {
     // iterate over the arguments
@@ -37,3 +38,4 @@ int main(int argc, const char *argv[])
     // done
     return 0;
 }
+*/
