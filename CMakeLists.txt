@@ -10,7 +10,7 @@
 #       ON:  Build posix handler implementation
 #       OFF: Don't build posix handler implementation
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
 # project name
 project(amqpcpp)
@@ -87,13 +87,13 @@ endif()
 if(AMQP-CPP_BUILD_SHARED)
     # copy shared lib and its static counter part
     install(TARGETS ${PROJECT_NAME}
-            ARCHIVE DESTINATION lib
+            ARCHIVE DESTINATION lib EXPORT ${PROJECT_NAME}Config
             LIBRARY DESTINATION lib
             RUNTIME DESTINATION lib
     )
 else()
     # copy static lib
-    install(TARGETS ${PROJECT_NAME}
+    install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
             ARCHIVE DESTINATION lib
     )
 endif()
@@ -102,3 +102,6 @@ endif()
 install(DIRECTORY include/amqpcpp/ DESTINATION include/amqpcpp
         FILES_MATCHING PATTERN "*.h")
 install(FILES include/amqpcpp.h DESTINATION include)
+
+install(EXPORT ${PROJECT_NAME}Config DESTINATION cmake)
+export(TARGETS ${PROJECT_NAME} FILE ${PROJECT_NAME}Config.cmake)
