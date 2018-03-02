@@ -67,10 +67,11 @@ int main()
     // make a connection
     AMQP::Address address("amqps://guest:guest@localhost/");
     AMQP::TcpConnection connection(&handler, address);
+    
         
     // we need a channel too
     AMQP::TcpChannel channel(&connection);
-    
+
     // create a temporary queue
     channel.declareQueue(AMQP::exclusive).onSuccess([&connection](const std::string &name, uint32_t messagecount, uint32_t consumercount) {
         
