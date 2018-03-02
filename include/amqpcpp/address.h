@@ -23,12 +23,11 @@ namespace AMQP {
 class Address
 {
 private:
-
     /**
      *  The auth method
-     *  @var std::string
+     *  @var bool
      */
-    std::string _authmethod;
+    bool _secure;
     
     /**
      *  Login data (username + password)
@@ -68,12 +67,12 @@ public:
         const char *last = data + size;
 
         // must start with amqp:// or ampqs://
-        if (strncmp(data, "amqps://", 8) == 0) _authmethod = std::string("amqps://");
-        else if (strncmp(data, "amqp://", 7) == 0) _authmethod = std::string("amqp://");
+        if (strncmp(data, "amqps://", 8) == 0) _secure = true;
+        else if (strncmp(data, "amqp://", 7) == 0) _secure = false;
         else throw std::runtime_error("AMQP address should start with \"amqp://\" or \"amqps://\"");
 
         // begin of the string was parsed
-        data += _authmethod.length();
+        data += _secure ? 8 : 7;
 
         // do we have a '@' to split user-data and hostname?
         const char *at = (const char *)memchr(data, '@', last - data);
@@ -138,14 +137,14 @@ public:
 
     /**
      *  Constructor based on already known properties
-     *  @param  authmethod
      *  @param  host
      *  @param  port
      *  @param  login
      *  @param  vhost
+     * 	@param	secure
      */
-    Address(std::string authmethod, std::string host, uint16_t port, Login login, std::string vhost) :
-        _authmethod(std::move(authmethod)),
+    Address(std::string host, uint16_t port, Login login, std::string vhost, bool secure = false) :
+        _secure(secure),
         _login(std::move(login)),
         _hostname(std::move(host)),
         _port(port),
@@ -157,12 +156,12 @@ public:
     virtual ~Address() = default;
 
     /**
-     *  Expose the login data
-     *  @return Login
+     *  Should we open a secure connection?
+     *  @return bool
      */
-    const std::string &authmethod() const
+    bool secure() const
     {
-        return _authmethod;
+        return _secure;
     }
 
     /**
@@ -208,7 +207,7 @@ public:
     operator std::string () const
     {
         // result object
-        std::string str(_authmethod);
+        std::string str(_secure ? "amqps://" : "amqp://");
 
         // append login
         str.append(_login.user()).append(":").append(_login.password()).append("@").append(_hostname);
@@ -233,8 +232,8 @@ public:
      */
     bool operator==(const Address &that) const
     {
-        // auth method should match
-        if (_authmethod != that._authmethod) return false;
+        // security setting should match
+        if (_secure != that._secure) return false;
 
         // logins must match
         if (_login != that._login) return false;
@@ -267,8 +266,8 @@ public:
      */
     bool operator<(const Address &that) const
     {
-        // compare auth methods
-        if (_authmethod != that._authmethod) return _authmethod < that._authmethod;
+        // compare auth methods (amqp comes before amqps)
+        if (_secure != that._secure) return !_secure;
         
         // compare logins
         if (_login != that._login) return _login < that._login;
@@ -295,7 +294,7 @@ public:
     friend std::ostream &operator<<(std::ostream &stream, const Address &address)
     {
         // start with the protocol and login
-        stream << address._authmethod << address._login;
+        stream << (address._secure ? "amqps://" : "amqp://");
 
         // do we need a special portnumber?
         if (address._port != 5672) stream << ":" << address._port;

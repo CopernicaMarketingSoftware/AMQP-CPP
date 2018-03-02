@@ -40,6 +40,12 @@ private:
     std::string _hostname;
     
     /**
+     *  Should we be using a secure connection?
+     *  @var bool
+     */
+    bool _secure;
+    
+    /**
      *  The portnumber to connect to
      *  @var uint16_t
      */
@@ -142,11 +148,13 @@ public:
      *  @param  connection  Parent connection object
      *  @param  hostname    The hostname for the lookup
      *  @param  portnumber  The portnumber for the lookup
+     * 	@param	secure		Do we need a secure tls connection when ready?
      *  @param  handler     User implemented handler object
      */
-    TcpResolver(TcpConnection *connection, const std::string &hostname, uint16_t port, TcpHandler *handler) : 
+    TcpResolver(TcpConnection *connection, const std::string &hostname, uint16_t port, bool secure, TcpHandler *handler) : 
         TcpState(connection, handler), 
         _hostname(hostname),
+        _secure(secure),
         _port(port)
     {
         // tell the event loop to monitor the filedescriptor of the pipe
@@ -183,7 +191,14 @@ public:
         if (fd != _pipe.in() || !(flags & readable)) return this;
 
         // do we have a valid socket?
-        if (_socket >= 0) return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
+        if (_socket >= 0) 
+        {
+			// if we need a secure connection, we move to the tls handshake
+			//if (_secure) return new TcpSslHandshake(....);
+			
+			// otherwise we have a valid regular tcp connection
+			return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
+		}
         
         // report error
         _handler->onError(_connection, _error.data());
@@ -202,7 +217,14 @@ public:
         _thread.join();
         
         // do we have a valid socket?
-        if (_socket >= 0) return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
+        if (_socket >= 0) 
+        {
+			// if we need a secure connection, we move to the tls handshake
+			//if (_secure) return new TcpSslHandshake(....);
+			
+			// otherwise we have a valid regular tcp connection
+			return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
+		}
         
         // report error
         _handler->onError(_connection, _error.data());
