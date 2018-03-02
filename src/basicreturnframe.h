@@ -1,7 +1,7 @@
 /**
  *  Class describing a basic return frame
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -155,8 +155,23 @@ public:
      */
     virtual bool process(ConnectionImpl *connection) override
     {
-        // we no longer support returned messages
-        return false;
+        // we need the appropriate channel
+        auto channel = connection->channel(this->channel());
+
+        // channel does not exist
+        if (!channel) return false;
+        
+        // get the current publisher
+        auto publisher = channel->publisher();
+        
+        // if there is no deferred publisher, we can just as well stop
+        if (publisher == nullptr) return false;
+        
+        // initialize the object, because we're about to receive a message
+        publisher->process(*this);
+        
+        // done
+        return true;
     }
 };
 

@@ -1,7 +1,7 @@
 /**
  *  Class describing a basic get ok frame
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -170,14 +170,17 @@ public:
         // channel does not exist
         if (!channel) return false;
 
-        // report success for the get operation
-        channel->reportSuccess(messageCount(), deliveryTag(), redelivered());
+        // report success for the get operation (this will also update the current receiver!)
+        channel->reportSuccess(messageCount(), _deliveryTag, redelivered());
 
-        // check if we have a valid consumer
-        if (!channel->consumer()) return false;
+        // get the current receiver object
+        auto *receiver = channel->receiver();
 
-        // pass on to consumer
-        channel->consumer()->process(*this);
+        // check if we have a valid receiver
+        if (receiver == nullptr) return false;
+
+        // initialize the receiver for the upcoming message
+        receiver->initialize(_exchange, _routingKey);
 
         // done
         return true;

@@ -44,7 +44,9 @@ add_sources(
     consumedmessage.h
     deferredcancel.cpp
     deferredconsumer.cpp
-    deferredconsumerbase.cpp
+    deferredreceiver.cpp
+    deferredextreceiver.cpp
+    deferredpublisher.cpp
     deferredget.cpp
     exchangebindframe.h
     exchangebindokframe.h

@@ -7,7 +7,7 @@
  *  Message objects can not be constructed by end users, they are only constructed
  *  by the AMQP library, and passed to user callbacks.
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -31,7 +31,7 @@ namespace AMQP {
 /**
  *  Forward declarations
  */
-class DeferredConsumerBase;
+class DeferredReceiver;
 
 /**
  *  Class definition
@@ -61,7 +61,7 @@ protected:
     /**
      *  We are an open book to the consumer handler
      */
-    friend class DeferredConsumerBase;
+    friend class DeferredReceiver;
 
     /**
      *  Set the body size

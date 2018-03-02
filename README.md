@@ -799,44 +799,54 @@ in almost any form:
 ````c++
 /**
  *  Publish a message to an exchange
- *
- *  The following flags can be used
- *
- *      -   mandatory   if set, an unroutable message will be sent back to
- *                      the client (currently not supported)
- *
- *      -   immediate   if set, a message that could not immediately be consumed
- *                      is returned to the client (currently not supported)
- *
- *  If either of the two flags is set, and the message could not immediately
- *  be published, the message is returned by the server to the client. However,
- *  at this moment in time, the AMQP-CPP library does not support catching
- *  such returned messages.
- *
+ * 
+ *  You have to supply the name of an exchange and a routing key. RabbitMQ will 
+ *  then try to send the message to one or more queues. With the optional flags 
+ *  parameter you can specify what should happen if the message could not be routed 
+ *  to a queue. By default, unroutable message are silently discarded.
+ * 
+ *  This method returns a reference to a DeferredPublisher object. You can use 
+ *  this returned object to install callbacks that are called when an undeliverable 
+ *  message is returned, or to set the callback that is called when the server 
+ *  confirms that the message was received. 
+ * 
+ *  To enable handling returned messages, or to enable publisher-confirms, you must 
+ *  not only set the callback, but also pass in appropriate flags to enable this 
+ *  feature. If you do not pass in these flags, your callbacks will not be called. 
+ *  If you are not at all interested in returned messages or publish-confirms, you 
+ *  can ignore the flag and the returned object.
+ * 
+ *  Watch out: the channel returns _the same_ DeferredPublisher object for all 
+ *  calls to the publish() method. This means that the callbacks that you install 
+ *  for the first published message are also used for subsequent messages _and_ 
+ *  it means that if you install a different callback for a later publish 
+ *  operation, it overwrites your earlier callbacks 
+ * 
+ *  The following flags can be supplied:
+ * 
+ *      -   mandatory   If set, server returns messages that are not sent to a queue
+ *      -   immediate   If set, server returns messages that can not immediately be forwarded to a consumer. 
+ * 
  *  @param  exchange    the exchange to publish to
  *  @param  routingkey  the routing key
- *  @param  flags       optional flags (see above)
  *  @param  envelope    the full envelope to send
  *  @param  message     the message to send
  *  @param  size        size of the message
+ *  @param  flags       optional flags
  */
-bool publish(const std::string &exchange, const std::string &routingKey, int flags, const AMQP::Envelope &envelope);
-bool publish(const std::string &exchange, const std::string &routingKey, const AMQP::Envelope &envelope);
-bool publish(const std::string &exchange, const std::string &routingKey, int flags, const std::string &message);
-bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message);
-bool publish(const std::string &exchange, const std::string &routingKey, int flags, const char *message, size_t size);
-bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size);
+DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0) { return _implementation->publish(exchange, routingKey, envelope, flags); }
+DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message.data(), message.size()), flags); }
+DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, size), flags); }
+DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, strlen(message)), flags); }
 ````
 
 Published messages are normally not confirmed by the server, and the RabbitMQ
 will not send a report back to inform you whether the message was succesfully
-published or not. Therefore the publish method does not return a Deferred
-object.
+published or not. But with the flags you can instruct RabbitMQ to send back
+the message if it was undeliverable.
 
-As long as no error is reported via the Channel::onError() method, you can safely
-assume that your messages were delivered.
-
-This can of course be a problem when you are publishing many messages. If you get
+You can also use transactions to ensure that your messages get delivered.
+Let's say that you are publishing many messages in a row. If you get
 an error halfway through there is no way to know for sure how many messages made
 it to the broker and how many should be republished. If this is important, you can
 wrap the publish commands inside a transaction. In this case, if an error occurs,
@@ -1002,7 +1012,6 @@ need additional attention:
     -   ability to set up secure connections (or is this fully done on the IO level)
     -   login with other protocols than login/password
     -   publish confirms
-    -   returned messages
 
 We also need to add more safety checks so that strange or invalid data from
 RabbitMQ does not break the library (although in reality RabbitMQ only sends

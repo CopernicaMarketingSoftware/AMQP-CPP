@@ -3,14 +3,33 @@
  *
  *  Implementation file for the DeferredConsumer class
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 #include "includes.h"
+#include "basicdeliverframe.h"
 
 /**
  *  Namespace
  */
 namespace AMQP {
+
+/**
+ *  Process a delivery frame
+ *
+ *  @param  frame   The frame to process
+ */
+void DeferredConsumer::process(BasicDeliverFrame &frame)
+{
+    // this object will handle all future frames with header and body data
+    _channel->install(shared_from_this());
+    
+    // retrieve the delivery tag and whether we were redelivered
+    _deliveryTag = frame.deliveryTag();
+    _redelivered = frame.redelivered();
+
+    // initialize the object for the next message
+    initialize(frame.exchange(), frame.routingKey());
+}
 
 /**
  *  Report success for frames that report start consumer operations
@@ -30,18 +49,6 @@ const std::shared_ptr<Deferred> &DeferredConsumer::reportSuccess(const std::stri
 
     // return next object
     return _next;
-}
-
-/**
- *  Announce that a message was received
- *  @param  message     The message to announce
- *  @param  deliveryTag The delivery tag (for ack()ing)
- *  @param  redelivered Is this a redelivered message
- */
-void DeferredConsumer::announce(const Message &message, uint64_t deliveryTag, bool redelivered) const
-{
-    // simply execute the message callback
-    _messageCallback(message, deliveryTag, redelivered);
 }
 
 /**

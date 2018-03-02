@@ -341,17 +341,42 @@ public:
 
     /**
      *  Publish a message to an exchange
-     *
+     * 
+     *  You have to supply the name of an exchange and a routing key. RabbitMQ will then try
+     *  to send the message to one or more queues. With the optional flags parameter you can
+     *  specify what should happen if the message could not be routed to a queue. By default,
+     *  unroutable message are silently discarded.
+     * 
+     *  This method returns a reference to a DeferredPublisher object. You can use this returned
+     *  object to install callbacks that are called when an undeliverable message is returned, or 
+     *  to set the callback that is called when the server confirms that the message was received. 
+     * 
+     *  To enable handling returned messages, or to enable publisher-confirms, you must not only
+     *  set the callback, but also pass in appropriate flags to enable this feature. If you do not 
+     *  pass in these flags, your callbacks will not be called. If you are not at all interested
+     *  in returned messages or publish-confirms, you can ignore the flag and the returned object.
+     * 
+     *  Watch out: the channel returns _the same_ DeferredPublisher object for all calls to the 
+     *  publish() method. This means that the callbacks that you install for the first published 
+     *  message are also used for subsequent messages _and_ it means that if you install a different 
+     *  callback for a later publish operation, it overwrites your earlier callbacks 
+     * 
+     *  The following flags can be supplied:
+     * 
+     *      -   mandatory   If set, server returns messages that are not sent to a queue
+     *      -   immediate   If set, server returns messages that can not immediately be forwarded to a consumer. 
+     * 
      *  @param  exchange    the exchange to publish to
      *  @param  routingkey  the routing key
      *  @param  envelope    the full envelope to send
      *  @param  message     the message to send
      *  @param  size        size of the message
+     *  @param  flags       optional flags
      */
-    bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope) { return _implementation->publish(exchange, routingKey, envelope); }
-    bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message) { return _implementation->publish(exchange, routingKey, Envelope(message.data(), message.size())); }
-    bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size) { return _implementation->publish(exchange, routingKey, Envelope(message, size)); }
-    bool publish(const std::string &exchange, const std::string &routingKey, const char *message) { return _implementation->publish(exchange, routingKey, Envelope(message, strlen(message))); }
+    DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0) { return _implementation->publish(exchange, routingKey, envelope, flags); }
+    DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message.data(), message.size()), flags); }
+    DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, size), flags); }
+    DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, strlen(message)), flags); }
 
     /**
      *  Set the Quality of Service (QOS) for this channel
