@@ -6,7 +6,7 @@
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
  *  @copyright 2015 Copernica BV
  */
-
+ 
 /**
  *  Include guard
  */
@@ -23,6 +23,13 @@ namespace AMQP {
 class Address
 {
 private:
+
+    /**
+     *  The auth method
+     *  @var std::string
+     */
+    std::string _authmethod;
+    
     /**
      *  Login data (username + password)
      *  @var Login
@@ -60,8 +67,10 @@ public:
         // position of the last byte
         const char *last = data + size;
 
-        // must start with amqp://
-        if (size < 7 || strncmp(data, "amqp://", 7) != 0) throw std::runtime_error("AMQP address should start with \"amqp://\"");
+        // must start with amqp:// or ampqs://
+        if (strncmp(data, "amqps://", 8) == 0) _authmethod = std::string("amqps://");
+        else if (strncmp(data, "amqp://", 7) == 0) _authmethod = std::string("amqp://");
+        else throw std::runtime_error("AMQP address should start with \"amqp://\" or \"amqps://\"");
 
         // begin of the string was parsed
         data += 7;
@@ -115,7 +124,7 @@ public:
 
     /**
      *  Constructor to parse an address string
-     *  The address should start with "amqp://
+     *  The address should start with amqp:// or amqps://
      *  @param  data
      *  @throws std::runtime_error
      */
@@ -129,12 +138,14 @@ public:
 
     /**
      *  Constructor based on already known properties
+     *  @param  authmethod
      *  @param  host
      *  @param  port
      *  @param  login
      *  @param  vhost
      */
-    Address(std::string host, uint16_t port, Login login, std::string vhost) :
+    Address(std::string authmethod, std::string host, uint16_t port, Login login, std::string vhost) :
+        _authmethod(std::move(authmethod)),
         _login(std::move(login)),
         _hostname(std::move(host)),
         _port(port),
@@ -144,6 +155,15 @@ public:
      *  Destructor
      */
     virtual ~Address() = default;
+
+    /**
+     *  Expose the login data
+     *  @return Login
+     */
+    const std::string &authmethod() const
+    {
+        return _authmethod;
+    }
 
     /**
      *  Expose the login data
@@ -183,12 +203,12 @@ public:
 
     /**
      *  Cast to a string
-     *  @return std:string
+     *  @return std::string
      */
     operator std::string () const
     {
         // result object
-        std::string str("amqp://");
+        std::string str(_authmethod);
 
         // append login
         str.append(_login.user()).append(":").append(_login.password()).append("@").append(_hostname);
@@ -213,6 +233,9 @@ public:
      */
     bool operator==(const Address &that) const
     {
+        // auth method should match
+        if (_authmethod != that._authmethod) return false;
+
         // logins must match
         if (_login != that._login) return false;
 
@@ -244,6 +267,9 @@ public:
      */
     bool operator<(const Address &that) const
     {
+        // compare auth methods
+        if (_authmethod != that._authmethod) return _authmethod < that._authmethod;
+        
         // compare logins
         if (_login != that._login) return _login < that._login;
         
@@ -269,7 +295,7 @@ public:
     friend std::ostream &operator<<(std::ostream &stream, const Address &address)
     {
         // start with the protocol and login
-        stream << "amqp://" << address._login;
+        stream << address._authmethod << address._login;
 
         // do we need a special portnumber?
         if (address._port != 5672) stream << ":" << address._port;
