@@ -16,10 +16,12 @@
  *  Dependencies
  */
 #include "tcpoutbuffer.h"
+#include "tcpsslconnected.h"
+#include "wait.h"
 
+#include <openssl/err.h>
 #include <openssl/ssl.h>
 #include <copernica/dynamic.h>
-
 #include <iostream>
 
 /**
@@ -33,7 +35,12 @@ namespace AMQP {
 class TcpSslHandshake : public TcpState, private Watchable
 {
 private:
-
+    /**
+     *  SSL context
+     *  @var SSL_CTX
+     */
+    SSL_CTX *ctx;
+    
     /**
      *  SSL structure
      *  @var SSL
@@ -53,7 +60,6 @@ private:
     TcpOutBuffer _out;
     
     
-    
     /**
      *  Helper method to report an error
      *  @return TcpState*
@@ -67,7 +73,7 @@ private:
         _handler->onError(_connection, "failed to setup ssl connection");
         
         // close the socket
-        close(_socket);
+        close(_socket);	
         
         // done, go to the closed state
         return new TcpClosed(_connection, _handler);
@@ -83,30 +89,6 @@ private:
         // if the object is still in a valid state, we can move to the close-state, 
         // otherwise there is no point in moving to a next state
         return monitor.valid() ? new TcpClosed(this) : nullptr;
-    }
-    
-    /**
-     *  Wait until the socket is writable
-     *  @return bool
-     */
-    bool wait4writable()
-    {
-        // we need the fd-sets
-        fd_set readables, writables, exceptions;
-        
-        // initialize all the sets
-        FD_ZERO(&readables);
-        FD_ZERO(&writables);
-        FD_ZERO(&exceptions);
-        
-        // add the one socket
-        FD_SET(_socket, &writables);
-        
-        // wait for the socket
-        auto result = select(_socket + 1, &readables, &writables, &exceptions, nullptr);
-        
-        // check for success
-        return result == 0;
     }
     
 public:
@@ -126,22 +108,29 @@ public:
         TcpState(connection, handler),
         _socket(socket),
         _out(std::move(buffer))
-    {
+    {		
+		// init the SSL library
 		SSL_library_init();
 		
+		// create ssl context 
+		ctx = SSL_CTX_new(TLS_client_method());
+		
 		// create ssl object
-		_ssl = SSL_new(SSL_CTX_new(TLS_client_method()));
-
+		_ssl = SSL_new(ctx);
+		
 		// leap out on error
 		if (_ssl == nullptr) throw std::runtime_error("ERROR: SSL structure is null");
-
+        
 		// we will be using the ssl context as a client
-		// @todo check return value
 		SSL_set_connect_state(_ssl);
 		
+		
 		// associate the ssl context with the socket filedescriptor
-		// @todo check return value
-		SSL_set_fd(_ssl, socket);
+		int set_fd_ret = SSL_set_fd(_ssl, socket);
+		if (set_fd_ret == 0) {
+			reportError();
+			std::cout << "error while setting file descriptor" << std::endl;
+		}
 		
 		// we are going to wait until the socket becomes writable before we start the handshake
         _handler->monitor(_connection, _socket, writable);
@@ -153,7 +142,8 @@ public:
     virtual ~TcpSslHandshake() noexcept
     {
         // close the socket
-        close(_socket);
+        // @todo only if really closed
+        //close(_socket);
     }
 
     /**
@@ -175,38 +165,57 @@ public:
 
 		// start the ssl handshake
 		int result = SSL_do_handshake(_ssl);
-		
+				
 		// if the connection succeeds, we can move to the ssl-connected state
-		// @todo we need the sslconnected state object
-		if (result == 1) return this; // new TcpSslConnected(connection, socket, _ssl, std::move(_out), _handler);
+		if (result == 1) return new TcpSslConnected(_connection, _socket, _ssl, std::move(_out), _handler);
 		
 		// if there is a failure, we must close down the connection
-		if (result == 0) return reportError();
-		
-		// -1 was returned, so we must investigate what is going on
-		auto error = SSL_get_error(_ssl, result);
+		if (result <= 0) 
+		{
+			// error was returned, so we must investigate what is going on
+			auto error = SSL_get_error(_ssl, result);
+							
+			// check the error
+			switch (error) {
+			case SSL_ERROR_WANT_READ:
+				// the handshake must be repeated when socket is readable, wait for that
+				std::cout << "wait for readability" << std::endl;
+				_handler->monitor(_connection, _socket, readable);
+				break;
 			
-		// check the error
-		switch (error) {
-		case SSL_ERROR_WANT_READ:
-			// the handshake must be repeated when socket is readable, wait for that
-			std::cout << "wait for readability" << std::endl;
-			_handler->monitor(_connection, _socket, readable);
-			break;
-		
-		case SSL_ERROR_WANT_WRITE:
-			// the handshake must be repeated when socket is readable, wait for that
-			std::cout << "wait for writability" << std::endl;
-			_handler->monitor(_connection, _socket, writable);
-			break;
-		
-		default:
-			// @todo implement handling other error states
-			std::cout << "unknown error state " << error << std::endl;
-			// @todo we have to close the connection
-			return reportError();
+			case SSL_ERROR_WANT_WRITE:
+				// the handshake must be repeated when socket is readable, wait for that
+				std::cout << "wait for writability" << std::endl;
+				_handler->monitor(_connection, _socket, writable);
+				break;
+			
+			case SSL_ERROR_WANT_ACCEPT:
+				// the BIO was not connected yet, the SSL function should be called again
+				std::cout << "wait for acceptability" << ERR_error_string(ERR_get_error(), nullptr)  << std::endl;
+				_handler->monitor(_connection, _socket, writable);
+				
+				break;
+			case  SSL_ERROR_WANT_X509_LOOKUP:
+				std::cout << "SSL_ERROR_WANT_X509_LOOKUP" << ERR_error_string(ERR_get_error(), nullptr)  << std::endl;
+				_handler->monitor(_connection, _socket, writable);
+				
+				break;
+			case SSL_ERROR_SYSCALL:
+				std::cout << "SSL_ERROR_SYSCALL: " << ERR_error_string(ERR_get_error(), nullptr) << std::endl;
+				_handler->monitor(_connection, _socket, writable);
+				
+				break;
+			case  SSL_ERROR_SSL:
+				std::cout << "SSL_ERROR_SSL" << ERR_error_string(ERR_get_error(), nullptr)  << std::endl;
+				_handler->monitor(_connection, _socket, writable);
+				
+				break;
+			default:
+				std::cout << "unknown error state " << error << std::endl;
+				return reportError();
+			}
 		}
-	
+		
         // keep same object
         return this;
     }
@@ -218,9 +227,8 @@ public:
      */
     virtual void send(const char *buffer, size_t size) override
     {
-		
-		// @todo because the handshake is still busy, outgoing data must be cached
-		
+		// the handshake is still busy, outgoing data must be cached
+		_out.add(buffer, size);	
     }
     
     /**
@@ -229,37 +237,48 @@ public:
      */
     virtual TcpState *flush() override
     {
-		// @todo implementation?
-		return nullptr;
-    }
-
-    /**
-     *  Report that heartbeat negotiation is going on
-     *  @param  heartbeat   suggested heartbeat
-     *  @return uint16_t    accepted heartbeat
-     */
-    virtual uint16_t reportNegotiate(uint16_t heartbeat) override
-    {
-		/*
-		 *  @todo what should we do here?
+		// create an object to wait for the filedescriptor to becomes active
+		Wait wait(_socket);
 		
-        // remember that we have to reallocated (_in member can not be accessed because it is moved away)
-        _reallocate = _connection->maxFrame();
-        
-        // pass to base
-        return TcpState::reportNegotiate(heartbeat);
-        */
-        
-        return 0;
-    }
+		// keep looping
+		while (true)
+		{
+			// start the ssl handshake
+			int result = SSL_do_handshake(_ssl);
+		
+			// if the connection succeeds, we can move to the ssl-connected state
+			if (result == 1) return new TcpSslConnected(_connection, _socket, _ssl, std::move(_out), _handler);
+		
+			// error was returned, so we must investigate what is going on
+			auto error = SSL_get_error(_ssl, result);
+			
+			// check the error
+			switch (error) {
+			case SSL_ERROR_WANT_READ:
+				// wait for the socket to become readable
+				if (!wait.readable()) return reportError();
+				break;
+			
+			case SSL_ERROR_WANT_WRITE:
+				// wait for the socket to become writable
+				if (!wait.writable()) return reportError();
+				break;
+
+			default:
+				// report an error
+				return reportError();
+			}
+		}
+		
+        // keep same object (we never reach this code)
+        return this;
+	}
 
     /**
      *  Report to the handler that the connection was nicely closed
      */
     virtual void reportClosed() override
     {
-		/*
-		
         // we no longer have to monitor the socket
         _handler->monitor(_connection, _socket, 0);
 
@@ -277,7 +296,6 @@ public:
         
         // notify to handler
         handler->onClosed(_connection);
-        */
     }
 };
     

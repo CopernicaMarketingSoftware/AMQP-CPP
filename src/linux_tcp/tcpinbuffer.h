@@ -107,6 +107,20 @@ public:
         // done
         return result;
     }
+
+    /**
+     *  Receive data from a socket
+     *  @param  ssl          	ssl wrapped socket to read from
+     *  @param  expected        number of bytes that the library expects
+     *  @return ssize_t
+     */
+	/*
+    ssize_t receivefrom(SSL *ssl, uint32_t expected)
+    {
+		// @todo implementation
+		return 0;
+	}
+	*/
     
     /**
      *  Shrink the buffer (in practice this is always called with the full buffer size)

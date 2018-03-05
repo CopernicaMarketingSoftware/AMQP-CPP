@@ -4,7 +4,7 @@
  *  An AMQP address in the "amqp://user:password@hostname:port/vhost" notation
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
  
 /**
@@ -66,10 +66,11 @@ public:
         // position of the last byte
         const char *last = data + size;
 
-        // must start with amqp:// or ampqs://
-        if (strncmp(data, "amqps://", 8) == 0) _secure = true;
-        else if (strncmp(data, "amqp://", 7) == 0) _secure = false;
-        else throw std::runtime_error("AMQP address should start with \"amqp://\" or \"amqps://\"");
+        // must start with ampqs:// to have a secure connection (and we also assign a different default port)
+        if ((_secure = strncmp(data, "amqps://", 8) == 0)) _port = 5671;
+
+		// otherwise protocol must be amqp://
+        else if (strncmp(data, "amqp://", 7) != 0) throw std::runtime_error("AMQP address should start with \"amqp://\" or \"amqps://\"");
 
         // begin of the string was parsed
         data += _secure ? 8 : 7;

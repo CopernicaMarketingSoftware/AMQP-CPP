@@ -20,7 +20,6 @@
 #include "tcpstate.h"
 #include "tcpclosed.h"
 #include "tcpconnected.h"
-#include "tcpsslhandshake.h"
 #include <thread>
 
 /**
@@ -195,7 +194,7 @@ public:
         if (_socket >= 0) 
         {
 			// if we need a secure connection, we move to the tls handshake
-			if (_secure) return new TcpSslHandshake(_connection, _socket, std::move(_buffer), _handler);
+			//if (_secure) return new TcpSslHandshake(_connection, _socket, std::move(_buffer), _handler);
 			
 			// otherwise we have a valid regular tcp connection
 			return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
@@ -221,7 +220,7 @@ public:
         if (_socket >= 0) 
         {
 			// if we need a secure connection, we move to the tls handshake
-			if (_secure) return new TcpSslHandshake(_connection, _socket, std::move(_buffer), _handler);
+			//if (_secure) return new TcpSslHandshake(_connection, _socket, std::move(_buffer), _handler);
 			
 			// otherwise we have a valid regular tcp connection
 			return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);

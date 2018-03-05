@@ -5,7 +5,7 @@
  *  the hostname was resolved into an IP address
  * 
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2016 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
 /**
@@ -18,6 +18,7 @@
  */
 #include "tcpoutbuffer.h"
 #include "tcpinbuffer.h"
+#include "wait.h"
 
 /**
  *  Set up namespace
@@ -81,30 +82,6 @@ private:
         // if the object is still in a valid state, we can move to the close-state, 
         // otherwise there is no point in moving to a next state
         return monitor.valid() ? new TcpClosed(this) : nullptr;
-    }
-    
-    /**
-     *  Wait until the socket is writable
-     *  @return bool
-     */
-    bool wait4writable()
-    {
-        // we need the fd-sets
-        fd_set readables, writables, exceptions;
-        
-        // initialize all the sets
-        FD_ZERO(&readables);
-        FD_ZERO(&writables);
-        FD_ZERO(&exceptions);
-        
-        // add the one socket
-        FD_SET(_socket, &writables);
-        
-        // wait for the socket
-        auto result = select(_socket + 1, &readables, &writables, &exceptions, nullptr);
-        
-        // check for success
-        return result == 0;
     }
     
 public:
@@ -242,11 +219,14 @@ public:
      */
     virtual TcpState *flush() override
     {
+		// create an object to wait for the filedescriptor to becomes active
+		Wait wait(_socket);
+
         // keep running until the out buffer is empty
         while (_out)
         {
             // poll the socket, is it already writable?
-            if (!wait4writable()) return this;
+            if (!wait.writable()) return this;
             
             // socket is writable, send as much data as possible
             auto *newstate = process(_socket, writable);
