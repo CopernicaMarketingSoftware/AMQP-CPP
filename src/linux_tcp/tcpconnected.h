@@ -180,7 +180,10 @@ public:
             _in = std::move(buffer);
             
             // do we have to reallocate?
-            if (_reallocate) { _in.reallocate(_reallocate); _reallocate = 0; }
+            if (_reallocate) _in.reallocate(_reallocate); 
+            
+            // we can remove the reallocate instruction
+            _reallocate = 0;
         }
         
         // keep same object
@@ -246,7 +249,7 @@ public:
      */
     virtual uint16_t reportNegotiate(uint16_t heartbeat) override
     {
-        // remember that we have to reallocated (_in member can not be accessed because it is moved away)
+        // remember that we have to reallocate (_in member can not be accessed because it is moved away)
         _reallocate = _connection->maxFrame();
         
         // pass to base

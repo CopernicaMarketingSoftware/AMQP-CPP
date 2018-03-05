@@ -17,7 +17,8 @@
 #include "tcpoutbuffer.h"
 #include "tcpinbuffer.h"
 #include "wait.h"
-#include <openssl/ssl.h>
+#include "tcpssl.h"
+#include "tcpsslclose.h"
 
 /**
  * Set up namespace
@@ -27,14 +28,14 @@ namespace AMQP {
 /** 
  * Class definition
  */	
-class TcpSslConnected: public TcpState, private Watchable 
+class TcpSslConnected : public TcpState, private Watchable 
 {
 private:
 	/**
 	 *  The SSL context
-	 *  @var SSL*
+	 *  @var TcpSsl
 	 */
-	SSL *_ssl;
+	TcpSsl _ssl;
 
 	/** 
 	 * 	Socket file descriptor
@@ -63,6 +64,18 @@ private:
 		state_sending,
 		state_receiving
 	} _state;
+    
+    /**
+     *  Is the object already closed?
+     *  @var bool
+     */
+    bool _closed = false;
+
+    /**
+     *  Cached reallocation instruction
+     *  @var size_t
+     */
+    size_t _reallocate = 0;
 	
 
 	/**
@@ -71,9 +84,6 @@ private:
      */
     bool reportError()
     {
-        // some errors are ok and do not (necessarily) mean that we're disconnected
-        if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) return false;
-        
         // we have an error - report this to the user
         _handler->onError(_connection, strerror(errno));
         
@@ -94,7 +104,8 @@ private:
     }
 	
 	/**
-	 *  Proceed with the previous operation, possibly changing the monitor
+	 *  Proceed with the next operation after the previous operation was
+     *  a success, possibly changing the filedescriptor-monitor
 	 * 	@return TcpState*
 	 */
 	TcpState *proceed()
@@ -106,8 +117,16 @@ private:
 			_state = state_sending;
 		
 			// let's wait until the socket becomes writable
-			_handler->monitor(_connection, _socket, readable);
+			_handler->monitor(_connection, _socket, readable | writable);
 		}
+        else if (_closed)
+        {
+            // we forget the current handler to prevent that things are changed
+            _handler = nullptr;
+            
+            // start the state that closes the connection
+            return new TcpSslClose(_connection, _socket, _ssl, _handler);
+        }
 		else
 		{
 			// outgoing buffer is empty, we're idle again waiting for further input
@@ -140,7 +159,7 @@ private:
 		
 		case SSL_ERROR_WANT_WRITE:
 			// wait until socket becomes writable again
-			_handler->monitor(_connection, _socket, writable);
+			_handler->monitor(_connection, _socket, readable | writable);
 			return this;
 			
 		default:
@@ -149,18 +168,53 @@ private:
 			return this;
 		}
 	}
-	
+    
+    /**
+     *  Parse the received buffer
+     *  @param  size
+     *  @return TcpState
+     */
+    TcpState *parse(size_t size)
+    {
+        // we need a local copy of the buffer - because it is possible that "this"
+        // object gets destructed halfway through the call to the parse() method
+        TcpInBuffer buffer(std::move(_in));
+        
+        // because the object might soon be destructed, we create a monitor to check this
+        Monitor monitor(this);
+        
+        // parse the buffer
+        auto processed = _connection->parse(buffer);
+
+        // "this" could be removed by now, check this
+        if (!monitor.valid()) return nullptr;
+        
+        // shrink buffer
+        buffer.shrink(processed);
+        
+        // restore the buffer as member
+        _in = std::move(buffer);
+        
+        // do we have to reallocate?
+        if (_reallocate) _in.reallocate(_reallocate); 
+        
+        // we can remove the reallocate instruction
+        _reallocate = 0;
+        
+        // done
+        return this;
+    }
 	
 public:
 	/**
-	 * Constructor
-	 * @param	connection 	Parent TCP connection object
-	 * @param	socket		The socket filedescriptor
-	 * @param	ssl			The SSL structure
-	 * @param	buffer		The buffer that was already built
-	 * @param	handler		User-supplied handler object
+	 *  Constructor
+	 *  @param	connection 	Parent TCP connection object
+	 *  @param	socket		The socket filedescriptor
+	 *  @param	ssl			The SSL structure
+	 *  @param	buffer		The buffer that was already built
+	 *  @param	handler		User-supplied handler object
 	 */
-	TcpSslConnected(TcpConnection *connection, int socket, SSL *ssl, TcpOutBuffer &&buffer, TcpHandler *handler) : 
+	TcpSslConnected(TcpConnection *connection, int socket, const TcpSsl &ssl, TcpOutBuffer &&buffer, TcpHandler *handler) : 
 		TcpState(connection, handler),
 		_ssl(ssl),
         _socket(socket),
@@ -213,7 +267,7 @@ public:
 			// try to send more data from the outgoing buffer
 			auto result = _out.sendto(_ssl);
 			
-			// if this is a success, we may have to update the monitor
+			// if this is a success, we can proceed with the event loop
 			if (result > 0) return proceed();
 			
 			// the operation failed, we may have to repeat our call
@@ -225,18 +279,11 @@ public:
             auto result = _in.receivefrom(_ssl, _connection->expected());
 
 			// if this is a success, we may have to update the monitor
-			// @todo also parse the buffer
-			if (result > 0) return proceed();
+			if (result > 0) return parse(result);
 			
 			// the operation failed, we may have to repeat our call
 			else return repeat(result);
-
-			// we're busy with receiving data
-			// @todo check this
         }
-        
-        // keep same object
-		return this;
     }
 
     /**
@@ -253,8 +300,40 @@ public:
 		// for that operation to complete before we can move on
 		if (_state != state_idle) return;
 		
+        // object is now busy sending
+        _state = state_sending;
+        
 		// let's wait until the socket becomes writable
-		_handler->monitor(_connection, _socket, writable);
+		_handler->monitor(_connection, _socket, readable | writable);
+    }
+
+    /**
+     *  Report that heartbeat negotiation is going on
+     *  @param  heartbeat   suggested heartbeat
+     *  @return uint16_t    accepted heartbeat
+     */
+    virtual uint16_t reportNegotiate(uint16_t heartbeat) override
+    {
+        // remember that we have to reallocate (_in member can not be accessed because it is moved away)
+        _reallocate = _connection->maxFrame();
+        
+        // pass to base
+        return TcpState::reportNegotiate(heartbeat);
+    }
+
+    /**
+     *  Report to the handler that the connection was nicely closed
+     */
+    virtual void reportClosed() override
+    {
+        // remember that the object is closed
+        _closed = true;
+        
+        // if the previous operation is still in progress
+        if (_state != state_idle) return;
+        
+        // wait until the connection is writable
+        _handler->monitor(_connection, _socket, writable);
     }
 }; 
 

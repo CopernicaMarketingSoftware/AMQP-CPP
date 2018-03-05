@@ -8,7 +8,7 @@
  *  case the connection object should stop further handling the data. This
  *  monitor class is used to check if the connection has been destructed.
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -74,6 +74,24 @@ public:
     {
         // remove from watchable
         if (_watchable) _watchable->remove(this);
+    }
+
+    /**
+     *  Cast to boolean: is object in valid state?
+     *  @return bool
+     */
+    operator bool () const
+    {
+        return _watchable != nullptr;
+    }
+    
+    /**
+     *  Negate operator: is the object in an invalid state?
+     *  @return bool
+     */
+    bool operator! () const
+    {
+        return _watchable == nullptr;
     }
 
     /**
