@@ -52,6 +52,20 @@ private:
     
     
     /**
+     *  Report a new state
+     *  @param  state
+     *  @return TcpState
+     */
+    TcpState *nextstate(TcpState *state)
+    {
+        // forget the socket to prevent that it is closed by the destructor
+        _socket = -1;
+        
+        // done
+        return state;
+    }
+    
+    /**
      *  Helper method to report an error
      *  @return TcpState*
      */
@@ -63,23 +77,22 @@ private:
         // we have an error - report this to the user
         _handler->onError(_connection, "failed to setup ssl connection");
         
-        // close the socket
-        close(_socket);	
-        
         // done, go to the closed state
         return new TcpClosed(_connection, _handler);
     }
     
     /**
-     *  Construct the next state
-     *  @param  monitor     Object that monitors whether connection still exists
-     *  @return TcpState*
+     *  Proceed with the handshake
+     *  @param  events      the events to wait for on the socket
+     *  @return TcpState
      */
-    TcpState *nextState(const Monitor &monitor)
+    TcpState *proceed(int events)
     {
-        // if the object is still in a valid state, we can move to the close-state, 
-        // otherwise there is no point in moving to a next state
-        return monitor.valid() ? new TcpClosed(this) : nullptr;
+        // tell the handler that we want to listen for certain events
+        _handler->monitor(_connection, _socket, events);
+        
+        // allow chaining
+        return this;
     }
     
 public:
@@ -120,9 +133,11 @@ public:
      */
     virtual ~TcpSslHandshake() noexcept
     {
+        // leap out if socket is invalidated
+        if (_socket < 0) return;
+        
         // close the socket
-        // @todo only if really closed
-        //close(_socket);
+        close(_socket);
     }
 
     /**
@@ -146,50 +161,17 @@ public:
 		int result = SSL_do_handshake(_ssl);
 				
 		// if the connection succeeds, we can move to the ssl-connected state
-		if (result == 1) return new TcpSslConnected(_connection, _socket, _ssl, std::move(_out), _handler);
+		if (result == 1) return nextstate(new TcpSslConnected(_connection, _socket, _ssl, std::move(_out), _handler));
 		
-		// if there is a failure, we must close down the connection
-		if (result <= 0) 
-		{
-			// error was returned, so we must investigate what is going on
-			auto error = SSL_get_error(_ssl, result);
+        // error was returned, so we must investigate what is going on
+        auto error = SSL_get_error(_ssl, result);
 							
-			// check the error
-			switch (error) {
-			case SSL_ERROR_WANT_READ:
-				// the handshake must be repeated when socket is readable, wait for that
-				_handler->monitor(_connection, _socket, readable);
-				break;
-			
-			case SSL_ERROR_WANT_WRITE:
-				// the handshake must be repeated when socket is readable, wait for that
-				_handler->monitor(_connection, _socket, writable);
-				break;
-			
-			case SSL_ERROR_WANT_ACCEPT:
-				// the BIO was not connected yet, the SSL function should be called again
-				_handler->monitor(_connection, _socket, writable);
-				
-				break;
-			case  SSL_ERROR_WANT_X509_LOOKUP:
-				_handler->monitor(_connection, _socket, writable);
-				
-				break;
-			case SSL_ERROR_SYSCALL:
-				_handler->monitor(_connection, _socket, writable);
-				
-				break;
-			case  SSL_ERROR_SSL:
-				_handler->monitor(_connection, _socket, writable);
-				
-				break;
-			default:
-				return reportError();
-			}
-		}
-		
-        // keep same object
-        return this;
+        // check the error
+        switch (error) {
+        case SSL_ERROR_WANT_READ:   return proceed(readable);
+        case SSL_ERROR_WANT_WRITE:  return proceed(readable | writable);
+        default:                    return reportError();
+        }
     }
 
     /**
@@ -219,31 +201,23 @@ public:
 			int result = SSL_do_handshake(_ssl);
 		
 			// if the connection succeeds, we can move to the ssl-connected state
-			if (result == 1) return new TcpSslConnected(_connection, _socket, _ssl, std::move(_out), _handler);
+			if (result == 1) return nextstate(new TcpSslConnected(_connection, _socket, _ssl, std::move(_out), _handler));
 		
 			// error was returned, so we must investigate what is going on
 			auto error = SSL_get_error(_ssl, result);
 			
 			// check the error
-			switch (error) {
-			case SSL_ERROR_WANT_READ:
-				// wait for the socket to become readable
-				if (!wait.readable()) return reportError();
-				break;
-			
-			case SSL_ERROR_WANT_WRITE:
-				// wait for the socket to become writable
-				if (!wait.writable()) return reportError();
-				break;
-
-			default:
-				// report an error
-				return reportError();
+			switch (error) 
+            {
+                // if openssl reports that socket readability or writability is needed,
+                // we wait for that until this situation is reached
+                case SSL_ERROR_WANT_READ:   wait.readable(); break;
+                case SSL_ERROR_WANT_WRITE:  wait.active(); break;
+            
+                // something is wrong, we proceed to the next state
+                default: return reportError();
 			}
 		}
-		
-        // keep same object (we never reach this code)
-        return this;
 	}
 
     /**
@@ -275,3 +249,4 @@ public:
  *  End of namespace
  */
 }
+
