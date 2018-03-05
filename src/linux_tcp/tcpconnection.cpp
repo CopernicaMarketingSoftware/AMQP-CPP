@@ -24,7 +24,7 @@ namespace AMQP {
  *  @param  hostname        The address to connect to
  */
 TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
-    _state(new TcpResolver(this, address.hostname(), address.port(), handler)),
+    _state(new TcpResolver(this, address.hostname(), address.port(), address.secure(), handler)),
     _connection(this, address.login(), address.vhost()) {}
 
 /**

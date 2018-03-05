@@ -4,9 +4,9 @@
  *  An AMQP address in the "amqp://user:password@hostname:port/vhost" notation
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
-
+ 
 /**
  *  Include guard
  */
@@ -23,6 +23,12 @@ namespace AMQP {
 class Address
 {
 private:
+    /**
+     *  The auth method
+     *  @var bool
+     */
+    bool _secure;
+    
     /**
      *  Login data (username + password)
      *  @var Login
@@ -60,11 +66,14 @@ public:
         // position of the last byte
         const char *last = data + size;
 
-        // must start with amqp://
-        if (size < 7 || strncmp(data, "amqp://", 7) != 0) throw std::runtime_error("AMQP address should start with \"amqp://\"");
+        // must start with ampqs:// to have a secure connection (and we also assign a different default port)
+        if ((_secure = strncmp(data, "amqps://", 8) == 0)) _port = 5671;
+
+		// otherwise protocol must be amqp://
+        else if (strncmp(data, "amqp://", 7) != 0) throw std::runtime_error("AMQP address should start with \"amqp://\" or \"amqps://\"");
 
         // begin of the string was parsed
-        data += 7;
+        data += _secure ? 8 : 7;
 
         // do we have a '@' to split user-data and hostname?
         const char *at = (const char *)memchr(data, '@', last - data);
@@ -115,7 +124,7 @@ public:
 
     /**
      *  Constructor to parse an address string
-     *  The address should start with "amqp://
+     *  The address should start with amqp:// or amqps://
      *  @param  data
      *  @throws std::runtime_error
      */
@@ -133,8 +142,10 @@ public:
      *  @param  port
      *  @param  login
      *  @param  vhost
+     * 	@param	secure
      */
-    Address(std::string host, uint16_t port, Login login, std::string vhost) :
+    Address(std::string host, uint16_t port, Login login, std::string vhost, bool secure = false) :
+        _secure(secure),
         _login(std::move(login)),
         _hostname(std::move(host)),
         _port(port),
@@ -144,6 +155,15 @@ public:
      *  Destructor
      */
     virtual ~Address() = default;
+
+    /**
+     *  Should we open a secure connection?
+     *  @return bool
+     */
+    bool secure() const
+    {
+        return _secure;
+    }
 
     /**
      *  Expose the login data
@@ -183,12 +203,12 @@ public:
 
     /**
      *  Cast to a string
-     *  @return std:string
+     *  @return std::string
      */
     operator std::string () const
     {
         // result object
-        std::string str("amqp://");
+        std::string str(_secure ? "amqps://" : "amqp://");
 
         // append login
         str.append(_login.user()).append(":").append(_login.password()).append("@").append(_hostname);
@@ -213,6 +233,9 @@ public:
      */
     bool operator==(const Address &that) const
     {
+        // security setting should match
+        if (_secure != that._secure) return false;
+
         // logins must match
         if (_login != that._login) return false;
 
@@ -244,6 +267,9 @@ public:
      */
     bool operator<(const Address &that) const
     {
+        // compare auth methods (amqp comes before amqps)
+        if (_secure != that._secure) return !_secure;
+        
         // compare logins
         if (_login != that._login) return _login < that._login;
         
@@ -269,7 +295,7 @@ public:
     friend std::ostream &operator<<(std::ostream &stream, const Address &address)
     {
         // start with the protocol and login
-        stream << "amqp://" << address._login;
+        stream << (address._secure ? "amqps://" : "amqp://");
 
         // do we need a special portnumber?
         if (address._port != 5672) stream << ":" << address._port;
