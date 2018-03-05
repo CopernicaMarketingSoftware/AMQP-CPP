@@ -5,7 +5,7 @@
  *  server, and to make the initial connection
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2016 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
 /**
@@ -20,6 +20,7 @@
 #include "tcpstate.h"
 #include "tcpclosed.h"
 #include "tcpconnected.h"
+#include "tcpsslhandshake.h"
 #include <thread>
 
 /**
@@ -180,6 +181,31 @@ public:
     }
     
     /**
+     *  Proceed to the next state
+     *  @return TcpState *
+     */
+    TcpState *proceed()
+    {
+        // do we have a valid socket?
+        if (_socket >= 0) 
+        {
+			// if we need a secure connection, we move to the tls handshake
+			if (_secure) return new TcpSslHandshake(_connection, _socket, _hostname, std::move(_buffer), _handler);
+			
+			// otherwise we have a valid regular tcp connection
+			return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
+		}
+        else
+        {
+            // report error
+            _handler->onError(_connection, _error.data());
+        
+            // create dummy implementation
+            return new TcpClosed(_connection, _handler);
+        }
+    }
+    
+    /**
      *  Wait for the resolver to be ready
      *  @param  fd          The filedescriptor that is active
      *  @param  flags       Flags to indicate that fd is readable and/or writable
@@ -190,21 +216,8 @@ public:
         // only works if the incoming pipe is readable
         if (fd != _pipe.in() || !(flags & readable)) return this;
 
-        // do we have a valid socket?
-        if (_socket >= 0) 
-        {
-			// if we need a secure connection, we move to the tls handshake
-			//if (_secure) return new TcpSslHandshake(_connection, _socket, std::move(_buffer), _handler);
-			
-			// otherwise we have a valid regular tcp connection
-			return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
-		}
-        
-        // report error
-        _handler->onError(_connection, _error.data());
-        
-        // create dummy implementation
-        return new TcpClosed(_connection, _handler);
+        // proceed to the next state
+        return proceed();
     }
     
     /**
@@ -216,21 +229,8 @@ public:
         // just wait for the other thread to be ready
         _thread.join();
         
-        // do we have a valid socket?
-        if (_socket >= 0) 
-        {
-			// if we need a secure connection, we move to the tls handshake
-			//if (_secure) return new TcpSslHandshake(_connection, _socket, std::move(_buffer), _handler);
-			
-			// otherwise we have a valid regular tcp connection
-			return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
-		}
-        
-        // report error
-        _handler->onError(_connection, _error.data());
-        
-        // create dummy implementation
-        return new TcpClosed(_connection, _handler);
+        // proceed to the next state
+        return proceed();
     }
 
     /**

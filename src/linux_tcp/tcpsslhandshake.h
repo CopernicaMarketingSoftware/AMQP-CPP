@@ -18,11 +18,8 @@
 #include "tcpoutbuffer.h"
 #include "tcpsslconnected.h"
 #include "wait.h"
-
-#include <openssl/err.h>
-#include <openssl/ssl.h>
-#include <copernica/dynamic.h>
-#include <iostream>
+#include "tcpssl.h"
+#include "tcpsslcontext.h"
 
 /**
  *  Set up namespace
@@ -36,16 +33,10 @@ class TcpSslHandshake : public TcpState, private Watchable
 {
 private:
     /**
-     *  SSL context
-     *  @var SSL_CTX
-     */
-    SSL_CTX *ctx;
-    
-    /**
      *  SSL structure
      *  @var SSL
      */
-    SSL *_ssl;
+    TcpSsl _ssl;
 
     /**
      *  The socket file descriptor
@@ -99,38 +90,26 @@ public:
      * 
      *  @param  connection  Parent TCP connection object
      *  @param  socket      The socket filedescriptor
+     *  @param  hostname    The hostname to connect to
      *  @param  context     SSL context
      *  @param  buffer      The buffer that was already built
      *  @param  handler     User-supplied handler object
      * 	@throws std::runtime_error
      */
-    TcpSslHandshake(TcpConnection *connection, int socket, TcpOutBuffer &&buffer, TcpHandler *handler) : 
+    TcpSslHandshake(TcpConnection *connection, int socket, const std::string &hostname, TcpOutBuffer &&buffer, TcpHandler *handler) : 
         TcpState(connection, handler),
+        _ssl(TcpSslContext(SSLv23_client_method())),
         _socket(socket),
         _out(std::move(buffer))
     {		
-		// init the SSL library
-		SSL_library_init();
-		
-		// create ssl context 
-		ctx = SSL_CTX_new(TLS_client_method());
-		
-		// create ssl object
-		_ssl = SSL_new(ctx);
-		
-		// leap out on error
-		if (_ssl == nullptr) throw std::runtime_error("ERROR: SSL structure is null");
-        
 		// we will be using the ssl context as a client
 		SSL_set_connect_state(_ssl);
-		
+        
+        // associate domain name with the connection
+        SSL_set_tlsext_host_name(_ssl, hostname.data());
 		
 		// associate the ssl context with the socket filedescriptor
-		int set_fd_ret = SSL_set_fd(_ssl, socket);
-		if (set_fd_ret == 0) {
-			reportError();
-			std::cout << "error while setting file descriptor" << std::endl;
-		}
+		if (SSL_set_fd(_ssl, socket) == 0) throw std::runtime_error("failed to associate filedescriptor with ssl socket");
 		
 		// we are going to wait until the socket becomes writable before we start the handshake
         _handler->monitor(_connection, _socket, writable);
@@ -179,39 +158,32 @@ public:
 			switch (error) {
 			case SSL_ERROR_WANT_READ:
 				// the handshake must be repeated when socket is readable, wait for that
-				std::cout << "wait for readability" << std::endl;
 				_handler->monitor(_connection, _socket, readable);
 				break;
 			
 			case SSL_ERROR_WANT_WRITE:
 				// the handshake must be repeated when socket is readable, wait for that
-				std::cout << "wait for writability" << std::endl;
 				_handler->monitor(_connection, _socket, writable);
 				break;
 			
 			case SSL_ERROR_WANT_ACCEPT:
 				// the BIO was not connected yet, the SSL function should be called again
-				std::cout << "wait for acceptability" << ERR_error_string(ERR_get_error(), nullptr)  << std::endl;
 				_handler->monitor(_connection, _socket, writable);
 				
 				break;
 			case  SSL_ERROR_WANT_X509_LOOKUP:
-				std::cout << "SSL_ERROR_WANT_X509_LOOKUP" << ERR_error_string(ERR_get_error(), nullptr)  << std::endl;
 				_handler->monitor(_connection, _socket, writable);
 				
 				break;
 			case SSL_ERROR_SYSCALL:
-				std::cout << "SSL_ERROR_SYSCALL: " << ERR_error_string(ERR_get_error(), nullptr) << std::endl;
 				_handler->monitor(_connection, _socket, writable);
 				
 				break;
 			case  SSL_ERROR_SSL:
-				std::cout << "SSL_ERROR_SSL" << ERR_error_string(ERR_get_error(), nullptr)  << std::endl;
 				_handler->monitor(_connection, _socket, writable);
 				
 				break;
 			default:
-				std::cout << "unknown error state " << error << std::endl;
 				return reportError();
 			}
 		}

@@ -63,7 +63,10 @@ int main()
     
     // handler for libev
     MyHandler handler(loop);
-    
+
+    // init the SSL library
+    SSL_library_init();
+
     // make a connection
     AMQP::Address address("amqps://guest:guest@localhost/");
     AMQP::TcpConnection connection(&handler, address);

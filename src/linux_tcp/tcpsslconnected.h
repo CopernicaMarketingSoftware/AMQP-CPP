@@ -19,8 +19,6 @@
 #include "wait.h"
 #include <openssl/ssl.h>
 
-#include <iostream>
-
 /**
  * Set up namespace
  */
@@ -133,26 +131,19 @@ private:
 		// error was returned, so we must investigate what is going on
 		auto error = SSL_get_error(_ssl, result);
 						
-		std::cout << "error = " << error << std::endl;
-						
 		// check the error
 		switch (error) {
 		case SSL_ERROR_WANT_READ:
 			// the operation must be repeated when readable
-			std::cout << "want read" << std::endl;
-			
 			_handler->monitor(_connection, _socket, readable);
 			return this;
 		
 		case SSL_ERROR_WANT_WRITE:
 			// wait until socket becomes writable again
-			std::cout << "want write" << std::endl;
-
 			_handler->monitor(_connection, _socket, writable);
 			return this;
 			
 		default:
-			std::cout << "something else" << std::endl;
 
 			// @todo check how to handle this
 			return this;
@@ -177,8 +168,6 @@ public:
         _in(4096),
         _state(_out ? state_sending : state_idle)
 	{
-		std::cout << "ssl-connected" << std::endl;
-		
 		// tell the handler to monitor the socket if there is an out
 		_handler->monitor(_connection, _socket, _state == state_sending ? writable : readable); 
 	}	
@@ -212,11 +201,6 @@ public:
      */
     virtual TcpState *process(int fd, int flags)
     {
-		std::cout << "process call in ssl-connected" << std::endl;
-		
-		std::cout << fd << " - " << _socket << std::endl;
-		
-		
 		// the socket must be the one this connection writes to
 		if (fd != _socket) return this;
 		
@@ -226,12 +210,8 @@ public:
 		// are we busy with sending or receiving data?
 		if (_state == state_sending)
         {
-			std::cout << "busy sending" << std::endl;
-			
 			// try to send more data from the outgoing buffer
 			auto result = _out.sendto(_ssl);
-			
-			std::cout << "result = " << result << std::endl;
 			
 			// if this is a success, we may have to update the monitor
 			if (result > 0) return proceed();
@@ -251,13 +231,8 @@ public:
 			// the operation failed, we may have to repeat our call
 			else return repeat(result);
 
-
-
 			// we're busy with receiving data
 			// @todo check this
-			
-			std::cout << "receive data" << std::endl;
-			
         }
         
         // keep same object

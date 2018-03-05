@@ -5,7 +5,7 @@
  *  output buffer. This is the implementation of that buffer
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2016 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
 /**
@@ -18,6 +18,7 @@
  */
 #include <sys/ioctl.h>
 #include <sys/uio.h>
+#include <openssl/ssl.h>
 
 /**
  *  FIONREAD on Solaris is defined elsewhere
@@ -272,7 +273,6 @@ public:
      *  @param  ssl			the ssl context to send data to
      *  @return ssize_t		number of bytes sent, or the return value of ssl_write
      */
-	/*
     ssize_t sendto(SSL *ssl)
     {
 		// we're going to fill a lot of buffers (for ssl only one buffer at a time can be sent)
@@ -281,14 +281,11 @@ public:
 		// fill the buffers, and leap out if there is no data
 		auto buffers = fill(buffer, 1);
 		
-		std::cout << "buffercount = " << buffers << std::endl;
-		
+        // just to be sure we do this check
 		if (buffers == 0) return 0;
 		
 		// send the data
 		auto result = SSL_write(ssl, buffer[0].iov_base, buffer[0].iov_len);
-		
-		// @todo do we have to move to the next buffer to prevent that this buffer is further filled?
 		
 		// on success we shrink the buffer
 		if (result > 0) shrink(result);
@@ -296,7 +293,6 @@ public:
 		// done
 		return result;
     }
-	*/
 };
     
 /**
