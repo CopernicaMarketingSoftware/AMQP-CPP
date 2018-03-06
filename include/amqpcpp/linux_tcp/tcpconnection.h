@@ -100,7 +100,7 @@ private:
     /**
      *  Classes that have access to private data
      */
-    friend class TcpSslConnected;
+    friend class SslConnected;
     friend class TcpConnected;
     friend class TcpChannel;
 
