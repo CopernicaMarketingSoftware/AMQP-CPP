@@ -1,15 +1,12 @@
 /**
  *  Function.h
  *
- *  When you want to retrieve a function from a dynamicallly loaded
- *  library, you normally use the dlsym() function for that. The
- *  Function object is a little more convenient:
- *
- *      // open the library
- *      void *lib = dlopen("library.so");
+ *  When you want to call a function only if it is already linked into
+ *  the program space. you would normally use the dlsym() function for 
+ *  that. Th Function object in this file is a little more convenient:
  *
  *      // get the function object
- *      Function func<int(int)> magic_open(library, "my_function");
+ *      Function func<int(int)> func("example_function");
  *
  *      // call the function
  *      int result = func(123);
@@ -17,7 +14,6 @@
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
  *  @copyright 2018 Copernica BV
  */
-
 
 /**
  * Include guard
