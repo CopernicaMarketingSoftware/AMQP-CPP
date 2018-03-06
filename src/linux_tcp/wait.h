@@ -30,7 +30,7 @@ private:
 
     /**
      *  The current socket // @todo what is it exactly?
-     * @var int
+     *  @var int
      */
     int _socket;
     
@@ -39,16 +39,20 @@ public:
      *  Constructor
      *  @param  fd      the filedescriptor that we're waiting on
      */
-    Wait(int fd)
+    Wait(int fd) : _socket(fd)
     {
-        _socket = fd;
-        
         // initialize the set
         FD_ZERO(&_set);
         
         // add the one socket
         FD_SET(_socket, &_set);
     }
+    
+    /**
+     *  No copying
+     *  @param  that
+     */
+    Wait(const Wait &that) = delete;
     
     /**
      *  Destructor
