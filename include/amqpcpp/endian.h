@@ -74,7 +74,7 @@
 
 #define htobe64(x) ((1==htonl(1)) ? (x) : ((uint64_t)htonl((x) & 0xFFFFFFFF) << 32) | htonl((x) >> 32))
 #define htole64(x) (x)
-#define be64toh(x) ntohll(x)
+#define be64toh(x) ((1==ntohl(1)) ? (x) : ((uint64_t)ntohl((x) & 0xFFFFFFFF) << 32) | ntohl((x) >> 32))
 #define le64toh(x) (x)
 
 #elif BYTE_ORDER == BIG_ENDIAN
