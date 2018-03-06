@@ -29,6 +29,7 @@
  */
 #include <cstddef>
 #include <functional>
+#include <dlfcn.h>
 
 /**
  *  Namespace
