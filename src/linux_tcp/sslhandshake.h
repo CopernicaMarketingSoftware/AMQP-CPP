@@ -111,18 +111,18 @@ public:
      */
     SslHandshake(TcpConnection *connection, int socket, const std::string &hostname, TcpOutBuffer &&buffer, TcpHandler *handler) : 
         TcpState(connection, handler),
-        _ssl(SslContext(SSLv23_client_method())),
+        _ssl(SslContext(OpenSSL::TLS_client_method())),
         _socket(socket),
         _out(std::move(buffer))
     {       
         // we will be using the ssl context as a client
-        SSL_set_connect_state(_ssl);
+        OpenSSL::SSL_set_connect_state(_ssl);
         
         // associate domain name with the connection
-        SSL_set_tlsext_host_name(_ssl, hostname.data());
+        OpenSSL::SSL_ctrl(_ssl, SSL_CTRL_SET_TLSEXT_HOSTNAME, TLSEXT_NAMETYPE_host_name, (void *)hostname.data());
         
         // associate the ssl context with the socket filedescriptor
-        if (SSL_set_fd(_ssl, socket) == 0) throw std::runtime_error("failed to associate filedescriptor with ssl socket");
+        if (OpenSSL::SSL_set_fd(_ssl, socket) == 0) throw std::runtime_error("failed to associate filedescriptor with ssl socket");
         
         // we are going to wait until the socket becomes writable before we start the handshake
         _handler->monitor(_connection, _socket, writable);
@@ -164,7 +164,7 @@ public:
         if (result == 1) return nextstate(new SslConnected(_connection, _socket, _ssl, std::move(_out), _handler));
         
         // error was returned, so we must investigate what is going on
-        auto error = SSL_get_error(_ssl, result);
+        auto error = OpenSSL::SSL_get_error(_ssl, result);
                             
         // check the error
         switch (error) {
@@ -198,13 +198,13 @@ public:
         while (true)
         {
             // start the ssl handshake
-            int result = SSL_do_handshake(_ssl);
+            int result = OpenSSL::SSL_do_handshake(_ssl);
         
             // if the connection succeeds, we can move to the ssl-connected state
             if (result == 1) return nextstate(new SslConnected(_connection, _socket, _ssl, std::move(_out), _handler));
         
             // error was returned, so we must investigate what is going on
-            auto error = SSL_get_error(_ssl, result);
+            auto error = OpenSSL::SSL_get_error(_ssl, result);
             
             // check the error
             switch (error) 

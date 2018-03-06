@@ -33,6 +33,7 @@ bool valid();
 /**
  *  List of all wrapper methods that are in use inside AMQP-CPP
  */
+const SSL_METHOD *TLS_client_method();
 SSL_CTX *SSL_CTX_new(const SSL_METHOD *method);
 SSL     *SSL_new(SSL_CTX *ctx);
 int      SSL_do_handshake(SSL *ssl);
@@ -43,7 +44,9 @@ int      SSL_set_fd(SSL *ssl, int fd);
 int      SSL_get_error(const SSL *ssl, int ret);
 int      SSL_up_ref(SSL *ssl);
 void     SSL_set_connect_state(SSL *ssl);
+void     SSL_CTX_free(SSL_CTX *ctx);
 void     SSL_free(SSL *ssl);
+long     SSL_ctrl(SSL *ssl, int cmd, long larg, void *parg);
 
 /**
  *  End of namespace

@@ -225,7 +225,7 @@ public:
         // create an object to wait for the filedescriptor to becomes active
         Wait wait(_socket);
 
-        // keep running until the out buffer is empty
+        // keep running until the out buffer is not empty
         while (_out)
         {
             // poll the socket, is it already writable?

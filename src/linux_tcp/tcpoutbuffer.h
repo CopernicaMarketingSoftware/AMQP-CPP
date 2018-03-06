@@ -18,7 +18,8 @@
  */
 #include <sys/ioctl.h>
 #include <sys/uio.h>
-#include <openssl/ssl.h>
+#include "openssl.h"
+
 /**
  *  FIONREAD on Solaris is defined elsewhere
  */
@@ -284,7 +285,7 @@ public:
         if (buffers == 0) return 0;
         
         // send the data
-        auto result = SSL_write(ssl, buffer[0].iov_base, buffer[0].iov_len);
+        auto result = OpenSSL::SSL_write(ssl, buffer[0].iov_base, buffer[0].iov_len);
         
         // on success we shrink the buffer
         if (result > 0) shrink(result);

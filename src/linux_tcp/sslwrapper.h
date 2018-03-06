@@ -34,7 +34,7 @@ public:
      *  Constructor
      *  @param  ctx
      */
-    SslWrapper(SSL_CTX *ctx) : _ssl(SSL_new(ctx)) 
+    SslWrapper(SSL_CTX *ctx) : _ssl(OpenSSL::SSL_new(ctx)) 
     {
         // report error
         if (_ssl == nullptr) throw std::runtime_error("failed to construct ssl structure");
@@ -68,7 +68,7 @@ public:
     virtual ~SslWrapper()
     {
         // destruct object
-        SSL_free(_ssl);
+        OpenSSL::SSL_free(_ssl);
     }
     
     /**

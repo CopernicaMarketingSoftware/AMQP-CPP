@@ -119,11 +119,10 @@ private:
 public:
     /**
      *  Constructor
-     *  @param  library     The library to load the function from
      *  @param  name        Name of the function
      */
-    Function(void *library, const char *name) :
-        _method(dlsym(library, name)) {}
+    Function(const char *name) :
+        _method(dlsym(RTLD_DEFAULT, name)) {}
 
     /**
      *  Destructor

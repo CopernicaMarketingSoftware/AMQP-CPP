@@ -121,8 +121,17 @@ public:
      */
     ssize_t receivefrom(SSL *ssl, uint32_t expected)
     {
-        // @todo implementation
-        return 0;
+        // number of bytes to that still fit in the buffer
+        size_t bytes = expected - _size;
+        
+        // read data
+        auto result = OpenSSL::SSL_read(ssl, (void *)(_data + _size), bytes);
+        
+        // update total buffer size on success
+        if (result > 0) _size += result;
+        
+        // done
+        return result;
     }
     
     /**

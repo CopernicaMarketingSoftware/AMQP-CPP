@@ -35,7 +35,7 @@ public:
      *  @param  method
      *  @throws std::runtime_error
      */
-    SslContext(const SSL_METHOD *method) : _ctx(SSL_CTX_new(method)) 
+    SslContext(const SSL_METHOD *method) : _ctx(OpenSSL::SSL_CTX_new(method)) 
     {
         // report error
         if (_ctx == nullptr) throw std::runtime_error("failed to construct ssl context");
@@ -69,7 +69,7 @@ public:
     virtual ~SslContext()
     {
         // free resource (this updates the refcount -1, and may destruct it)
-        SSL_CTX_free(_ctx);
+        OpenSSL::SSL_CTX_free(_ctx);
     }
     
     /**

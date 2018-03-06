@@ -148,7 +148,7 @@ private:
     TcpState *repeat(int result)
     {
         // error was returned, so we must investigate what is going on
-        auto error = SSL_get_error(_ssl, result);
+        auto error = OpenSSL::SSL_get_error(_ssl, result);
                         
         // check the error
         switch (error) {
@@ -284,6 +284,20 @@ public:
             // the operation failed, we may have to repeat our call
             else return repeat(result);
         }
+    }
+
+    /**
+     *  Flush the connection, sent all buffered data to the socket
+     *  @return TcpState    new tcp state
+     */
+    virtual TcpState *flush() override
+    {
+        // create an object to wait for the filedescriptor to becomes active
+        Wait wait(_socket);
+        
+        // @todo implementation
+        
+        return this;
     }
 
     /**

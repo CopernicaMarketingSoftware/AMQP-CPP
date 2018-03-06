@@ -70,7 +70,7 @@ private:
     TcpState *repeat(int result)
     {
         // error was returned, so we must investigate what is going on
-        auto error = SSL_get_error(_ssl, result);
+        auto error = OpenSSL::SSL_get_error(_ssl, result);
                         
         // check the error
         switch (error) {
@@ -145,7 +145,7 @@ public:
         Monitor monitor(this);
 
         // close the connection
-        auto result = SSL_shutdown(_ssl);
+        auto result = OpenSSL::SSL_shutdown(_ssl);
             
         // if this is a success, we can proceed with the event loop
         if (result > 0) return proceed();
