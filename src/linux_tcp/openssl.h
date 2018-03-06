@@ -22,10 +22,16 @@
 /**
  *  Begin of namespace
  */
-namespace Copernica { namespace OpenSSL {
-    
+namespace AMQP { namespace OpenSSL {
+
 /**
- *	List of all methods that we need
+ *  Function to check if openssl is loaded
+ *  @return bool
+ */
+bool valid();
+
+/**
+ *  List of all wrapper methods that are in use inside AMQP-CPP
  */
 SSL_CTX *SSL_CTX_new(const SSL_METHOD *method);
 SSL     *SSL_new(SSL_CTX *ctx);

@@ -4,7 +4,7 @@
  *  Test program to check AMQP functionality based on LibEV
  * 
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2017 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
 /**
@@ -13,6 +13,7 @@
 #include <ev.h>
 #include <amqpcpp.h>
 #include <amqpcpp/libev.h>
+#include <openssl/ssl.h>
 
 /**
  *  Custom handler
@@ -65,7 +66,7 @@ int main()
     MyHandler handler(loop);
 
     // init the SSL library
-    SSL_library_init();
+//    SSL_library_init();
 
     // make a connection
     AMQP::Address address("amqps://guest:guest@localhost/");

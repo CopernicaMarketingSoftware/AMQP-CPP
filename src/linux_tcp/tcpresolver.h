@@ -20,7 +20,8 @@
 #include "tcpstate.h"
 #include "tcpclosed.h"
 #include "tcpconnected.h"
-//#include "sslhandshake.h"
+#include "openssl.h"
+#include "sslhandshake.h"
 #include <thread>
 
 /**
@@ -91,6 +92,9 @@ private:
         // prevent exceptions
         try
         {
+            // check if we support openssl in the first place
+            if (!OpenSSL::valid()) throw std::runtime_error("Secure connection cannot be established: the application has no access to openssl");
+            
             // get address info
             AddressInfo addresses(_hostname.data(), _port);
     
@@ -190,7 +194,8 @@ public:
         if (_socket >= 0) 
         {
             // if we need a secure connection, we move to the tls handshake
-            //if (_secure) return new SslHandshake(_connection, _socket, _hostname, std::move(_buffer), _handler);
+            // @todo catch exception
+            if (_secure) return new SslHandshake(_connection, _socket, _hostname, std::move(_buffer), _handler);
             
             // otherwise we have a valid regular tcp connection
             return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);

@@ -158,7 +158,7 @@ public:
         if (fd != _socket) return this;
 
         // start the ssl handshake
-        int result = SSL_do_handshake(_ssl);
+        int result = OpenSSL::SSL_do_handshake(_ssl);
                 
         // if the connection succeeds, we can move to the ssl-connected state
         if (result == 1) return nextstate(new SslConnected(_connection, _socket, _ssl, std::move(_out), _handler));
