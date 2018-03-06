@@ -65,7 +65,7 @@ int main()
     MyHandler handler(loop);
 
     // init the SSL library
-//    SSL_library_init();
+    SSL_library_init();
 
     // make a connection
     AMQP::Address address("amqps://guest:guest@localhost/");

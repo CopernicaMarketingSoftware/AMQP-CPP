@@ -19,7 +19,6 @@
 #include <sys/ioctl.h>
 #include <sys/uio.h>
 #include <openssl/ssl.h>
-
 /**
  *  FIONREAD on Solaris is defined elsewhere
  */

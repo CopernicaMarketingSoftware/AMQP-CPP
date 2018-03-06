@@ -13,6 +13,11 @@
 #pragma once
 
 /**
+ *	Dependencies
+ */
+ #include <openssl/ssl.h>
+ 
+/**
  *  Beginnig of namespace
  */
 namespace AMQP {
