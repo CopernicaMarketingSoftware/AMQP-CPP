@@ -86,8 +86,8 @@ endif()
 
 if(AMQP-CPP_BUILD_SHARED)
     # copy shared lib and its static counter part
-    install(TARGETS ${PROJECT_NAME}
-            ARCHIVE DESTINATION lib EXPORT ${PROJECT_NAME}Config
+    install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
+            ARCHIVE DESTINATION lib
             LIBRARY DESTINATION lib
             RUNTIME DESTINATION lib
     )
