@@ -1,9 +1,9 @@
 /**
- *	Wait.h
+ *  Wait.h
  *
- *	Class to wait for a socket to become readable and/or writable
+ *  Class to wait for a socket to become readable and/or writable
  *
- *	@copyright 2018 Copernica BV
+ *  @copyright 2018 Copernica BV
  */
  
  /**
@@ -12,82 +12,82 @@
 #pragma once
 
 /**
- *	Begin of namespace
+ *  Begin of namespace
  */
 namespace AMQP {
 
 /**
- *	Class definition
+ *  Class definition
  */
 class Wait
 {
 private:
-	/**
-	 *	Set with just one filedescriptor
-	 *	@var fd_set
-	 */
-	fd_set _set;
+    /**
+     *  Set with just one filedescriptor
+     *  @var fd_set
+     */
+    fd_set _set;
 
-	/**
-	 * 	The current socket // @todo what is it exactly?
-	 * @var int
-	 */
-	int _socket;
-	
+    /**
+     *  The current socket // @todo what is it exactly?
+     * @var int
+     */
+    int _socket;
+    
 public:
-	/**
-	 *	Constructor
-	 *	@param	fd		the filedescriptor that we're waiting on
-	 */
-	Wait(int fd)
-	{
-		_socket = fd;
-		
+    /**
+     *  Constructor
+     *  @param  fd      the filedescriptor that we're waiting on
+     */
+    Wait(int fd)
+    {
+        _socket = fd;
+        
         // initialize the set
         FD_ZERO(&_set);
         
         // add the one socket
         FD_SET(_socket, &_set);
-	}
-	
-	/**
-	 *  Destructor
-	 */
-	virtual ~Wait() = default;
-	
-	/**
-	 *  Wait until the filedescriptor becomes readable
-	 *	@return bool
-	 */
-	bool readable() 
-	{
+    }
+    
+    /**
+     *  Destructor
+     */
+    virtual ~Wait() = default;
+    
+    /**
+     *  Wait until the filedescriptor becomes readable
+     *  @return bool
+     */
+    bool readable() 
+    {
         // wait for the socket
         return select(_socket + 1, &_set, nullptr, nullptr, nullptr) > 0;
-	}
-		
-	/**
-	 *  Wait until the filedescriptor becomes writable
-	 *	@return bool
-	 */
-	bool writable() 
-	{
+    }
+        
+    /**
+     *  Wait until the filedescriptor becomes writable
+     *  @return bool
+     */
+    bool writable() 
+    {
         // wait for the socket
         return select(_socket + 1, nullptr, &_set, nullptr, nullptr) > 0;
-	}
-	
-	/**
-	 *  Wait until a filedescriptor becomes active (readable or writable)
-	 *  @return bool
-	 */
-	bool active()
-	{
+    }
+    
+    /**
+     *  Wait until a filedescriptor becomes active (readable or writable)
+     *  @return bool
+     */
+    bool active()
+    {
         // wait for the socket
         return select(_socket + 1, &_set, &_set, nullptr, nullptr) > 0;
-	}
+    }
 };
 
 /**
- *	End of namespace
+ *  End of namespace
  */
 }
 

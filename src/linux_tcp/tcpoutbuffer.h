@@ -198,34 +198,34 @@ public:
     
     /**
      *  Fill an iovec buffer
-     *  @param	buffers		the buffers to be filled
-     * 	@param	count		number of buffers available
-     * 	@return size_t		the number of buffers that were filled
+     *  @param  buffers     the buffers to be filled
+     *  @param  count       number of buffers available
+     *  @return size_t      the number of buffers that were filled
      */
     size_t fill(struct iovec buffers[], size_t count) const
     {
-		// index counter
-		size_t index = 0;
+        // index counter
+        size_t index = 0;
 
-		// iterate over the buffers
-		for (const auto &str : _buffers)
-		{
-			// fill buffer
-			buffers[index].iov_base = (void *)(index == 0 ? str.data() + _skip : str.data());
-			buffers[index].iov_len = index == 0 ? str.size() - _skip : str.size();
-			
-			// update counter for next iteration
-			if (++index >= count) return count;
-		}
-		
-		// done
-		return index;
-	}
+        // iterate over the buffers
+        for (const auto &str : _buffers)
+        {
+            // fill buffer
+            buffers[index].iov_base = (void *)(index == 0 ? str.data() + _skip : str.data());
+            buffers[index].iov_len = index == 0 ? str.size() - _skip : str.size();
+            
+            // update counter for next iteration
+            if (++index >= count) return count;
+        }
+        
+        // done
+        return index;
+    }
     
     /**
      *  Send the buffer to a socket
-     *  @param  socket			the socket to send data to
-     *  @return ssize_t			number of bytes sent (or the same result as sendmsg() in case of an error)
+     *  @param  socket          the socket to send data to
+     *  @return ssize_t         number of bytes sent (or the same result as sendmsg() in case of an error)
      */
     ssize_t sendto(int socket)
     {
@@ -270,28 +270,28 @@ public:
     
     /**
      *  Send the buffer to an SSL connection
-     *  @param  ssl			the ssl context to send data to
-     *  @return ssize_t		number of bytes sent, or the return value of ssl_write
+     *  @param  ssl         the ssl context to send data to
+     *  @return ssize_t     number of bytes sent, or the return value of ssl_write
      */
     ssize_t sendto(SSL *ssl)
     {
-		// we're going to fill a lot of buffers (for ssl only one buffer at a time can be sent)
-		struct iovec buffer[1];
-		
-		// fill the buffers, and leap out if there is no data
-		auto buffers = fill(buffer, 1);
-		
+        // we're going to fill a lot of buffers (for ssl only one buffer at a time can be sent)
+        struct iovec buffer[1];
+        
+        // fill the buffers, and leap out if there is no data
+        auto buffers = fill(buffer, 1);
+        
         // just to be sure we do this check
-		if (buffers == 0) return 0;
-		
-		// send the data
-		auto result = SSL_write(ssl, buffer[0].iov_base, buffer[0].iov_len);
-		
-		// on success we shrink the buffer
-		if (result > 0) shrink(result);
-		
-		// done
-		return result;
+        if (buffers == 0) return 0;
+        
+        // send the data
+        auto result = SSL_write(ssl, buffer[0].iov_base, buffer[0].iov_len);
+        
+        // on success we shrink the buffer
+        if (result > 0) shrink(result);
+        
+        // done
+        return result;
     }
 };
     

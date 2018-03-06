@@ -149,7 +149,7 @@ public:
      *  @param  connection  Parent connection object
      *  @param  hostname    The hostname for the lookup
      *  @param  portnumber  The portnumber for the lookup
-     * 	@param	secure		Do we need a secure tls connection when ready?
+     *  @param  secure      Do we need a secure tls connection when ready?
      *  @param  handler     User implemented handler object
      */
     TcpResolver(TcpConnection *connection, const std::string &hostname, uint16_t port, bool secure, TcpHandler *handler) : 
@@ -189,12 +189,12 @@ public:
         // do we have a valid socket?
         if (_socket >= 0) 
         {
-			// if we need a secure connection, we move to the tls handshake
-			//if (_secure) return new SslHandshake(_connection, _socket, _hostname, std::move(_buffer), _handler);
-			
-			// otherwise we have a valid regular tcp connection
-			return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
-		}
+            // if we need a secure connection, we move to the tls handshake
+            //if (_secure) return new SslHandshake(_connection, _socket, _hostname, std::move(_buffer), _handler);
+            
+            // otherwise we have a valid regular tcp connection
+            return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
+        }
         else
         {
             // report error

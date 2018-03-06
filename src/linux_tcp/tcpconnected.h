@@ -222,8 +222,8 @@ public:
      */
     virtual TcpState *flush() override
     {
-		// create an object to wait for the filedescriptor to becomes active
-		Wait wait(_socket);
+        // create an object to wait for the filedescriptor to becomes active
+        Wait wait(_socket);
 
         // keep running until the out buffer is empty
         while (_out)
