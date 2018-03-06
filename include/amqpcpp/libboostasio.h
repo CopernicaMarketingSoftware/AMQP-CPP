@@ -176,7 +176,7 @@ protected:
                           TcpConnection *const connection,
                           const int fd)
         {
-	        // Resolve any potential problems with dangling pointers
+            // Resolve any potential problems with dangling pointers
             // (remember we are using async).
             const std::shared_ptr<Watcher> apWatcher = awpWatcher.lock();
             if (!apWatcher) { return; }
@@ -210,7 +210,7 @@ protected:
                            TcpConnection *const connection,
                            const int fd)
         {
-	        // Resolve any potential problems with dangling pointers
+            // Resolve any potential problems with dangling pointers
             // (remember we are using async).
             const std::shared_ptr<Watcher> apWatcher = awpWatcher.lock();
             if (!apWatcher) { return; }
@@ -498,7 +498,7 @@ protected:
 
             // construct a new pair (watcher/timer), and put it in the map
             const std::shared_ptr<Watcher> apWatcher = 
-				std::make_shared<Watcher>(_ioservice, _strand, fd);
+                std::make_shared<Watcher>(_ioservice, _strand, fd);
 
             _watchers[fd] = apWatcher;
 

@@ -67,9 +67,12 @@ public:
         const char *last = data + size;
 
         // must start with ampqs:// to have a secure connection (and we also assign a different default port)
-        if ((_secure = strncmp(data, "amqps://", 8) == 0)) _port = 5671;
+        _secure = strncmp(data, "amqps://", 8) == 0;
 
-		// otherwise protocol must be amqp://
+        // default port changes for secure connections
+        if (_secure) _port = 5671;
+
+        // otherwise protocol must be amqp://
         else if (strncmp(data, "amqp://", 7) != 0) throw std::runtime_error("AMQP address should start with \"amqp://\" or \"amqps://\"");
 
         // begin of the string was parsed
@@ -142,7 +145,7 @@ public:
      *  @param  port
      *  @param  login
      *  @param  vhost
-     * 	@param	secure
+     *  @param  secure
      */
     Address(std::string host, uint16_t port, Login login, std::string vhost, bool secure = false) :
         _secure(secure),
