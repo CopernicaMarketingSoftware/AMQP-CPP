@@ -102,8 +102,10 @@ and `make install` for that.
 When you compile an application that uses the AMQP-CPP library, do not
 forget to link with the library. For gcc and clang the linker flag is -lamqpcpp.
 If you use the fullblown version of AMQP-CPP (with the TCP module), you also
-need to pass a -lpthread linker flag, because the TCP module uses a thread
-for running an asynchronous and non-blocking DNS hostname lookup.
+need to pass the -lpthread and -ldl linker flags, because the TCP module uses a 
+thread for running an asynchronous and non-blocking DNS hostname lookup, and it
+optionally dynamically opens the openssl library if a secure connection to
+RabbitMQ has to be set up.
 
 
 HOW TO USE AMQP-CPP
