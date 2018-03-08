@@ -291,7 +291,7 @@ public:
      *  Report to the handler that the object is in an error state.
      *  @param  error
      */
-    virtual void reportError(const char *error)
+    virtual void reportError(const char *error) override
     {
         // close the socket
         close();

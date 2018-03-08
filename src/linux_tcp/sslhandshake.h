@@ -179,7 +179,7 @@ public:
         switch (error) {
         case SSL_ERROR_WANT_READ:   return proceed(readable);
         case SSL_ERROR_WANT_WRITE:  return proceed(readable | writable);
-        default:                    return reportError();
+        default:                    return reportError(monitor);
         }
     }
 
@@ -225,7 +225,7 @@ public:
                 case SSL_ERROR_WANT_WRITE:  wait.active(); break;
             
                 // something is wrong, we proceed to the next state
-                default: return reportError();
+                default: return reportError(monitor);
             }
         }
     }
