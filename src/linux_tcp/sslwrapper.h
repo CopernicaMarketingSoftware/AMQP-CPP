@@ -33,11 +33,14 @@ public:
     /**
      *  Constructor
      *  @param  ctx
+     *  @param  file
      */
     SslWrapper(SSL_CTX *ctx) : _ssl(OpenSSL::SSL_new(ctx)) 
     {
         // report error
         if (_ssl == nullptr) throw std::runtime_error("failed to construct ssl structure");
+        
+        //OpenSSL::SSL_use_certificate_file(_ssl, "cert.pem", SSL_FILETYPE_PEM);
     }
     
     /**

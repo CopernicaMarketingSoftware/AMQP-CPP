@@ -32,7 +32,7 @@ private:
 public:
     /**
      *  Constructor
-     *  @param  method
+     *  @param  method      the connect method to use
      *  @throws std::runtime_error
      */
     SslContext(const SSL_METHOD *method) : _ctx(OpenSSL::SSL_CTX_new(method)) 

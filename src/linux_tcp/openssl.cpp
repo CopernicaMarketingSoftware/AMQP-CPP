@@ -256,7 +256,23 @@ long SSL_ctrl(SSL *ssl, int cmd, long larg, void *parg)
     // call the openssl function
     return func(ssl, cmd, larg, parg);
 }
+
+/**
+ *  Set the certificate file to be used by the connection
+ *  @param  ssl     ssl structure
+ *  @param  file    filename
+ *  @param  type    type of file
+ *  @return int
+ */
+int SSL_use_certificate_file(SSL *ssl, const char *file, int type)
+{
+    // create a function
+    static Function<decltype(::SSL_use_certificate_file)> func("SSL_use_certificate_file");
     
+    // call the openssl function
+    return func(ssl, file, type);
+}
+
 /**
  *  End of namespace
  */
