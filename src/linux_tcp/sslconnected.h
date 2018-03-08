@@ -161,14 +161,11 @@ private:
     /**
      *  Method to repeat the previous call\
      *  @param  monitor     monitor to check if connection object still exists
-     *  @param  result      result of an earlier openssl operation
+     *  @param  result      result of an earlier SSL_get_error call
      *  @return TcpState*
      */
-    TcpState *repeat(const Monitor &monitor, int result)
+    TcpState *repeat(const Monitor &monitor, int error)
     {
-        // error was returned, so we must investigate what is going on
-        auto error = OpenSSL::SSL_get_error(_ssl, result);
-        
         // check the error
         switch (error) {
         case SSL_ERROR_WANT_READ:
@@ -305,7 +302,7 @@ public:
             if (result > 0) return proceed();
             
             // the operation failed, we may have to repeat our call
-            else return repeat(monitor, result);
+            else return repeat(monitor, OpenSSL::SSL_get_error(_ssl, result));
         }
         else
         {
@@ -316,7 +313,7 @@ public:
             if (result > 0) return parse(monitor, result);
             
             // the operation failed, we may have to repeat our call
-            else return repeat(monitor, result);
+            else return repeat(monitor, OpenSSL::SSL_get_error(_ssl, result));
         }
     }
 
@@ -339,18 +336,35 @@ public:
             // try to send more data from the outgoing buffer
             auto result = _out.sendto(_ssl);
             
-            // go to the next state
-            auto *state = result > 0 ? proceed() : repeat(monitor, result);
-            
-            return state;
-            
-//            if (result > 0) return proceed();
-//            
-//            // the operation failed, we may have to repeat our call
-//            else return repeat(result);
+            // was this a success?
+            if (result > 0)
+            {
+                // parse the buffer
+                auto *nextstate = parse(monitor, result);
+                
+                // leap out if we move to a different state
+                if (nextstate != this) return nextstate;
+            }
+            else
+            {
+                // error was returned, so we must investigate what is going on
+                auto error = OpenSSL::SSL_get_error(_ssl, result);
+                
+                // get the next state given this error
+                auto *nextstate = repeat(monitor, error);
+                
+                // leap out if we move to a different state
+                if (nextstate != this) return nextstate;
+                
+                // check the type of error, and wait now
+                switch (error) {
+                case SSL_ERROR_WANT_READ:   wait.readable(); break;
+                case SSL_ERROR_WANT_WRITE:  wait.active(); break;
+                }
+            }
         }
         
-        
+        // done
         return this;
     }
 

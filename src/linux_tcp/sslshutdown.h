@@ -43,6 +43,32 @@ private:
 
 
     /**
+     *  Report an error
+     *  @param  monitor         object to check if connection still exists
+     *  @return TcpState*
+     */
+    TcpState *reporterror(const Monitor &monitor)
+    {
+        // close the socket
+        close(_socket);
+        
+        // forget the socket
+        _socket = -1;
+        
+        // if we have already told user space that connection is gone
+        if (_finalized) return new TcpClosed(this);
+        
+        // object will be finalized now
+        _finalized = true;
+        
+        // inform user space that the party is over
+        _handler->onError(_connection, "ssl shutdown error");
+        
+        // go to the final state (if not yet disconnected)
+        return monitor.valid() ? new TcpClosed(this) : nullptr;
+    }
+
+    /**
      *  Proceed with the next operation after the previous operation was
      *  a success, possibly changing the filedescriptor-monitor
      *  @param  monitor         object to check if connection still exists
@@ -96,17 +122,8 @@ private:
             return this;
             
         default:
-            // the shutdown failed, ignore this if user was already notified of an error
-            if (_finalized) return new TcpClosed(this);
-
-            // object will be finalized now
-            _finalized = true;
-            
-            // inform user space that the party is over
-            _handler->onError(_connection, "ssl shutdown error");
-
             // go to the final state (if not yet disconnected)
-            return monitor.valid() ? new TcpClosed(this) : nullptr;
+            return reporterror(monitor);
         }
     }
     
@@ -171,6 +188,42 @@ public:
             
         // the operation failed, we may have to repeat our call
         else return repeat(monitor, result);
+    }
+
+    /**
+     *  Flush the connection, sent all buffered data to the socket
+     *  @param  monitor     Object to check if connection still exists
+     *  @return TcpState    new tcp state
+     */
+    virtual TcpState *flush(const Monitor &monitor) override
+    {
+        // create an object to wait for the filedescriptor to becomes active
+        Wait wait(_socket);
+
+        // keep looping
+        while (true)
+        {
+            // close the connection
+            auto result = OpenSSL::SSL_shutdown(_ssl);
+                
+            // if this is a success, we can proceed with the event loop
+            if (result > 0) return proceed(monitor);
+
+            // error was returned, so we must investigate what is going on
+            auto error = OpenSSL::SSL_get_error(_ssl, result);
+            
+            // check the error
+            switch (error) {
+
+            // if openssl reports that socket readability or writability is needed,
+            // we wait for that until this situation is reached
+            case SSL_ERROR_WANT_READ:   wait.readable(); break;
+            case SSL_ERROR_WANT_WRITE:  wait.active(); break;
+        
+            // something is wrong, we proceed to the next state
+            default: return reporterror(monitor);
+            }
+        }
     }
 };
 
