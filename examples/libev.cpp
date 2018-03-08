@@ -14,6 +14,7 @@
 #include <amqpcpp.h>
 #include <amqpcpp/libev.h>
 #include <openssl/ssl.h>
+#include <openssl/opensslv.h>
 
 /**
  *  Custom handler
@@ -66,7 +67,11 @@ int main()
     MyHandler handler(loop);
 
     // init the SSL library
-//    SSL_library_init();
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    SSL_library_init();
+#else
+    OPENSSL_init_ssl(0, NULL);
+#endif
 
     // make a connection
     AMQP::Address address("amqp://guest:guest@localhost/");

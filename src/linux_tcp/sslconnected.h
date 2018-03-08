@@ -139,11 +139,14 @@ private:
         }
         else if (_closed)
         {
+            // start the state that closes the connection
+            auto *nextstate = new SslShutdown(_connection, _socket, std::move(_ssl), _finalized, _handler);
+
             // we forget the current socket to prevent that it gets destructed
             _socket = -1;
             
-            // start the state that closes the connection
-            return new SslShutdown(_connection, _socket, std::move(_ssl), _finalized, _handler);
+            // report the next state
+            return nextstate;
         }
         else
         {
@@ -263,7 +266,7 @@ public:
     {
         // tell the handler to monitor the socket if there is an out
         _handler->monitor(_connection, _socket, _state == state_sending ? readable | writable : readable); 
-    }   
+    }
     
     /**
      * Destructor

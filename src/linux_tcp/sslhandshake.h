@@ -122,7 +122,7 @@ public:
         _ssl(SslContext(OpenSSL::TLS_client_method())),
         _socket(socket),
         _out(std::move(buffer))
-    {       
+    {
         // we will be using the ssl context as a client
         OpenSSL::SSL_set_connect_state(_ssl);
         
@@ -168,13 +168,13 @@ public:
 
         // start the ssl handshake
         int result = OpenSSL::SSL_do_handshake(_ssl);
-                
+        
         // if the connection succeeds, we can move to the ssl-connected state
         if (result == 1) return nextstate(new SslConnected(_connection, _socket, std::move(_ssl), std::move(_out), _handler));
         
         // error was returned, so we must investigate what is going on
         auto error = OpenSSL::SSL_get_error(_ssl, result);
-                            
+        
         // check the error
         switch (error) {
         case SSL_ERROR_WANT_READ:   return proceed(readable);
@@ -217,15 +217,15 @@ public:
             auto error = OpenSSL::SSL_get_error(_ssl, result);
             
             // check the error
-            switch (error) 
-            {
-                // if openssl reports that socket readability or writability is needed,
-                // we wait for that until this situation is reached
-                case SSL_ERROR_WANT_READ:   wait.readable(); break;
-                case SSL_ERROR_WANT_WRITE:  wait.active(); break;
-            
-                // something is wrong, we proceed to the next state
-                default: return reportError(monitor);
+            switch (error) {
+
+            // if openssl reports that socket readability or writability is needed,
+            // we wait for that until this situation is reached
+            case SSL_ERROR_WANT_READ:   wait.readable(); break;
+            case SSL_ERROR_WANT_WRITE:  wait.active(); break;
+        
+            // something is wrong, we proceed to the next state
+            default: return reportError(monitor);
             }
         }
     }

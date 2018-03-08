@@ -43,6 +43,28 @@ private:
 
 
     /**
+     *  Close the socket
+     *  @return bool
+     */
+    bool close()
+    {
+        // skip if already closed
+        if (_socket < 0) return false;
+        
+        // we're no longer interested in events
+        _handler->monitor(_connection, _socket, 0);
+        
+        // close the socket
+        ::close(_socket);
+        
+        // forget the socket
+        _socket = -1;
+        
+        // done
+        return true;
+    }
+
+    /**
      *  Report an error
      *  @param  monitor         object to check if connection still exists
      *  @return TcpState*
@@ -50,10 +72,7 @@ private:
     TcpState *reporterror(const Monitor &monitor)
     {
         // close the socket
-        close(_socket);
-        
-        // forget the socket
-        _socket = -1;
+        close();
         
         // if we have already told user space that connection is gone
         if (_finalized) return new TcpClosed(this);
@@ -76,14 +95,8 @@ private:
      */
     TcpState *proceed(const Monitor &monitor)
     {
-        // we're no longer interested in events
-        _handler->monitor(_connection, _socket, 0);
-        
         // close the socket
-        close(_socket);
-        
-        // forget the socket
-        _socket = -1;
+        close();
         
         // if we have already told user space that connection is gone
         if (_finalized) return new TcpClosed(this);
@@ -108,7 +121,7 @@ private:
     {
         // error was returned, so we must investigate what is going on
         auto error = OpenSSL::SSL_get_error(_ssl, result);
-                        
+
         // check the error
         switch (error) {
         case SSL_ERROR_WANT_READ:
@@ -143,8 +156,8 @@ public:
         _socket(socket),
         _finalized(finalized)
     {
-        // tell the handler to monitor the socket if there is an out
-        _handler->monitor(_connection, _socket, readable); 
+        // wait until the socket is accessible
+        _handler->monitor(_connection, _socket, readable | writable); 
     }   
     
     /**
@@ -152,14 +165,8 @@ public:
      */
     virtual ~SslShutdown() noexcept
     {
-        // skip if socket is already gond
-        if (_socket < 0) return;
-        
-        // we no longer have to monitor the socket
-        _handler->monitor(_connection, _socket, 0);
-        
         // close the socket
-        close(_socket);
+        close();
     }
     
     /**
@@ -182,7 +189,7 @@ public:
         
         // close the connection
         auto result = OpenSSL::SSL_shutdown(_ssl);
-            
+        
         // if this is a success, we can proceed with the event loop
         if (result > 0) return proceed(monitor);
             
