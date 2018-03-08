@@ -37,22 +37,6 @@ protected:
 
 protected:
     /**
-     *  Helper function to reset the handler, and to return the old handler object
-     *  @return TcpHandler* User-supplied handler that was just reset
-     */
-    TcpHandler *reset(TcpHandler *handler)
-    {
-        // remember old handler
-        auto *oldhandler = _handler;
-        
-        // install the new handler
-        _handler = handler;
-        
-        // return the old handler
-        return oldhandler;
-    }
-
-    /**
      *  Protected constructor
      *  @param  connection  Original TCP connection object
      *  @param  handler     User-supplied handler class
@@ -150,7 +134,7 @@ public:
     virtual void reportError(const char *error)
     {
         // pass to handler
-        reset(nullptr)->onError(_connection, error);
+        _handler->onError(_connection, error);
     }
 
     /**
@@ -182,7 +166,7 @@ public:
     virtual void reportClosed()
     {
         // pass to handler
-        reset(nullptr)->onClosed(_connection);
+        _handler->onClosed(_connection);
     }
 };
 

@@ -194,7 +194,7 @@ public:
         if (_socket >= 0) 
         {
             // if we need a secure connection, we move to the tls handshake
-            // @todo catch exception
+            // @todo catch possible exception
             if (_secure) return new SslHandshake(_connection, _socket, _hostname, std::move(_buffer), _handler);
             
             // otherwise we have a valid regular tcp connection
