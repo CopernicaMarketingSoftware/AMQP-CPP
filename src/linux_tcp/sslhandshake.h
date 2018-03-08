@@ -67,18 +67,26 @@ private:
     
     /**
      *  Helper method to report an error
+     *  @param  monitor
      *  @return TcpState*
      */
-    TcpState *reportError()
+    TcpState *reportError(const Monitor &monitor)
     {
         // we are no longer interested in any events for this socket
         _handler->monitor(_connection, _socket, 0);
         
+        // close the socket
+        close(_socket);
+        
+        // forget filedescriptor
+        _socket = -1;
+        
         // we have an error - report this to the user
         _handler->onError(_connection, "failed to setup ssl connection");
         
-        // done, go to the closed state
-        return new TcpClosed(_connection, _handler);
+        // done, go to the closed state (plus check if connection still exists, because
+        // after the onError() call the user space program may have destructed that object)
+        return monitor.valid() ? new TcpClosed(this) : nullptr;
     }
     
     /**
@@ -136,7 +144,7 @@ public:
         // leap out if socket is invalidated
         if (_socket < 0) return;
         
-        // close the socket
+        // the object got destructed without moving to a new state, this is normally
         close(_socket);
     }
 
@@ -220,30 +228,6 @@ public:
                 default: return reportError();
             }
         }
-    }
-
-    /**
-     *  Report to the handler that the connection was nicely closed
-     */
-    virtual void reportClosed() override
-    {
-        // we no longer have to monitor the socket
-        _handler->monitor(_connection, _socket, 0);
-
-        // close the socket
-        close(_socket);
-        
-        // socket is closed now
-        _socket = -1;
-        
-        // copy the handler (if might destruct this object)
-        auto *handler = _handler;
-        
-        // reset member before the handler can make a mess of it
-        _handler = nullptr;
-        
-        // notify to handler
-        handler->onClosed(_connection);
     }
 };
     
