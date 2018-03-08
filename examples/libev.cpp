@@ -66,20 +66,30 @@ int main()
     MyHandler handler(loop);
 
     // init the SSL library
-    SSL_library_init();
+//    SSL_library_init();
 
     // make a connection
-    AMQP::Address address("amqps://guest:guest@localhost/");
+    AMQP::Address address("amqp://guest:guest@localhost/");
     AMQP::TcpConnection connection(&handler, address);
     
     // we need a channel too
     AMQP::TcpChannel channel(&connection);
 
     // create a temporary queue
-    channel.declareQueue(AMQP::exclusive).onSuccess([&connection](const std::string &name, uint32_t messagecount, uint32_t consumercount) {
+    channel.declareQueue(AMQP::exclusive).onSuccess([&connection, &channel](const std::string &name, uint32_t messagecount, uint32_t consumercount) {
         
         // report the name of the temporary queue
         std::cout << "declared queue " << name << std::endl;
+        
+        // close the channel
+        channel.close().onSuccess([&connection, &channel]() {
+            
+            // report that channel was closed
+            std::cout << "channel closed" << std::endl;
+            
+            // close the connection
+            connection.close();
+        });
     });
     
     // run the loop

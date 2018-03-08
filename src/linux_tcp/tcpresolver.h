@@ -93,7 +93,7 @@ private:
         try
         {
             // check if we support openssl in the first place
-            if (!OpenSSL::valid()) throw std::runtime_error("Secure connection cannot be established: libssl.so cannot be loaded");
+            if (_secure && !OpenSSL::valid()) throw std::runtime_error("Secure connection cannot be established: libssl.so cannot be loaded");
             
             // get address info
             AddressInfo addresses(_hostname.data(), _port);

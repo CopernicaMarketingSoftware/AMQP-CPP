@@ -25,7 +25,7 @@ namespace AMQP {
  *  @param  hostname        The address to connect to
  */
 TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
-//    _state(new TcpResolver(this, address.hostname(), address.port(), address.secure(), handler)),
+    _state(new TcpResolver(this, address.hostname(), address.port(), address.secure(), handler)),
     _connection(this, address.login(), address.vhost()) {}
 
 /**
@@ -133,14 +133,8 @@ void TcpConnection::onHeartbeat(Connection *connection)
  */
 void TcpConnection::onError(Connection *connection, const char *message)
 {
-    // current object is going to be removed, but we have to keep it for a while
-    auto ptr = std::move(_state);
-
-    // object is now in a closed state
-    //_state.reset(new TcpClosed(ptr.get()));
-
     // tell the implementation to report the error
-    ptr->reportError(message);
+    _state->reportError(message);
 }
 
 /**
