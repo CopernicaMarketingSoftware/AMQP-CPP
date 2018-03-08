@@ -212,11 +212,12 @@ public:
     
     /**
      *  Wait for the resolver to be ready
+     *  @param  monitor     Object to check if connection still exists
      *  @param  fd          The filedescriptor that is active
      *  @param  flags       Flags to indicate that fd is readable and/or writable
      *  @return             New implementation object
      */
-    virtual TcpState *process(int fd, int flags) override
+    virtual TcpState *process(const Monitor &monitor, int fd, int flags) override
     {
         // only works if the incoming pipe is readable
         if (fd != _pipe.in() || !(flags & readable)) return this;
@@ -227,9 +228,10 @@ public:
     
     /**
      *  Flush state / wait for the connection to complete
+     *  @param  monitor     Object to check if connection still exists
      *  @return             New implementation object
      */
-    virtual TcpState *flush() override
+    virtual TcpState *flush(const Monitor &monitor) override
     {
         // just wait for the other thread to be ready
         _thread.join();

@@ -212,6 +212,20 @@ int SSL_do_handshake(SSL *ssl)
 }
 
 /**
+ *  Obtain shutdown statue for TLS/SSL I/O operation
+ *  @param  ssl     SSL object
+ *  @return int     returns error values
+ */
+int SSL_get_shutdown(const SSL *ssl)
+{
+    // create a function
+    static Function<decltype(::SSL_get_shutdown)> func("SSL_get_shutdown");
+    
+    // call the openssl function
+    return func(ssl);
+}
+
+/**
  *  Obtain result code for TLS/SSL I/O operation
  *  @param  ssl     SSL object
  *  @param  ret     the returned diagnostic value of SSL calls

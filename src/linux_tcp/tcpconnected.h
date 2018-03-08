@@ -128,18 +128,16 @@ public:
     
     /**
      *  Process the filedescriptor in the object
+     *  @param  monitor     Monitor to check if the object is still alive
      *  @param  fd          Filedescriptor that is active
      *  @param  flags       AMQP::readable and/or AMQP::writable
      *  @return             New state object
      */
-    virtual TcpState *process(int fd, int flags) override
+    virtual TcpState *process(const Monitor &monitor, int fd, int flags) override
     {
         // must be the socket
         if (fd != _socket) return this;
 
-        // because the object might soon be destructed, we create a monitor to check this
-        Monitor monitor(this);
-        
         // can we write more data to the socket?
         if (flags & writable)
         {
@@ -218,9 +216,10 @@ public:
     
     /**
      *  Flush the connection, sent all buffered data to the socket
+     *  @param  monitor     Object to check if connection still lives
      *  @return TcpState    new tcp state
      */
-    virtual TcpState *flush() override
+    virtual TcpState *flush(const Monitor &monitor) override
     {
         // create an object to wait for the filedescriptor to becomes active
         Wait wait(_socket);
@@ -232,7 +231,7 @@ public:
             if (!wait.writable()) return this;
             
             // socket is writable, send as much data as possible
-            auto *newstate = process(_socket, writable);
+            auto *newstate = process(monitor, _socket, writable);
             
             // are we done
             if (newstate != this) return newstate;

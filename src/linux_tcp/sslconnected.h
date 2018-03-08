@@ -149,23 +149,54 @@ private:
     {
         // error was returned, so we must investigate what is going on
         auto error = OpenSSL::SSL_get_error(_ssl, result);
-                        
+        
+        // create a monitor because the handler could make things ugly
+        Monitor monitor(this);
+        
         // check the error
         switch (error) {
         case SSL_ERROR_WANT_READ:
             // the operation must be repeated when readable
             _handler->monitor(_connection, _socket, readable);
-            return this;
+            
+            // allow chaining
+            return monitor.valid() ? this : nullptr;
         
         case SSL_ERROR_WANT_WRITE:
             // wait until socket becomes writable again
             _handler->monitor(_connection, _socket, readable | writable);
-            return this;
+
+            // allow chaining
+            return monitor.valid() ? this : nullptr;
+
+        case SSL_ERROR_NONE:
+            // turns out no error occured, an no action has to be rescheduled
+            _handler->monitor(_connection, _socket, _out ? readable | writable : readable);
+
+            // we're ready for the next instruction from userspace
+            _state = state_idle;
+
+            // allow chaining
+            return monitor.valid() ? this : nullptr;
             
         default:
+            // is the peer trying to shutdown? (we dont expect this)
+            bool shutdown = OpenSSL::SSL_get_shutdown(_ssl);
 
-            // @todo check how to handle this
-            return this;
+            // send back a nice shutdown
+            if (shutdown) OpenSSL::SSL_shutdown(_ssl);
+                
+            // tell the handler
+            _handler->onError(_connection, "ssl error");
+            
+            // no need to chain if object is already destructed
+            if (!monitor) return nullptr;
+            
+            // create a new new object
+            //return shutdown ? 
+            
+            // allow chaining
+            return nullptr; //monitor.valid() ? new TcpClosed(this) : nullptr;
         }
     }
     
@@ -258,9 +289,6 @@ public:
         // the socket must be the one this connection writes to
         if (fd != _socket) return this;
         
-        // because the object might soon be destructed, we create a monitor to check this
-        Monitor monitor(this);
-
         // are we busy with sending or receiving data?
         if (_state == state_sending)
         {
@@ -288,14 +316,34 @@ public:
 
     /**
      *  Flush the connection, sent all buffered data to the socket
+     *  @param  monitor     Object to check if connection still exists
      *  @return TcpState    new tcp state
      */
-    virtual TcpState *flush() override
+    virtual TcpState *flush(const Monitor &monitor) override
     {
+        // we are not going to do this is object is busy reading
+        if (_state == state_receiving) return this;
+        
         // create an object to wait for the filedescriptor to becomes active
         Wait wait(_socket);
         
-        // @todo implementation
+        // keep looping while we have an outgoing buffer
+        while (_out)
+        {
+            // try to send more data from the outgoing buffer
+            auto result = _out.sendto(_ssl);
+            
+            // go to the next state
+            auto *state = result > 0 ? proceed() : repeat(result);
+            
+            return state;
+            
+//            if (result > 0) return proceed();
+//            
+//            // the operation failed, we may have to repeat our call
+//            else return repeat(result);
+        }
+        
         
         return this;
     }

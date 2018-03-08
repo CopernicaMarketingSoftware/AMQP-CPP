@@ -5,7 +5,7 @@
  *  IO between the client application and the RabbitMQ server.
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2016 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
 /**

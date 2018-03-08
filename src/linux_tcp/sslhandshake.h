@@ -148,11 +148,12 @@ public:
     
     /**
      *  Process the filedescriptor in the object
+     *  @param  monitor     Object to check if connection still exists
      *  @param  fd          Filedescriptor that is active
      *  @param  flags       AMQP::readable and/or AMQP::writable
      *  @return             New state object
      */
-    virtual TcpState *process(int fd, int flags) override
+    virtual TcpState *process(const Monitor &monitor, int fd, int flags) override
     {
         // must be the socket
         if (fd != _socket) return this;
@@ -187,9 +188,10 @@ public:
     
     /**
      *  Flush the connection, sent all buffered data to the socket
+     *  @param  monitor     Object to check if connection still exists
      *  @return TcpState    new tcp state
      */
-    virtual TcpState *flush() override
+    virtual TcpState *flush(const Monitor &monitor) override
     {
         // create an object to wait for the filedescriptor to becomes active
         Wait wait(_socket);

@@ -4,7 +4,7 @@
  *  Implementation file for the TCP connection
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2016 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
 /**
@@ -12,6 +12,7 @@
  */
 #include "includes.h"
 #include "tcpresolver.h"
+#include "tcpstate.h"
 
 /**
  *  Set up namespace
@@ -24,7 +25,7 @@ namespace AMQP {
  *  @param  hostname        The address to connect to
  */
 TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
-    _state(new TcpResolver(this, address.hostname(), address.port(), address.secure(), handler)),
+//    _state(new TcpResolver(this, address.hostname(), address.port(), address.secure(), handler)),
     _connection(this, address.login(), address.vhost()) {}
 
 /**
@@ -48,11 +49,11 @@ int TcpConnection::fileno() const
  */
 void TcpConnection::process(int fd, int flags)
 {
-    // monitor the object for destruction
-    Monitor monitor{ this };
+    // monitor the object for destruction, because you never know what the user
+    Monitor monitor(this);
 
     // pass on the the state, that returns a new impl
-    auto *result = _state->process(fd, flags);
+    auto *result = _state->process(monitor, fd, flags);
 
     // are we still valid
     if (!monitor.valid()) return;
@@ -78,7 +79,7 @@ void TcpConnection::flush()
     while (true)
     {
         // flush the object
-        auto *newstate = _state->flush();
+        auto *newstate = _state->flush(monitor);
         
         // done if object no longer exists
         if (!monitor.valid()) return;
@@ -136,7 +137,7 @@ void TcpConnection::onError(Connection *connection, const char *message)
     auto ptr = std::move(_state);
 
     // object is now in a closed state
-    _state.reset(new TcpClosed(ptr.get()));
+    //_state.reset(new TcpClosed(ptr.get()));
 
     // tell the implementation to report the error
     ptr->reportError(message);
@@ -158,14 +159,8 @@ void TcpConnection::onConnected(Connection *connection)
  */
 void TcpConnection::onClosed(Connection *connection)
 {
-    // current object is going to be removed, but we have to keep it for a while
-    auto ptr = std::move(_state);
-
-    // object is now in a closed state
-    _state.reset(new TcpClosed(ptr.get()));
-
     // tell the implementation to report that connection is closed now
-    ptr->reportClosed();
+    _state->reportClosed();
 }
 
 /**
