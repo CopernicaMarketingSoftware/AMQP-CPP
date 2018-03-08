@@ -43,7 +43,6 @@ int      SSL_shutdown(SSL *ssl);
 int      SSL_set_fd(SSL *ssl, int fd);
 int      SSL_get_shutdown(const SSL *ssl);
 int      SSL_get_error(const SSL *ssl, int ret);
-int      SSL_up_ref(SSL *ssl);
 void     SSL_set_connect_state(SSL *ssl);
 void     SSL_CTX_free(SSL_CTX *ctx);
 void     SSL_free(SSL *ssl);

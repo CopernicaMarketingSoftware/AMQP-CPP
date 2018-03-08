@@ -162,7 +162,7 @@ public:
         int result = OpenSSL::SSL_do_handshake(_ssl);
                 
         // if the connection succeeds, we can move to the ssl-connected state
-        if (result == 1) return nextstate(new SslConnected(_connection, _socket, _ssl, std::move(_out), _handler));
+        if (result == 1) return nextstate(new SslConnected(_connection, _socket, std::move(_ssl), std::move(_out), _handler));
         
         // error was returned, so we must investigate what is going on
         auto error = OpenSSL::SSL_get_error(_ssl, result);
@@ -203,7 +203,7 @@ public:
             int result = OpenSSL::SSL_do_handshake(_ssl);
         
             // if the connection succeeds, we can move to the ssl-connected state
-            if (result == 1) return nextstate(new SslConnected(_connection, _socket, _ssl, std::move(_out), _handler));
+            if (result == 1) return nextstate(new SslConnected(_connection, _socket, std::move(_ssl), std::move(_out), _handler));
         
             // error was returned, so we must investigate what is going on
             auto error = OpenSSL::SSL_get_error(_ssl, result);

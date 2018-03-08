@@ -42,26 +42,11 @@ public:
     }
     
     /**
-     *  Constructor that wraps around an existing context
-     *  @param  context
-     */
-    SslContext(SSL_CTX *context) : _ctx(context)
-    {
-        // increment refcount
-        // @todo fix this
-        //SSL_ctx_up_ref(context);
-    }
-    
-    /**
-     *  Copy constructor
+     *  Copy constructor is delete because the object is refcounted,
+     *  and we do not have a decent way to update the refcount in openssl 1.0
      *  @param  that
      */
-    SslContext(SslContext &that) : _ctx(that._ctx)
-    {
-        // increment refcount
-        // @todo fix this
-        //SSL_ctx_up_ref(context);
-    }
+    SslContext(SslContext &that) = delete;
     
     /**
      *  Destructor

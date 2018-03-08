@@ -125,7 +125,7 @@ private:
             _handler = nullptr;
             
             // start the state that closes the connection
-            return new SslShutdown(_connection, _socket, _ssl, _handler);
+            return new SslShutdown(_connection, _socket, std::move(_ssl), _handler);
         }
         else
         {
@@ -245,9 +245,9 @@ public:
      *  @param  buffer      The buffer that was already built
      *  @param  handler     User-supplied handler object
      */
-    SslConnected(TcpConnection *connection, int socket, const SslWrapper &ssl, TcpOutBuffer &&buffer, TcpHandler *handler) : 
+    SslConnected(TcpConnection *connection, int socket, SslWrapper &&ssl, TcpOutBuffer &&buffer, TcpHandler *handler) : 
         TcpState(connection, handler),
-        _ssl(ssl),
+        _ssl(std::move(ssl)),
         _socket(socket),
         _out(std::move(buffer)),
         _in(4096),

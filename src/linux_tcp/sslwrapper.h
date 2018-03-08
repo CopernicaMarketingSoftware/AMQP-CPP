@@ -41,25 +41,20 @@ public:
     }
     
     /**
-     *  Wrapper constructor
-     *  @param  ssl
-     */
-    SslWrapper(SSL *ssl) : _ssl(ssl)
-    {
-        // one more reference
-        // @todo fix this
-        //CRYPTO_add(_ssl);
-    }
-    
-    /**
-     *  Copy constructor
+     *  Copy constructor is removed because openssl 1.0 has no way to up refcount 
+     *  (otherwise we could be safely copying objects around)
      *  @param  that
      */
-    SslWrapper(const SslWrapper &that) : _ssl(that._ssl)
+    SslWrapper(const SslWrapper &that) = delete;
+    
+    /**
+     *  Move constructor
+     *  @param  that
+     */
+    SslWrapper(SslWrapper &&that) : _ssl(that._ssl)
     {
-        // one more reference
-        // @todo fix this
-        //SSL_up_ref(_ssl);
+        // invalidate other object
+        that._ssl = nullptr;
     }
     
     /**
@@ -67,6 +62,9 @@ public:
      */
     virtual ~SslWrapper()
     {
+        // do nothing if already moved away
+        if (_ssl == nullptr) return;
+        
         // destruct object
         OpenSSL::SSL_free(_ssl);
     }

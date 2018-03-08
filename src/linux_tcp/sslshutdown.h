@@ -100,9 +100,9 @@ public:
      *  @param  ssl         The SSL structure
      *  @param  handler     User-supplied handler object
      */
-    SslShutdown(TcpConnection *connection, int socket, const SslWrapper &ssl, TcpHandler *handler) : 
+    SslShutdown(TcpConnection *connection, int socket, SslWrapper &&ssl, TcpHandler *handler) : 
         TcpState(connection, handler),
-        _ssl(ssl),
+        _ssl(std::move(ssl)),
         _socket(socket)
     {
         // tell the handler to monitor the socket if there is an out
