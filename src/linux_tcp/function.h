@@ -115,10 +115,11 @@ private:
 public:
     /**
      *  Constructor
+     *  @param  handle      Handle to access openssl
      *  @param  name        Name of the function
      */
-    Function(const char *name) :
-        _method(dlsym(RTLD_DEFAULT, name)) {}
+    Function(void *handle, const char *name) :
+        _method(dlsym(handle, name)) {}
 
     /**
      *  Destructor

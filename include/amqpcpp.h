@@ -79,4 +79,4 @@
 #include "amqpcpp/connectionhandler.h"
 #include "amqpcpp/connectionimpl.h"
 #include "amqpcpp/connection.h"
-
+#include "amqpcpp/openssl.h"
