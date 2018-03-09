@@ -64,9 +64,14 @@ Then check out our other commercial and open source solutions:
 
 INSTALLING
 ==========
-AMQP-CPP comes with an optional Linux-only TCP module that takes care of the network part required for the AMQP-CPP core library. If you use this module, you are required to link with `pthread`.
 
-There are two methods to compile AMQP-CPP: CMake and Make. CMake is platform portable, but the Makefile only works on Linux. Building of a shared library is currently not supported on Windows.
+AMQP-CPP comes with an optional Linux-only TCP module that takes care of the 
+network part required for the AMQP-CPP core library. If you use this module, you 
+are required to link with `pthread` and `dl`.
+
+There are two methods to compile AMQP-CPP: CMake and Make. CMake is platform portable 
+and works on all systems, while the Makefile only works on Linux. Building of a shared 
+library is currently not supported on Windows.
 
 After building there are two relevant files to include when using the library.
 
@@ -77,9 +82,14 @@ After building there are two relevant files to include when using the library.
 
 On Windows you are required to define `NOMINMAX` when compiling code that includes public AMQP-CPP header files.
 
-## CMake
-The CMake file supports both building and installing. You can choose not to use the install functionality, and instead manually use the build output at `bin/`. Keep in mind that the TCP module is only supported for Linux. An example install method would be:
-``` bash
+## Using cmake
+
+The CMake file supports both building and installing. You can choose not to use 
+the install functionality, and instead manually use the build output at `bin/`. Keep 
+in mind that the TCP module is only supported for Linux. An example install method 
+would be:
+
+```bash
 mkdir build
 cd build
 cmake .. [-DAMQP-CPP_AMQBUILD_SHARED] [-DAMQP-CPP_LINUX_TCP]
@@ -91,22 +101,21 @@ cmake --build .. --target install
  AMQP-CPP_BUILD_SHARED   | OFF     | Static lib(ON) or shared lib(OFF)? Shared is not supported on Windows.
  AMQP-CPP_LINUX_TCP      | OFF     | Should the Linux-only TCP module be built?
 
-## Make
+## Using make
 
-Installing the library is as easy
-as running `make` and `make install`. This will install the full version of
-the AMQP-CPP, including the system specific TCP module. If you do not need the
-additional TCP module (because you take care of handling the network stuff
-yourself), you can also compile a pure form of the library. Use `make pure`
-and `make install` for that.
+Compiling and installing AMQP-CPP with make is as easy as running `make` and 
+then `make install`. This will install the full version of AMQP-CPP, including 
+the system specific TCP module. If you do not need the additional TCP module 
+(because you take care of handling the network stuff yourself), you can also 
+compile a pure form of the library. Use `make pure` and `make install` for that.
 
 When you compile an application that uses the AMQP-CPP library, do not
 forget to link with the library. For gcc and clang the linker flag is -lamqpcpp.
 If you use the fullblown version of AMQP-CPP (with the TCP module), you also
 need to pass the -lpthread and -ldl linker flags, because the TCP module uses a 
 thread for running an asynchronous and non-blocking DNS hostname lookup, and it
-optionally dynamically opens the openssl library if a secure connection to
-RabbitMQ has to be set up.
+may dynamically look up functions from the openssl library if a secure connection
+to RabbitMQ has to be set up.
 
 
 HOW TO USE AMQP-CPP
@@ -408,7 +417,7 @@ server using the amqps:// protocol:
 // init the SSL library (this works for openssl 1.1, for openssl 1.0 use SSL_library_init())
 OPENSSL_init_ssl(0, NULL);
 
-// address of the server
+// address of the server (secure!)
 AMQP::Address address("amqps://guest:guest@localhost/vhost");
 
 // create a AMQP connection object
@@ -416,11 +425,65 @@ AMQP::TcpConnection connection(&myHandler, address);
 ````
 
 There are two things to take care of if you want to create a secure connection: 
-(1) you must link your application with the -lssl flag, and (2) you must initialize 
-the openssl library by calling OPENSSL_init_ssl(). This initializating must take 
-place before you let you application connect to RabbitMQ. This is necessary
-because AMQP-CPP needs access to the openssl library, which it needs for setting up
-secure connections.
+(1) you must link your application with the -lssl flag (or use dlopen()), and (2) 
+you must initialize the openssl library by calling OPENSSL_init_ssl(). This 
+initializating must take place before you let you application connect to RabbitMQ. 
+This is necessary because AMQP-CPP needs access to the openssl library to set up 
+secure connections. It can only access this library if you have linked your 
+application with this library, or if you have loaded this library at runtime 
+using dlopen()). 
+
+If you do not want to link your application with openssl, you can also load the
+openssl library at runtime, and pass in the pointer to the handler to AMQP-CPP:
+
+````c++
+// dynamically open the openssl library
+void *handle = dlopen("/path/to/openssl.so", RTLD_LAZY);
+
+// tell AMQP-CPP library where the handle to openssl can be found
+AMQP::openssl(handle);
+
+// @todo call functions to initialize openssl, and create the AMQP connection
+// (see exampe above)
+````
+
+By itself, AMQP-CPP does not check if the created TLS connection is sufficient
+secure. Whether the certificate is expired, self-signed, missing or invalid: for
+AMQP-CPP it all doesn't matter and the connection is simply permitted. If you
+want to be more strict (for example: if you want to verify the server's certificate),
+you must do this yourself by implementing the "onSecured()" method in your handler
+object:
+
+````c++
+#include <amqpcpp.h>
+
+class MyTcpHandler : public AMQP::TcpHandler
+{
+    /**
+     *  Method that is called right after the TLS connection has been created.
+     *  In this method you can check the connection properties (like the certificate)
+     *  and return false if you find it not secure enough
+     *  @param  connection      the connection that has just completed the tls handshake
+     *  @param  ssl             SSL structure from the openssl library
+     *  @return bool            true if connection is secure enough to start the AMQP protocol
+     */
+    virtual bool onSecure(AMQP::TcpConnection *connection, const SSL *ssl) override
+    {
+        // @todo call functions from the openssl library to check the certificate,
+        // like SSL_get_peer_certificate() or SSL_get_verify_result().
+        // For now we always allow the connection to proceed
+        return true;
+    }
+    
+    /**
+     *  All other methods (like onConnected(), onError(), etc) are left out of this
+     *  example, but would be here if this was an actual user space handler class.
+     */
+};
+````
+
+The SSL pointer that is passed to the onSecured() method refers to the "SSL"
+structure from the openssl library.
 
 
 EXISTING EVENT LOOPS

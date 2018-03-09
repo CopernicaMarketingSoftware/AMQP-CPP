@@ -53,16 +53,34 @@ private:
     
     /**
      *  Report a new state
-     *  @param  state
+     *  @param  monitor
      *  @return TcpState
      */
-    TcpState *nextstate(TcpState *state)
+    TcpState *nextstate(const Monitor &monitor)
     {
-        // forget the socket to prevent that it is closed by the destructor
+        // check if the handler allows the connection
+        bool allowed = _handler->onSecured(_connection, _ssl);
+        
+        // leap out if the user space function destructed the object
+        if (!monitor.valid()) return nullptr;
+
+        // copy the socket because we might forget it
+        auto socket = _socket;
+
+        // forget the socket member to prevent that it is closed by the destructor
         _socket = -1;
         
-        // done
-        return state;
+        // if connection is allowed, we move to the next state
+        if (allowed) return new SslConnected(_connection, socket, std::move(_ssl), std::move(_out), _handler);
+        
+        // report that the connection is broken
+        _handler->onError(_connection, "TLS connection has been blocked by application level checks");
+        
+        // the onError method could have destructed this object
+        if (!monitor.valid()) return nullptr;
+        
+        // shutdown the connection
+        return new SslShutdown(_connection, socket, std::move(_ssl), true, _handler);
     }
     
     /**
@@ -170,7 +188,7 @@ public:
         int result = OpenSSL::SSL_do_handshake(_ssl);
         
         // if the connection succeeds, we can move to the ssl-connected state
-        if (result == 1) return nextstate(new SslConnected(_connection, _socket, std::move(_ssl), std::move(_out), _handler));
+        if (result == 1) return nextstate(monitor);
         
         // error was returned, so we must investigate what is going on
         auto error = OpenSSL::SSL_get_error(_ssl, result);
@@ -211,7 +229,7 @@ public:
             int result = OpenSSL::SSL_do_handshake(_ssl);
         
             // if the connection succeeds, we can move to the ssl-connected state
-            if (result == 1) return nextstate(new SslConnected(_connection, _socket, std::move(_ssl), std::move(_out), _handler));
+            if (result == 1) return nextstate(monitor);
         
             // error was returned, so we must investigate what is going on
             auto error = OpenSSL::SSL_get_error(_ssl, result);

@@ -6,13 +6,18 @@
  *  class.
  * 
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
 /**
  *  Include guard
  */
 #pragma once
+
+/**
+ *  Dependencies
+ */
+#include <openssl/ssl.h>
 
 /**
  *  Set up namespace
@@ -36,8 +41,32 @@ public:
     virtual ~TcpHandler() = default;
 
     /**
+     *  Method that is called after a TCP connection has been set up and the initial 
+     *  TLS handshake is finished too, but right before the AMQP login handshake is
+     *  going to take place and the first data is going to be sent over the connection. 
+     *  This method allows you to inspect the TLS certificate and other connection 
+     *  properties, and to break up the connection if you find it not secure enough. 
+     *  The default implementation considers all connections to be secure, even if the 
+     *  connection has a self-signed or even invalid certificate. To be more strict, 
+     *  override this method, inspect the certificate and return false if you do not 
+     *  want to use the connection. The passed in SSL pointer is a pointer to a SSL 
+     *  structure from the openssl library. This method is only called for secure 
+     *  connections (connection with an amqps:// address).
+     *  @param  connection      The connection for which TLS was just started
+     *  @param  ssl             Pointer to the SSL structure that can be inspected
+     *  @return bool            True to proceed / accept the connection, false to break up
+     */
+    virtual bool onSecured(TcpConnection *connection, const SSL *ssl)
+    {
+        // default implementation: do not inspect anything, just allow the connection
+        return true;
+    }
+
+    /**
      *  Method that is called when the heartbeat frequency is negotiated
-     *  between the server and the client. 
+     *  between the server and the client. Applications can override this method
+     *  if they want to use a different heartbeat interval (for example: return 0
+     *  to disable heartbeats)
      *  @param  connection      The connection that suggested a heartbeat interval
      *  @param  interval        The suggested interval from the server
      *  @return uint16_t        The interval to use
@@ -51,7 +80,9 @@ public:
     }
 
     /**
-     *  Method that is called when the TCP connection ends up in a connected state
+     *  Method that is called when the AMQP connection ends up in a connected state
+     *  This method is called after the TCP connection has been set up, the (optional)
+     *  secure TLS connection, and the AMQP login handshake has been completed.
      *  @param  connection  The TCP connection
      */
     virtual void onConnected(TcpConnection *connection) {}
