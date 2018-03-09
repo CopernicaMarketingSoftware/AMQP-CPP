@@ -111,6 +111,21 @@ int SSL_set_fd(SSL *ssl, int fd)
 }
 
 /**
+ *  The number of bytes availabe in the ssl struct that have been read
+ *  from the socket, but that have not been returned the SSL_read()
+ *  @param  ssl     SSL object
+ *  @return int     number of bytes
+ */
+int SSL_pending(const SSL *ssl)
+{
+    // create a function
+    static Function<decltype(::SSL_pending)> func("SSL_pending");
+    
+    // call the openssl function
+    return func(ssl);
+}
+
+/**
  *  Free an allocated ssl context
  *  @param  ctx
  */

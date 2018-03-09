@@ -190,6 +190,9 @@ public:
         // close the connection
         auto result = OpenSSL::SSL_shutdown(_ssl);
         
+        // on result==0 we need an additional call
+        while (result == 0) result = OpenSSL::SSL_shutdown(_ssl);
+        
         // if this is a success, we can proceed with the event loop
         if (result > 0) return proceed(monitor);
             
@@ -212,6 +215,9 @@ public:
         {
             // close the connection
             auto result = OpenSSL::SSL_shutdown(_ssl);
+
+            // on result==0 we need an additional call
+            while (result == 0) result = OpenSSL::SSL_shutdown(_ssl);
                 
             // if this is a success, we can proceed with the event loop
             if (result > 0) return proceed(monitor);

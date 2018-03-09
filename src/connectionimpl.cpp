@@ -3,7 +3,7 @@
  *
  *  Implementation of an AMQP connection
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 #include "includes.h"
 #include "protocolheaderframe.h"
@@ -147,7 +147,7 @@ uint64_t ConnectionImpl::parse(const Buffer &buffer)
                 // data we need for the next frame, otherwise we need at least 7
                 // bytes for processing the header of the next frame
                 _expected = receivedFrame.header() ? (uint32_t)receivedFrame.totalSize() : 7;
-
+                
                 // we're ready for now
                 return processed;
             }

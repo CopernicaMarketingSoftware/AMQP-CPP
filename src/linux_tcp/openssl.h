@@ -40,6 +40,7 @@ int      SSL_do_handshake(SSL *ssl);
 int      SSL_read(SSL *ssl, void *buf, int num);
 int      SSL_write(SSL *ssl, const void *buf, int num);
 int      SSL_shutdown(SSL *ssl);
+int      SSL_pending(const SSL *ssl);
 int      SSL_set_fd(SSL *ssl, int fd);
 int      SSL_get_shutdown(const SSL *ssl);
 int      SSL_get_error(const SSL *ssl, int ret);

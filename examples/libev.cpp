@@ -75,6 +75,7 @@ int main()
 
     // make a connection
     AMQP::Address address("amqp://guest:guest@localhost/");
+//    AMQP::Address address("amqps://guest:guest@localhost/");
     AMQP::TcpConnection connection(&handler, address);
     
     // we need a channel too
