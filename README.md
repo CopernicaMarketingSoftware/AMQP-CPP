@@ -70,10 +70,10 @@ There are two methods to compile AMQP-CPP: CMake and Make. CMake is platform por
 
 After building there are two relevant files to include when using the library.
 
-File|Include when?
-----|------------
-amqpcpp.h|Always
-amqpcpp/linux_tcp.h|If using the Linux-only TCP module
+ File                | Include when?
+---------------------|--------------------------------------------------------
+ amqpcpp.h           | Always
+ amqpcpp/linux_tcp.h | If using the Linux-only TCP module
 
 On Windows you are required to define `NOMINMAX` when compiling code that includes public AMQP-CPP header files.
 
@@ -86,12 +86,13 @@ cmake .. [-DAMQP-CPP_AMQBUILD_SHARED] [-DAMQP-CPP_LINUX_TCP]
 cmake --build .. --target install
 ```
 
-Option|Default|Meaning
-------|-------|-------
-AMQP-CPP_BUILD_SHARED|OFF|Static lib(ON) or shared lib(OFF)? Shared is not supported on Windows.
-AMQP-CPP_LINUX_TCP|OFF|Should the Linux-only TCP module be built?
+ Option                  | Default | Meaning
+-------------------------|---------|-----------------------------------------------------------------------
+ AMQP-CPP_BUILD_SHARED   | OFF     | Static lib(ON) or shared lib(OFF)? Shared is not supported on Windows.
+ AMQP-CPP_LINUX_TCP      | OFF     | Should the Linux-only TCP module be built?
 
 ## Make
+
 Installing the library is as easy
 as running `make` and `make install`. This will install the full version of
 the AMQP-CPP, including the system specific TCP module. If you do not need the
@@ -395,6 +396,32 @@ channel.declareExchange("my-exchange", AMQP::fanout);
 channel.declareQueue("my-queue");
 channel.bindQueue("my-exchange", "my-queue", "my-routing-key");
 ````
+
+SECURE CONNECTIONS
+==================
+
+The TCP module of AMQP-CPP also supports setting up secure connections. If your
+RabbitMQ server accepts SSL connections, you can specify the address to your
+server using the amqps:// protocol:
+
+````c++
+// init the SSL library (this works for openssl 1.1, for openssl 1.0 use SSL_library_init())
+OPENSSL_init_ssl(0, NULL);
+
+// address of the server
+AMQP::Address address("amqps://guest:guest@localhost/vhost");
+
+// create a AMQP connection object
+AMQP::TcpConnection connection(&myHandler, address);
+````
+
+There are two things to take care of if you want to create a secure connection: 
+(1) you must link your application with the -lssl flag, and (2) you must initialize 
+the openssl library by calling OPENSSL_init_ssl(). This initializating must take 
+place before you let you application connect to RabbitMQ. This is necessary
+because AMQP-CPP needs access to the openssl library, which it needs for setting up
+secure connections.
+
 
 EXISTING EVENT LOOPS
 ====================
