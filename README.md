@@ -433,8 +433,10 @@ secure connections. It can only access this library if you have linked your
 application with this library, or if you have loaded this library at runtime 
 using dlopen()). 
 
-If you do not want to link your application with openssl, you can also load the
-openssl library at runtime, and pass in the pointer to the handler to AMQP-CPP:
+Linking openssl is the normal thing to do. You just have to add the `-lssl` flag
+to your linker. If you however do not want to link your application with openssl, 
+you can also load the openssl library at runtime, and pass in the pointer to the 
+handle to AMQP-CPP:
 
 ````c++
 // dynamically open the openssl library
