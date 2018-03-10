@@ -299,6 +299,12 @@ public:
     {
         // start with the protocol and login
         stream << (address._secure ? "amqps://" : "amqp://");
+        
+        // do we have a login?
+        if (address._login) stream << address._login << "@";
+        
+        // write hostname
+        stream << address._hostname;
 
         // do we need a special portnumber?
         if (address._port != 5672) stream << ":" << address._port;
