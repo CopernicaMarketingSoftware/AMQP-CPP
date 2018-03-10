@@ -4,7 +4,7 @@
  *  Implementation file for the TCP connection
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2016 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
 /**
@@ -26,6 +26,11 @@ namespace AMQP {
 TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
     _state(new TcpResolver(this, address.hostname(), address.port(), address.secure(), handler)),
     _connection(this, address.login(), address.vhost()) {}
+
+/**
+ *  Destructor
+ */
+TcpConnection::~TcpConnection() noexcept = default;
 
 /**
  *  The filedescriptor that is used for this connection

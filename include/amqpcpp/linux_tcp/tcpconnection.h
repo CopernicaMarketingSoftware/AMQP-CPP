@@ -5,7 +5,7 @@
  *  IO between the client application and the RabbitMQ server.
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2016 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
 /**
@@ -34,9 +34,7 @@ private:
     /**
      *  The state of the TCP connection - this state objecs changes based on 
      *  the state of the connection (resolving, connected or closed)
-     *  a shared pointer is used because we use a forward declaration, which isn't
-     *  allowed in a unique pointer
-     *  @var    std::shared_ptr<TcpState>
+     *  @var    std::unique_ptr<TcpState>
      */
     std::shared_ptr<TcpState> _state;
 
@@ -116,7 +114,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~TcpConnection() noexcept {}
+    virtual ~TcpConnection() noexcept;
 
     /**
      *  The filedescriptor that is used for this connection
