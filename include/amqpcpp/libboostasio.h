@@ -1,14 +1,19 @@
 /**
  *  LibBoostAsio.h
  *
- *  Implementation for the AMQP::TcpHandler that is optimized for boost::asio. You can
- *  use this class instead of a AMQP::TcpHandler class, just pass the boost asio service
- *  to the constructor and you're all set.  See tests/libboostasio.cpp for example.
+ *  Implementation for the AMQP::TcpHandler for boost::asio. You can use this class 
+ *  instead of a AMQP::TcpHandler class, just pass the boost asio service to the 
+ *  constructor and you're all set.  See tests/libboostasio.cpp for example.
+ *
+ *  Watch out: this class was not implemented or reviewed by the original author of 
+ *  AMQP-CPP. However, we do get a lot of questions and issues from users of this class,
+ *  so we cannot guarantee its quality. If you run into such issues too, it might be
+ *  better to implement your own handler that interact with boost.
+ *
  *
  *  @author Gavin Smith <gavin.smith@coralbay.tv>
- *
- *
  */
+
 
 /**
  *  Include guard
