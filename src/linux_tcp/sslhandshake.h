@@ -74,7 +74,7 @@ private:
         if (allowed) return new SslConnected(_connection, socket, std::move(_ssl), std::move(_out), _handler);
         
         // report that the connection is broken
-        _handler->onError(_connection, "TLS connection has been blocked by application level checks");
+        _handler->onError(_connection, "TLS connection has been rejected");
         
         // the onError method could have destructed this object
         if (!monitor.valid()) return nullptr;

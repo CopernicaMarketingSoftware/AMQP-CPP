@@ -27,7 +27,7 @@ private:
      *  The auth method
      *  @var bool
      */
-    bool _secure;
+    bool _secure = false;
     
     /**
      *  Login data (username + password)
@@ -52,6 +52,16 @@ private:
      *  @var std::string
      */
     std::string _vhost;
+    
+    
+    /**
+     *  The default port
+     *  @return uint16_t
+     */
+    uint16_t defaultport() const
+    {
+        return _secure ? 5671 : 5672;
+    }
 
 public:
     /**
@@ -67,13 +77,13 @@ public:
         const char *last = data + size;
 
         // must start with ampqs:// to have a secure connection (and we also assign a different default port)
-        _secure = strncmp(data, "amqps://", 8) == 0;
-
-        // default port changes for secure connections
-        if (_secure) _port = 5671;
+        if (strncmp(data, "amqps://", 8) == 0) _secure = true;
 
         // otherwise protocol must be amqp://
-        else if (strncmp(data, "amqp://", 7) != 0) throw std::runtime_error("AMQP address should start with \"amqp://\" or \"amqps://\"");
+        else if (!strncmp(data, "amqp://", 7) != 0) throw std::runtime_error("AMQP address should start with \"amqp://\" or \"amqps://\"");
+        
+        // assign default port (we may overwrite it later)
+        _port = defaultport();
 
         // begin of the string was parsed
         data += _secure ? 8 : 7;
@@ -307,7 +317,7 @@ public:
         stream << address._hostname;
 
         // do we need a special portnumber?
-        if (address._port != 5672) stream << ":" << address._port;
+        if (address._port != address.defaultport()) stream << ":" << address._port;
 
         // append default vhost
         stream << "/";
