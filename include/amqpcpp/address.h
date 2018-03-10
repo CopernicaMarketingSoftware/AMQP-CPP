@@ -80,7 +80,7 @@ public:
         if (strncmp(data, "amqps://", 8) == 0) _secure = true;
 
         // otherwise protocol must be amqp://
-        else if (!strncmp(data, "amqp://", 7) != 0) throw std::runtime_error("AMQP address should start with \"amqp://\" or \"amqps://\"");
+        else if (strncmp(data, "amqp://", 7) != 0) throw std::runtime_error("AMQP address should start with \"amqp://\" or \"amqps://\"");
         
         // assign default port (we may overwrite it later)
         _port = defaultport();
