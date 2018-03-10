@@ -3,7 +3,7 @@
  *
  *  This class combines login, password and vhost
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -65,7 +65,25 @@ public:
     /**
      *  Destructor
      */
-    virtual ~Login() {}
+    virtual ~Login() = default;
+    
+    /**
+     *  Cast to boolean: is the login set?
+     *  @return bool
+     */
+    operator bool () const
+    {
+        return !_user.empty() || !_password.empty();
+    }
+    
+    /**
+     *  Negate operator: is it not set
+     *  @return bool
+     */
+    bool operator! () const
+    {
+        return _user.empty() && _password.empty();
+    }
 
     /**
      *  Retrieve the user name
@@ -143,7 +161,7 @@ public:
     friend std::ostream &operator<<(std::ostream &stream, const Login &login)
     {
         // write username and password
-        return stream << login._user << "@" << login._password;
+        return stream << login._user << ":" << login._password;
     }
 
 };

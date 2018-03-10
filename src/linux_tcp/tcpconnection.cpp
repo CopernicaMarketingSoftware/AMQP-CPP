@@ -12,6 +12,7 @@
  */
 #include "includes.h"
 #include "tcpresolver.h"
+#include "tcpstate.h"
 
 /**
  *  Set up namespace
@@ -53,11 +54,11 @@ int TcpConnection::fileno() const
  */
 void TcpConnection::process(int fd, int flags)
 {
-    // monitor the object for destruction
-    Monitor monitor{ this };
+    // monitor the object for destruction, because you never know what the user
+    Monitor monitor(this);
 
     // pass on the the state, that returns a new impl
-    auto *result = _state->process(fd, flags);
+    auto *result = _state->process(monitor, fd, flags);
 
     // are we still valid
     if (!monitor.valid()) return;
@@ -83,7 +84,7 @@ void TcpConnection::flush()
     while (true)
     {
         // flush the object
-        auto *newstate = _state->flush();
+        auto *newstate = _state->flush(monitor);
         
         // done if object no longer exists
         if (!monitor.valid()) return;
@@ -137,14 +138,8 @@ void TcpConnection::onHeartbeat(Connection *connection)
  */
 void TcpConnection::onError(Connection *connection, const char *message)
 {
-    // current object is going to be removed, but we have to keep it for a while
-    auto ptr = std::move(_state);
-
-    // object is now in a closed state
-    _state.reset(new TcpClosed(ptr.get()));
-
     // tell the implementation to report the error
-    ptr->reportError(message);
+    _state->reportError(message);
 }
 
 /**
@@ -163,14 +158,8 @@ void TcpConnection::onConnected(Connection *connection)
  */
 void TcpConnection::onClosed(Connection *connection)
 {
-    // current object is going to be removed, but we have to keep it for a while
-    auto ptr = std::move(_state);
-
-    // object is now in a closed state
-    _state.reset(new TcpClosed(ptr.get()));
-
     // tell the implementation to report that connection is closed now
-    ptr->reportClosed();
+    _state->reportClosed();
 }
 
 /**

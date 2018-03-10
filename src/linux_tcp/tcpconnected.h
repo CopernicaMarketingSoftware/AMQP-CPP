@@ -54,7 +54,35 @@ private:
      *  @var size_t
      */
     size_t _reallocate = 0;
+    
+    /**
+     *  Have we already made the last report to the user (about an error or closed connection?)
+     *  @var bool
+     */
+    bool _finalized = false;
 
+    
+    /**
+     *  Close the connection
+     *  @return bool
+     */
+    bool close()
+    {
+        // do nothing if already closed
+        if (_socket < 0) return false;
+        
+        // and stop monitoring it
+        _handler->monitor(_connection, _socket, 0);
+
+        // close the socket
+        ::close(_socket);
+        
+        // forget filedescriptor
+        _socket = -1;
+        
+        // done
+        return true;
+    }
     
     /**
      *  Helper method to report an error
@@ -64,6 +92,16 @@ private:
     {
         // some errors are ok and do not (necessarily) mean that we're disconnected
         if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) return false;
+        
+        // connection can be closed now
+        close();
+        
+        // if the user has already been notified, we do not have to do anything else
+        if (_finalized) return true;
+        
+        // update the _finalized member before we make the call to user space because
+        // the user space may destruct this object
+        _finalized = true;
         
         // we have an error - report this to the user
         _handler->onError(_connection, strerror(errno));
@@ -110,14 +148,8 @@ public:
      */
     virtual ~TcpConnected() noexcept
     {
-        // skip if handler is already forgotten
-        if (_handler == nullptr) return;
-        
-        // we no longer have to monitor the socket
-        _handler->monitor(_connection, _socket, 0);
-        
         // close the socket
-        close(_socket);
+        close();
     }
 
     /**
@@ -128,18 +160,16 @@ public:
     
     /**
      *  Process the filedescriptor in the object
+     *  @param  monitor     Monitor to check if the object is still alive
      *  @param  fd          Filedescriptor that is active
      *  @param  flags       AMQP::readable and/or AMQP::writable
      *  @return             New state object
      */
-    virtual TcpState *process(int fd, int flags) override
+    virtual TcpState *process(const Monitor &monitor, int fd, int flags) override
     {
         // must be the socket
         if (fd != _socket) return this;
 
-        // because the object might soon be destructed, we create a monitor to check this
-        Monitor monitor(this);
-        
         // can we write more data to the socket?
         if (flags & writable)
         {
@@ -147,7 +177,7 @@ public:
             auto result = _out.sendto(_socket);
             
             // are we in an error state?
-            if (result <  0 && reportError()) return nextState(monitor);
+            if (result < 0 && reportError()) return nextState(monitor);
             
             // if buffer is empty by now, we no longer have to check for 
             // writability, but only for readability
@@ -218,9 +248,10 @@ public:
     
     /**
      *  Flush the connection, sent all buffered data to the socket
+     *  @param  monitor     Object to check if connection still lives
      *  @return TcpState    new tcp state
      */
-    virtual TcpState *flush() override
+    virtual TcpState *flush(const Monitor &monitor) override
     {
         // create an object to wait for the filedescriptor to becomes active
         Wait wait(_socket);
@@ -232,7 +263,7 @@ public:
             if (!wait.writable()) return this;
             
             // socket is writable, send as much data as possible
-            auto *newstate = process(_socket, writable);
+            auto *newstate = process(monitor, _socket, writable);
             
             // are we done
             if (newstate != this) return newstate;
@@ -257,27 +288,46 @@ public:
     }
 
     /**
+     *  Report to the handler that the object is in an error state.
+     *  @param  error
+     */
+    virtual void reportError(const char *error) override
+    {
+        // close the socket
+        close();
+        
+        // if the user was already notified of an final state, we do not have to proceed
+        if (_finalized) return;
+        
+        // remember that this is the final call to user space
+        _finalized = true;
+        
+        // pass to handler
+        _handler->onError(_connection, error);
+    }
+
+    /**
      *  Report to the handler that the connection was nicely closed
+     *  This is the counter-part of the connection->close() call.
      */
     virtual void reportClosed() override
     {
-        // we no longer have to monitor the socket
-        _handler->monitor(_connection, _socket, 0);
+        // we will shutdown the socket in a very elegant way, we notify the peer 
+        // that we will not be sending out more write operations
+        shutdown(_socket, SHUT_WR);
+        
+        // we still monitor the socket for readability to see if our close call was
+        // confirmed by the peer
+        _handler->monitor(_connection, _socket, readable);
 
-        // close the socket
-        close(_socket);
+        // if the user was already notified of an final state, we do not have to proceed
+        if (_finalized) return;
         
-        // socket is closed now
-        _socket = -1;
+        // remember that this is the final call to user space
+        _finalized = true;
         
-        // copy the handler (if might destruct this object)
-        auto *handler = _handler;
-        
-        // reset member before the handler can make a mess of it
-        _handler = nullptr;
-        
-        // notify to handler
-        handler->onClosed(_connection);
+        // pass to handler
+        _handler->onClosed(_connection);
     }
 };
     

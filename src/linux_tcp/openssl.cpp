@@ -11,11 +11,33 @@
  */
 #include "openssl.h"
 #include "function.h"
+#include "amqpcpp/openssl.h"
 
 /**
- *  Begin of namespace
+ *  The handle to access openssl (the result of dlopen("openssl.so"))
+ *  By default we set this to RTLD_DEFAULT, so that AMQP-CPP checks the internal process space
  */
-namespace AMQP { namespace OpenSSL {
+static void *handle = RTLD_DEFAULT;
+
+/**
+ *  Just the AMQP namespace
+ */
+namespace AMQP {
+
+/**
+ *  Function to set the openssl handle
+ *  @param  ptr
+ */
+void openssl(void *ptr)
+{
+    // store handle
+    handle = ptr;
+}
+
+/**
+ *  Begin of AMQP::OpenSSL namespace
+ */
+namespace OpenSSL {
 
 /**
  *  Is the openssl library loaded?
@@ -24,7 +46,7 @@ namespace AMQP { namespace OpenSSL {
 bool valid()
 {
     // create a function
-    static Function<decltype(::SSL_CTX_new)> func("SSL_CTX_new");
+    static Function<decltype(::SSL_CTX_new)> func(handle, "SSL_CTX_new");
 
     // we need a library
     return func;
@@ -37,13 +59,13 @@ bool valid()
 const SSL_METHOD *TLS_client_method()
 {
     // create a function that loads the method
-    static Function<decltype(TLS_client_method)> func("TLS_client_method");
+    static Function<decltype(TLS_client_method)> func(handle, "TLS_client_method");
     
     // call the openssl function
     if (func) return func();
     
     // older openssl libraries do not have this function, so we try to load an other function
-    static Function<decltype(TLS_client_method)> old("SSLv23_client_method");
+    static Function<decltype(TLS_client_method)> old(handle, "SSLv23_client_method");
     
     // call the old one
     return old();
@@ -57,7 +79,7 @@ const SSL_METHOD *TLS_client_method()
 SSL_CTX *SSL_CTX_new(const SSL_METHOD *method) 
 {
     // create a function
-    static Function<decltype(::SSL_CTX_new)> func("SSL_CTX_new");
+    static Function<decltype(::SSL_CTX_new)> func(handle, "SSL_CTX_new");
     
     // call the openssl function
     return func(method);
@@ -73,7 +95,7 @@ SSL_CTX *SSL_CTX_new(const SSL_METHOD *method)
 int SSL_read(SSL *ssl, void *buf, int num)
 {
     // create a function
-    static Function<decltype(::SSL_read)> func("SSL_read");
+    static Function<decltype(::SSL_read)> func(handle, "SSL_read");
     
     // call the openssl function
     return func(ssl, buf, num);
@@ -89,7 +111,7 @@ int SSL_read(SSL *ssl, void *buf, int num)
 int SSL_write(SSL *ssl, const void *buf, int num)
 {
     // create a function
-    static Function<decltype(::SSL_write)> func("SSL_write");
+    static Function<decltype(::SSL_write)> func(handle, "SSL_write");
     
     // call the openssl function
     return func(ssl, buf, num);
@@ -104,10 +126,25 @@ int SSL_write(SSL *ssl, const void *buf, int num)
 int SSL_set_fd(SSL *ssl, int fd) 
 {
     // create a function
-    static Function<decltype(::SSL_set_fd)> func("SSL_set_fd");
+    static Function<decltype(::SSL_set_fd)> func(handle, "SSL_set_fd");
     
     // call the openssl function
     return func(ssl, fd);
+}
+
+/**
+ *  The number of bytes availabe in the ssl struct that have been read
+ *  from the socket, but that have not been returned the SSL_read()
+ *  @param  ssl     SSL object
+ *  @return int     number of bytes
+ */
+int SSL_pending(const SSL *ssl)
+{
+    // create a function
+    static Function<decltype(::SSL_pending)> func(handle, "SSL_pending");
+    
+    // call the openssl function
+    return func(ssl);
 }
 
 /**
@@ -117,7 +154,7 @@ int SSL_set_fd(SSL *ssl, int fd)
 void SSL_CTX_free(SSL_CTX *ctx)
 {
     // create a function
-    static Function<decltype(::SSL_CTX_free)> func("SSL_CTX_free");
+    static Function<decltype(::SSL_CTX_free)> func(handle, "SSL_CTX_free");
     
     // call the openssl function
     return func(ctx);
@@ -131,7 +168,7 @@ void SSL_CTX_free(SSL_CTX *ctx)
 void SSL_free(SSL *ssl)
 {
     // create a function
-    static Function<decltype(::SSL_free)> func("SSL_free");
+    static Function<decltype(::SSL_free)> func(handle, "SSL_free");
     
     // call the openssl function
     return func(ssl);
@@ -145,7 +182,7 @@ void SSL_free(SSL *ssl)
 SSL *SSL_new(SSL_CTX *ctx)
 {
     // create a function
-    static Function<decltype(::SSL_new)> func("SSL_new");
+    static Function<decltype(::SSL_new)> func(handle, "SSL_new");
     
     // call the openssl function
     return func(ctx);
@@ -159,7 +196,7 @@ SSL *SSL_new(SSL_CTX *ctx)
 int SSL_up_ref(SSL *ssl)
 {
     // create a function
-    static Function<decltype(SSL_up_ref)> func("SSL_up_ref");
+    static Function<decltype(SSL_up_ref)> func(handle, "SSL_up_ref");
     
     // call the openssl function if it exists
     if (func) return func(ssl);
@@ -177,7 +214,7 @@ int SSL_up_ref(SSL *ssl)
 int SSL_shutdown(SSL *ssl)
 {
     // create a function
-    static Function<decltype(::SSL_shutdown)> func("SSL_shutdown");
+    static Function<decltype(::SSL_shutdown)> func(handle, "SSL_shutdown");
     
     // call the openssl function
     return func(ssl);
@@ -190,7 +227,7 @@ int SSL_shutdown(SSL *ssl)
 void SSL_set_connect_state(SSL *ssl)
 {
     // create a function
-    static Function<decltype(::SSL_set_connect_state)> func("SSL_set_connect_state");
+    static Function<decltype(::SSL_set_connect_state)> func(handle, "SSL_set_connect_state");
     
     // call the openssl function
     func(ssl);
@@ -205,7 +242,21 @@ void SSL_set_connect_state(SSL *ssl)
 int SSL_do_handshake(SSL *ssl)
 {
     // create a function
-    static Function<decltype(::SSL_do_handshake)> func("SSL_do_handshake");
+    static Function<decltype(::SSL_do_handshake)> func(handle, "SSL_do_handshake");
+    
+    // call the openssl function
+    return func(ssl);
+}
+
+/**
+ *  Obtain shutdown statue for TLS/SSL I/O operation
+ *  @param  ssl     SSL object
+ *  @return int     returns error values
+ */
+int SSL_get_shutdown(const SSL *ssl)
+{
+    // create a function
+    static Function<decltype(::SSL_get_shutdown)> func(handle, "SSL_get_shutdown");
     
     // call the openssl function
     return func(ssl);
@@ -220,7 +271,7 @@ int SSL_do_handshake(SSL *ssl)
 int SSL_get_error(const SSL *ssl, int ret)
 {
     // create a function
-    static Function<decltype(::SSL_get_error)> func("SSL_get_error");
+    static Function<decltype(::SSL_get_error)> func(handle, "SSL_get_error");
     
     // call the openssl function
     return func(ssl, ret);
@@ -237,12 +288,28 @@ int SSL_get_error(const SSL *ssl, int ret)
 long SSL_ctrl(SSL *ssl, int cmd, long larg, void *parg)
 {
     // create a function
-    static Function<decltype(::SSL_ctrl)> func("SSL_ctrl");
+    static Function<decltype(::SSL_ctrl)> func(handle, "SSL_ctrl");
     
     // call the openssl function
     return func(ssl, cmd, larg, parg);
 }
+
+/**
+ *  Set the certificate file to be used by the connection
+ *  @param  ssl     ssl structure
+ *  @param  file    filename
+ *  @param  type    type of file
+ *  @return int
+ */
+int SSL_use_certificate_file(SSL *ssl, const char *file, int type)
+{
+    // create a function
+    static Function<decltype(::SSL_use_certificate_file)> func(handle, "SSL_use_certificate_file");
     
+    // call the openssl function
+    return func(ssl, file, type);
+}
+
 /**
  *  End of namespace
  */
