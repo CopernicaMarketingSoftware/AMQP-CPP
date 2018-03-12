@@ -36,9 +36,9 @@
 
 // C++17 has 'weak_from_this()' support.
 #if __cplusplus >= 201701L
-#define PTR_FROM_THIS weak_from_this
+#define PTR_FROM_THIS(T) weak_from_this()
 #else
-#define PTR_FROM_THIS shared_from_this
+#define PTR_FROM_THIS(T) std::weak_ptr<T>(shared_from_this())
 #endif
 
 /**
@@ -142,7 +142,7 @@ protected:
                                   this,
                                   _1,
                                   _2,
-                                  PTR_FROM_THIS(),
+                                  PTR_FROM_THIS(Watcher),
                                   connection,
                                   fd);
             return get_dispatch_wrapper(fn);
@@ -160,7 +160,7 @@ protected:
                                   this,
                                   _1,
                                   _2,
-                                  PTR_FROM_THIS(),
+                                  PTR_FROM_THIS(Watcher),
                                   connection,
                                   fd);
             return get_dispatch_wrapper(fn);
@@ -346,7 +346,7 @@ protected:
             const auto fn = boost::bind(&Timer::timeout,
                                   this,
                                   _1,
-                                  PTR_FROM_THIS(),
+                                  PTR_FROM_THIS(Timer),
                                   connection,
                                   timeout);
 
@@ -583,6 +583,16 @@ public:
      *  Destructor
      */
     ~LibBoostAsioHandler() override = default;
+
+    /**
+     * Make sure to stop the heartbeat timer after the connection is closed.
+     * Otherwise it will keep the service running forever.
+     */
+    void onClosed(TcpConnection* connection) override
+    {
+        (void)connection;
+        _timer.reset();
+    }
 };
 
 

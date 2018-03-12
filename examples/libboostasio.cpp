@@ -30,9 +30,6 @@ int main()
     // note: we suggest use of 2 threads - normally one is fin (we are simply demonstrating thread safety).
     boost::asio::io_service service(4);
 
-    // create a work object to process our events.
-    boost::asio::io_service::work work(service);
-    
     // handler for libev
     AMQP::LibBoostAsioHandler handler(service);
     
