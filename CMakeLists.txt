@@ -75,7 +75,7 @@ if(AMQP-CPP_BUILD_SHARED)
     # create shared lib
     add_library(${PROJECT_NAME} SHARED ${SRCS})
     # set shared lib version
-    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 2.8)
+    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 3.0)
 else()
     # create static lib
     add_library(${PROJECT_NAME} STATIC ${SRCS})
