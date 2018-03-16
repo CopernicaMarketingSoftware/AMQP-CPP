@@ -85,7 +85,7 @@ On Windows you are required to define `NOMINMAX` when compiling code that includ
 ## Using cmake
 
 The CMake file supports both building and installing. You can choose not to use 
-the install functionality, and instead manually use the build output at `bin/`. Keep 
+the install functionality, and instead manually use the build output at `build/bin/`. Keep
 in mind that the TCP module is only supported for Linux. An example install method 
 would be:
 
