@@ -27,7 +27,7 @@ set (CMAKE_CXX_STANDARD 11)
 # ------------------------------------------------------------------------------------------------------
 
 # set include/ as include directory
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # macro that adds a list of provided source files to a list called SRCS.
 # if variable SRCS does not yet exist, it is created.
@@ -69,7 +69,7 @@ endif()
 # ------------------------------------------------------------------------------------------------------
 
 # set output directory
-set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 if(AMQP-CPP_BUILD_SHARED)
     # create shared lib
