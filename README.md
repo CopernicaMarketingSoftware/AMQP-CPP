@@ -309,6 +309,7 @@ the main event loop:
 
 ````c++
 #include <amqpcpp.h>
+#include <amqpcpp/linux_tcp.h>
 
 class MyTcpHandler : public AMQP::TcpHandler
 {
@@ -458,6 +459,7 @@ object:
 
 ````c++
 #include <amqpcpp.h>
+#include <amqpcpp/linux_tcp.h>
 
 class MyTcpHandler : public AMQP::TcpHandler
 {
