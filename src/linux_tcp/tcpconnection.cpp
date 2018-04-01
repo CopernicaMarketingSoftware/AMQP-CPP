@@ -45,11 +45,11 @@ int TcpConnection::fileno() const
 
 /**
  *  The number of outgoing bytes queued on this connection.
- *  @return size_t
+ *  @return std::size_t
  */
-size_t TcpConnection::bytesQueued() const
+std::size_t TcpConnection::queued() const
 {
-    return _state->bytesQueued();
+    return _state->queued();
 }
 
 /**

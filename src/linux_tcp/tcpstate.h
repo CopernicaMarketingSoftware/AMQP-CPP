@@ -4,7 +4,7 @@
  *  Base class / interface of the various states of the TCP connection
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2016 Copernica BV
+ *  @copyright 2015 - 2018 Copernica BV
  */
 
 /**
@@ -67,7 +67,7 @@ public:
      *  The number of outgoing bytes queued on this connection.
      *  @return size_t
      */
-    virtual size_t bytesQueued() const { return 0; }
+    virtual std::size_t queued() const { return 0; }
 
     /**
      *  Process the filedescriptor in the object

@@ -337,11 +337,11 @@ public:
     virtual int fileno() const override { return _socket; }
 
     /**
-     *  The number of outgoing bytes queued on this connection.
-     *  @return size_t
+     *  Number of bytes in the outgoing buffer
+     *  @return std::size_t
      */
-    virtual size_t bytesQueued() const { return _out.size(); }
-     
+    virtual std::size_t queued() const override { return _out.size(); }
+
     /**
      *  Process the filedescriptor in the object
      *  @param  monitor     Object that can be used to find out if connection object is still alive

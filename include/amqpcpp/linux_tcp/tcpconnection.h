@@ -123,12 +123,6 @@ public:
     int fileno() const;
 
     /**
-     *  The number of outgoing bytes queued on this connection.
-     *  @return size_t
-     */
-    size_t bytesQueued() const;
-
-    /**
      *  Process the TCP connection
      * 
      *  This method should be called when the filedescriptor that is registered
@@ -161,7 +155,7 @@ public:
     }
 
     /**
-     *  The max frame size
+     *  The max frame size. Useful if you set up a buffer to parse incoming data: it does not have to exceed this size.
      *  @return uint32_t
      */
     uint32_t maxFrame() const
@@ -170,7 +164,7 @@ public:
     }
 
     /**
-     *  The number of bytes that can best be passed to the next call to the parse() method
+     *  The number of bytes that can best be passed to the next call to the parse() method.
      *  @return uint32_t
      */
     uint32_t expected() const
@@ -179,7 +173,7 @@ public:
     }
 
     /**
-      *  Return the amount of channels this connection has
+      *  Return the number of channels this connection has.
       *  @return std::size_t
       */
     std::size_t channels() const
@@ -187,6 +181,12 @@ public:
         // return the amount of channels this connection has
         return _connection.channels();
     }
+
+    /**
+     *  The number of outgoing bytes queued on this connection.
+     *  @return std::size_t
+     */
+    std::size_t queued() const;
     
     /**
      *  Send a heartbeat

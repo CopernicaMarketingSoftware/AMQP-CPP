@@ -171,6 +171,12 @@ public:
      *  @return int
      */
     virtual int fileno() const override { return _socket; }
+
+    /**
+     *  Number of bytes in the outgoing buffer
+     *  @return std::size_t
+     */
+    virtual std::size_t queued() const override { return _out.size(); }
     
     /**
      *  Process the filedescriptor in the object

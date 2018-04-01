@@ -185,6 +185,12 @@ public:
     }
     
     /**
+     *  Number of bytes in the outgoing buffer
+     *  @return std::size_t
+     */
+    virtual std::size_t queued() const override { return _buffer.size(); }
+    
+    /**
      *  Proceed to the next state
      *  @return TcpState *
      */
