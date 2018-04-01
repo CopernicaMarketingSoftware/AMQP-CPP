@@ -64,6 +64,12 @@ public:
     virtual int fileno() const { return -1; }
 
     /**
+     *  The number of outgoing bytes queued on this connection.
+     *  @return size_t
+     */
+    virtual size_t bytesQueued() const { return 0; }
+
+    /**
      *  Process the filedescriptor in the object
      * 
      *  This method should return the handler object that will be responsible for

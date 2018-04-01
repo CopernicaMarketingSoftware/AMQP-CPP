@@ -44,6 +44,15 @@ int TcpConnection::fileno() const
 }
 
 /**
+ *  The number of outgoing bytes queued on this connection.
+ *  @return size_t
+ */
+size_t TcpConnection::bytesQueued() const
+{
+    return _state->bytesQueued();
+}
+
+/**
  *  Process the TCP connection
  *  This method should be called when the filedescriptor that is registered
  *  in the event loop becomes active. You should pass in a flag holding the

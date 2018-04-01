@@ -123,6 +123,12 @@ public:
     int fileno() const;
 
     /**
+     *  The number of outgoing bytes queued on this connection.
+     *  @return size_t
+     */
+    size_t bytesQueued() const;
+
+    /**
      *  Process the TCP connection
      * 
      *  This method should be called when the filedescriptor that is registered

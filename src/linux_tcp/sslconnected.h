@@ -335,6 +335,12 @@ public:
      *  @return int
      */
     virtual int fileno() const override { return _socket; }
+
+    /**
+     *  The number of outgoing bytes queued on this connection.
+     *  @return size_t
+     */
+    virtual size_t bytesQueued() const { return _out.size(); }
      
     /**
      *  Process the filedescriptor in the object
