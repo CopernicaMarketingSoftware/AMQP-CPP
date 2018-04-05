@@ -250,30 +250,42 @@ private:
     
     /**
      *  Perform a write operation
-     *  @param  monitor
+     *  @param  monitor         object to check the existance of the connection object
+     *  @param  readable        is the connection also readable and should we call a read operation afterwards?
      *  @return TcpState*
      */
-    TcpState *write(const Monitor &monitor)
+    TcpState *write(const Monitor &monitor, bool readable)
     {
         // assume default state
         _state = state_idle;
         
-        // try to send more data from the outgoing buffer
-        auto result = _out.sendto(_ssl);
+        // because the output buffer contains a lot of small buffers, we can do multiple 
+        // operations till the buffer is empty (but only if the socket is not also
+        // readable, because then we want to read that data first instead of endless writes
+        do
+        {
+            // try to send more data from the outgoing buffer
+            auto result = _out.sendto(_ssl);
+            
+            // we may have to repeat the operation on failure
+            if (result > 0) continue;
+            
+            // the operation failed, we may have to repeat our call
+            return repeat(monitor, state_sending, OpenSSL::SSL_get_error(_ssl, result));
+        }
+        while (_out && !readable);
         
-        // if this is a success, we can proceed with the event loop
-        if (result > 0) return proceed();
-        
-        // the operation failed, we may have to repeat our call
-        return repeat(monitor, state_sending, OpenSSL::SSL_get_error(_ssl, result));
+        // proceed with the read operation or the event loop
+        return readable ? receive(monitor, false) : proceed();
     }
 
     /**
      *  Perform a receive operation
-     *  @param  monitor
+     *  @param  monitor         object to check the existance of the connection object
+     *  @param  writable        is the socket writable, and should we start a write operation after this operation?
      *  @return TcpState
      */
-    TcpState *receive(const Monitor &monitor)
+    TcpState *receive(const Monitor &monitor, bool writable)
     {
         // start a loop
         do
@@ -295,8 +307,8 @@ private:
         }
         while (OpenSSL::SSL_pending(_ssl) > 0);
         
-        // go to the next state
-        return proceed();
+        // proceed with the write operation or the event loop
+        return writable && _out ? write(monitor, false) : proceed();
     }
 
     
@@ -355,16 +367,16 @@ public:
         if (fd != _socket) return this;
         
         // if we were busy with a write operation, we have to repeat that
-        if (_state == state_sending) return write(monitor);
+        if (_state == state_sending) return write(monitor, flags & readable);
         
         // same is true for read operations, they should also be repeated
-        if (_state == state_receiving) return receive(monitor);
+        if (_state == state_receiving) return receive(monitor, flags & writable);
         
         // if the socket is readable, we are going to receive data
-        if (flags & readable) return receive(monitor);
+        if (flags & readable) return receive(monitor, flags & writable);
         
         // socket is not readable (so it must be writable), do we have data to write?
-        if (_out) return write(monitor);
+        if (_out) return write(monitor, false);
         
         // the only scenario in which we can end up here is the socket should be
         // closed, but instead of moving to the shutdown-state right, we call proceed()
@@ -435,7 +447,7 @@ public:
     {
         // put the data in the outgoing buffer
         _out.add(buffer, size);
-        
+
         // if we're already busy with sending or receiving, we first have to wait
         // for that operation to complete before we can move on
         if (_state != state_idle) return;
@@ -498,4 +510,3 @@ public:
  *  End of namespace
  */
 }
- 

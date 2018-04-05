@@ -20,6 +20,7 @@
  */
 #include <event2/event.h>
 #include <amqpcpp/flags.h>
+#include <amqpcpp/linux_tcp.h>
 
 /**
  *  Set up namespace
