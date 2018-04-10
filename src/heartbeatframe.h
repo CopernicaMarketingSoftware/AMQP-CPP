@@ -59,9 +59,6 @@ public:
     {
         // notify the connection-handler
         connection->reportHeartbeat();
-        
-        // send back the same frame
-        connection->send(*this);
 
         // done
         return true;

@@ -1,7 +1,7 @@
 /**
  *  Class describing an AMQP basic header frame
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -13,10 +13,10 @@
  *  Dependencies
  */
 #include "headerframe.h"
-#include "../include/metadata.h"
-#include "../include/envelope.h"
-#include "../include/connectionimpl.h"
-#include "../include/deferredconsumerbase.h"
+#include "amqpcpp/metadata.h"
+#include "amqpcpp/envelope.h"
+#include "amqpcpp/connectionimpl.h"
+#include "amqpcpp/deferredreceiver.h"
 
 /**
  *  Set up namespace
@@ -134,12 +134,18 @@ public:
     {
         // we need the appropriate channel
         auto channel = connection->channel(this->channel());
+        
+        // we need a channel
+        if (channel == nullptr) return false;
+        
+        // do we have an object that is receiving this data?
+        auto *receiver = channel->receiver();
 
         // check if we have a valid channel and consumer
-        if (!channel || !channel->consumer()) return false;
+        if (receiver == nullptr) return false;
 
         // the channel can process the frame
-        channel->consumer()->process(*this);
+        receiver->process(*this);
 
         // done
         return true;

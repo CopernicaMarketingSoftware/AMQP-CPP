@@ -81,7 +81,7 @@ public:
      *  @param  locales     available locales
      */
     ConnectionStartFrame(uint8_t major, uint8_t minor, const Table& properties, const std::string& mechanisms, const std::string& locales) :
-        ConnectionFrame((properties.size() + mechanisms.length() + locales.length() + 10)), // 4 for each longstring (size-uint32), 2 major/minor
+        ConnectionFrame((uint32_t)(properties.size() + mechanisms.length() + locales.length() + 10)), // 4 for each longstring (size-uint32), 2 major/minor
         _major(major),
         _minor(minor),
         _properties(properties),
@@ -121,7 +121,7 @@ public:
      *  Major AMQP version number
      *  @return uint8_t
      */
-    uint8_t major() const
+    uint8_t majorVersion() const
     {
         return _major;
     }
@@ -130,7 +130,7 @@ public:
      *  Minor AMQP version number
      *  @return uint8_t
      */
-    uint8_t minor() const
+    uint8_t minorVersion() const
     {
         return _minor;
     }
@@ -196,8 +196,8 @@ public:
         properties["product"] = "Copernica AMQP library";
         properties["version"] = "Unknown";
         properties["platform"] = "Unknown";
-        properties["copyright"] = "Copyright 2015 Copernica BV";
-        properties["information"] = "http://www.copernica.com";
+        properties["copyright"] = "Copyright 2015 - 2018 Copernica BV";
+        properties["information"] = "https://www.copernica.com";
         properties["capabilities"] = capabilities;
         
         // move connection to handshake mode

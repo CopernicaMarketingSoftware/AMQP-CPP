@@ -3,10 +3,9 @@
  *
  *  Implementation for a channel
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 #include "includes.h"
-#include "basicdeliverframe.h"
 #include "basicgetokframe.h"
 #include "basicreturnframe.h"
 #include "consumedmessage.h"
@@ -39,7 +38,6 @@
 #include "basicrecoverframe.h"
 #include "basicrejectframe.h"
 #include "basicgetframe.h"
-
 
 /**
  *  Set up namespace
@@ -266,7 +264,7 @@ Deferred &ChannelImpl::close()
 Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType type, int flags, const Table &arguments)
 {
     // convert exchange type
-    std::string exchangeType;
+    const char *exchangeType = "";
     
     // convert the exchange type into a string
     if      (type == ExchangeType::fanout)          exchangeType = "fanout";
@@ -275,8 +273,15 @@ Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType typ
     else if (type == ExchangeType::headers)         exchangeType = "headers";
     else if (type == ExchangeType::consistent_hash) exchangeType = "x-consistent-hash";
 
+    // the boolean options
+    bool passive = flags & AMQP::passive;
+    bool durable = flags & AMQP::durable;
+    bool autodelete = flags & AMQP::autodelete;
+    bool internal = flags & AMQP::internal;
+    bool nowait = flags & AMQP::nowait;
+
     // send declare exchange frame
-    return push(ExchangeDeclareFrame(_id, name, exchangeType, (flags & passive) != 0, (flags & durable) != 0, false, arguments));
+    return push(ExchangeDeclareFrame(_id, name, exchangeType, passive, durable, autodelete, internal, nowait, arguments));
 }
 
 /**
@@ -459,26 +464,31 @@ DeferredDelete &ChannelImpl::removeQueue(const std::string &name, int flags)
  *  @param  envelope    the full envelope to send
  *  @param  message     the message to send
  *  @param  size        size of the message
+ *  @param  flags
+ *  @return DeferredPublisher
  */
-bool ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope)
+DeferredPublisher &ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
 {
     // we are going to send out multiple frames, each one will trigger a call to the handler,
     // which in turn could destruct the channel object, we need to monitor that
     Monitor monitor(this);
 
     // @todo do not copy the entire buffer to individual frames
+    
+    // make sure we have a deferred object to return
+    if (!_publisher) _publisher.reset(new DeferredPublisher(this));
 
     // send the publish frame
-    if (!send(BasicPublishFrame(_id, exchange, routingKey))) return false;
+    if (!send(BasicPublishFrame(_id, exchange, routingKey, (flags & mandatory) != 0, (flags & immediate) != 0))) return *_publisher;
 
     // channel still valid?
-    if (!monitor.valid()) return false;
+    if (!monitor.valid()) return *_publisher;
 
     // send header
-    if (!send(BasicHeaderFrame(_id, envelope))) return false;
+    if (!send(BasicHeaderFrame(_id, envelope))) return *_publisher;
 
     // channel and connection still valid?
-    if (!monitor.valid() || !_connection) return false;
+    if (!monitor.valid() || !_connection) return *_publisher;
 
     // the max payload size is the max frame size minus the bytes for headers and trailer
     uint32_t maxpayload = _connection->maxPayload();
@@ -495,10 +505,10 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
         uint64_t chunksize = std::min(static_cast<uint64_t>(maxpayload), bytesleft);
 
         // send out a body frame
-        if (!send(BodyFrame(_id, data + bytessent, chunksize))) return false;
+        if (!send(BodyFrame(_id, data + bytessent, (uint32_t)chunksize))) return *_publisher;
 
         // channel still valid?
-        if (!monitor.valid()) return false;
+        if (!monitor.valid()) return *_publisher;
 
         // update counters
         bytessent += chunksize;
@@ -509,7 +519,7 @@ bool ChannelImpl::publish(const std::string &exchange, const std::string &routin
     _messageCounter++;
 
     // done
-    return true;
+    return *_publisher;
 }
 
 /**
@@ -703,7 +713,7 @@ bool ChannelImpl::send(const Frame &frame)
     // added to the list of deferred objects. it will be notified about
     // the error when the close operation succeeds
     if (_state == state_closing) return true;
-
+    
     // are we currently in synchronous mode or are there
     // other frames waiting for their turn to be sent?
     if (_synchronous || !_queue.empty())
@@ -826,41 +836,17 @@ void ChannelImpl::reportError(const char *message, bool notifyhandler)
 }
 
 /**
- *  Process incoming delivery
- *
- *  @param  frame   The frame to process
+ *  Get the current receiver for a given consumer tag
+ *  @param  consumertag     the consumer frame
+ *  @return DeferredConsumer
  */
-void ChannelImpl::process(BasicDeliverFrame &frame)
+DeferredConsumer *ChannelImpl::consumer(const std::string &consumertag) const
 {
-    // find the consumer for this frame
-    auto iter = _consumers.find(frame.consumerTag());
-    if (iter == _consumers.end()) return;
-
-    // we are going to be receiving a message, store
-    // the handler for the incoming message
-    _consumer = iter->second;
-
-    // let the consumer process the frame
-    _consumer->process(frame);
-}
-
-/**
- *  Retrieve the current consumer handler
- *
- *  @return The handler responsible for the current message
- */
-DeferredConsumerBase *ChannelImpl::consumer()
-{
-    return _consumer.get();
-}
-
-/**
- *  Mark the current consumer as done
- */
-void ChannelImpl::complete()
-{
-    // no more consumer
-    _consumer.reset();
+    // look in the map
+    auto iter = _consumers.find(consumertag);
+    
+    // return the result
+    return iter == _consumers.end() ? nullptr : iter->second.get();
 }
 
 /**

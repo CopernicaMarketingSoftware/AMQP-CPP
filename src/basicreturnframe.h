@@ -1,7 +1,7 @@
 /**
  *  Class describing a basic return frame
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -67,7 +67,7 @@ public:
      *  @param  routingKey      message routing key
      */
     BasicReturnFrame(uint16_t channel, int16_t replyCode, const std::string& replyText = "", const std::string& exchange = "", const std::string& routingKey = "") :
-        BasicFrame(channel, replyText.length() + exchange.length() + routingKey.length() + 5), // 3 for each string (extra size byte), 2 for uint16_t
+        BasicFrame(channel, (uint32_t)(replyText.length() + exchange.length() + routingKey.length() + 5)), // 3 for each string (extra size byte), 2 for uint16_t
         _replyCode(replyCode),
         _replyText(replyText),
         _exchange(exchange),
@@ -155,8 +155,23 @@ public:
      */
     virtual bool process(ConnectionImpl *connection) override
     {
-        // we no longer support returned messages
-        return false;
+        // we need the appropriate channel
+        auto channel = connection->channel(this->channel());
+
+        // channel does not exist
+        if (!channel) return false;
+        
+        // get the current publisher
+        auto publisher = channel->publisher();
+        
+        // if there is no deferred publisher, we can just as well stop
+        if (publisher == nullptr) return false;
+        
+        // initialize the object, because we're about to receive a message
+        publisher->process(*this);
+        
+        // done
+        return true;
     }
 };
 

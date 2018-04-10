@@ -1,53 +1,55 @@
 AMQP-CPP
 ========
 
+[![Build Status](https://travis-ci.org/CopernicaMarketingSoftware/AMQP-CPP.svg?branch=master)](https://travis-ci.org/CopernicaMarketingSoftware/AMQP-CPP)
+
 AMQP-CPP is a C++ library for communicating with a RabbitMQ message broker. The
 library can be used to parse incoming data from a RabbitMQ server, and to
 generate frames that can be sent to a RabbitMQ server.
 
-This library has a layered architecture, and allows you - if you like - to 
-completely take care of the network layer. If you want to set up and manage the 
+This library has a layered architecture, and allows you - if you like - to
+completely take care of the network layer. If you want to set up and manage the
 network connections yourself, the AMQP-CPP library will not make a connection to
-RabbitMQ by itself, nor will it create sockets and/or perform IO operations. As 
-a user of this library, you create the socket connection and implement a certain 
-interface that you pass to the AMQP-CPP library and that the library will use 
+RabbitMQ by itself, nor will it create sockets and/or perform IO operations. As
+a user of this library, you create the socket connection and implement a certain
+interface that you pass to the AMQP-CPP library and that the library will use
 for IO operations.
 
-Intercepting this network layer is however optional, the AMQP-CPP library also 
-comes with a predefined Tcp module that can be used if you trust the AMQP library 
+Intercepting this network layer is however optional, the AMQP-CPP library also
+comes with a predefined Tcp module that can be used if you trust the AMQP library
 to take care of the network handling. In that case, the AMQP-CPP library does
 all the system calls to set up network connections and send and receive the data.
 
-This layered architecture makes the library extremely flexible and portable: it 
-does not necessarily rely on operating system specific IO calls, and can be 
+This layered architecture makes the library extremely flexible and portable: it
+does not necessarily rely on operating system specific IO calls, and can be
 easily integrated into any kind of event loop. If you want to implement the AMQP
-protocol on top of some [unusual other communication layer](https://tools.ietf.org/html/rfc1149), 
-this library can be used for that - but if you want to use it with regular TCP 
-connections, setting it up is just as easy. 
+protocol on top of some [unusual other communication layer](https://tools.ietf.org/html/rfc1149),
+this library can be used for that - but if you want to use it with regular TCP
+connections, setting it up is just as easy.
 
-AMQP-CPP is fully asynchronous and does not do any blocking (system) calls, so 
+AMQP-CPP is fully asynchronous and does not do any blocking (system) calls, so
 it can be used in high performance applications without the need for threads.
 
-The AMQP-CPP library uses C++11 features, so if you intend use it, please make 
+The AMQP-CPP library uses C++11 features, so if you intend use it, please make
 sure that your compiler is up-to-date and supports C++11.
 
-**Note for the reader:** This readme file has a peculiar structure. We start 
+**Note for the reader:** This readme file has a peculiar structure. We start
 explaining the pure and hard core low level interface in which you have to
 take care of opening socket connections yourself. In reality, you probably want
-to use the simpler TCP interface that is being described later on.
+to use the simpler TCP interface that is being described [later on](#tcp-connections).
 
 
 ABOUT
 =====
 
 This library is created and maintained by Copernica (www.copernica.com), and is
-used inside the MailerQ (www.mailerq.com), Yothalot (www.yothalot.com) and 
-AMQPipe (www.amqpipe.com) applications. MailerQ is a tool for sending large 
+used inside the MailerQ (www.mailerq.com), Yothalot (www.yothalot.com) and
+AMQPipe (www.amqpipe.com) applications. MailerQ is a tool for sending large
 volumes of email, using AMQP message queues, Yothalot is a big data processing
-map/reduce framework and AMQPipe is a tool for high-speed processing messages 
+map/reduce framework and AMQPipe is a tool for high-speed processing messages
 between AMQP pipes
 
-Do you appreciate our work and are you looking for high quality email solutions? 
+Do you appreciate our work and are you looking for high quality email solutions?
 Then check out our other commercial and open source solutions:
 
 * Copernica Marketing Suite (www.copernica.com)
@@ -63,35 +65,68 @@ Then check out our other commercial and open source solutions:
 INSTALLING
 ==========
 
-If you are on some kind of Linux environment, installing the library is as easy
-as running `make` and `make install`. This will install the full version of
-the AMQP-CPP, including the system specific TCP module. If you do not need the
-additional TCP module (because you take care of handling the network stuff 
-yourself), you can also compile a pure form of the library. Use `make pure` 
-and `make install` for that.
+AMQP-CPP comes with an optional Linux-only TCP module that takes care of the 
+network part required for the AMQP-CPP core library. If you use this module, you 
+are required to link with `pthread` and `dl`.
 
-For users on a non-Linux environment: this library is known to work on your
-environment too (after all, it does not do any operating specific system calls), 
-but it might take some extra effort to get your compiler to compile it. Please 
-send in your pull requests once you have it running, so that others can benefit 
-from your experiences.
+There are two methods to compile AMQP-CPP: CMake and Make. CMake is platform portable 
+and works on all systems, while the Makefile only works on Linux. Building of a shared 
+library is currently not supported on Windows.
+
+After building there are two relevant files to include when using the library.
+
+ File                | Include when?
+---------------------|--------------------------------------------------------
+ amqpcpp.h           | Always
+ amqpcpp/linux_tcp.h | If using the Linux-only TCP module
+
+On Windows you are required to define `NOMINMAX` when compiling code that includes public AMQP-CPP header files.
+
+## Using cmake
+
+The CMake file supports both building and installing. You can choose not to use 
+the install functionality, and instead manually use the build output at `build/bin/`. Keep
+in mind that the TCP module is only supported for Linux. An example install method 
+would be:
+
+```bash
+mkdir build
+cd build
+cmake .. [-DAMQP-CPP_AMQBUILD_SHARED] [-DAMQP-CPP_LINUX_TCP]
+cmake --build .. --target install
+```
+
+ Option                  | Default | Meaning
+-------------------------|---------|-----------------------------------------------------------------------
+ AMQP-CPP_BUILD_SHARED   | OFF     | Static lib(ON) or shared lib(OFF)? Shared is not supported on Windows.
+ AMQP-CPP_LINUX_TCP      | OFF     | Should the Linux-only TCP module be built?
+
+## Using make
+
+Compiling and installing AMQP-CPP with make is as easy as running `make` and 
+then `make install`. This will install the full version of AMQP-CPP, including 
+the system specific TCP module. If you do not need the additional TCP module 
+(because you take care of handling the network stuff yourself), you can also 
+compile a pure form of the library. Use `make pure` and `make install` for that.
 
 When you compile an application that uses the AMQP-CPP library, do not
 forget to link with the library. For gcc and clang the linker flag is -lamqpcpp.
-If you use the fullblown version of AMQP-CPP (with the TCP module), you also 
-need to pass a -lpthread linker flag, because the TCP module uses a thread 
-for running an asynchronous and non-blocking DNS hostname lookup.
+If you use the fullblown version of AMQP-CPP (with the TCP module), you also
+need to pass the -lpthread and -ldl linker flags, because the TCP module uses a 
+thread for running an asynchronous and non-blocking DNS hostname lookup, and it
+may dynamically look up functions from the openssl library if a secure connection
+to RabbitMQ has to be set up.
 
 
 HOW TO USE AMQP-CPP
 ===================
 
 As we mentioned above, the library can be used in a network-agnostic fashion.
-It then does not do any IO by itself, and you need to pass an object to the 
+It then does not do any IO by itself, and you need to pass an object to the
 library that the library can use for IO. So, before you start using the
-library, you first you need to create a class that extends from the 
-ConnectionHandler base class. This is a class with a number of methods that are 
-called by the library every time it wants to send out data, or when it needs to 
+library, you first you need to create a class that extends from the
+ConnectionHandler base class. This is a class with a number of methods that are
+called by the library every time it wants to send out data, or when it needs to
 inform you that an error occured.
 
 ````c++
@@ -204,16 +239,16 @@ example call the "send()" or "write()" system call to send out the data to
 the RabbitMQ server. But what about data in the other direction? How does the
 library receive data back from RabbitMQ?
 
-In this raw setup, the AMQP-CPP library does not do any IO by itself and it is 
-therefore also not possible for the library to receive data from a 
-socket. It is again up to you to do this. If, for example, you notice in your 
-event loop that the socket that is connected with the RabbitMQ server becomes 
-readable, you should read out that socket (for example by using the recv() system 
-call), and pass the received bytes to the AMQP-CPP library. This is done by 
+In this raw setup, the AMQP-CPP library does not do any IO by itself and it is
+therefore also not possible for the library to receive data from a
+socket. It is again up to you to do this. If, for example, you notice in your
+event loop that the socket that is connected with the RabbitMQ server becomes
+readable, you should read out that socket (for example by using the recv() system
+call), and pass the received bytes to the AMQP-CPP library. This is done by
 calling the parse() method in the Connection object.
 
 The Connection::parse() method gets two parameters, a pointer to a buffer of
-data that you just read from the socket, and a parameter that holds the size of 
+data that you just read from the socket, and a parameter that holds the size of
 this buffer. The code snippet below comes from the Connection.h C++ header file.
 
 ````c++
@@ -249,9 +284,9 @@ both the old data, and the new data.
 To optimize your calls to the parse() method, you _could_ use the Connection::expected()
 and Connection::maxFrame() methods. The expected() method returns the number of bytes
 that the library prefers to receive next. It is pointless to call the parse() method
-with a smaller buffer, and it is best to call the method with a buffer of exactly this 
-size. The maxFrame() returns the max frame size for AMQP messages. If you read your 
-messages into a reusable buffer, you could allocate this buffer up to this size, so that 
+with a smaller buffer, and it is best to call the method with a buffer of exactly this
+size. The maxFrame() returns the max frame size for AMQP messages. If you read your
+messages into a reusable buffer, you could allocate this buffer up to this size, so that
 you never will have to reallocate.
 
 
@@ -259,21 +294,22 @@ TCP CONNECTIONS
 ===============
 
 Although the AMQP-CPP library gives you extreme flexibility by letting you setup
-your own network connections, the reality is that most if not all AMQP connections 
-use the TCP protocol. To help you out, the library therefore also comes with a 
+your own network connections, the reality is that most if not all AMQP connections
+use the TCP protocol. To help you out, the library therefore also comes with a
 TCP module that takes care of setting up the network connections, and sending
-and receiving the data. 
+and receiving the data.
 
 If you want to use this TCP module, you should not use the AMQP::Connection
 and AMQP::Channel classes that you saw above, but the alternative AMQP::TcpConnection
 and AMQP::TcpChannel classes instead. You also do not have to create your own class
-that implements the "AMQP::ConnectionHandler" interface - but a class that inherits 
-from "AMQP::TcpHandler" instead. You especially need to implement the "monitor()" 
-method in that class, as that is needed by the AMQP-CPP library to interact with 
+that implements the "AMQP::ConnectionHandler" interface - but a class that inherits
+from "AMQP::TcpHandler" instead. You especially need to implement the "monitor()"
+method in that class, as that is needed by the AMQP-CPP library to interact with
 the main event loop:
 
 ````c++
 #include <amqpcpp.h>
+#include <amqpcpp/linux_tcp.h>
 
 class MyTcpHandler : public AMQP::TcpHandler
 {
@@ -334,7 +370,7 @@ class MyTcpHandler : public AMQP::TcpHandler
         //  descriptor to the main application event loop (like the select() or
         //  poll() loop). When the event loop reports that the descriptor becomes
         //  readable and/or writable, it is up to you to inform the AMQP-CPP
-        //  library that the filedescriptor is active by calling the 
+        //  library that the filedescriptor is active by calling the
         //  connection->process(fd, flags) method.
     }
 };
@@ -344,8 +380,8 @@ The "monitor()" method can be used to integrate the AMQP filedescriptors in your
 application's event loop. For some popular event loops (libev, libevent), we have
 already added example handler objects (see the next section for that).
 
-Using the TCP module of the AMQP-CPP library is easier than using the 
-raw AMQP::Connection and AMQP::Channel objects, because you do not have to 
+Using the TCP module of the AMQP-CPP library is easier than using the
+raw AMQP::Connection and AMQP::Channel objects, because you do not have to
 create the sockets and connections yourself, and you also do not have to take
 care of buffering network data.
 
@@ -371,14 +407,97 @@ channel.declareQueue("my-queue");
 channel.bindQueue("my-exchange", "my-queue", "my-routing-key");
 ````
 
+SECURE CONNECTIONS
+==================
+
+The TCP module of AMQP-CPP also supports setting up secure connections. If your
+RabbitMQ server accepts SSL connections, you can specify the address to your
+server using the amqps:// protocol:
+
+````c++
+// init the SSL library (this works for openssl 1.1, for openssl 1.0 use SSL_library_init())
+OPENSSL_init_ssl(0, NULL);
+
+// address of the server (secure!)
+AMQP::Address address("amqps://guest:guest@localhost/vhost");
+
+// create a AMQP connection object
+AMQP::TcpConnection connection(&myHandler, address);
+````
+
+There are two things to take care of if you want to create a secure connection: 
+(1) you must link your application with the -lssl flag (or use dlopen()), and (2) 
+you must initialize the openssl library by calling OPENSSL_init_ssl(). This 
+initializating must take place before you let you application connect to RabbitMQ. 
+This is necessary because AMQP-CPP needs access to the openssl library to set up 
+secure connections. It can only access this library if you have linked your 
+application with this library, or if you have loaded this library at runtime 
+using dlopen()). 
+
+Linking openssl is the normal thing to do. You just have to add the `-lssl` flag
+to your linker. If you however do not want to link your application with openssl, 
+you can also load the openssl library at runtime, and pass in the pointer to the 
+handle to AMQP-CPP:
+
+````c++
+// dynamically open the openssl library
+void *handle = dlopen("/path/to/openssl.so", RTLD_LAZY);
+
+// tell AMQP-CPP library where the handle to openssl can be found
+AMQP::openssl(handle);
+
+// @todo call functions to initialize openssl, and create the AMQP connection
+// (see exampe above)
+````
+
+By itself, AMQP-CPP does not check if the created TLS connection is sufficient
+secure. Whether the certificate is expired, self-signed, missing or invalid: for
+AMQP-CPP it all doesn't matter and the connection is simply permitted. If you
+want to be more strict (for example: if you want to verify the server's certificate),
+you must do this yourself by implementing the "onSecured()" method in your handler
+object:
+
+````c++
+#include <amqpcpp.h>
+#include <amqpcpp/linux_tcp.h>
+
+class MyTcpHandler : public AMQP::TcpHandler
+{
+    /**
+     *  Method that is called right after the TLS connection has been created.
+     *  In this method you can check the connection properties (like the certificate)
+     *  and return false if you find it not secure enough
+     *  @param  connection      the connection that has just completed the tls handshake
+     *  @param  ssl             SSL structure from the openssl library
+     *  @return bool            true if connection is secure enough to start the AMQP protocol
+     */
+    virtual bool onSecure(AMQP::TcpConnection *connection, const SSL *ssl) override
+    {
+        // @todo call functions from the openssl library to check the certificate,
+        // like SSL_get_peer_certificate() or SSL_get_verify_result().
+        // For now we always allow the connection to proceed
+        return true;
+    }
+    
+    /**
+     *  All other methods (like onConnected(), onError(), etc) are left out of this
+     *  example, but would be here if this was an actual user space handler class.
+     */
+};
+````
+
+The SSL pointer that is passed to the onSecured() method refers to the "SSL"
+structure from the openssl library.
+
+
 EXISTING EVENT LOOPS
 ====================
 
 Both the pure AMQP::Connection as well as the easier AMQP::TcpConnection class
 allow you to integrate AMQP-CPP in your own event loop. Whether you take care
-of running the event loop yourself (for example by using the select() system 
-call), or if you use an existing library for it (like libevent, libev or libuv), 
-you can implement the "monitor()" method to watch the file descriptors and 
+of running the event loop yourself (for example by using the select() system
+call), or if you use an existing library for it (like libevent, libev or libuv),
+you can implement the "monitor()" method to watch the file descriptors and
 hand over control back to AMQP-CPP when one of the sockets become active.
 
 For libev and libevent users, we have even implemented an example implementation,
@@ -394,26 +513,26 @@ int main()
 {
     // access to the event loop
     auto *loop = EV_DEFAULT;
-    
+
     // handler for libev (so we don't have to implement AMQP::TcpHandler!)
     AMQP::LibEvHandler handler(loop);
-    
+
     // make a connection
     AMQP::TcpConnection connection(&handler, AMQP::Address("amqp://localhost/"));
-    
+
     // we need a channel too
     AMQP::TcpChannel channel(&connection);
-    
+
     // create a temporary queue
     channel.declareQueue(AMQP::exclusive).onSuccess([&connection](const std::string &name, uint32_t messagecount, uint32_t consumercount) {
-        
+
         // report the name of the temporary queue
         std::cout << "declared queue " << name << std::endl;
-        
+
         // now we can close the connection
         connection.close();
     });
-    
+
     // run the loop
     ev_run(loop, 0);
 
@@ -426,18 +545,84 @@ The AMQP::LibEvHandler and AMQP::LibEventHandler classes are extended AMQP::TcpH
 classes, with an implementation of the monitor() method that simply adds the
 filedescriptor to the event loop. If you use this class however, it is recommended not to
 instantiate it directly (like we did in the example), but to create your own
-"MyHandler" class that extends from it, and in which you also implement the 
+"MyHandler" class that extends from it, and in which you also implement the
 onError() method to report possible connection errors to your end users.
 
-Currently, we have only added such an example TcpHandler implementation for libev and
-libevent. For other event loops (like libuv and boost asio) we do not yet have
+Currently, we have example TcpHandler implementations for libev,
+libevent, and Boost's asio. For other event loops (like libuv) we do not yet have
 such examples.
+
+| TCP Handler Impl        | Header File Location   |  Sample File Location |
+| ----------------------- | ---------------------- | --------------------- |
+| Boost asio (io_service) | include/libboostasio.h | tests/libboostasio.cpp |  
+| libev                   | include/libev.h        | tests/libev.cpp       |
+| libevent                | include/libevent.h     | tests/libevent.cpp    |
+| libuv                   | include/libuv.h        |  (Not available)      |
+
+HEARTBEATS
+==========
+
+The AMQP protocol supports *heartbeats*. If this heartbeat feature is enabled, the
+client and the server negotiate a heartbeat interval during connection setup, and
+they agree to send at least *some kind of data* over the connection during every
+iteration of that interval. The normal data that is sent over the connection (like
+publishing or consuming messages) is normally sufficient to keep the connection alive,
+but if the client or server was idle during the negotiated interval time, a dummy
+heartbeat message must be sent instead.
+
+The default behavior of the AMQP-CPP library is to disable heartbeats. The
+proposed heartbeat interval of the server during connection setup (the server
+normally suggests an interval of 60 seconds) is vetoed by the AMQP-CPP library so
+no heartbeats are ever needed to be sent over the connection. This means that you
+can safely keep your AMQP connection idle for as long as you like, and/or run long
+lasting algorithms after you've consumed a message from RabbitMQ, without having
+to worry about the connection being idle for too long.
+
+You can however choose to enable these heartbeats. If you want to enable heartbeats,
+simple implement the onNegotiate() method inside your ConnectionHandler or
+TcpHandler class and have it return the interval that you find appropriate.
+
+````c++
+#include <amqpcpp.h>
+
+class MyTcpHandler : public AMQP::TcpHandler
+{
+    /**
+     *  Method that is called when the server tries to negotiate a heartbeat
+     *  interval, and that is overridden to get rid of the default implementation
+     *  (which vetoes the suggested heartbeat interval), and accept the interval
+     *  instead.
+     *  @param  connection      The connection on which the error occured
+     *  @param  interval        The suggested interval in seconds
+     */
+    virtual void onNegotiate(AMQP::TcpConnection *connection, uint16_t interval)
+    {
+        // we accept the suggestion from the server, but if the interval is smaller
+        // that one minute, we will use a one minute interval instead
+        if (interval < 60) interval = 60;
+
+        // @todo
+        //  set a timer in your event loop, and make sure that you call
+        //  connection->heartbeat() every _interval_ seconds.
+
+        // return the interval that we want to use
+        return interval;
+    }
+};
+````
+
+If you have enabled heartbeats, it is your own responsibility to ensure that the
+```connection->heartbeat()``` method is called at least once during this period,
+or that you call one of the other channel or connection methods to send data
+over the connection.
+
+In the libev event loop implementation the heartbeats are enabled by default.
 
 
 CHANNELS
 ========
 
-In the above example we created a channel object. A channel is a sort of virtual 
+In the above example we created a channel object. A channel is a sort of virtual
 connection, and it is possible to create many channels that all use
 the same connection.
 
@@ -451,8 +636,8 @@ documented.
 
 All operations that you can perform on a channel are non-blocking. This means
 that it is not possible for a method (like Channel::declareExchange()) to
-immediately return 'true' or 'false'. Instead, almost every method of the Channel 
-class returns an instance of the 'Deferred' class. This 'Deferred' object can be 
+immediately return 'true' or 'false'. Instead, almost every method of the Channel
+class returns an instance of the 'Deferred' class. This 'Deferred' object can be
 used to install handlers that will be called in case of success or failure.
 
 For example, if you call the channel.declareExchange() method, the AMQP-CPP library
@@ -544,7 +729,7 @@ channel object right after it was constructed.
 CHANNEL ERRORS
 ==============
 
-It is important to realize that any error that occurs on a channel, 
+It is important to realize that any error that occurs on a channel,
 invalidates the entire channel, including all subsequent instructions that
 were already sent over it. This means that if you call multiple methods in a row,
 and the first method fails, all subsequent methods will not be executed either:
@@ -576,7 +761,7 @@ requires and extra instruction to be sent to the RabbitMQ server, so some extra
 bytes are sent over the network, and some additional resources in both the client
 application and the RabbitMQ server are used (although this is all very limited).
 
-If possible, it is best to make use of this feature. For example, if you have an important AMQP 
+If possible, it is best to make use of this feature. For example, if you have an important AMQP
 connection that you use for consuming messages, and at the same time you want
 to send another instruction to RabbitMQ (like declaring a temporary queue), it is
 best to set up a new channel for this 'declare' instruction. If the declare fails,
@@ -591,7 +776,7 @@ void myDeclareMethod(AMQP::Connection *connection)
 {
     // create temporary channel to declare a queue
     AMQP::Channel channel(connection);
-    
+
     // declare the queue (the channel object is destructed before the
     // instruction reaches the server, but the AMQP-CPP library can deal
     // with this)
@@ -710,44 +895,54 @@ in almost any form:
 ````c++
 /**
  *  Publish a message to an exchange
- *
- *  The following flags can be used
- *
- *      -   mandatory   if set, an unroutable message will be sent back to
- *                      the client (currently not supported)
- *
- *      -   immediate   if set, a message that could not immediately be consumed
- *                      is returned to the client (currently not supported)
- *
- *  If either of the two flags is set, and the message could not immediately
- *  be published, the message is returned by the server to the client. However,
- *  at this moment in time, the AMQP-CPP library does not support catching
- *  such returned messages.
- *
+ * 
+ *  You have to supply the name of an exchange and a routing key. RabbitMQ will 
+ *  then try to send the message to one or more queues. With the optional flags 
+ *  parameter you can specify what should happen if the message could not be routed 
+ *  to a queue. By default, unroutable message are silently discarded.
+ * 
+ *  This method returns a reference to a DeferredPublisher object. You can use 
+ *  this returned object to install callbacks that are called when an undeliverable 
+ *  message is returned, or to set the callback that is called when the server 
+ *  confirms that the message was received. 
+ * 
+ *  To enable handling returned messages, or to enable publisher-confirms, you must 
+ *  not only set the callback, but also pass in appropriate flags to enable this 
+ *  feature. If you do not pass in these flags, your callbacks will not be called. 
+ *  If you are not at all interested in returned messages or publish-confirms, you 
+ *  can ignore the flag and the returned object.
+ * 
+ *  Watch out: the channel returns _the same_ DeferredPublisher object for all 
+ *  calls to the publish() method. This means that the callbacks that you install 
+ *  for the first published message are also used for subsequent messages _and_ 
+ *  it means that if you install a different callback for a later publish 
+ *  operation, it overwrites your earlier callbacks 
+ * 
+ *  The following flags can be supplied:
+ * 
+ *      -   mandatory   If set, server returns messages that are not sent to a queue
+ *      -   immediate   If set, server returns messages that can not immediately be forwarded to a consumer. 
+ * 
  *  @param  exchange    the exchange to publish to
  *  @param  routingkey  the routing key
- *  @param  flags       optional flags (see above)
  *  @param  envelope    the full envelope to send
  *  @param  message     the message to send
  *  @param  size        size of the message
+ *  @param  flags       optional flags
  */
-bool publish(const std::string &exchange, const std::string &routingKey, int flags, const AMQP::Envelope &envelope);
-bool publish(const std::string &exchange, const std::string &routingKey, const AMQP::Envelope &envelope);
-bool publish(const std::string &exchange, const std::string &routingKey, int flags, const std::string &message);
-bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message);
-bool publish(const std::string &exchange, const std::string &routingKey, int flags, const char *message, size_t size);
-bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size);
+DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0) { return _implementation->publish(exchange, routingKey, envelope, flags); }
+DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message.data(), message.size()), flags); }
+DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, size), flags); }
+DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, strlen(message)), flags); }
 ````
 
 Published messages are normally not confirmed by the server, and the RabbitMQ
 will not send a report back to inform you whether the message was succesfully
-published or not. Therefore the publish method does not return a Deferred
-object.
+published or not. But with the flags you can instruct RabbitMQ to send back
+the message if it was undeliverable.
 
-As long as no error is reported via the Channel::onError() method, you can safely
-assume that your messages were delivered.
-
-This can of course be a problem when you are publishing many messages. If you get
+You can also use transactions to ensure that your messages get delivered.
+Let's say that you are publishing many messages in a row. If you get
 an error halfway through there is no way to know for sure how many messages made
 it to the broker and how many should be republished. If this is important, you can
 wrap the publish commands inside a transaction. In this case, if an error occurs,
@@ -774,8 +969,8 @@ channel.commitTransaction()
     });
 ````
 
-Note that AMQP transactions are not as powerful as transactions that are 
-knows in the database world. It is not possible to wrap all sort of 
+Note that AMQP transactions are not as powerful as transactions that are
+knows in the database world. It is not possible to wrap all sort of
 operations in a transaction, they are only meaningful for publishing
 and consuming.
 
@@ -951,7 +1146,6 @@ need additional attention:
 
     -   ability to set up secure connections (or is this fully done on the IO level)
     -   login with other protocols than login/password
-    -   returned messages
 
 We also need to add more safety checks so that strange or invalid data from
 RabbitMQ does not break the library (although in reality RabbitMQ only sends
@@ -964,4 +1158,3 @@ class that can be directly plugged into libev, libevent and libuv event loops.
 
 For performance reasons, we need to investigate if we can limit the number of times
 an incoming or outgoing messages is copied.
-

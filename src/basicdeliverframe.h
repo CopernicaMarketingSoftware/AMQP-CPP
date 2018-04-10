@@ -1,7 +1,7 @@
 /**
  *  Class describing a basic deliver frame
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -13,9 +13,10 @@
  *  Dependencies
  */
 #include "basicframe.h"
-#include "../include/stringfield.h"
-#include "../include/booleanset.h"
-#include "../include/connectionimpl.h"
+#include "amqpcpp/stringfield.h"
+#include "amqpcpp/booleanset.h"
+#include "amqpcpp/connectionimpl.h"
+#include "amqpcpp/deferredconsumer.h"
 
 /**
  *  Set up namespace
@@ -87,7 +88,7 @@ public:
      *  @param  routingKey      message routing key
      */
     BasicDeliverFrame(uint16_t channel, const std::string& consumerTag, uint64_t deliveryTag, bool redelivered = false, const std::string& exchange = "", const std::string& routingKey = "") :
-        BasicFrame(channel, (consumerTag.length() + exchange.length() + routingKey.length() + 12)),
+        BasicFrame(channel, (uint32_t)(consumerTag.length() + exchange.length() + routingKey.length() + 12)),
             // length of strings + 1 byte per string for stringsize, 8 bytes for uint64_t and 1 for bools
         _consumerTag(consumerTag),
         _deliveryTag(deliveryTag),
@@ -193,8 +194,14 @@ public:
         // channel does not exist
         if (!channel) return false;
 
-        // construct the message
-        channel->process(*this);
+        // get the appropriate consumer object
+        auto consumer = channel->consumer(_consumerTag);
+
+        // skip if there was no consumer for this tag
+        if (consumer == nullptr) return false;
+        
+        // initialize the object, because we're about to receive a message
+        consumer->process(*this);
 
         // done
         return true;

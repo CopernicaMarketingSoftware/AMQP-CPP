@@ -1,11 +1,36 @@
-cmake_minimum_required(VERSION 2.8)
+# Builds AMQP-CPP
+#
+# Options:
+#
+# - AMQP-CPP_BUILD_SHARED (default OFF)
+#       ON:  Build shared lib
+#       OFF: Build static lib
+#
+# - AMQP-CPP_LINUX_TCP (default OFF)
+#       ON:  Build posix handler implementation
+#       OFF: Don't build posix handler implementation
 
-project(amqp-cpp)
+cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
+
+# project name
+project(amqpcpp)
+
+# build options
+option(AMQP-CPP_BUILD_SHARED "Build shared library. If off, build will be static." OFF)
+option(AMQP-CPP_LINUX_TCP "Build linux sockets implementation." OFF)
+option(AMQP-CPP_BUILD_EXAMPLES "Build amqpcpp examples" OFF)
 
 # ensure c++11 on all compilers
-include(set_cxx_norm.cmake)
-set_cxx_norm (${CXX_NORM_CXX11})
+set (CMAKE_CXX_STANDARD 11)
 
+# add source files
+# ------------------------------------------------------------------------------------------------------
+
+# set include/ as include directory
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+# macro that adds a list of provided source files to a list called SRCS.
+# if variable SRCS does not yet exist, it is created.
 macro (add_sources)
     file (RELATIVE_PATH _relPath "${PROJECT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
     foreach (_src ${ARGN})
@@ -21,36 +46,62 @@ macro (add_sources)
     endif()
 endmacro()
 
+# add source files
 add_subdirectory(src)
-add_subdirectory(include)
-
-option(BUILD_SHARED "build shared library" OFF)
-
-if(BUILD_SHARED)
-  add_library(amqp-cpp SHARED ${SRCS})
-  set_target_properties(amqp-cpp PROPERTIES SOVERSION 2.7)
-  install(TARGETS amqp-cpp
-          LIBRARY DESTINATION lib
-  )
-else()
-  add_library(amqp-cpp STATIC ${SRCS})
-  install(TARGETS amqp-cpp
-          ARCHIVE DESTINATION lib
-  )
-endif()
-Include_directories(${PROJECT_SOURCE_DIR})
-install(DIRECTORY include/ DESTINATION include/amqpcpp
-        FILES_MATCHING PATTERN "*.h")
-install(FILES amqpcpp.h DESTINATION include)
-
-option(BUILD_TUTORIALS "build rabbitmq tutorials" OFF)
-if(BUILD_TUTORIALS)
-#    add_subdirectory(examples/rabbitmq_tutorials)
+if(AMQP-CPP_LINUX_TCP)
+    add_subdirectory(src/linux_tcp)
 endif()
 
-set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-set(AMQP-CPP_INCLUDE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE)
+# potentially build the examples
+if(AMQP-CPP_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
 
+# settings for specific compilers
+# ------------------------------------------------------------------------------------------------------
+
+# we have to prevent windows from defining the max macro.
 if (WIN32)
-    add_definitions(-DNOMINMAX -DWIN32_LEAN_AND_MEAN)
+    add_definitions(-DNOMINMAX)
 endif()
+
+# build targets
+# ------------------------------------------------------------------------------------------------------
+
+# set output directory
+set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
+
+if(AMQP-CPP_BUILD_SHARED)
+    # create shared lib
+    add_library(${PROJECT_NAME} SHARED ${SRCS})
+    # set shared lib version
+    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 3.0)
+else()
+    # create static lib
+    add_library(${PROJECT_NAME} STATIC ${SRCS})
+endif()
+
+# install rules
+# ------------------------------------------------------------------------------------------------------
+
+if(AMQP-CPP_BUILD_SHARED)
+    # copy shared lib and its static counter part
+    install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
+            ARCHIVE DESTINATION lib
+            LIBRARY DESTINATION lib
+            RUNTIME DESTINATION lib
+    )
+else()
+    # copy static lib
+    install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
+            ARCHIVE DESTINATION lib
+    )
+endif()
+
+# copy header files
+install(DIRECTORY include/amqpcpp/ DESTINATION include/amqpcpp
+        FILES_MATCHING PATTERN "*.h")
+install(FILES include/amqpcpp.h DESTINATION include)
+
+install(EXPORT ${PROJECT_NAME}Config DESTINATION cmake)
+export(TARGETS ${PROJECT_NAME} FILE ${PROJECT_NAME}Config.cmake)

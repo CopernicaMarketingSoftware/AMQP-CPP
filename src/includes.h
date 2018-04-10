@@ -9,7 +9,7 @@
 
 // c and c++ dependencies
 #include <stdlib.h>
-#include <string.h>
+#include <string.h> // TODO cstring
 #include <stdint.h>
 #include <string>
 #include <memory>
@@ -21,67 +21,70 @@
 #include <unordered_map>
 #include <vector>
 #include <queue>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <netinet/tcp.h>
+
+#include <sys/types.h> // TODO is this needed
+
 #include <functional>
 #include <stdexcept>
 
+// TODO make this nice
+#ifdef _MSC_VER 
+//not #if defined(_WIN32) || defined(_WIN64) because we have strncasecmp in mingw
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#endif
+
 // forward declarations
-#include "../include/classes.h"
+#include "amqpcpp/classes.h"
 
 // utility classes
-#include "../include/endian.h"
-#include "../include/buffer.h"
-#include "../include/bytebuffer.h"
-#include "../include/receivedframe.h"
-#include "../include/outbuffer.h"
-#include "../include/copiedbuffer.h"
-#include "../include/watchable.h"
-#include "../include/monitor.h"
-#include "../include/tcpdefines.h"
+#include "amqpcpp/endian.h"
+#include "amqpcpp/buffer.h"
+#include "amqpcpp/bytebuffer.h"
+#include "amqpcpp/receivedframe.h"
+#include "amqpcpp/outbuffer.h"
+#include "amqpcpp/copiedbuffer.h"
+#include "amqpcpp/watchable.h"
+#include "amqpcpp/monitor.h"
 
 // amqp types
-#include "../include/field.h"
-#include "../include/numericfield.h"
-#include "../include/decimalfield.h"
-#include "../include/stringfield.h"
-#include "../include/booleanset.h"
-#include "../include/fieldproxy.h"
-#include "../include/table.h"
-#include "../include/array.h"
+#include "amqpcpp/field.h"
+#include "amqpcpp/numericfield.h"
+#include "amqpcpp/decimalfield.h"
+#include "amqpcpp/stringfield.h"
+#include "amqpcpp/booleanset.h"
+#include "amqpcpp/fieldproxy.h"
+#include "amqpcpp/table.h"
+#include "amqpcpp/array.h"
 
 // envelope for publishing and consuming
-#include "../include/metadata.h"
-#include "../include/envelope.h"
-#include "../include/message.h"
+#include "amqpcpp/metadata.h"
+#include "amqpcpp/envelope.h"
+#include "amqpcpp/message.h"
 
 // mid level includes
-#include "../include/exchangetype.h"
-#include "../include/flags.h"
-#include "../include/callbacks.h"
-#include "../include/deferred.h"
-#include "../include/deferredconsumer.h"
-#include "../include/deferredqueue.h"
-#include "../include/deferreddelete.h"
-#include "../include/deferredcancel.h"
-#include "../include/deferredget.h"
-#include "../include/channelimpl.h"
-#include "../include/channel.h"
-#include "../include/login.h"
-#include "../include/address.h"
-#include "../include/connectionhandler.h"
-#include "../include/connectionimpl.h"
-#include "../include/connection.h"
-#include "../include/tcphandler.h"
-#include "../include/tcpconnection.h"
+#include "amqpcpp/exchangetype.h"
+#include "amqpcpp/flags.h"
+#include "amqpcpp/callbacks.h"
+#include "amqpcpp/deferred.h"
+#include "amqpcpp/deferredconsumer.h"
+#include "amqpcpp/deferredpublisher.h"
+#include "amqpcpp/deferredqueue.h"
+#include "amqpcpp/deferreddelete.h"
+#include "amqpcpp/deferredcancel.h"
+#include "amqpcpp/deferredget.h"
+#include "amqpcpp/channelimpl.h"
+#include "amqpcpp/channel.h"
+#include "amqpcpp/login.h"
+#include "amqpcpp/address.h"
+#include "amqpcpp/connectionhandler.h"
+#include "amqpcpp/connectionimpl.h"
+#include "amqpcpp/connection.h"
 
 // classes that are very commonly used
-#include "../include/exception.h"
-#include "../include/protocolexception.h"
-#include "../include/frame.h"
+#include "amqpcpp/exception.h"
+#include "amqpcpp/protocolexception.h"
+#include "amqpcpp/frame.h"
 #include "extframe.h"
 #include "methodframe.h"
 #include "headerframe.h"
@@ -92,6 +95,5 @@
 #include "basicframe.h"
 #include "confirmframe.h"
 #include "transactionframe.h"
-#include "addressinfo.h"
 
 

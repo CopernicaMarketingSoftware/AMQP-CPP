@@ -30,7 +30,7 @@ MyConnection::MyConnection(const std::string &ip) :
     _socket(Event::MainLoop::instance(), this)
 {
     // start connecting
-    if (_socket.connect(Network::Ipv4Address(ip), 5672)) return;
+    if (_socket.connect(Dns::IpAddress(ip), 5672)) return;
     
     // failure
     onFailure(&_socket);
@@ -96,21 +96,30 @@ void MyConnection::onConnected(Network::TcpSocket *socket)
         std::cout << "queue declared" << std::endl; 
         
         // start consuming
-        _channel->consume("my_queue").onReceived([](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
-            std::cout << "received: " << message.message() << std::endl;
+        _channel->consume("my_queue").onReceived([this](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
+            std::cout << "consumed from exchange " << message.exchange() << " " << message.routingkey() << ": " << std::string(message.body(), message.bodySize()) << std::endl;
+            _channel->ack(deliveryTag);
         });
     });
 
     // declare an exchange
-    _channel->declareExchange().onSuccess([]() { 
+    _channel->declareExchange("my_exchange", AMQP::direct).onSuccess([]() { 
         std::cout << "exchange declared" << std::endl; 
     });
     
     // bind queue and exchange
     _channel->bindQueue("my_exchange", "my_queue", "key").onSuccess([this]() {
         std::cout << "queue bound to exchange" << std::endl;
+       
+        // callback for returns
+        auto callback = [](const AMQP::Message &message, int16_t code, const std::string &description) {
         
-        _channel->publish("my_exchange", "key", "just a message");
+            std::cout << "message was returned: " << code << " " << description << ": " << std::string(message.body(), message.bodySize()) << std::endl;
+            
+        };
+        
+        _channel->publish("my_exchange", "key", "just a message", AMQP::mandatory).onReturned(callback);
+        _channel->publish("my_exchange", "unknown key", "just another message", AMQP::mandatory).onReturned(callback);
     });
 }
 
@@ -156,7 +165,7 @@ void MyConnection::onData(Network::TcpSocket *socket, Network::Buffer *buffer)
     if (!_connection) return;
     
     // let the data be handled by the connection
-    size_t bytes = _connection->parse(buffer->data(), buffer->size());
+    size_t bytes = _connection->parse(buffer->buffer(), buffer->size());
     
     // shrink the buffer
     buffer->shrink(bytes);
