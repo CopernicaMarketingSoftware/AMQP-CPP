@@ -595,7 +595,7 @@ class MyTcpHandler : public AMQP::TcpHandler
      *  @param  connection      The connection on which the error occured
      *  @param  interval        The suggested interval in seconds
      */
-    virtual void onNegotiate(AMQP::TcpConnection *connection, uint16_t interval)
+    virtual uint16_t onNegotiate(AMQP::TcpConnection *connection, uint16_t interval)
     {
         // we accept the suggestion from the server, but if the interval is smaller
         // that one minute, we will use a one minute interval instead
