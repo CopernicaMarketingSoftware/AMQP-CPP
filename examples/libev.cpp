@@ -55,6 +55,76 @@ public:
 };
 
 /**
+ *  Class that runs a timer
+ */
+class MyTimer
+{
+private:
+    /**
+     *  The actual watcher structure
+     *  @var struct ev_io
+     */
+    struct ev_timer _timer;
+
+    /**
+     *  Pointer towards the AMQP channel
+     *  @var AMQP::TcpChannel
+     */
+    AMQP::TcpChannel *_channel;
+
+    /**
+     *  Name of the queue
+     *  @var std::string
+     */
+    std::string _queue;
+
+
+    /**
+     *  Callback method that is called by libev when the timer expires
+     *  @param  loop        The loop in which the event was triggered
+     *  @param  timer       Internal timer object
+     *  @param  revents     The events that triggered this call
+     */
+    static void callback(struct ev_loop *loop, struct ev_timer *timer, int revents)
+    {
+        // retrieve the this pointer
+        MyTimer *self = static_cast<MyTimer*>(timer->data);
+
+        // publish a message
+        self->_channel->publish("", self->_queue, "ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    }
+
+public:
+    /**
+     *  Constructor
+     *  @param  loop
+     *  @param  channel
+     *  @param  queue
+     */
+    MyTimer(struct ev_loop *loop, AMQP::TcpChannel *channel, std::string queue) : 
+        _channel(channel), _queue(std::move(queue))
+    {
+        // initialize the libev structure
+        ev_timer_init(&_timer, callback, 0.005, 0.005);
+
+        // this object is the data
+        _timer.data = this;
+
+        // and start it
+        ev_timer_start(loop, &_timer);
+    }
+    
+    /**
+     *  Destructor
+     */
+    virtual ~MyTimer()
+    {
+        // @todo to be implemented
+    }
+};
+
+
+/**
  *  Main program
  *  @return int
  */
@@ -82,20 +152,23 @@ int main()
     AMQP::TcpChannel channel(&connection);
 
     // create a temporary queue
-    channel.declareQueue(AMQP::exclusive).onSuccess([&connection, &channel](const std::string &name, uint32_t messagecount, uint32_t consumercount) {
+    channel.declareQueue(AMQP::exclusive).onSuccess([&connection, &channel, loop](const std::string &name, uint32_t messagecount, uint32_t consumercount) {
         
         // report the name of the temporary queue
         std::cout << "declared queue " << name << std::endl;
         
         // close the channel
-        channel.close().onSuccess([&connection, &channel]() {
-            
-            // report that channel was closed
-            std::cout << "channel closed" << std::endl;
-            
-            // close the connection
-            connection.close();
-        });
+        //channel.close().onSuccess([&connection, &channel]() {
+        //    
+        //    // report that channel was closed
+        //    std::cout << "channel closed" << std::endl;
+        //    
+        //    // close the connection
+        //    connection.close();
+        //});
+        
+        // construct a timer that is going to publish stuff
+        auto *timer = new MyTimer(loop, &channel, name);
     });
     
     // run the loop
