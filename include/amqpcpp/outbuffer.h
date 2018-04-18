@@ -39,6 +39,13 @@ protected:
 
 public:
     /**
+     *  Destructor
+     */
+    virtual ~OutBuffer()
+    {
+    }
+
+    /**
      *  Add a binary buffer to the buffer
      *  @param  string  char* to the string
      *  @param  size    size of string
