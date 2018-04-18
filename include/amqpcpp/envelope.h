@@ -56,7 +56,7 @@ public:
      *  @param  body
      *  @param  size
      */
-    Envelope(const char *body, uint64_t size) : MetaData(), _body((char *)body), _bodySize(size) {}
+    Envelope(const char *body, uint64_t size) : MetaData(), _body(const_cast<char *>(body)), _bodySize(size) {}
 
     /**
      *  Disabled copy constructor
