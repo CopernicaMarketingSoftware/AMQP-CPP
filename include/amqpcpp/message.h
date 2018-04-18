@@ -103,7 +103,7 @@ protected:
         {
             // we do not have to combine multiple frames, so we can store
             // the buffer pointer in the message 
-            _body = (char *)buffer;
+            _body = const_cast<char *>(buffer);
         }
         else
         {
