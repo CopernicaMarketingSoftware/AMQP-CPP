@@ -400,10 +400,9 @@ public:
      *  Tell the RabbitMQ server that we're ready to consume messages
      *
      *  After this method is called, RabbitMQ starts delivering messages to the client
-     *  application. The consume tag is a string identifier that will be passed to
-     *  each received message, so that you can associate incoming messages with a
-     *  consumer. If you do not specify a consumer tag, the server will assign one
-     *  for you.
+     *  application. The consume tag is a string identifier that you can use to identify
+     *  the consumer if you later want to stop it with with a channel::cancel() call. 
+     *  If you do not specify a consumer tag, the server will assign one for you.
      *
      *  The following flags are supported:
      *
