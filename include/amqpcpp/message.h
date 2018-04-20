@@ -38,6 +38,13 @@ class DeferredReceiver;
  */
 class Message : public Envelope
 {
+private:
+   /**
+     *  An allocated and mutable block of memory underlying _body
+     *  @var    char *
+     */
+    char *_mutableBody = nullptr;
+
 protected:
     /**
      *  The exchange to which it was originally published
@@ -88,13 +95,13 @@ protected:
     bool append(const char *buffer, uint64_t size)
     {
         // is the body already allocated?
-        if (_allocated)
+        if (_mutableBody)
         {
             // prevent overflow
             size = std::min(size, _bodySize - _filled);
             
             // append more data
-            memcpy(_body + _filled, buffer, (size_t)size);
+            memcpy(_mutableBody + _filled, buffer, (size_t)size);
             
             // update filled data
             _filled += (size_t)size;
@@ -103,21 +110,19 @@ protected:
         {
             // we do not have to combine multiple frames, so we can store
             // the buffer pointer in the message 
-            _body = const_cast<char *>(buffer);
+            _body = buffer;
         }
         else
         {
             // allocate the buffer
-            _body = (char *)malloc((size_t)_bodySize);
+            _mutableBody = (char *)malloc((size_t)_bodySize);
             
-            // remember that the buffer was allocated, so that the destructor can get rid of it
-            _allocated = true;
+            // expose the body in its immutable form
+            _body = _mutableBody;
             
-            // append more data
-            memcpy(_body, buffer, std::min((size_t)size, (size_t)_bodySize));
-            
-            // update filled data
+            // store the initial data
             _filled = std::min((size_t)size, (size_t)_bodySize);
+            memcpy(_mutableBody, buffer, _filled);
         }
             
         // check if we're done
@@ -144,7 +149,10 @@ public:
     /**
      *  Destructor
      */
-    virtual ~Message() = default;
+    virtual ~Message()
+    {
+        if (_mutableBody) free(_mutableBody);
+    }
 
     /**
      *  The exchange to which it was originally published

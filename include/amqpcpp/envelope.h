@@ -32,7 +32,7 @@ protected:
      *  Pointer to the body data (the memory is not managed by the AMQP library!)
      *  @var    const char *
      */
-    char *_body;
+    const char *_body;
 
     /**
      *  Size of the data
@@ -40,12 +40,6 @@ protected:
      */
     uint64_t _bodySize;
     
-    /**
-     *  Was the data allocated by this object?
-     *  @var    bool
-     */
-    bool _allocated = false;
-
 public:
     /**
      *  Constructor
@@ -56,7 +50,7 @@ public:
      *  @param  body
      *  @param  size
      */
-    Envelope(const char *body, uint64_t size) : MetaData(), _body(const_cast<char *>(body)), _bodySize(size) {}
+    Envelope(const char *body, uint64_t size) : MetaData(), _body(body), _bodySize(size) {}
 
     /**
      *  Disabled copy constructor
@@ -68,11 +62,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~Envelope()
-    {
-        // deallocate the data
-        if (_allocated) free(_body);
-    }
+    virtual ~Envelope() {}
 
     /**
      *  Access to the full message data
