@@ -14,6 +14,10 @@ cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
 # project name
 project(amqpcpp)
+set (VERSION_MAJOR 3)
+set (VERSION_MINOR 0)
+set (VERSION_PATCH 2)
+set (SO_VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
 
 # build options
 option(AMQP-CPP_BUILD_SHARED "Build shared library. If off, build will be static." OFF)
@@ -75,7 +79,7 @@ if(AMQP-CPP_BUILD_SHARED)
     # create shared lib
     add_library(${PROJECT_NAME} SHARED ${SRCS})
     # set shared lib version
-    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 3.0)
+    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${SO_VERSION})
 else()
     # create static lib
     add_library(${PROJECT_NAME} STATIC ${SRCS})
@@ -105,3 +109,9 @@ install(FILES include/amqpcpp.h DESTINATION include)
 
 install(EXPORT ${PROJECT_NAME}Config DESTINATION cmake)
 export(TARGETS ${PROJECT_NAME} FILE ${PROJECT_NAME}Config.cmake)
+
+set(DEST_DIR "${CMAKE_INSTALL_PREFIX}")
+set(PRIVATE_LIBS "-llibamqpcc")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/amqpcpp.pc" @ONLY)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/amqpcpp.pc" DESTINATION lib/pkgconfig)
