@@ -30,8 +30,7 @@ namespace AMQP {
 template<
     typename T,
     char F,
-    typename = typename std::enable_if<std::is_arithmetic<T>::value, T>,
-    typename = typename std::enable_if<std::is_integral<T>::value, T>
+    typename = typename std::enable_if<std::is_arithmetic<T>::value, T>
 >
 class NumericField : public Field
 {
@@ -126,6 +125,8 @@ public:
     operator int16_t () const override { return (int16_t)_value; }
     operator int32_t () const override { return (int32_t)_value; }
     operator int64_t () const override { return (int64_t)_value; }
+    operator float () const override { return (float)_value; }
+    operator double () const override { return (double)_value; }
 
     /**
      *  Get the value
@@ -144,7 +145,7 @@ public:
      */
     bool isInteger() const override
     {
-        return true;
+        return std::is_integral<T>::value;
     }
 
     /**
