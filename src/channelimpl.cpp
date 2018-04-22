@@ -261,11 +261,11 @@ Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType typ
     else if (type == ExchangeType::consistent_hash) exchangeType = "x-consistent-hash";
 
     // the boolean options
-    bool passive = flags & AMQP::passive;
-    bool durable = flags & AMQP::durable;
-    bool autodelete = flags & AMQP::autodelete;
-    bool internal = flags & AMQP::internal;
-    bool nowait = flags & AMQP::nowait;
+    bool passive = (flags & AMQP::passive) != 0;
+    bool durable = (flags & AMQP::durable) != 0;
+    bool autodelete = (flags & AMQP::autodelete) != 0;
+    bool internal = (flags & AMQP::internal) != 0;
+    bool nowait = (flags & AMQP::nowait) != 0;
 
     // send declare exchange frame
     return push(ExchangeDeclareFrame(_id, name, exchangeType, passive, durable, autodelete, internal, nowait, arguments));

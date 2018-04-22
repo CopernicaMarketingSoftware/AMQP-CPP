@@ -45,7 +45,7 @@ using DeleteCallback        =   std::function<void(uint32_t deletedmessages)>;
  *  When retrieving the size of a queue in some way
  */
 using EmptyCallback         =   std::function<void()>;
-using SizeCallback          =   std::function<void(uint32_t messagecount)>;
+using SizeCallback          =   std::function<void(uint64_t messagecount)>;
 
 /**
  *  Starting and stopping a consumer
