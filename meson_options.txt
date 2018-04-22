@@ -1,0 +1,12 @@
+# NB: By default meson uses --default-library shared
+# Use meson --default-library static to get shared library
+# With meson >= 0.46 use --default-library both to enable both
+option('linux-tcp',
+       type: 'boolean',
+       value: false,
+       description: 'Build linux TCP socket implementation.')
+option('googletest',
+       type: 'boolean',
+       value: false,
+       description: 'Enable Google Test framework subproject.')
+# NB: examples not supported
