@@ -270,8 +270,12 @@ private:
             // we may have to repeat the operation on failure
             if (result > 0) continue;
             
+            // Check for error and clear the error queue before the next TLS/SSL I/O operation
+            auto error = OpenSSL::SSL_get_error(_ssl, result);
+            OpenSSL::ERR_clear_error();
+
             // the operation failed, we may have to repeat our call
-            return repeat(monitor, state_sending, OpenSSL::SSL_get_error(_ssl, result));
+            return repeat(monitor, state_sending, error);
         }
         while (_out && !readable);
         
@@ -297,8 +301,14 @@ private:
             auto result = _in.receivefrom(_ssl, _connection->expected());
             
             // if this is a failure, we are going to repeat the operation
-            if (result <= 0) return repeat(monitor, state_receiving, OpenSSL::SSL_get_error(_ssl, result));
-        
+            if (result <= 0)
+            {
+                // Check for error and clear the error queue before the next TLS/SSL I/O operation
+                auto error = OpenSSL::SSL_get_error(_ssl, result);
+                OpenSSL::ERR_clear_error();
+
+                return repeat(monitor, state_receiving, error);
+            }
             // go process the received data
             auto *nextstate = parse(monitor, result);
             
@@ -419,6 +429,9 @@ public:
             {
                 // error was returned, so we must investigate what is going on
                 auto error = OpenSSL::SSL_get_error(_ssl, result);
+
+                // clear the error queue before the next TLS/SSL I/O operation
+                OpenSSL::ERR_clear_error();
                 
                 // get the next state given the error
                 auto *nextstate = repeat(monitor, state_sending, error);

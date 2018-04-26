@@ -311,6 +311,19 @@ int SSL_use_certificate_file(SSL *ssl, const char *file, int type)
 }
 
 /**
+ *  Clear the SSL error queue
+ *  @return void
+ */
+void ERR_clear_error()
+{
+    // create a function
+    static Function<decltype(::ERR_clear_error)> func(handle, "ERR_clear_error");
+
+    // call the openssl function
+    return func();
+}
+
+/**
  *  End of namespace
  */
 }}

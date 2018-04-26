@@ -18,6 +18,7 @@
  *  Dependencies
  */
 #include <openssl/ssl.h>
+#include <openssl/err.h>
 
 /**
  *  Begin of namespace
@@ -49,6 +50,7 @@ void     SSL_set_connect_state(SSL *ssl);
 void     SSL_CTX_free(SSL_CTX *ctx);
 void     SSL_free(SSL *ssl);
 long     SSL_ctrl(SSL *ssl, int cmd, long larg, void *parg);
+void     ERR_clear_error(void);
 
 /**
  *  End of namespace
