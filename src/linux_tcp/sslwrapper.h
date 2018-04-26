@@ -40,7 +40,10 @@ public:
         // report error
         if (_ssl == nullptr) throw std::runtime_error("failed to construct ssl structure");
         
+        //OpenSSL::SSL_CTX_load_verify_locations(_ssl->ctx, "cacert.pem", "/path/to/cacert");
+        //OpenSSL::SSL_use_PrivateKey_file(_ssl, "key.pem", SSL_FILETYPE_PEM);
         //OpenSSL::SSL_use_certificate_file(_ssl, "cert.pem", SSL_FILETYPE_PEM);
+        //OpenSSL::SSL_set_verify(_ssl, SSL_VERIFY_PEER, NULL);
     }
     
     /**
