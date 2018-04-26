@@ -311,6 +311,83 @@ int SSL_use_certificate_file(SSL *ssl, const char *file, int type)
 }
 
 /**
+ *  Set the PrivateKey file to be used by the connection
+ *  @param  ssl     ssl structure
+ *  @param  file    filename
+ *  @param  type    type of file
+ *  @return int
+ */
+int SSL_use_PrivateKey_file(SSL *ssl, const char *file, int type)
+{
+    // create a function
+    static Function<decltype(::SSL_use_PrivateKey_file)> func(handle, "SSL_use_PrivateKey_file");
+
+    // call the openssl function
+    return func(ssl, file, type);
+}
+
+/**
+ *  Set default locations for trusted CA certificates to be used by the connection
+ *  @param  ctx     context structure
+ *  @param  file    CAfile filename
+ *  @param  dir     CAfile directory location
+ *  @return int
+ */
+int SSL_CTX_load_verify_locations(SSL_CTX *ctx, const char *file, const char *dir)
+{
+    // create a function
+    static Function<decltype(::SSL_CTX_load_verify_locations)> func(handle, "SSL_CTX_load_verify_locations");
+
+    // call the openssl function
+    return func(ctx, file, dir);
+}
+
+/**
+ *  Set parameters for peer certificate verification
+ *  @param  ssl         ssl structure
+ *  @param  mode        verify mode (SSL_VERIFY_NONE or SSL_VERIFY_PEER. The rest are server mode only)
+ *  @param  callback    Callback function used for verification, or NULL for default callback of ctx
+ *  @return void
+ */
+void SSL_set_verify(SSL *ssl, int mode, int (*callback) (int ok, X509_STORE_CTX *ctx))
+{
+    // create a function
+    static Function<decltype(::SSL_set_verify)> func(handle, "SSL_set_verify");
+
+    // call the openssl function
+    func(ssl, mode, callback);
+
+}
+
+/**
+ *  Get the result of peer certificate verification
+ *  @param  ssl     ssl structure
+ *  @return long    verification result
+ */
+long SSL_get_verify_result(const SSL *ssl)
+{
+    // create a function
+    static Function<decltype(::SSL_get_verify_result)> func(handle, "SSL_get_verify_result");
+
+    // call the openssl function
+    return func(ssl);
+}
+
+/**
+ *  Get peer X509 certificate
+ *  @param  ssl     ssl structure
+ *  @return X509    peer certificate
+ */
+X509* SSL_get_peer_certificate(const SSL *ssl)
+{
+    // create a function
+    static Function<decltype(::SSL_get_peer_certificate)> func(handle, "SSL_get_peer_certificate");
+
+    // call the openssl function
+    return func(ssl);
+}
+
+/**
  *  End of namespace
  */
 }}
