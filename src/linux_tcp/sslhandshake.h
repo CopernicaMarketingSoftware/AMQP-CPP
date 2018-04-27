@@ -190,6 +190,10 @@ public:
         // must be the socket
         if (fd != _socket) return this;
 
+        // we are going to check for errors after the openssl operations, so we make 
+        // sure that the error queue is currently completely empty
+        OpenSSL::ERR_clear_error();
+
         // start the ssl handshake
         int result = OpenSSL::SSL_do_handshake(_ssl);
         

@@ -186,6 +186,10 @@ public:
     {
         // the socket must be the one this connection writes to
         if (fd != _socket) return this;
+
+        // we are going to check for errors after the openssl operations, so we make 
+        // sure that the error queue is currently completely empty
+        OpenSSL::ERR_clear_error();
         
         // close the connection
         auto result = OpenSSL::SSL_shutdown(_ssl);

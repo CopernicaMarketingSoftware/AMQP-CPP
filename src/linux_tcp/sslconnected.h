@@ -259,6 +259,10 @@ private:
         // assume default state
         _state = state_idle;
         
+        // we are going to check for errors after the openssl operations, so we make 
+        // sure that the error queue is currently completely empty
+        OpenSSL::ERR_clear_error();
+        
         // because the output buffer contains a lot of small buffers, we can do multiple 
         // operations till the buffer is empty (but only if the socket is not also
         // readable, because then we want to read that data first instead of endless writes
@@ -270,9 +274,8 @@ private:
             // we may have to repeat the operation on failure
             if (result > 0) continue;
             
-            // Check for error and clear the error queue before the next TLS/SSL I/O operation
+            // check for error
             auto error = OpenSSL::SSL_get_error(_ssl, result);
-            OpenSSL::ERR_clear_error();
 
             // the operation failed, we may have to repeat our call
             return repeat(monitor, state_sending, error);
@@ -291,6 +294,10 @@ private:
      */
     TcpState *receive(const Monitor &monitor, bool writable)
     {
+        // we are going to check for errors after the openssl operations, so we make 
+        // sure that the error queue is currently completely empty
+        OpenSSL::ERR_clear_error();
+
         // start a loop
         do
         {
@@ -301,14 +308,8 @@ private:
             auto result = _in.receivefrom(_ssl, _connection->expected());
             
             // if this is a failure, we are going to repeat the operation
-            if (result <= 0)
-            {
-                // Check for error and clear the error queue before the next TLS/SSL I/O operation
-                auto error = OpenSSL::SSL_get_error(_ssl, result);
-                OpenSSL::ERR_clear_error();
+            if (result <= 0) return repeat(monitor, state_receiving, OpenSSL::SSL_get_error(_ssl, result));
 
-                return repeat(monitor, state_receiving, error);
-            }
             // go process the received data
             auto *nextstate = parse(monitor, result);
             
@@ -406,6 +407,10 @@ public:
         
         // create an object to wait for the filedescriptor to becomes active
         Wait wait(_socket);
+
+        // we are going to check for errors after the openssl operations, so we make 
+        // sure that the error queue is currently completely empty
+        OpenSSL::ERR_clear_error();
         
         // keep looping while we have an outgoing buffer
         while (_out)
@@ -430,9 +435,6 @@ public:
                 // error was returned, so we must investigate what is going on
                 auto error = OpenSSL::SSL_get_error(_ssl, result);
 
-                // clear the error queue before the next TLS/SSL I/O operation
-                OpenSSL::ERR_clear_error();
-                
                 // get the next state given the error
                 auto *nextstate = repeat(monitor, state_sending, error);
                 
