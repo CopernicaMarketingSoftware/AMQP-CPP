@@ -41,6 +41,23 @@ public:
     virtual ~TcpHandler() = default;
 
     /**
+     *  Method that is called once an SSL structure has been created, after a TCP connection
+     *  has been set up and before the TLS handshake occurs.  This method allows you to
+     *  initialize the SSL structure with any certificates, keys or callbacks which may be
+     *  required for successful operation.  This method is only called for secure connections
+     *  (connection with an amqps:// address).
+     *
+     *  @param  connection      The connection for which TLS was just started
+     *  @param  ssl             Pointer to the SSL structure that can be initialized
+     *  @return bool            True to proceed, false to indicate failure
+     */
+    virtual bool onCreateSSL(TcpConnection *connection, SSL *ssl)
+    {
+        // default implementation: do no custom initialization
+        return true;
+    }
+
+    /**
      *  Method that is called after a TCP connection has been set up and the initial 
      *  TLS handshake is finished too, but right before the AMQP login handshake is
      *  going to take place and the first data is going to be sent over the connection. 

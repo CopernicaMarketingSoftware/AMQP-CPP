@@ -200,20 +200,32 @@ public:
         if (_socket >= 0) 
         {
             // if we need a secure connection, we move to the tls handshake
-            // @todo catch possible exception
-            if (_secure) return new SslHandshake(_connection, _socket, _hostname, std::move(_buffer), _handler);
-            
-            // otherwise we have a valid regular tcp connection
-            return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
+            if (_secure)
+            {
+                try
+                {
+                    return new SslHandshake(_connection, _socket, _hostname, std::move(_buffer), _handler);
+                }
+                catch (std::runtime_error &re)
+                {
+                    // report error
+                    _handler->onError(_connection, re.what());
+                }
+            }
+            else
+            {
+                // otherwise we have a valid regular tcp connection
+                return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
+            }
         }
         else
         {
             // report error
-            _handler->onError(_connection, _error.data());
-        
-            // create dummy implementation
-            return new TcpClosed(_connection, _handler);
+            _handler->onError(_connection, _error.data());        
         }
+
+        // create dummy implementation
+        return new TcpClosed(_connection, _handler);
     }
     
     /**

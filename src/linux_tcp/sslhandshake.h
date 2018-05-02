@@ -124,9 +124,7 @@ private:
 public:
     /**
      *  Constructor
-     * 
-     *  @todo catch the exception!  
-     * 
+     *
      *  @param  connection  Parent TCP connection object
      *  @param  socket      The socket filedescriptor
      *  @param  hostname    The hostname to connect to
@@ -141,6 +139,9 @@ public:
         _socket(socket),
         _out(std::move(buffer))
     {
+        // perform user space program initialization of the ssl socket
+        if (!_handler->onCreateSSL(connection, _ssl)) throw std::runtime_error("failed to initialize the ssl socket");
+
         // we will be using the ssl context as a client
         OpenSSL::SSL_set_connect_state(_ssl);
         
