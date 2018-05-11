@@ -6,7 +6,7 @@
  *  of methods that are called when data needs to be sent, or when the
  *  AMQP connection ends up in a broken state.
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -62,9 +62,11 @@ public:
      */
     virtual uint16_t onNegotiate(Connection *connection, uint16_t interval)
     {
-        // default implementation, disable heartbeats
+        // make sure compilers dont complain about unused parameters
         (void) connection;
         (void) interval;
+
+        // default implementation, disable heartbeats
         return 0;
     }
 
@@ -90,7 +92,11 @@ public:
      *
      *  @param  connection      The connection over which the heartbeat was received
      */
-    virtual void onHeartbeat(Connection *connection) { (void) connection; }
+    virtual void onHeartbeat(Connection *connection) 
+    { 
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+    }
 
     /**
      *  When the connection ends up in an error state this method is called.
@@ -108,6 +114,7 @@ public:
      */
     virtual void onError(Connection *connection, const char *message)
     {
+        // make sure compilers dont complain about unused parameters
         (void) connection;
         (void) message;
     }
@@ -126,7 +133,11 @@ public:
      *
      *  @param  connection      The connection that can now be used
      */
-    virtual void onConnected(Connection *connection) { (void) connection; }
+    virtual void onConnected(Connection *connection) 
+    { 
+        // make sure compilers dont complain about unused parameters
+        (void) connection; 
+    }
 
     /**
      *  Method that is called when the connection was closed.
@@ -136,8 +147,11 @@ public:
      *
      *  @param  connection      The connection that was closed and that is now unusable
      */
-    virtual void onClosed(Connection *connection) { (void) connection; }
-
+    virtual void onClosed(Connection *connection) 
+    { 
+        // make sure compilers dont complain about unused parameters
+        (void) connection; 
+    }
 };
 
 /**
