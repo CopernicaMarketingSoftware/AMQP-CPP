@@ -98,6 +98,9 @@ protected:
     virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name, uint32_t messagecount, uint32_t consumercount) const
     {
         // this is the same as a regular success message
+        (void) name;
+        (void) messagecount;
+        (void) consumercount;
         return reportSuccess();
     }
 
@@ -109,6 +112,7 @@ protected:
     virtual const std::shared_ptr<Deferred> &reportSuccess(uint32_t messagecount) const
     {
         // this is the same as a regular success message
+        (void) messagecount;
         return reportSuccess();
     }
 
@@ -122,6 +126,9 @@ protected:
     virtual const std::shared_ptr<Deferred> &reportSuccess(uint32_t messagecount, uint64_t deliveryTag, bool redelivered)
     {
         // this is the same as a regular success message
+        (void) messagecount;
+        (void) deliveryTag;
+        (void) redelivered;
         return reportSuccess();
     }
 
@@ -133,6 +140,7 @@ protected:
     virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name)
     {
         // this is the same as a regular success message
+        (void) name;
         return reportSuccess();
     }
 
