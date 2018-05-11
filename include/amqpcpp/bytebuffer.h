@@ -114,6 +114,7 @@ public:
      */
     virtual const char *data(size_t pos, size_t size) const override
     {
+        (void) size;
         return _data + pos;
     }
     
