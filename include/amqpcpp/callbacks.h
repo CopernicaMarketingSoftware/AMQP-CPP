@@ -78,6 +78,13 @@ using MessageCallback       =   std::function<void(const Message &message, uint6
 using BounceCallback        =   std::function<void(const Message &message, int16_t code, const std::string &description)>;
 
 /**
+ * When using publisher confirms, AckCallback is called when server confirms that message is received
+ * and processed. NackCallback is called otherwise.
+ */
+using AckCallback           =   std::function<void(uint64_t deliveryTag, bool multiple)>;
+using NackCallback          =   std::function<void(uint64_t deliveryTag, bool multiple, bool requeue)>;
+
+/**
  *  End namespace
  */
 }

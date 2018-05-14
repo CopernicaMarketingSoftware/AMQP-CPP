@@ -128,6 +128,17 @@ public:
     }
 
     /**
+     *  Put channel in a confirm mode (RabbitMQ specific)
+     *
+     *  This function returns a deferred handler. Callbacks can be installed
+     *  using onSuccess(), onError() and onFinalize() methods.
+     */
+    DeferredConfirm &confirmSelect()
+    {
+        return _implementation->confirmSelect();
+    }
+
+    /**
      *  Start a transaction
      *
      *  This function returns a deferred handler. Callbacks can be installed

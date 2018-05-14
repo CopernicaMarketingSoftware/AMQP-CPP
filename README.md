@@ -974,6 +974,42 @@ knows in the database world. It is not possible to wrap all sort of
 operations in a transaction, they are only meaningful for publishing
 and consuming.
 
+PUBLISHER CONFIRMS
+===================
+
+RabbitMQ supports lightweight method of confirming that broker received and processed
+a message. For this method to work, the channel needs to be put in so-called _confirm mode_.
+This is done using confirmSelect() method. When channel is successfully put in 
+confirm mode, the server and client count messages (starting from 1) and server sends
+acknowledgments for every message it processed (it can also acknowledge multiple message at
+once). 
+
+If server is unable to process a message, it will send send negative acknowledgments. Both 
+positive and negative acknowledgments handling are implemented as callbacks for Channel object.
+
+````c++
+// setup confirm mode and ack/nack callbacks
+channel.confirmSelect().onSuccess([&]() {
+    // from this moment onwards ack/nack confirmations are comming in
+
+    channel.publish("my-exchange", "my-key", "my first message");
+    // message counter is now 1, will call onAck/onNack with deliverTag=1
+
+    channel.publish("my-exchange", "my-key", "my second message");
+    // message counter is now 2, will call onAck/onNack with deliverTag=2
+
+}).onAck([&](uint64_t deliverTag, bool multiple) {
+    // deliverTag is message number
+    // multiple is set to true, if all messages UP TO deliverTag have been processed
+}).onNack([&](uint64 deliveryTag, bool multiple, bool requeue) {
+    // deliverTag is message number
+    // multiple is set to true, if all messages UP TO deliverTag have not been processed
+    // requeue is to be ignored
+});
+
+````
+
+For more information, please see http://www.rabbitmq.com/confirms.html.
 
 CONSUMING MESSAGES
 ==================
@@ -1107,7 +1143,6 @@ need additional attention:
 
     -   ability to set up secure connections (or is this fully done on the IO level)
     -   login with other protocols than login/password
-    -   publish confirms
 
 We also need to add more safety checks so that strange or invalid data from
 RabbitMQ does not break the library (although in reality RabbitMQ only sends

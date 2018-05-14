@@ -14,6 +14,7 @@
 #include "channelflowframe.h"
 #include "channelcloseokframe.h"
 #include "channelcloseframe.h"
+#include "confirmselectframe.h"
 #include "transactionselectframe.h"
 #include "transactioncommitframe.h"
 #include "transactionrollbackframe.h"
@@ -178,6 +179,27 @@ Deferred &ChannelImpl::resume()
 {
     // send a channel flow frame
     return push(ChannelFlowFrame(_id, true));
+}
+
+/**
+ *  Put channel in a confirm mode
+ *
+ *  This function returns a deferred handler. Callbacks can be installed
+ *  using onSuccess(), onError() and onFinalize() methods.
+ */
+DeferredConfirm &ChannelImpl::confirmSelect()
+{
+    // the frame to send
+    ConfirmSelectFrame frame(_id);
+
+    // send the frame, and create deferred object
+    _confirm = std::make_shared<DeferredConfirm>(!send(frame));
+
+    // push to list
+    push(_confirm);
+
+    // done
+    return *_confirm;
 }
 
 /**

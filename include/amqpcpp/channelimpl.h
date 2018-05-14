@@ -42,6 +42,7 @@ class ConsumedMessage;
 class ConnectionImpl;
 class DeferredDelete;
 class DeferredCancel;
+class DeferredConfirm;
 class DeferredQueue;
 class DeferredGet;
 class DeferredPublisher;
@@ -79,6 +80,12 @@ private:
      *  @var    std::shared_ptr<DeferredPublisher>
      */
     std::shared_ptr<DeferredPublisher> _publisher;
+
+    /**
+     * Handler that deals with publisher confirms frames
+     * @var    std::shared_ptr<DeferredConfirm>
+     */
+    std::shared_ptr<DeferredConfirm> _confirm;
 
     /**
      *  Handlers for all consumers that are active
@@ -251,6 +258,11 @@ public:
     {
         return _state == state_connected || _state == state_ready;
     }
+
+    /**
+     *  Put channel in a confirm mode (RabbitMQ specific)
+     */
+    DeferredConfirm &confirmSelect();
 
     /**
      *  Start a transaction
@@ -714,6 +726,12 @@ public:
      *  @return The deferred publisher object
      */
     DeferredPublisher *publisher() const { return _publisher.get(); }
+
+    /**
+     * Retrieve the deferred confirm that handles publisher confirms
+     * @return The deferred confirm object
+     */
+    DeferredConfirm *confirm() const { return _confirm.get(); }
 
     /**
      *  The channel class is its friend, thus can it instantiate this object

@@ -29,6 +29,8 @@ add_sources(
     channelimpl.cpp
     channelopenframe.h
     channelopenokframe.h
+    confirmselectframe.h
+    confirmselectokframe.h
     connectioncloseframe.h
     connectioncloseokframe.h
     connectionframe.h
@@ -43,6 +45,7 @@ add_sources(
     connectiontuneokframe.h
     consumedmessage.h
     deferredcancel.cpp
+    deferredconfirm.cpp
     deferredconsumer.cpp
     deferredreceiver.cpp
     deferredextreceiver.cpp
