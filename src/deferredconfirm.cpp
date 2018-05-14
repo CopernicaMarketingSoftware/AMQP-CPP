@@ -7,6 +7,8 @@
  *  @copyright 2018 Copernica BV
  */
 #include "includes.h"
+#include "basicackframe.h"
+#include "basicnackframe.h"
 
 /**
  *  Namespace

@@ -45,6 +45,7 @@ add_sources(
     connectiontuneokframe.h
     consumedmessage.h
     deferredcancel.cpp
+    deferredconfirm.cpp
     deferredconsumer.cpp
     deferredreceiver.cpp
     deferredextreceiver.cpp
