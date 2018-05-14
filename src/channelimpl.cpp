@@ -187,7 +187,7 @@ Deferred &ChannelImpl::resume()
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred &ChannelImpl::setConfirmMode()
+Deferred &ChannelImpl::confirmSelect()
 {
     // send a transaction frame
     return push(ConfirmSelectFrame(_id));

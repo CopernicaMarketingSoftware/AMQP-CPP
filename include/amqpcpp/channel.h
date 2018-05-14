@@ -133,9 +133,9 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &setConfirmMode()
+    Deferred &confirmSelect()
     {
-        return _implementation->setConfirmMode();
+        return _implementation->confirmSelect();
     }
 
     /**

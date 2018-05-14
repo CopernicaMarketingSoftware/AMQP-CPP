@@ -287,7 +287,7 @@ public:
     /**
      *  Put channel in a confirm mode (RabbitMQ specific)
      */
-    Deferred &setConfirmMode();
+    Deferred &confirmSelect();
 
     /**
      *  Start a transaction

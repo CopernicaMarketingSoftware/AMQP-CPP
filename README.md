@@ -979,7 +979,7 @@ PUBLISHER CONFIRMS
 
 RabbitMQ supports lightweight method of confirming that broker received and processed
 a message. For this method to work, the channel needs to be put in so-called _confirm mode_.
-This is done using setConfirmMode() method. When channel is successfully put in 
+This is done using confirmSelect() method. When channel is successfully put in 
 confirm mode, the server and client count messages (starting from 1) and server sends
 acknowledgments for every message it processed (it can also acknowledge multiple message at
 once). 
@@ -1001,7 +1001,7 @@ channel.onNack([&](uint64 deliveryTag, bool multiple, bool requeue) {
 });
 
 // put channel in confirm mode
-channel.setConfirmMode().onSuccess([&]() {
+channel.confirmSelect().onSuccess([&]() {
     channel.publish("my-exchange", "my-key", "my first message");
     // message counter is now 1, will call onAck/onNack with deliverTag=1
 
