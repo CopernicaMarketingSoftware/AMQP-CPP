@@ -42,7 +42,6 @@ private:
      */
     void process(BasicAckFrame &frame);
 
-
     /**
      *  Process an ACK frame
      *
@@ -81,6 +80,32 @@ public:
     {
         // call base
         Deferred::onSuccess(callback);
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Callback that is called when the broker confirmed message publication
+     *  @param  callback    the callback to execute
+     */
+    DeferredConfirm &onAck(const AckCallback &callback)
+    {
+        // store callback
+        _ackCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Callback that is called when the broker denied message publication
+     *  @param  callback    the callback to execute
+     */
+    DeferredConfirm &onNack(const NackCallback &callback)
+    {
+        // store callback
+        _nackCallback = callback;
 
         // allow chaining
         return *this;
