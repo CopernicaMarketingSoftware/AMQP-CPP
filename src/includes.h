@@ -72,6 +72,7 @@
 #include "amqpcpp/deferredqueue.h"
 #include "amqpcpp/deferreddelete.h"
 #include "amqpcpp/deferredcancel.h"
+#include "amqpcpp/deferredconfirm.h"
 #include "amqpcpp/deferredget.h"
 #include "amqpcpp/channelimpl.h"
 #include "amqpcpp/channel.h"
