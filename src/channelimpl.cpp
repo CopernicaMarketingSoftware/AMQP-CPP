@@ -193,13 +193,13 @@ DeferredConfirm &ChannelImpl::confirmSelect()
     ConfirmSelectFrame frame(_id);
 
     // send the frame, and create deferred object
-    auto deferred = std::make_shared<DeferredConfirm>(!send(frame));
+    _confirm = std::make_shared<DeferredConfirm>(!send(frame));
 
     // push to list
-    push(deferred);
+    push(_confirm);
 
     // done
-    return *deferred;
+    return *_confirm;
 }
 
 /**
