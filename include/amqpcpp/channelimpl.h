@@ -42,6 +42,7 @@ class ConsumedMessage;
 class ConnectionImpl;
 class DeferredDelete;
 class DeferredCancel;
+class DeferredConfirm;
 class DeferredQueue;
 class DeferredGet;
 class DeferredPublisher;
@@ -79,6 +80,12 @@ private:
      *  @var    std::shared_ptr<DeferredPublisher>
      */
     std::shared_ptr<DeferredPublisher> _publisher;
+
+    /**
+     * Handler that deals with publisher confirms frames
+     * @var    std::shared_ptr<DeferredConfirm>
+     */
+    std::shared_ptr<DeferredConfirm> _confirm;
 
     /**
      *  Handlers for all consumers that are active
@@ -140,18 +147,6 @@ private:
      *  @var std::shared_ptr<DeferredReceiver>
      */
     std::shared_ptr<DeferredReceiver> _receiver;
-
-    /**
-     *  Callback when broker confirmed message publication
-     *  @var    SuccessCallback
-     */
-    AckCallback _ackCallback;
-
-    /**
-     *  Callback when broker denied message publication
-     *  @var    ErrorCallback
-     */
-    NackCallback _nackCallback;
 
     /**
      *  Attach the connection
@@ -236,26 +231,6 @@ public:
     void onError(const ErrorCallback &callback);
 
     /**
-     *  Callback that is called when the broker confirmed message publication
-     *  @param  callback    the callback to execute
-     */
-    void onAck(const AckCallback &callback)
-    {
-        // store callback
-        _ackCallback = callback;
-    }
-
-    /**
-     *  Callback that is called when the broker denied message publication
-     *  @param  callback    the callback to execute
-     */
-    void onNack(const NackCallback &callback)
-    {
-        // store callback
-        _nackCallback = callback;
-    }
-
-    /**
      *  Pause deliveries on a channel
      *
      *  This will stop all incoming messages
@@ -287,7 +262,7 @@ public:
     /**
      *  Put channel in a confirm mode (RabbitMQ specific)
      */
-    Deferred &confirmSelect();
+    DeferredConfirm &confirmSelect();
 
     /**
      *  Start a transaction
@@ -604,22 +579,6 @@ public:
     void onSynchronized();
 
     /**
-     * Report to the handler that message has been published
-     */
-    void reportAck(uint64_t deliveryTag, bool multiple)
-    {
-        if (_ackCallback) _ackCallback(deliveryTag, multiple);
-    }
-
-    /**
-     * Report to the handler that message has not been published
-     */
-    void reportNack(uint64_t deliveryTag, bool multiple, bool requeue)
-    {
-        if (_nackCallback) _nackCallback(deliveryTag, multiple, requeue);
-    }
-
-    /**
      *  Report to the handler that the channel is opened
      */
     void reportReady()
@@ -767,6 +726,12 @@ public:
      *  @return The deferred publisher object
      */
     DeferredPublisher *publisher() const { return _publisher.get(); }
+
+    /**
+     * Retrieve the deferred confirm that handles publisher confirms
+     * @return The deferred confirm object
+     */
+    DeferredConfirm *confirm() const { return _confirm.get(); }
 
     /**
      *  The channel class is its friend, thus can it instantiate this object

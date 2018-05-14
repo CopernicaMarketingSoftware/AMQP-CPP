@@ -133,39 +133,9 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &confirmSelect()
+    DeferredConfirm &confirmSelect()
     {
         return _implementation->confirmSelect();
-    }
-
-    /**
-     *  Callback that is called when the broker confirmed message publication
-     *
-     *  Only one callback can be registered. Calling this function multiple
-     *  times will remove the old callback.
-     *
-     *  For this callback to be called, the channel needs to be in confirm mode.
-     *
-     *  @param  callback    the callback to execute
-     */
-    void onAck(const AckCallback &callback)
-    {
-        _implementation->onAck(callback);
-    }
-
-    /**
-     *  Callback that is called when the broker denied message publication
-     *
-     *  Only one callback can be registered. Calling this function multiple
-     *  times will remove the old callback.
-     *
-     *  For this callback to be called, the channel needs to be in confirm mode.
-     *
-     *  @param  callback    the callback to execute
-     */
-    void onNack(const NackCallback &callback)
-    {
-        _implementation->onNack(callback);
     }
 
     /**

@@ -124,8 +124,14 @@ public:
         // channel does not exist
         if(!channel) return false;
 
-        // start message counter
-        channel->reportAck(deliveryTag(), multiple());
+        // get the current confirm
+        auto confirm = channel->confirm();
+
+        // if there is no deferred confirm, we can just as well stop
+        if (confirm == nullptr) return false;
+
+        // process the frame
+        confirm->process(*this);
 
         // done
         return true;
