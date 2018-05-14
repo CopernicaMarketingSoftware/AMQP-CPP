@@ -988,26 +988,25 @@ If server is unable to process a message, it will send send negative acknowledgm
 positive and negative acknowledgments handling are implemented as callbacks for Channel object.
 
 ````c++
-// setup ack and nack callbacks
-channel.onAck([&](uint64_t deliverTag, bool multiple) {
-    // deliverTag is message number
-    // multiple is set to true, if all messages UP TO deliverTag have been processed
-});
-
-channel.onNack([&](uint64 deliveryTag, bool multiple, bool requeue) {
-    // deliverTag is message number
-    // multiple is set to true, if all messages UP TO deliverTag have not been processed
-    // requeue is to be ignored
-});
-
-// put channel in confirm mode
+// setup confirm mode and ack/nack callbacks
 channel.confirmSelect().onSuccess([&]() {
+    // from this moment onwards ack/nack confirmations are comming in
+
     channel.publish("my-exchange", "my-key", "my first message");
     // message counter is now 1, will call onAck/onNack with deliverTag=1
 
     channel.publish("my-exchange", "my-key", "my second message");
     // message counter is now 2, will call onAck/onNack with deliverTag=2
+
+}).onAck([&](uint64_t deliverTag, bool multiple) {
+    // deliverTag is message number
+    // multiple is set to true, if all messages UP TO deliverTag have been processed
+}).onNack([&](uint64 deliveryTag, bool multiple, bool requeue) {
+    // deliverTag is message number
+    // multiple is set to true, if all messages UP TO deliverTag have not been processed
+    // requeue is to be ignored
 });
+
 ````
 
 For more information, please see http://www.rabbitmq.com/confirms.html.
