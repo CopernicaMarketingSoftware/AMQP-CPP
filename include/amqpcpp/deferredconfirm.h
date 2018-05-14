@@ -1,5 +1,5 @@
 /**
- *  DeferredDelete.h
+ *  DeferredConfirm.h
  *
  *  Deferred callback for RabbitMQ-specific publisher confirms mechanism.
  *
