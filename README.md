@@ -986,8 +986,6 @@ once).
 
 If server is unable to process a message, it will send send negative acknowledgments. Both 
 positive and negative acknowledgments handling are implemented as callbacks for Channel object.
-There is also helper method messageCounter() that returns number of messages send so far 
-(note that this value is reset when channel is put in confirm mode).
 
 ````c++
 // setup ack and nack callbacks
@@ -1005,10 +1003,10 @@ channel.onNack([&](uint64 deliveryTag, bool multiple, bool requeue) {
 // put channel in confirm mode
 channel.setConfirmMode().onSuccess([&]() {
     channel.publish("my-exchange", "my-key", "my first message");
-    // channel.messageCounter() is now 1, will call onAck/onNack with deliverTag=1
+    // message counter is now 1, will call onAck/onNack with deliverTag=1
 
     channel.publish("my-exchange", "my-key", "my second message");
-    // channel.messageCounter() is now 2, will call onAck/onNack with deliverTag=2
+    // message counter is now 2, will call onAck/onNack with deliverTag=2
 });
 ````
 

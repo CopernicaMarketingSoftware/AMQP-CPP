@@ -515,9 +515,6 @@ DeferredPublisher &ChannelImpl::publish(const std::string &exchange, const std::
         bytesleft -= chunksize;
     }
 
-    // increment message counter
-    _messageCounter++;
-
     // done
     return *_publisher;
 }

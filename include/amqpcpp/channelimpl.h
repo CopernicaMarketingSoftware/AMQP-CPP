@@ -142,12 +142,6 @@ private:
     std::shared_ptr<DeferredReceiver> _receiver;
 
     /**
-     * Number of messages sent. Used in confirm mode
-     * @var     uint64_t
-     */
-    uint64_t _messageCounter = 0;
-
-    /**
      *  Callback when broker confirmed message publication
      *  @var    SuccessCallback
      */
@@ -294,14 +288,6 @@ public:
      *  Put channel in a confirm mode (RabbitMQ specific)
      */
     Deferred &setConfirmMode();
-
-    /**
-     * Return number of messages sent.
-     */
-    uint64_t messageCounter() const
-    {
-        return _messageCounter;
-    }
 
     /**
      *  Start a transaction
@@ -781,14 +767,6 @@ public:
      *  @return The deferred publisher object
      */
     DeferredPublisher *publisher() const { return _publisher.get(); }
-
-    /**
-     * Reset message counter
-     */
-    void resetMessageCounter()
-    {
-        _messageCounter = 0;
-    }
 
     /**
      *  The channel class is its friend, thus can it instantiate this object

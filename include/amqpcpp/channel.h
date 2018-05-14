@@ -139,17 +139,6 @@ public:
     }
 
     /**
-     * Return number of messages sent.
-     *
-     * This functions returns number of messages sent. It's reset to zero when channel is
-     * put into confirm mode.
-     */
-    uint64_t messageCounter() const
-    {
-        return _implementation->messageCounter();
-    }
-
-    /**
      *  Callback that is called when the broker confirmed message publication
      *
      *  Only one callback can be registered. Calling this function multiple
