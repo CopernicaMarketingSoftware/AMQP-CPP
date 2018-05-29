@@ -5,8 +5,8 @@
  *
  * @copyright 2018 copernica BV
  */
- 
-/** 
+
+/**
   * Include guard
   */
 #pragma once
@@ -16,9 +16,23 @@
  */
 #include "tcpoutbuffer.h"
 #include "tcpinbuffer.h"
+#include "tcpstate.h"
 #include "wait.h"
 #include "sslwrapper.h"
 #include "sslshutdown.h"
+
+#include <amqpcpp/monitor.h>
+#include <amqpcpp/flags.h>
+
+#include <amqpcpp/linux_tcp/tcpconnection.h>
+#include <amqpcpp/linux_tcp/tcphandler.h>
+
+#include <cassert>
+
+extern "C"
+{
+#include <unistd.h>
+}
 
 /**
  * Set up namespace
