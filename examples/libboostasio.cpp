@@ -19,6 +19,9 @@
 #include <amqpcpp.h>
 #include <amqpcpp/libboostasio.h>
 
+#include <openssl/ssl.h>
+#include <openssl/opensslv.h>
+
 /**
  *  Main program
  *  @return int
@@ -32,9 +35,16 @@ int main()
 
     // handler for libev
     AMQP::LibBoostAsioHandler handler(service);
-    
+
+    // init the SSL library
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+    SSL_library_init();
+#else
+    OPENSSL_init_ssl(0, NULL);
+#endif
+
     // make a connection
-    AMQP::TcpConnection connection(&handler, AMQP::Address("amqp://guest:guest@localhost/"));
+    AMQP::TcpConnection connection(&handler, AMQP::Address("amqps://guest:guest@localhost/"));
     
     // we need a channel too
     AMQP::TcpChannel channel(&connection);
@@ -44,7 +54,6 @@ int main()
         
         // report the name of the temporary queue
         std::cout << "declared queue " << name << std::endl;
-        
         // now we can close the connection
         connection.close();
     });
