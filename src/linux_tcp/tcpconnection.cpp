@@ -70,13 +70,20 @@ void TcpConnection::process(int fd, int flags)
     auto *result = _state->process(monitor, fd, flags);
 
     // are we still valid
-    if (!monitor.valid()) return;
+    if (!monitor.valid()) 
+    {
+        delete result;
+        return;
+    }
 
     // skip if the same state is continued to be used, or when the process()
     // method returns nullptr (which only happens when the object is destructed,
     // and "this" is no longer valid)
-    if (!result || result == _state.get()) return;
-
+    if (!result || result == _state.get()) 
+    {
+        delete result;
+        return;
+    }
     // replace it with the new implementation
     _state.reset(result);
 }
