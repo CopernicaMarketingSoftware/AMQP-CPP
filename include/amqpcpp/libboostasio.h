@@ -192,11 +192,15 @@ protected:
             {
                 connection->process(fd, AMQP::readable);
 
-                _read_pending = true;
-                
-                _socket.async_read_some(
-                    boost::asio::null_buffers(),
-                    get_read_handler(connection, fd));
+                // Avoid setting up too many read handlers if process already setup a read handler
+                if (!_read_pending)
+                {
+                    _read_pending = true;
+
+                    _socket.async_read_some(
+                            boost::asio::null_buffers(),
+                            get_read_handler(connection, fd));
+                }
             }
         }
 
@@ -226,11 +230,15 @@ protected:
             {
                 connection->process(fd, AMQP::writable);
 
-                _write_pending = true;
+                // Avoid setting up too many write handlers if process() already setup a write handler
+                if (!_write_pending)
+                {
+                    _write_pending = true;
 
-                _socket.async_write_some(
-                    boost::asio::null_buffers(),
-                    get_write_handler(connection, fd));
+                    _socket.async_write_some(
+                            boost::asio::null_buffers(),
+                            get_write_handler(connection, fd));
+                }
             }
         }
 
