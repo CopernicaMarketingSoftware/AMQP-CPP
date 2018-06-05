@@ -159,8 +159,7 @@ private:
 
         if (_write_want_flags | _receive_want_flags)
         {
-            // this is the only place where we setup the monitor
-            // setup the monitor when our async operations didn't immedeately complete
+            // setup the monitor when our async operations didn't immediately complete
             _handler->monitor(_connection, _socket, _write_want_flags | _receive_want_flags);
         }
         return this;
@@ -449,7 +448,11 @@ public:
         Monitor monitor(this);
         write(monitor);
 
-        proceed();
+        if (_write_want_flags | _receive_want_flags)
+        {
+            // setup the monitor when our async operations didn't immediately complete
+            _handler->monitor(_connection, _socket, _write_want_flags | _receive_want_flags);
+        }
     }
 
     /**
@@ -494,7 +497,11 @@ public:
         // remember that the object is going to be closed
         _closed = true;
 
-        proceed();
+        if (_write_want_flags | _receive_want_flags)
+        {
+            // setup the monitor when our async operations didn't immediately complete
+            _handler->monitor(_connection, _socket, _write_want_flags | _receive_want_flags);
+        }
     }
 };
 
