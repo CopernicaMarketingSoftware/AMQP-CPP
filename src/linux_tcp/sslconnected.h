@@ -138,6 +138,14 @@ private:
         return monitor.valid() ? new TcpClosed(this) : nullptr;
     }
 
+    void setup_monitor()
+    {
+        if (_write_want_flags | _receive_want_flags)
+        {
+            _handler->monitor(_connection, _socket, _write_want_flags | _receive_want_flags);
+        }
+    }
+
     /**
      *  Proceed with the next operation after the previous operation was
      *  a success, possibly changing the filedescriptor-monitor
@@ -157,11 +165,9 @@ private:
             return nextstate;
         }
 
-        if (_write_want_flags | _receive_want_flags)
-        {
-            // setup the monitor when our async operations didn't immediately complete
-            _handler->monitor(_connection, _socket, _write_want_flags | _receive_want_flags);
-        }
+        // setup the monitor when our async operations didn't immediately complete
+        setup_monitor();
+
         return this;
     }
 
@@ -331,7 +337,7 @@ public:
         _in(4096),
         _write_want_flags(_out ? readable | writable : 0)
     {
-        proceed();
+        setup_monitor();
     }
 
     /**
@@ -448,11 +454,8 @@ public:
         Monitor monitor(this);
         write(monitor);
 
-        if (_write_want_flags | _receive_want_flags)
-        {
-            // setup the monitor when our async operations didn't immediately complete
-            _handler->monitor(_connection, _socket, _write_want_flags | _receive_want_flags);
-        }
+        // setup the monitor when our async operations didn't immediately complete
+        setup_monitor();
     }
 
     /**
@@ -497,11 +500,8 @@ public:
         // remember that the object is going to be closed
         _closed = true;
 
-        if (_write_want_flags | _receive_want_flags)
-        {
-            // setup the monitor when our async operations didn't immediately complete
-            _handler->monitor(_connection, _socket, _write_want_flags | _receive_want_flags);
-        }
+        // setup the monitor when our async operations didn't immediately complete
+        setup_monitor();
     }
 };
 
