@@ -212,7 +212,7 @@ public:
     virtual TcpState *flush(const Monitor &monitor) override
     {
         // create an object to wait for the filedescriptor to becomes active
-        Wait wait(_socket);
+        Poll poll(_socket);
 
         // keep looping
         while (true)
@@ -234,8 +234,8 @@ public:
 
             // if openssl reports that socket readability or writability is needed,
             // we wait for that until this situation is reached
-            case SSL_ERROR_WANT_READ:   wait.readable(); break;
-            case SSL_ERROR_WANT_WRITE:  wait.active(); break;
+            case SSL_ERROR_WANT_READ:   poll.readable(true); break;
+            case SSL_ERROR_WANT_WRITE:  poll.active(true); break;
         
             // something is wrong, we proceed to the next state
             default: return reporterror(monitor);

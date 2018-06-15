@@ -16,7 +16,7 @@
  */
 #include "tcpoutbuffer.h"
 #include "tcpinbuffer.h"
-#include "wait.h"
+#include "poll.h"
 #include "sslwrapper.h"
 #include "sslshutdown.h"
 
@@ -249,12 +249,37 @@ private:
     }
     
     /**
+     *  Check if the socket is readable
+     *  @return bool
+     */
+    bool isReadable() const
+    {
+        // object to poll a socket
+        Poll poll(_socket);
+        
+        // wait until socket is readable, but do not block
+        return poll.readable(false);
+    }
+
+    /**
+     *  Check if the socket is writable
+     *  @return bool
+     */
+    bool isWritable() const
+    {
+        // object to poll a socket
+        Poll poll(_socket);
+        
+        // wait until socket is writable, but do not block
+        return poll.writable(false);
+    }
+    
+    /**
      *  Perform a write operation
      *  @param  monitor         object to check the existance of the connection object
-     *  @param  readable        is the connection also readable and should we call a read operation afterwards?
      *  @return TcpState*
      */
-    TcpState *write(const Monitor &monitor, bool readable)
+    TcpState *write(const Monitor &monitor)
     {
         // assume default state
         _state = state_idle;
@@ -280,19 +305,18 @@ private:
             // the operation failed, we may have to repeat our call
             return repeat(monitor, state_sending, error);
         }
-        while (_out && !readable);
+        while (_out && !isReadable());
         
         // proceed with the read operation or the event loop
-        return readable ? receive(monitor, false) : proceed();
+        return isReadable() ? receive(monitor) : proceed();
     }
 
     /**
      *  Perform a receive operation
      *  @param  monitor         object to check the existance of the connection object
-     *  @param  writable        is the socket writable, and should we start a write operation after this operation?
      *  @return TcpState
      */
-    TcpState *receive(const Monitor &monitor, bool writable)
+    TcpState *receive(const Monitor &monitor)
     {
         // we are going to check for errors after the openssl operations, so we make 
         // sure that the error queue is currently completely empty
@@ -319,7 +343,7 @@ private:
         while (OpenSSL::SSL_pending(_ssl) > 0);
         
         // proceed with the write operation or the event loop
-        return writable && _out ? write(monitor, false) : proceed();
+        return _out && isWritable() ? write(monitor) : proceed();
     }
 
     
@@ -378,16 +402,16 @@ public:
         if (fd != _socket) return this;
         
         // if we were busy with a write operation, we have to repeat that
-        if (_state == state_sending) return write(monitor, flags & readable);
+        if (_state == state_sending) return write(monitor);
         
         // same is true for read operations, they should also be repeated
-        if (_state == state_receiving) return receive(monitor, flags & writable);
+        if (_state == state_receiving) return receive(monitor);
         
         // if the socket is readable, we are going to receive data
-        if (flags & readable) return receive(monitor, flags & writable);
+        if (flags & readable) return receive(monitor);
         
         // socket is not readable (so it must be writable), do we have data to write?
-        if (_out) return write(monitor, false);
+        if (_out) return write(monitor);
         
         // the only scenario in which we can end up here is the socket should be
         // closed, but instead of moving to the shutdown-state right, we call proceed()
@@ -406,7 +430,7 @@ public:
         if (_state == state_receiving) return this;
         
         // create an object to wait for the filedescriptor to becomes active
-        Wait wait(_socket);
+        Poll poll(_socket);
 
         // we are going to check for errors after the openssl operations, so we make 
         // sure that the error queue is currently completely empty
@@ -443,8 +467,8 @@ public:
                 
                 // check the type of error, and wait now
                 switch (error) {
-                case SSL_ERROR_WANT_READ:   wait.readable(); break;
-                case SSL_ERROR_WANT_WRITE:  wait.active(); break;
+                case SSL_ERROR_WANT_READ:   poll.readable(true); break;
+                case SSL_ERROR_WANT_WRITE:  poll.active(true); break;
                 }
             }
         }
