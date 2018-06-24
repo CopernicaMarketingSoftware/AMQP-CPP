@@ -72,6 +72,12 @@ matrix:
       - COMPILER_PACKAGE=clang-5.0
       - C_COMPILER=clang-5.0
       - CXX_COMPILER=clang++-5.0
+      
+  - os: linux
+    env:
+      - COMPILER_PACKAGE=clang-6.0
+      - C_COMPILER=clang-6.0
+      - CXX_COMPILER=clang++-6.0
 
 before_install:
 
