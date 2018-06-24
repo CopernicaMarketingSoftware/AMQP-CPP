@@ -37,6 +37,7 @@ matrix:
       - CXXFLAGS=-std=c++11
 
   - os: linux
+    compiler: gcc
     env:
       - COMPILER_PACKAGE=g++-6
       - C_COMPILER=gcc-6
