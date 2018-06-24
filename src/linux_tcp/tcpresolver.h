@@ -194,7 +194,7 @@ public:
      *  Proceed to the next state
      *  @return TcpState *
      */
-    TcpState *proceed()
+    TcpState *proceed(const Monitor &monitor)
     {
         // do we have a valid socket?
         if (_socket >= 0) 
@@ -211,6 +211,9 @@ public:
             // report error
             _handler->onError(_connection, _error.data());
         
+            // handler callback might have destroyed connection
+            if (!monitor.valid()) return nullptr;
+
             // create dummy implementation
             return new TcpClosed(_connection, _handler);
         }
@@ -229,7 +232,7 @@ public:
         if (fd != _pipe.in() || !(flags & readable)) return this;
 
         // proceed to the next state
-        return proceed();
+        return proceed(monitor);
     }
     
     /**
@@ -243,7 +246,7 @@ public:
         _thread.join();
         
         // proceed to the next state
-        return proceed();
+        return proceed(monitor);
     }
 
     /**
@@ -262,4 +265,3 @@ public:
  *  End of namespace
  */
 }
-

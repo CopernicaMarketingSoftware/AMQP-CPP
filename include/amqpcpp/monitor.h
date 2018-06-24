@@ -64,7 +64,25 @@ public:
     Monitor(const Monitor &monitor) : _watchable(monitor._watchable)
     {
         // register with the watchable
-        _watchable->add(this);
+        if (_watchable) _watchable->add(this);
+    }
+
+    /**
+     * Assignment operator
+     * @param  monitor
+     */
+    Monitor& operator= (const Monitor &monitor)
+    {
+        // remove from watchable
+        if (_watchable) _watchable->remove(this);
+
+        // replace watchable
+        _watchable = monitor._watchable;
+
+        // register with the watchable
+        if (_watchable) _watchable->add(this);
+
+        return *this;
     }
 
     /**
