@@ -48,6 +48,13 @@ matrix:
       - COMPILER_PACKAGE=g++-7
       - C_COMPILER=gcc-7
       - CXX_COMPILER=g++-7
+      
+  - os: linux
+    compiler: gcc
+    env:
+      - COMPILER_PACKAGE=g++-8
+      - C_COMPILER=gcc-8
+      - CXX_COMPILER=g++-8
 
   ################
   # Linux / Clang
@@ -71,7 +78,7 @@ before_install:
   - uname -a
 
   # Use an artful container - gives us access to latest compilers.
-  - docker run -d --name ubuntu-test-container -v $(pwd):/travis ubuntu:artful tail -f /dev/null
+  - docker run -d --name ubuntu-test-container -v $(pwd):/travis ubuntu:bionic tail -f /dev/null
   - docker ps
 
 
