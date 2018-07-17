@@ -2,6 +2,7 @@ AMQP-CPP
 ========
 
 [![Build Status](https://travis-ci.org/CopernicaMarketingSoftware/AMQP-CPP.svg?branch=master)](https://travis-ci.org/CopernicaMarketingSoftware/AMQP-CPP)
+[![Build status](https://ci.appveyor.com/api/projects/status/7xoc4y0flm0045yy/branch/master?svg=true)](https://ci.appveyor.com/project/mvdwerve/amqp-cpp/branch/master)
 
 AMQP-CPP is a C++ library for communicating with a RabbitMQ message broker. The
 library can be used to parse incoming data from a RabbitMQ server, and to
