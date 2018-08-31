@@ -22,9 +22,9 @@ class Channel
 private:
     /**
      *  The implementation for the channel
-     *  @var    ChannelImpl
+     *  @var    std::unique_ptr<ChannelImpl>
      */
-    std::shared_ptr<ChannelImpl> _implementation;
+    std::unique_ptr<ChannelImpl> _implementation;
 
 public:
     /**
@@ -46,6 +46,12 @@ public:
      *  @param  channel
      */
     Channel(const Channel &channel) = delete;
+
+    /**
+     *  But movement _is_ allowed
+     *  @param  channel
+     */
+    Channel(Channel &&channel) : _implementation(std::move(channel._implementation)) {}
 
     /**
      *  Destructor
