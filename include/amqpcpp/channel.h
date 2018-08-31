@@ -24,7 +24,7 @@ private:
      *  The implementation for the channel
      *  @var    std::unique_ptr<ChannelImpl>
      */
-    std::unique_ptr<ChannelImpl> _implementation;
+    std::shared_ptr<ChannelImpl> _implementation;
 
 public:
     /**
