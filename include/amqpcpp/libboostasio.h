@@ -176,7 +176,7 @@ protected:
          *  @note   The handler will get called if a read is cancelled.
          */
         void read_handler(const boost::system::error_code &ec,
-                          const std::size_t bytes_transferred,
+                          const std::size_t,
                           const std::weak_ptr<Watcher> awpWatcher,
                           TcpConnection *const connection,
                           const int fd)
@@ -210,7 +210,7 @@ protected:
          *  @note   The handler will get called if a write is cancelled.
          */
         void write_handler(const boost::system::error_code ec,
-                           const std::size_t bytes_transferred,
+                           const std::size_t,
                            const std::weak_ptr<Watcher> awpWatcher,
                            TcpConnection *const connection,
                            const int fd)
