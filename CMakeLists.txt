@@ -21,7 +21,7 @@ set (SO_VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
 
 # build options
 option(AMQP-CPP_BUILD_SHARED "Build shared library. If off, build will be static." OFF)
-option(AMQP-CPP_LINUX_TCP "Build linux sockets implementation." ON)
+option(AMQP-CPP_LINUX_TCP "Build linux sockets implementation." OFF)
 option(AMQP-CPP_BUILD_EXAMPLES "Build amqpcpp examples" OFF)
 
 # ensure c++11 on all compilers

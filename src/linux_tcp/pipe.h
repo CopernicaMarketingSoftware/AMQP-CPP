@@ -82,8 +82,7 @@ public:
         char byte = 0;
         
         // send one byte over the pipe - this will wake up the other thread
-        if (write(_fds[1], &byte, 1) == -1)
-          throw std::runtime_error(strerror(errno));
+        write(_fds[1], &byte, 1);
     }
 };
 

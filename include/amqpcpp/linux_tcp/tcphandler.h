@@ -56,7 +56,7 @@ public:
      *  @param  ssl             Pointer to the SSL structure that can be inspected
      *  @return bool            True to proceed / accept the connection, false to break up
      */
-    virtual bool onSecured(TcpConnection *, const SSL *)
+    virtual bool onSecured(TcpConnection *connection, const SSL *ssl)
     {
         // default implementation: do not inspect anything, just allow the connection
         return true;
@@ -73,7 +73,7 @@ public:
      *
      *  @see ConnectionHandler::onNegotiate
      */
-    virtual uint16_t onNegotiate(TcpConnection *, uint16_t interval)
+    virtual uint16_t onNegotiate(TcpConnection *connection, uint16_t interval)
     {
         // default implementation, suggested heartbeat is ok
         return interval;
@@ -85,7 +85,7 @@ public:
      *  secure TLS connection, and the AMQP login handshake has been completed.
      *  @param  connection  The TCP connection
      */
-    virtual void onConnected(TcpConnection *) {}
+    virtual void onConnected(TcpConnection *connection) {}
 
     /**
      *  Method that is called when the server sends a heartbeat to the client
@@ -93,20 +93,20 @@ public:
      *
      *  @see    ConnectionHandler::onHeartbeat
      */
-    virtual void onHeartbeat(TcpConnection *) {}
+    virtual void onHeartbeat(TcpConnection *connection) {}
     
     /**
      *  Method that is called when the TCP connection ends up in an error state
      *  @param  connection  The TCP connection
      *  @param  message     Error message
      */
-    virtual void onError(TcpConnection *, const char *) {}
+    virtual void onError(TcpConnection *connection, const char *message) {}
     
     /**
      *  Method that is called when the TCP connection is closed
      *  @param  connection  The TCP connection
      */
-    virtual void onClosed(TcpConnection *) {}
+    virtual void onClosed(TcpConnection *connection) {}
 
     /**
      *  Monitor a filedescriptor for readability or writability
