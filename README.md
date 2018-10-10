@@ -254,7 +254,7 @@ this buffer. The code snippet below comes from the Connection.h C++ header file.
 
 ````c++
 /**
- *  Parse data that was recevied from RabbitMQ
+ *  Parse data that was received from RabbitMQ
  *
  *  Every time that data comes in from RabbitMQ, you should call this method to parse
  *  the incoming data, and let it handle by the AMQP-CPP library. This method returns
@@ -938,7 +938,7 @@ DeferredPublisher &publish(const std::string &exchange, const std::string &routi
 ````
 
 Published messages are normally not confirmed by the server, and the RabbitMQ
-will not send a report back to inform you whether the message was succesfully
+will not send a report back to inform you whether the message was successfully
 published or not. But with the flags you can instruct RabbitMQ to send back
 the message if it was undeliverable.
 
@@ -991,7 +991,7 @@ positive and negative acknowledgments handling are implemented as callbacks for 
 ````c++
 // setup confirm mode and ack/nack callbacks
 channel.confirmSelect().onSuccess([&]() {
-    // from this moment onwards ack/nack confirmations are comming in
+    // from this moment onwards ack/nack confirmations are coming in
 
     channel.publish("my-exchange", "my-key", "my first message");
     // message counter is now 1, will call onAck/onNack with deliverTag=1
