@@ -24,6 +24,8 @@ class BasicDeliverFrame;
 class BasicGetOKFrame;
 class BasicHeaderFrame;
 class BasicReturnFrame;
+class BasicAckFrame;
+class BasicNackFrame;
 class BodyFrame;
 class Channel;
 class Connection;

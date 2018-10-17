@@ -18,7 +18,7 @@
  */
 #include "tcpoutbuffer.h"
 #include "tcpinbuffer.h"
-#include "wait.h"
+#include "poll.h"
 
 /**
  *  Set up namespace
@@ -260,13 +260,13 @@ public:
     virtual TcpState *flush(const Monitor &monitor) override
     {
         // create an object to wait for the filedescriptor to becomes active
-        Wait wait(_socket);
+        Poll poll(_socket);
 
         // keep running until the out buffer is not empty
         while (_out)
         {
             // poll the socket, is it already writable?
-            if (!wait.writable()) return this;
+            if (!poll.writable(true)) return this;
             
             // socket is writable, send as much data as possible
             auto *newstate = process(monitor, _socket, writable);

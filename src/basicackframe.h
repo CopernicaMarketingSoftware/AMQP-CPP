@@ -110,6 +110,32 @@ public:
     {
         return _multiple.get(0);
     }
+
+    /**
+     *  Process the frame
+     *  @param  connection      The connection over which it was received
+     *  @return bool            Was it succesfully processed?
+     */
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // we need the appropriate channel
+        auto channel = connection->channel(this->channel());
+
+        // channel does not exist
+        if(!channel) return false;
+
+        // get the current confirm
+        auto confirm = channel->confirm();
+
+        // if there is no deferred confirm, we can just as well stop
+        if (confirm == nullptr) return false;
+
+        // process the frame
+        confirm->process(*this);
+
+        // done
+        return true;
+    }
 };
 
 /**

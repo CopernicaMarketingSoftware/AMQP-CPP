@@ -194,38 +194,29 @@ public:
      *  Proceed to the next state
      *  @return TcpState *
      */
-    TcpState *proceed()
+    TcpState *proceed(const Monitor &monitor)
     {
         // do we have a valid socket?
         if (_socket >= 0) 
         {
             // if we need a secure connection, we move to the tls handshake
-            if (_secure)
-            {
-                try
-                {
-                    return new SslHandshake(_connection, _socket, _hostname, std::move(_buffer), _handler);
-                }
-                catch (std::runtime_error &re)
-                {
-                    // report error
-                    _handler->onError(_connection, re.what());
-                }
-            }
-            else
-            {
-                // otherwise we have a valid regular tcp connection
-                return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
-            }
+            // @todo catch possible exception
+            if (_secure) return new SslHandshake(_connection, _socket, _hostname, std::move(_buffer), _handler);
+            
+            // otherwise we have a valid regular tcp connection
+            return new TcpConnected(_connection, _socket, std::move(_buffer), _handler);
         }
         else
         {
             // report error
-            _handler->onError(_connection, _error.data());        
-        }
+            _handler->onError(_connection, _error.data());
+        
+            // handler callback might have destroyed connection
+            if (!monitor.valid()) return nullptr;
 
-        // create dummy implementation
-        return new TcpClosed(_connection, _handler);
+            // create dummy implementation
+            return new TcpClosed(_connection, _handler);
+        }
     }
     
     /**
@@ -241,7 +232,7 @@ public:
         if (fd != _pipe.in() || !(flags & readable)) return this;
 
         // proceed to the next state
-        return proceed();
+        return proceed(monitor);
     }
     
     /**
@@ -255,7 +246,7 @@ public:
         _thread.join();
         
         // proceed to the next state
-        return proceed();
+        return proceed(monitor);
     }
 
     /**
@@ -274,4 +265,3 @@ public:
  *  End of namespace
  */
 }
-

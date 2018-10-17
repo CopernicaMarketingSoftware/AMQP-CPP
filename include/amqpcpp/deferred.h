@@ -5,7 +5,7 @@
  *  possibly happen in the future that can be
  *  caught.
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -97,6 +97,11 @@ protected:
      */
     virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name, uint32_t messagecount, uint32_t consumercount) const
     {
+        // make sure compilers dont complain about unused parameters
+        (void) name;
+        (void) messagecount;
+        (void) consumercount;
+
         // this is the same as a regular success message
         return reportSuccess();
     }
@@ -108,6 +113,9 @@ protected:
      */
     virtual const std::shared_ptr<Deferred> &reportSuccess(uint32_t messagecount) const
     {
+        // make sure compilers dont complain about unused parameters
+        (void) messagecount;
+
         // this is the same as a regular success message
         return reportSuccess();
     }
@@ -121,6 +129,11 @@ protected:
      */
     virtual const std::shared_ptr<Deferred> &reportSuccess(uint32_t messagecount, uint64_t deliveryTag, bool redelivered)
     {
+        // make sure compilers dont complain about unused parameters
+        (void) messagecount;
+        (void) deliveryTag;
+        (void) redelivered;
+
         // this is the same as a regular success message
         return reportSuccess();
     }
@@ -132,6 +145,9 @@ protected:
      */
     virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name)
     {
+        // make sure compilers dont complain about unused parameters
+        (void) name;
+
         // this is the same as a regular success message
         return reportSuccess();
     }

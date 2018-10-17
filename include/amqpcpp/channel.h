@@ -22,7 +22,7 @@ class Channel
 private:
     /**
      *  The implementation for the channel
-     *  @var    ChannelImpl
+     *  @var    std::unique_ptr<ChannelImpl>
      */
     std::shared_ptr<ChannelImpl> _implementation;
 
@@ -46,6 +46,12 @@ public:
      *  @param  channel
      */
     Channel(const Channel &channel) = delete;
+
+    /**
+     *  But movement _is_ allowed
+     *  @param  channel
+     */
+    Channel(Channel &&channel) : _implementation(std::move(channel._implementation)) {}
 
     /**
      *  Destructor
@@ -125,6 +131,17 @@ public:
     bool connected()
     {
         return _implementation->connected();
+    }
+
+    /**
+     *  Put channel in a confirm mode (RabbitMQ specific)
+     *
+     *  This function returns a deferred handler. Callbacks can be installed
+     *  using onSuccess(), onError() and onFinalize() methods.
+     */
+    DeferredConfirm &confirmSelect()
+    {
+        return _implementation->confirmSelect();
     }
 
     /**

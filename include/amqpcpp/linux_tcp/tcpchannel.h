@@ -38,6 +38,18 @@ public:
      *  Destructor
      */
     virtual ~TcpChannel() {}
+
+    /**
+     *  Copying is not allowed.
+     *  @param  other
+     */
+    TcpChannel(const TcpChannel &other) = delete;
+
+    /**
+     *  But movement is allowed
+     *  @param  other
+     */
+    TcpChannel(TcpChannel &&other) = default;
 };
 
 /**

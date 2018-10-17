@@ -103,6 +103,19 @@ public:
         // allow chaining
         return *this;
     }
+    
+    /**
+     *  Register a function to be called when an error occurs. This should be defined, otherwise the base methods are used.
+     *  @param  callback
+     */
+    DeferredGet &onError(const ErrorCallback &callback)
+    {
+        // store the callback
+        _errorCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
 
     /**
      *  Register a function to be called when a message arrives

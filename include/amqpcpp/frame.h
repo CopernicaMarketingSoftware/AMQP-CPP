@@ -4,7 +4,7 @@
  *  Base class for frames. This base class can not be constructed from outside
  *  the library, and is only used internally.
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -90,6 +90,9 @@ public:
      */
     virtual bool process(ConnectionImpl *connection)
     {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+
         // this is an exception
         throw ProtocolException("unimplemented frame");
 

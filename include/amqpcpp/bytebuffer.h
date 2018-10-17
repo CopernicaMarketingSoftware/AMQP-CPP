@@ -5,7 +5,7 @@
  *  around a buffer of bytes
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -114,6 +114,10 @@ public:
      */
     virtual const char *data(size_t pos, size_t size) const override
     {
+        // make sure compilers dont complain about unused parameters
+        (void) size;
+        
+        // expose the data
         return _data + pos;
     }
     

@@ -66,19 +66,29 @@ void TcpConnection::process(int fd, int flags)
     // monitor the object for destruction, because you never know what the user
     Monitor monitor(this);
 
+    // store the old state
+    auto *oldstate = _state.get();
+
     // pass on the the state, that returns a new impl
-    auto *result = _state->process(monitor, fd, flags);
+    auto *newstate = _state->process(monitor, fd, flags);
 
-    // are we still valid
-    if (!monitor.valid()) return;
+    // if the state did not change, we do not have to update a member,
+    // when the newstate is nullptr, the object is (being) destructed
+    // and we do not have to do anything else either
+    if (oldstate == newstate || newstate == nullptr) return;
 
-    // skip if the same state is continued to be used, or when the process()
-    // method returns nullptr (which only happens when the object is destructed,
-    // and "this" is no longer valid)
-    if (!result || result == _state.get()) return;
-
-    // replace it with the new implementation
-    _state.reset(result);
+    // in a bizarre set of circumstances, the user may have implemented the
+    // handler in such a way that the connection object was destructed
+    if (!monitor.valid()) 
+    {
+        // ok, user code is weird, connection object no longer exist, get rid of the state too
+        delete newstate;
+    }
+    else
+    {
+        // replace it with the new implementation
+        _state.reset(newstate);
+    }
 }
 
 /**
