@@ -378,8 +378,8 @@ class MyTcpHandler : public AMQP::TcpHandler
 ````
 
 The "monitor()" method can be used to integrate the AMQP filedescriptors in your
-application's event loop. For some popular event loops (libev, libevent), we have
-already added example handler objects (see the next section for that).
+application's event loop. For some popular event loops (libev, libuv, libevent), we 
+have already added example handler objects (see the next section for that).
 
 Using the TCP module of the AMQP-CPP library is easier than using the
 raw AMQP::Connection and AMQP::Channel objects, because you do not have to
@@ -501,9 +501,10 @@ call), or if you use an existing library for it (like libevent, libev or libuv),
 you can implement the "monitor()" method to watch the file descriptors and
 hand over control back to AMQP-CPP when one of the sockets become active.
 
-For libev and libevent users, we have even implemented an example implementation,
-so that you do not even have to do this. Instead of implementing the monitor() method
-yourself, you can use the AMQP::LibEvHandler or AMQP:LibEventHandler classes instead:
+For libev, libuv and libevent users, we have even implemented an example 
+implementation, so that you do not even have to do this. Instead of implementing 
+the monitor() method yourself, you can use the AMQP::LibEvHandler, 
+AMQP::LibUvHandler or AMQP:LibEventHandler classes instead:
 
 ````c++
 #include <ev.h>
@@ -544,21 +545,23 @@ int main()
 
 The AMQP::LibEvHandler and AMQP::LibEventHandler classes are extended AMQP::TcpHandler
 classes, with an implementation of the monitor() method that simply adds the
-filedescriptor to the event loop. If you use this class however, it is recommended not to
+filedescriptor to the event loop. If you use this class, it is recommended not to
 instantiate it directly (like we did in the example), but to create your own
 "MyHandler" class that extends from it, and in which you also implement the
 onError() method to report possible connection errors to your end users.
 
-Currently, we have example TcpHandler implementations for libev,
-libevent, and Boost's asio. For other event loops (like libuv) we do not yet have
-such examples.
+Currently, we have example TcpHandler implementations for libev, libuv,
+libevent, and Boost's asio. For other event loops we do not yet have
+such examples. The quality of the libboostasio is however debatable: it was
+not developed and is not maintained by the original AMQP-CPP developers, and 
+it has a couple of open issues.
 
-| TCP Handler Impl        | Header File Location   |  Sample File Location |
-| ----------------------- | ---------------------- | --------------------- |
-| Boost asio (io_service) | include/libboostasio.h | tests/libboostasio.cpp |  
-| libev                   | include/libev.h        | tests/libev.cpp       |
-| libevent                | include/libevent.h     | tests/libevent.cpp    |
-| libuv                   | include/libuv.h        |  (Not available)      |
+| TCP Handler Impl        | Header File Location   |  Sample File Location     |
+| ----------------------- | ---------------------- | ------------------------- |
+| Boost asio (io_service) | include/libboostasio.h | examples/libboostasio.cpp |  
+| libev                   | include/libev.h        | examples/libev.cpp        |
+| libevent                | include/libevent.h     | examples/libevent.cpp     |
+| libuv                   | include/libuv.h        | examples/libuv.cpp        |
 
 HEARTBEATS
 ==========
