@@ -31,7 +31,7 @@ set (CMAKE_CXX_STANDARD 11)
 # ------------------------------------------------------------------------------------------------------
 
 # set include/ as include directory
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # macro that adds a list of provided source files to a list called SRCS.
 # if variable SRCS does not yet exist, it is created.
@@ -115,3 +115,14 @@ set(PRIVATE_LIBS "-llibamqpcc")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/amqpcpp.pc" @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/amqpcpp.pc" DESTINATION lib/pkgconfig)
+
+# submodule support
+# ------------------------------------------------------------------------------------------------------
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
+    $<INSTALL_INTERFACE:include/>
+)
+
+if(AMQP-CPP_LINUX_TCP)
+    target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS})
+endif()
