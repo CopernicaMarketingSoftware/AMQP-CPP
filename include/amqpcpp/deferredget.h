@@ -38,9 +38,9 @@ private:
 
     /**
      *  Callback with the number of messages still in the queue
-     *  @var    SizeCallback
+     *  @var    CountCallback
      */
-    SizeCallback _countCallback;
+    CountCallback _countCallback;
 
     /**
      *  Report success for a get operation
@@ -162,7 +162,7 @@ public:
      *  Register a function to be called when queue size information is known
      *  @param  callback    the callback to execute
      */
-    DeferredGet &onCount(const SizeCallback &callback)
+    DeferredGet &onCount(const CountCallback &callback)
     {
         // store callback
         _countCallback = callback;
