@@ -117,6 +117,24 @@ public:
     virtual TcpState *flush(const Monitor &monitor) { return this; }
 
     /**
+     *  Report to the handler that the connection was constructed
+     */
+    virtual void reportAttached()
+    {
+        // pass to the handler
+        _handler->onAttached(_connection);
+    }
+
+    /**
+     *  Report to the handler that the connection was destructed
+     */
+    virtual void reportDetached()
+    {
+        // pass to the handler
+        _handler->onDetached(_connection);
+    }
+
+    /**
      *  Report to the handler that heartbeat negotiation is going on
      *  @param  heartbeat   suggested heartbeat
      *  @return uint16_t    accepted heartbeat

@@ -43,6 +43,18 @@ private:
      *  @var    Connection
      */
     Connection _connection;
+    
+    /**
+     *  Method that is called after the connection was constructed
+     *  @param  connection      The connection that was attached to the handler
+     */
+    virtual void onAttached(Connection *connection) override;
+
+    /**
+     *  Method that is called when the connection is destructed
+     *  @param  connection      The connection that was detached from the handler
+     */
+    virtual void onDetached(Connection *connection) override;
 
     /**
      *  Method that is called when the heartbeat frequency is negotiated.

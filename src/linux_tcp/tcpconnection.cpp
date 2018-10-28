@@ -117,6 +117,26 @@ void TcpConnection::flush()
 }
 
 /**
+ *  Method that is called after the connection was constructed
+ *  @param  connection      The connection that was attached to the handler
+ */
+void TcpConnection::onAttached(Connection *connection)
+{
+    // pass on to the state
+    _state->reportAttached();
+}
+
+/**
+ *  Method that is called when the connection is destructed
+ *  @param  connection      The connection that was detached from the handler
+ */
+void TcpConnection::onDetached(Connection *connection)
+{
+    // pass on to the state
+    _state->reportDetached();
+}
+
+/**
  *  Method that is called when the heartbeat frequency is negotiated.
  *  @param  connection      The connection that suggested a heartbeat interval
  *  @param  interval        The suggested interval from the server

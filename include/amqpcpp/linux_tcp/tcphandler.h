@@ -41,6 +41,30 @@ public:
     virtual ~TcpHandler() = default;
 
     /**
+     *  Method that is called immediately after a connection has been constructed. 
+     *  @param  connection      The connection object that was just constructed
+     * 
+     *  @see    ConnectionHandler::onAttached
+     */
+    virtual void onAttached(TcpConnection *connection)
+    {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+    }
+    
+    /**
+     *  Method that is called right before a connection object is destructed.
+     *  @param  connection      The connection that is being destructed
+     * 
+     *  @see    ConnectionHandler::onDetached
+     */
+    virtual void onDetached(TcpConnection *connection)
+    {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+    }
+
+    /**
      *  Method that is called after a TCP connection has been set up and the initial 
      *  TLS handshake is finished too, but right before the AMQP login handshake is
      *  going to take place and the first data is going to be sent over the connection. 
