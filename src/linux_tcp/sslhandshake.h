@@ -52,6 +52,28 @@ private:
     
     
     /**
+     *  Close the socket
+     *  @return bool
+     */
+    bool close()
+    {
+        // do nothing if already closed
+        if (_socket < 0) return false;
+        
+        // and stop monitoring it
+        _handler->monitor(_connection, _socket, 0);
+
+        // close the socket
+        ::close(_socket);
+        
+        // forget filedescriptor
+        _socket = -1;
+        
+        // done
+        return true;
+    }
+    
+    /**
      *  Report a new state
      *  @param  monitor
      *  @return TcpState
@@ -90,14 +112,8 @@ private:
      */
     TcpState *reportError(const Monitor &monitor)
     {
-        // we are no longer interested in any events for this socket
-        _handler->monitor(_connection, _socket, 0);
-        
         // close the socket
-        close(_socket);
-        
-        // forget filedescriptor
-        _socket = -1;
+        close();
         
         // we have an error - report this to the user
         _handler->onError(_connection, "failed to setup ssl connection");
@@ -162,8 +178,9 @@ public:
         // leap out if socket is invalidated
         if (_socket < 0) return;
         
-        // the object got destructed without moving to a new state, this is normally
-        close(_socket);
+        // the object got destructed without moving to a new state, this 
+        // situation should normally not occur
+        ::close(_socket);
     }
 
     /**
@@ -256,6 +273,24 @@ public:
             default: return reportError(monitor);
             }
         }
+    }
+
+    /**
+     *  Close the connection immediately
+     *  @param  monitor     object to check if connection object is still active
+     *  @return TcpState    the new state
+     */
+    virtual TcpState *abort(const Monitor &monitor) override
+    {
+        // close the socket
+        close();
+        
+        // report to the user that the handshake was aborted
+        _handler->onError(_connection, "ssl handshake aborted");
+        
+        // done, go to the closed state (plus check if connection still exists, because
+        // after the onError() call the user space program may have destructed that object)
+        return monitor.valid() ? new TcpClosed(this) : nullptr;
     }
 };
     

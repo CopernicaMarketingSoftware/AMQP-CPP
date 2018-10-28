@@ -156,16 +156,15 @@ public:
     void flush();
     
     /**
-     *  Close the connection
-     *  This closes all channels and the TCP connection
+     *  Close the connection in an elegant fashion. This closes all channels and the 
+     *  TCP connection. Note that the connection is not immediately closed: first all
+     *  pending operations are completed, and then an AMQP closing-handshake is
+     *  performed. If you pass a parameter "immediate=true" the connection is 
+     *  immediately closed, without waiting for earlier commands
      *  @return bool
      */
-    bool close()
-    {
-        // pass to the underlying connection
-        return _connection.close();
-    }
-
+    bool close(bool immediate = false);
+    
     /**
      *  The max frame size. Useful if you set up a buffer to parse incoming data: it does not have to exceed this size.
      *  @return uint32_t

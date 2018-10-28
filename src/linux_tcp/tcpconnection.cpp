@@ -117,6 +117,52 @@ void TcpConnection::flush()
 }
 
 /**
+ *  Close the connection
+ *  @return bool
+ */
+bool TcpConnection::close(bool immediate)
+{
+    // if no immediate disconnect is needed, we can simply start the closing handshake
+    if (!immediate) return _connection.close();
+    
+    // a call to user-space will be made, so we need to monitor if "this" is destructed
+    Monitor monitor(this);
+
+    // pass to the underlying connection to start the amqp-closing handshake
+    _connection.close();
+    
+    // if the user-space code destructed the connection, there is nothing else to do
+    if (!monitor.valid()) return true;
+
+    // store the old state
+    auto *oldstate = _state.get();
+    
+    // abort the operation
+    auto *newstate = _state->abort(monitor);
+
+    // if the state did not change, we do not have to update a member,
+    // when the newstate is nullptr, the object is (being) destructed
+    // and we do not have to do anything else either
+    if (oldstate == newstate || newstate == nullptr) return true;
+    
+    // in a bizarre set of circumstances, the user may have implemented the
+    // handler in such a way that the connection object was destructed
+    if (!monitor.valid()) 
+    {
+        // ok, user code is weird, connection object no longer exist, get rid of the state too
+        delete newstate;
+    }
+    else
+    {
+        // replace it with the new implementation
+        _state.reset(newstate);
+    }
+    
+    // done, we return true because the connection is closed
+    return true;
+}
+
+/**
  *  Method that is called after the connection was constructed
  *  @param  connection      The connection that was attached to the handler
  */

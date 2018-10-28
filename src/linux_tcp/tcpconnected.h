@@ -278,6 +278,29 @@ public:
         // all has been sent
         return this;
     }
+    
+    /**
+     *  Close the connection immediately
+     *  @param  monitor     object to check if connection object is still active
+     *  @return TcpState    the new state
+     */
+    virtual TcpState *abort(const Monitor &monitor) override
+    {
+        // if we have already told user space that connection is gone
+        if (_finalized) return new TcpClosed(this);
+        
+        // object will be finalized now
+        _finalized = true;
+        
+        // close the connection
+        close();
+        
+        // inform user space that the party is over
+        _handler->onError(_connection, "tcp connection terminated");
+        
+        // go to the final state (if not yet disconnected)
+        return monitor.valid() ? new TcpClosed(this) : nullptr;
+    }
 
     /**
      *  Report that heartbeat negotiation is going on
