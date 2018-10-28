@@ -105,7 +105,7 @@ private:
                 _socket = socket(addresses[i]->ai_family, addresses[i]->ai_socktype, addresses[i]->ai_protocol);
                 
                 // move on on failure
-                if (_socket < -1) continue;
+                if (_socket < 0) continue;
                 
                 // connect to the socket
                 if (connect(_socket, addresses[i]->ai_addr, addresses[i]->ai_addrlen) == 0) break;
