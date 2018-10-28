@@ -40,12 +40,44 @@ public:
     *  Destructor
     */
     virtual ~ConnectionHandler() = default;
+    
+    /**
+     *  Method that is called immediately after a connection has been attached 
+     *  to the handler. This method is called right after the connection object
+     *  was constructed. You can override this method if you want to initialize
+     *  your handler for this specific connection. This is especially useful if 
+     *  you use your handler to deal with multiple connections, and cannot use 
+     *  the constructor for initialization.
+     * 
+     *  @param  connection      The connection object that was just constructed
+     */
+    virtual void onAttached(Connection *connection)
+    {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+    }
+    
+    /**
+     *  Method that is called right before a connection object is destructed.
+     *  This is the counterpart of the onAttached() method.
+     * 
+     *  Wacht out: the connection object that is passed to this method is in 
+     *  the process of being destructed, which makes it unsafe to call any 
+     *  methods on it.
+     *  
+     *  @param  connection      The connection that is being destructed
+     */
+    virtual void onDetached(Connection *connection)
+    {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+    }
 
     /**
      *  Method that is called when the heartbeat frequency is negotiated
-     *  between the server and the client. You normally do not have to
-     *  override this method, because in the default implementation the
-     *  suggested heartbeat is simply accepted by the client.
+     *  between the server and the client durion connection setup. You 
+     *  normally do not have to override this method, because in the default 
+     *  implementation the suggested heartbeat is simply accepted by the client.
      *
      *  However, if you want to disable heartbeats, or when you want an
      *  alternative heartbeat interval, you can override this method
@@ -121,9 +153,9 @@ public:
 
     /**
      *  Method that is called when the login attempt succeeded. After this method
-     *  is called, the connection is ready to use. This is the first method
-     *  that is normally called after you've constructed the connection object.
-     *
+     *  is called, the connection is ready to use, and the RabbitMQ server is
+     *  ready to receive instructions.
+     * 
      *  According to the AMQP protocol, you must wait for the connection to become
      *  ready (and this onConnected method to be called) before you can start
      *  using the Connection object. However, this AMQP library will cache all
