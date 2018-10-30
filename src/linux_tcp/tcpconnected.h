@@ -93,9 +93,6 @@ private:
         // some errors are ok and do not (necessarily) mean that we're disconnected
         if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) return false;
         
-        // connection can be closed now
-        close();
-        
         // if the user has already been notified, we do not have to do anything else
         if (_finalized) return true;
         
@@ -105,6 +102,9 @@ private:
         
         // we have an error - report this to the user
         _handler->onError(_connection, strerror(errno));
+        
+        // connection can be closed now
+        close();
         
         // done
         return true;
