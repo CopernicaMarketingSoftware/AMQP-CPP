@@ -1,7 +1,7 @@
 /**
  *  Class describing a mid-level Amqp connection
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -145,6 +145,27 @@ public:
     uint64_t parse(const Buffer &buffer)
     {
         return _implementation.parse(buffer);
+    }
+    
+    /**
+     *  Report that the connection was lost in the middle of an operation
+     * 
+     *  The AMQP protocol normally has a nice closing handshake, and a connection 
+     *  is elegantly closed via calls to the close() and parse() methods. The parse() 
+     *  methods recognizes the close-confirmation and will report this to the handler. 
+     *  However, if you notice yourself that the connection is lost in the middle of 
+     *  an operation (for example due to a crashing RabbitMQ server), you should 
+     *  explicitly tell the connection object about it, so that it can cancel all 
+     *  pending operations. For all pending operations the error and finalize callbacks
+     *  will be called. The ConnectionHandler::onError() method will however _not_ be
+     *  called.
+     * 
+     *  @param  message     the message that has to be passed to all error handlers
+     *  @return bool
+     */
+    bool fail(const char *message)
+    {
+        return _implementation.fail(message);
     }
     
     /**

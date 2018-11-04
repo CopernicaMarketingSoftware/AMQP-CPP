@@ -18,6 +18,7 @@
  */
 #include "tcpoutbuffer.h"
 #include "tcpinbuffer.h"
+#include "tcpshutdown.h"
 #include "poll.h"
 
 /**
@@ -28,15 +29,9 @@ namespace AMQP {
 /**
  *  Class definition
  */
-class TcpConnected : public TcpState, private Watchable
+class TcpConnected : public TcpExtState
 {
 private:
-    /**
-     *  The socket file descriptor
-     *  @var int
-     */
-    int _socket;
-    
     /**
      *  The outgoing buffer
      *  @var TcpOutBuffer
@@ -63,48 +58,36 @@ private:
 
     
     /**
-     *  Close the connection
-     *  @return bool
+     *  Start an elegant shutdown
+     * 
+     *  @todo remove this method
      */
-    bool close()
+    void shutdown2()
     {
-        // do nothing if already closed
-        if (_socket < 0) return false;
+        // we will shutdown the socket in a very elegant way, we notify the peer 
+        // that we will not be sending out more write operations
+        ::shutdown(_socket, SHUT_WR);
         
-        // and stop monitoring it
-        _handler->monitor(_connection, _socket, 0);
-
-        // close the socket
-        ::close(_socket);
-        
-        // forget filedescriptor
-        _socket = -1;
-        
-        // done
-        return true;
+        // we still monitor the socket for readability to see if our close call was
+        // confirmed by the peer
+        _parent->onIdle(this, _socket, readable);
     }
     
     /**
      *  Helper method to report an error
+     *  @param  monitor     Monitor to check validity of "this"
      *  @return bool        Was an error reported?
      */
-    bool reportError()
+    bool reportError(const Monitor &monitor)
     {
         // some errors are ok and do not (necessarily) mean that we're disconnected
         if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) return false;
-        
-        // connection can be closed now
-        close();
-        
-        // if the user has already been notified, we do not have to do anything else
-        if (_finalized) return true;
-        
-        // update the _finalized member before we make the call to user space because
-        // the user space may destruct this object
-        _finalized = true;
-        
-        // we have an error - report this to the user
-        _handler->onError(_connection, strerror(errno));
+
+        // tell the connection that it failed
+        // @todo we should report an error, but that could be wrong, because it calls back to us
+
+        // we're no longer interested in the socket (this also calls onClosed())
+        cleanup();
         
         // done
         return true;
@@ -125,14 +108,11 @@ private:
 public:
     /**
      *  Constructor
-     *  @param  connection  Parent TCP connection object
-     *  @param  socket      The socket filedescriptor
+     *  @param  state       The previous state
      *  @param  buffer      The buffer that was already built
-     *  @param  handler     User-supplied handler object
      */
-    TcpConnected(TcpConnection *connection, int socket, TcpOutBuffer &&buffer, TcpHandler *handler) : 
-        TcpState(connection, handler),
-        _socket(socket),
+    TcpConnected(TcpExtState *state, TcpOutBuffer &&buffer) : 
+        TcpExtState(state),
         _out(std::move(buffer)),
         _in(4096)
     {
@@ -140,17 +120,13 @@ public:
         if (_out) _out.sendto(_socket);
         
         // tell the handler to monitor the socket, if there is an out
-        _handler->monitor(_connection, _socket, _out ? readable | writable : readable);
+        _parent->onIdle(this, _socket, _out ? readable | writable : readable);
     }
     
     /**
      *  Destructor
      */
-    virtual ~TcpConnected() noexcept
-    {
-        // close the socket
-        close();
-    }
+    virtual ~TcpConnected() noexcept = default;
 
     /**
      *  The filedescriptor of this connection
@@ -183,28 +159,30 @@ public:
             auto result = _out.sendto(_socket);
             
             // are we in an error state?
-            if (result < 0 && reportError()) return nextState(monitor);
+            if (result < 0 && reportError(monitor)) return nextState(monitor);
             
             // if buffer is empty by now, we no longer have to check for 
             // writability, but only for readability
-            if (!_out) _handler->monitor(_connection, _socket, readable);
+            if (!_out) _parent->onIdle(this, _socket, readable);
         }
         
         // should we check for readability too?
         if (flags & readable)
         {
             // read data from buffer
-            ssize_t result = _in.receivefrom(_socket, _connection->expected());
+            ssize_t result = _in.receivefrom(_socket, _parent->expected());
             
             // are we in an error state?
-            if (result < 0 && reportError()) return nextState(monitor);
+            if (result < 0 && reportError(monitor)) return nextState(monitor);
+            
+            // @todo should we also check for result == 0
 
             // we need a local copy of the buffer - because it is possible that "this"
             // object gets destructed halfway through the call to the parse() method
             TcpInBuffer buffer(std::move(_in));
             
             // parse the buffer
-            auto processed = _connection->parse(buffer);
+            auto processed = _parent->onReceived(this, buffer);
 
             // "this" could be removed by now, check this
             if (!monitor.valid()) return nullptr;
@@ -249,7 +227,7 @@ public:
         _out.add(buffer + bytes, size - bytes);
         
         // start monitoring the socket to find out when it is writable
-        _handler->monitor(_connection, _socket, readable | writable);
+        _parent->onIdle(this, _socket, readable | writable);
     }
     
     /**
@@ -286,77 +264,55 @@ public:
      */
     virtual TcpState *abort(const Monitor &monitor) override
     {
-        // if we have already told user space that connection is gone
-        if (_finalized) return new TcpClosed(this);
+        // close the connection right now
+        if (!close(monitor)) return nullptr;
         
-        // object will be finalized now
-        _finalized = true;
-        
-        // close the connection
-        close();
-        
-        // inform user space that the party is over
-        _handler->onError(_connection, "tcp connection terminated");
+        // fail the connection (this ends up in our reportError() method)
+        // @todo should this not happen 
+        //_connection->fail();
         
         // go to the final state (if not yet disconnected)
         return monitor.valid() ? new TcpClosed(this) : nullptr;
     }
 
     /**
-     *  Report that heartbeat negotiation is going on
-     *  @param  heartbeat   suggested heartbeat
-     *  @return uint16_t    accepted heartbeat
+     *  When the AMQP transport layer is closed
+     *  @param  monitor     Object that can be used if connection is still alive
+     *  @return TcpState    New implementation object
      */
-    virtual uint16_t reportNegotiate(uint16_t heartbeat) override
+    virtual TcpState *onAmqpClosed(const Monitor &monitor) override
+    {
+        // move to the tcp shutdown state
+        return new TcpShutdown(this);
+    }
+
+    /**
+     *  When an error occurs in the AMQP protocol
+     *  @param  monitor     Monitor that can be used to check if the connection is still alive
+     *  @param  message     The error message
+     *  @return TcpState    New implementation object
+     */
+    virtual TcpState *onAmqpError(const Monitor &monitor, const char *message) override
+    {
+        // tell the user about it
+        // @todo do this somewhere else
+        //_handler->onError(_connection, message);
+        
+        // stop if the object was destructed
+        if (!monitor.valid()) return nullptr;
+        
+        // move to the tcp shutdown state
+        return new TcpShutdown(this);
+    }
+
+    /**
+     *  Install max-frame size
+     *  @param  heartbeat   suggested heartbeat
+     */
+    virtual void maxframe(size_t maxframe) override
     {
         // remember that we have to reallocate (_in member can not be accessed because it is moved away)
-        _reallocate = _connection->maxFrame();
-        
-        // pass to base
-        return TcpState::reportNegotiate(heartbeat);
-    }
-
-    /**
-     *  Report to the handler that the object is in an error state.
-     *  @param  error
-     */
-    virtual void reportError(const char *error) override
-    {
-        // close the socket
-        close();
-        
-        // if the user was already notified of an final state, we do not have to proceed
-        if (_finalized) return;
-        
-        // remember that this is the final call to user space
-        _finalized = true;
-        
-        // pass to handler
-        _handler->onError(_connection, error);
-    }
-
-    /**
-     *  Report to the handler that the connection was nicely closed
-     *  This is the counter-part of the connection->close() call.
-     */
-    virtual void reportClosed() override
-    {
-        // we will shutdown the socket in a very elegant way, we notify the peer 
-        // that we will not be sending out more write operations
-        shutdown(_socket, SHUT_WR);
-        
-        // we still monitor the socket for readability to see if our close call was
-        // confirmed by the peer
-        _handler->monitor(_connection, _socket, readable);
-
-        // if the user was already notified of an final state, we do not have to proceed
-        if (_finalized) return;
-        
-        // remember that this is the final call to user space
-        _finalized = true;
-        
-        // pass to handler
-        _handler->onClosed(_connection);
+        _reallocate = maxframe;
     }
 };
     

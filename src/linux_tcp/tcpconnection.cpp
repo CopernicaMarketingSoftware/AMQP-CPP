@@ -25,7 +25,8 @@ namespace AMQP {
  *  @param  hostname        The address to connect to
  */
 TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
-    _state(new TcpResolver(this, address.hostname(), address.port(), address.secure(), handler)),
+    _handler(handler),
+    _state(new TcpResolver(this, address.hostname(), address.port(), address.secure())),
     _connection(this, address.login(), address.vhost()) {}
 
 /**
@@ -65,7 +66,7 @@ void TcpConnection::process(int fd, int flags)
 {
     // monitor the object for destruction, because you never know what the user
     Monitor monitor(this);
-
+        
     // store the old state
     auto *oldstate = _state.get();
 
@@ -122,6 +123,8 @@ void TcpConnection::flush()
  */
 bool TcpConnection::close(bool immediate)
 {
+    // @todo what if not yet connected / still doing a lookup?
+    
     // if no immediate disconnect is needed, we can simply start the closing handshake
     if (!immediate) return _connection.close();
     
@@ -134,52 +137,27 @@ bool TcpConnection::close(bool immediate)
     // if the user-space code destructed the connection, there is nothing else to do
     if (!monitor.valid()) return true;
 
-    // store the old state
+    // remember the old state (this is necessary because _state may be modified by user-code)
     auto *oldstate = _state.get();
-    
+
     // abort the operation
+    // @todo does this call user-space stuff?
     auto *newstate = _state->abort(monitor);
 
     // if the state did not change, we do not have to update a member,
     // when the newstate is nullptr, the object is (being) destructed
     // and we do not have to do anything else either
-    if (oldstate == newstate || newstate == nullptr) return true;
+    if (newstate == nullptr || newstate == oldstate) return true;
     
-    // in a bizarre set of circumstances, the user may have implemented the
-    // handler in such a way that the connection object was destructed
-    if (!monitor.valid()) 
-    {
-        // ok, user code is weird, connection object no longer exist, get rid of the state too
-        delete newstate;
-    }
-    else
-    {
-        // replace it with the new implementation
-        _state.reset(newstate);
-    }
+    // replace it with the new implementation
+    _state.reset(newstate);
+    
+    // fail the connection / report the error to user-space
+    // @todo what if channels are not even ready?
+    _connection.fail("connection prematurely closed by client");
     
     // done, we return true because the connection is closed
     return true;
-}
-
-/**
- *  Method that is called after the connection was constructed
- *  @param  connection      The connection that was attached to the handler
- */
-void TcpConnection::onAttached(Connection *connection)
-{
-    // pass on to the state
-    _state->reportAttached();
-}
-
-/**
- *  Method that is called when the connection is destructed
- *  @param  connection      The connection that was detached from the handler
- */
-void TcpConnection::onDetached(Connection *connection)
-{
-    // pass on to the state
-    _state->reportDetached();
 }
 
 /**
@@ -190,8 +168,11 @@ void TcpConnection::onDetached(Connection *connection)
  */
 uint16_t TcpConnection::onNegotiate(Connection *connection, uint16_t interval)
 {
-    // the state object should do this
-    return _state->reportNegotiate(interval);
+    // tell the max-frame size
+    _state->maxframe(connection->maxFrame());
+    
+    // tell the handler
+    return _handler->onNegotiate(this, interval);
 }
 
 /**
@@ -207,34 +188,26 @@ void TcpConnection::onData(Connection *connection, const char *buffer, size_t si
 }
 
 /**
- *  Method that is called when the server sends a heartbeat to the client
- *  @param  connection      The connection over which the heartbeat was received
- */
-void TcpConnection::onHeartbeat(Connection *connection)
-{
-    // let the state object do this
-    _state->reportHeartbeat();
-}
-
-/**
  *  Method called when the connection ends up in an error state
  *  @param  connection      The connection that entered the error state
  *  @param  message         Error message
  */
 void TcpConnection::onError(Connection *connection, const char *message)
 {
-    // tell the implementation to report the error
-    _state->reportError(message);
-}
-
-/**
- *  Method that is called when the connection is established
- *  @param  connection      The connection that can now be used
- */
-void TcpConnection::onConnected(Connection *connection)
-{
-    // tell the implementation to report the status
-    _state->reportConnected();
+    // monitor to check if "this" is destructed
+    Monitor monitor(this);
+    
+    // remember the old state (this is necessary because _state may be modified by user-code)
+    auto *oldstate = _state.get();
+    
+    // tell the state that an error occured at the amqp level
+    auto *newstate = _state->onAmqpError(monitor, message);
+    
+    // leap out if nothing changes
+    if (newstate == nullptr || newstate == oldstate) return;
+    
+    // assign the new state
+    _state.reset(newstate);
 }
 
 /**
@@ -243,8 +216,20 @@ void TcpConnection::onConnected(Connection *connection)
  */
 void TcpConnection::onClosed(Connection *connection)
 {
-    // tell the implementation to report that connection is closed now
-    _state->reportClosed();
+    // monitor to check if "this" is destructed
+    Monitor monitor(this);
+
+    // remember the old state (this is necessary because _state may be modified by user-code)
+    auto *oldstate = _state.get();
+    
+    // tell the state that the connection was closed at the amqp level
+    auto *newstate = _state->onAmqpClosed(monitor);
+    
+    // leap out if nothing changes
+    if (newstate == nullptr || newstate == oldstate) return;
+    
+    // assign the new state
+    _state.reset(newstate);
 }
 
 /**

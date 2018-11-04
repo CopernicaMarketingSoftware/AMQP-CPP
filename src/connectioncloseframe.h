@@ -1,7 +1,7 @@
 /**
  *  Class describing connection close frame
  *  
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -81,10 +81,10 @@ public:
      *  @param  failingClass    id of the failing class if applicable
      *  @param  failingMethod   id of the failing method if applicable
      */
-    ConnectionCloseFrame(uint16_t code, const std::string &text, uint16_t failingClass = 0, uint16_t failingMethod = 0) :
+    ConnectionCloseFrame(uint16_t code, std::string text, uint16_t failingClass = 0, uint16_t failingMethod = 0) :
         ConnectionFrame((uint32_t)(text.length() + 7)), // 1 for extra string byte, 2 for each uint16
         _code(code),
-        _text(text),
+        _text(std::move(text)),
         _failingClass(failingClass),
         _failingMethod(failingMethod)
     {}

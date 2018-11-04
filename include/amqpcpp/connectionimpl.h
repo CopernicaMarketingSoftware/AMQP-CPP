@@ -5,7 +5,7 @@
  *  constructed by the connection class itselves and that has all sorts of
  *  methods that are only useful inside the library
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -70,7 +70,8 @@ protected:
     } _state = state_protocol;
 
     /**
-     *  Has the close() method been called?
+     *  Has the close() method been called? If this is true, we automatically
+     *  send a close-frame after all pending operations are finsihed.
      *  @var    bool
      */
     bool _closed = false;
@@ -148,6 +149,14 @@ protected:
      *  @return bool
      */
     bool waiting() const;
+    
+    /**
+     *  Helper method for the fail() method
+     *  @param  monitor
+     *  @param  message
+     *  @return bool
+     */
+    bool fail(const Monitor &monitor, const char *message);
 
 private:
     /**
@@ -327,8 +336,17 @@ public:
     uint64_t parse(const Buffer &buffer);
 
     /**
+     *  Fail all pending - this can be called by user-space when it is recognized that the 
+     *  underlying connection is lost. All error-handlers for all operations and open
+     *  channels will be called. This will _not_ call ConnectionHandler::onError() method.
+     *  
+     *  @return bool
+     */
+    bool fail(const char *message);
+
+    /**
      *  Close the connection
-     *  This will close all channels
+     *  This will also close all channels
      *  @return bool
      */
     bool close();
@@ -370,27 +388,7 @@ public:
      *  Report an error message
      *  @param  message
      */
-    void reportError(const char *message)
-    {
-        // set connection state to closed
-        _state = state_closed;
-
-        // monitor because every callback could invalidate the connection
-        Monitor monitor(this);
-
-        // all deferred result objects in the channels should report this error too
-        while (!_channels.empty())
-        {
-            // report the errors
-            _channels.begin()->second->reportError(message, false);
-
-            // leap out if no longer valid
-            if (!monitor.valid()) return;
-        }
-
-        // inform handler
-        _handler->onError(_parent, message);
-    }
+    void reportError(const char *message);
 
     /**
      *  Report that the connection is closed

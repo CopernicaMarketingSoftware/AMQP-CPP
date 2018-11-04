@@ -28,7 +28,7 @@ namespace AMQP {
 /** 
  * Class definition
  */ 
-class SslConnected : public TcpState, private Watchable 
+class SslConnected : public TcpExtState 
 {
 private:
     /**
@@ -37,12 +37,6 @@ private:
      */
     SslWrapper _ssl;
 
-    /** 
-     *  Socket file descriptor
-     *  @var int
-     */
-    int _socket;
-     
     /**
      *  The outgoing buffer
      *  @var TcpBuffer
@@ -72,55 +66,12 @@ private:
     bool _closed = false;
     
     /**
-     *  Have we reported the final instruction to the user?
-     *  @var bool
-     */
-    bool _finalized = false;
-
-    /**
      *  Cached reallocation instruction
      *  @var size_t
      */
     size_t _reallocate = 0;
     
 
-    /**
-     *  Close the connection
-     *  @return bool
-     */
-    bool close()
-    {
-        // do nothing if already closed
-        if (_socket < 0) return false;
-        
-        // and stop monitoring it
-        _handler->monitor(_connection, _socket, 0);
-
-        // close the socket
-        ::close(_socket);
-        
-        // forget filedescriptor
-        _socket = -1;
-        
-        // done
-        return true;
-    }
-
-    /**
-     *  Construct the final state
-     *  @param  monitor     Object that monitors whether connection still exists
-     *  @return TcpState*
-     */
-    TcpState *finalstate(const Monitor &monitor)
-    {
-        // close the socket if it is still open
-        close();
-        
-        // if the object is still in a valid state, we can move to the close-state, 
-        // otherwise there is no point in moving to a next state
-        return monitor.valid() ? new TcpClosed(this) : nullptr;
-    }
-    
     /**
      *  Proceed with the next operation after the previous operation was
      *  a success, possibly changing the filedescriptor-monitor
@@ -132,23 +83,17 @@ private:
         if (_out)
         {
             // let's wait until the socket becomes writable
-            _handler->monitor(_connection, _socket, readable | writable);
+            _parent->onIdle(this, _socket, readable | writable);
         }
         else if (_closed)
         {
             // start the state that closes the connection
-            auto *nextstate = new SslShutdown(_connection, _socket, std::move(_ssl), _finalized, _handler);
-
-            // we forget the current socket to prevent that it gets destructed
-            _socket = -1;
-            
-            // report the next state
-            return nextstate;
+            return new SslShutdown(this, std::move(_ssl));
         }
         else
         {
             // let's wait until the socket becomes readable
-            _handler->monitor(_connection, _socket, readable);
+            _parent->onIdle(this, _socket, readable);
         }
         
         // done
@@ -171,7 +116,7 @@ private:
             _state = state;
             
             // the operation must be repeated when readable
-            _handler->monitor(_connection, _socket, readable);
+            _parent->onIdle(this, _socket, readable);
             
             // allow chaining
             return monitor.valid() ? this : nullptr;
@@ -181,7 +126,7 @@ private:
             _state = state;
             
             // wait until socket becomes writable again
-            _handler->monitor(_connection, _socket, readable | writable);
+            _parent->onIdle(this, _socket, readable | writable);
 
             // allow chaining
             return monitor.valid() ? this : nullptr;
@@ -191,23 +136,17 @@ private:
             _state = state_idle;
             
             // turns out no error occured, an no action has to be rescheduled
-            _handler->monitor(_connection, _socket, _out || _closed ? readable | writable : readable);
+            _parent->onIdle(this, _socket, _out || _closed ? readable | writable : readable);
 
             // allow chaining
             return monitor.valid() ? this : nullptr;
             
         default:
-            // if we have already reported an error to user space, we can go to the final state right away
-            if (_finalized) return finalstate(monitor);
-            
-            // remember that we've sent out an error
-            _finalized = true;
-            
-            // tell the handler
-            _handler->onError(_connection, "ssl error");
-            
-            // go to the final state
-            return finalstate(monitor);
+
+            // @todo report an error to all channels
+        
+            // ssl level error, we have to tear down the tcp connection
+            return monitor.valid() ? new TcpShutdown(this) : nullptr;
         }
     }
     
@@ -224,7 +163,7 @@ private:
         TcpInBuffer buffer(std::move(_in));
         
         // parse the buffer
-        auto processed = _connection->parse(buffer);
+        auto processed = _parent->onReceived(this, buffer);
         
         // "this" could be removed by now, check this
         if (!monitor.valid()) return nullptr;
@@ -329,7 +268,7 @@ private:
             _state = state_idle;
 
             // read data from ssl into the buffer
-            auto result = _in.receivefrom(_ssl, _connection->expected());
+            auto result = _in.receivefrom(_ssl, _parent->expected());
             
             // if this is a failure, we are going to repeat the operation
             if (result <= 0) return repeat(monitor, state_receiving, OpenSSL::SSL_get_error(_ssl, result));
@@ -350,31 +289,34 @@ private:
 public:
     /**
      *  Constructor
-     *  @param  connection  Parent TCP connection object
-     *  @param  socket      The socket filedescriptor
+     *  @param  state       The previous state
      *  @param  ssl         The SSL structure
      *  @param  buffer      The buffer that was already built
-     *  @param  handler     User-supplied handler object
      */
-    SslConnected(TcpConnection *connection, int socket, SslWrapper &&ssl, TcpOutBuffer &&buffer, TcpHandler *handler) : 
-        TcpState(connection, handler),
+    SslConnected(TcpExtState *state, SslWrapper &&ssl, TcpOutBuffer &&buffer) : 
+        TcpExtState(state),
         _ssl(std::move(ssl)),
-        _socket(socket),
         _out(std::move(buffer)),
         _in(4096),
         _state(_out ? state_sending : state_idle)
     {
         // tell the handler to monitor the socket if there is an out
-        _handler->monitor(_connection, _socket, _state == state_sending ? readable | writable : readable); 
+        _parent->onIdle(this, _socket, _state == state_sending ? readable | writable : readable); 
     }
     
     /**
-     * Destructor
+     *  Destructor
      */
     virtual ~SslConnected() noexcept
     {
+        // no cleanup if socket is gone
+        if (_socket < 0) return;
+        
+        // and stop monitoring it
+        _parent->onIdle(this, _socket, 0);
+
         // close the socket
-        close();
+        ::close(_socket);
     }
     
     /**
@@ -426,7 +368,7 @@ public:
      */
     virtual TcpState *flush(const Monitor &monitor) override
     {
-        // we are not going to do this is object is busy reading
+        // we are not going to do this if object is busy reading
         if (_state == state_receiving) return this;
         
         // create an object to wait for the filedescriptor to becomes active
@@ -484,17 +426,12 @@ public:
      */
     virtual TcpState *abort(const Monitor &monitor) override
     {
-        // if we have already told user space that connection is gone
-        if (_finalized) return new TcpClosed(this);
+        // close the connection right now
+        if (!close(monitor)) return nullptr;
         
-        // object will be finalized now
-        _finalized = true;
-        
-        // close the connection
-        close();
-        
-        // inform user space that the party is over
-        _handler->onError(_connection, "ssl connection terminated");
+        // tell the connection that it failed (this eventually ends up in our reportError() method)
+        // @todo to we indeed need this?
+        //_connection->fail();
         
         // go to the final state (if not yet disconnected)
         return monitor.valid() ? new TcpClosed(this) : nullptr;
@@ -515,56 +452,59 @@ public:
         if (_state != state_idle) return;
         
         // let's wait until the socket becomes writable
-        _handler->monitor(_connection, _socket, readable | writable);
+        _parent->onIdle(this, _socket, readable | writable);
     }
 
     /**
-     *  Report that heartbeat negotiation is going on
-     *  @param  heartbeat   suggested heartbeat
-     *  @return uint16_t    accepted heartbeat
+     *  When the AMQP transport layer is closed
+     *  @param  monitor     Object that can be used if connection is still alive
+     *  @return TcpState    New implementation object
      */
-    virtual uint16_t reportNegotiate(uint16_t heartbeat) override
-    {
-        // remember that we have to reallocate (_in member can not be accessed because it is moved away)
-        _reallocate = _connection->maxFrame();
-        
-        // pass to base
-        return TcpState::reportNegotiate(heartbeat);
-    }
-    
-    /**
-     *  Report a connection error
-     *  @param  error
-     */
-    virtual void reportError(const char *error) override
-    {
-        // we want to start the elegant ssl shutdown procedure, so we call reportClosed() here too,
-        // because that function does exactly what we want to do here too
-        reportClosed();
-        
-        // if the user was already notified of an final state, we do not have to proceed
-        if (_finalized) return;
-        
-        // remember that this is the final call to user space
-        _finalized = true;
-        
-        // pass to handler
-        _handler->onError(_connection, error);
-    }
-
-    /**
-     *  Report to the handler that the connection was nicely closed
-     */
-    virtual void reportClosed() override
+    virtual TcpState *onAmqpClosed(const Monitor &monitor) override
     {
         // remember that the object is going to be closed
         _closed = true;
         
         // if the previous operation is still in progress we can wait for that
-        if (_state != state_idle) return;
+        if (_state != state_idle) return this;
         
-        // wait until the connection is writable so that we can close it then
-        _handler->monitor(_connection, _socket, readable | writable);
+        // the connection can be closed right now, move to the next state
+        return new SslShutdown(this, std::move(_ssl));
+    }
+
+    /**
+     *  When an error occurs in the AMQP protocol
+     *  @param  monitor     Monitor that can be used to check if the connection is still alive
+     *  @param  message     The error message
+     *  @return TcpState    New implementation object
+     */
+    virtual TcpState *onAmqpError(const Monitor &monitor, const char *message) override
+    {
+        // tell the user about it
+        // @todo do we need this here?
+        //_handler->onError(_connection, message);
+        
+        // stop if the object was destructed
+        if (!monitor.valid()) return nullptr;
+
+        // remember that the object is going to be closed
+        _closed = true;
+        
+        // if the previous operation is still in progress we can wait for that
+        if (_state != state_idle) return this;
+        
+        // the connection can be closed right now, move to the next state
+        return new SslShutdown(this, std::move(_ssl));
+    }
+
+    /**
+     *  Install max-frame size
+     *  @param  heartbeat   suggested heartbeat
+     */
+    virtual void maxframe(size_t maxframe) override
+    {
+        // remember that we have to reallocate (_in member can not be accessed because it is moved away)
+        _reallocate = maxframe;
     }
 }; 
 

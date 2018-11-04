@@ -24,32 +24,26 @@ class TcpState
 {
 protected:
     /**
-     *  Parent TcpConnection object as is seen by the user
-     *  @var TcpConnection
+     *  Parent object that constructed the state
+     *  @var TcpParent
      */
-    TcpConnection *_connection;
-
-    /**
-     *  User-supplied handler
-     *  @var TcpHandler
-     */
-    TcpHandler *_handler;
+    TcpParent *_parent;
 
 protected:
     /**
      *  Protected constructor
-     *  @param  connection  Original TCP connection object
+     *  @param  parent      The parent object
      *  @param  handler     User-supplied handler class
      */
-    TcpState(TcpConnection *connection, TcpHandler *handler) : 
-        _connection(connection), _handler(handler) {}
+    TcpState(TcpParent *parent) : 
+        _parent(parent) {}
 
     /**
      *  Protected "copy" constructor
      *  @param  state       Original TcpState object
      */
     TcpState(const TcpState *state) :
-        _connection(state->_connection), _handler(state->_handler) {}
+        _parent(state->_parent) {}
 
 public:
     /**
@@ -124,81 +118,25 @@ public:
     virtual TcpState *abort(const Monitor &monitor) = 0;
 
     /**
-     *  Report to the handler that the connection was constructed
-     */
-    virtual void reportAttached()
-    {
-        // pass to the handler
-        _handler->onAttached(_connection);
-    }
-
-    /**
-     *  Report to the handler that the connection was destructed
-     */
-    virtual void reportDetached()
-    {
-        // pass to the handler
-        _handler->onDetached(_connection);
-    }
-
-    /**
-     *  Report to the handler that heartbeat negotiation is going on
+     *  Install max-frame size
      *  @param  heartbeat   suggested heartbeat
-     *  @return uint16_t    accepted heartbeat
      */
-    virtual uint16_t reportNegotiate(uint16_t heartbeat)
-    {
-        // pass to handler
-        return _handler->onNegotiate(_connection, heartbeat);
-    }
-    
-    /**
-     *  Report to the handler that the object is in an error state.
-     * 
-     *  This is the last method to be called on the handler object, from now on
-     *  the handler will no longer be called to report things to user space. 
-     *  The state object itself stays active, and further calls to process()
-     *  may be possible.
-     * 
-     *  @param  error
-     */
-    virtual void reportError(const char *error)
-    {
-        // pass to handler
-        _handler->onError(_connection, error);
-    }
+    virtual void maxframe(size_t maxframe) {}
 
     /**
-     *  Report that a heartbeat frame was received
-     */
-    virtual void reportHeartbeat()
-    {
-        // pass to handler
-        _handler->onHeartbeat(_connection);
-    }
-    
-    /**
-     *  Report to the handler that the connection is ready for use
-     */
-    virtual void reportConnected()
-    {
-        // pass to handler
-        _handler->onConnected(_connection);
-    }
-    
-    /**
-     *  Report to the handler that the connection was correctly closed, after
-     *  the user has called the Connection::close() method. The underlying TCP
-     *  connection still has to be closed.
+     *  Events that can take place during the AMQP protocol
      * 
-     *  This is the last method that is called on the object, from now on no
-     *  other methods may be called on the _handler variable.
+     *  Both events also trigger the end of a valid connection, and should
+     *  be used to tear down the TCP connection.
+     * 
+     *  @todo are these appropriate names?
+     * 
+     *  @param  monitor
+     *  @param  TcpState
      */
-    virtual void reportClosed()
-    {
-        // pass to handler
-        _handler->onClosed(_connection);
-    }
+    virtual TcpState *onAmqpError(const Monitor &monitor, const char *error) { return this; }
+    virtual TcpState *onAmqpClosed(const Monitor &monitor) { return this; }
+
 };
 
 /**

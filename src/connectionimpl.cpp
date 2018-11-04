@@ -187,6 +187,64 @@ uint64_t ConnectionImpl::parse(const Buffer &buffer)
 }
 
 /**
+ *  Fail all open channels, helper method
+ *  @param  monitor     object to check if object still exists
+ *  @param  message     error message
+ *  @return bool        does the object still exist?
+ */
+bool ConnectionImpl::fail(const Monitor &monitor, const char *message)
+{
+    // all deferred result objects in the channels should report this error too
+    while (!_channels.empty())
+    {
+        // report the errors
+        _channels.begin()->second->reportError(message, false);
+
+        // leap out if no longer valid
+        if (!monitor.valid()) return false;
+    }
+    
+    // done
+    return true;
+}
+
+/**
+ *  Fail the connection / report that the connection is lost
+ *  @param  message
+ *  @return bool
+ */
+bool ConnectionImpl::fail(const char *message)
+{
+    // if already closed
+    if (_state == state_closed) return false;
+    
+    // from now on we consider the connection to be closed
+    _state = state_closed;
+
+    // monitor because every callback could invalidate the connection
+    fail(Monitor(this), message);
+
+    // done
+    return true;
+}
+
+/**
+ *  Report an error to user-space
+ *  @param  message     the error message
+ */
+void ConnectionImpl::reportError(const char *message)
+{
+    // monitor because every callback could invalidate the connection
+    Monitor monitor(this);
+
+    // fail all operations
+    if (!fail(monitor, message)) return;
+
+    // inform handler
+    _handler->onError(_parent, message);
+}
+
+/**
  *  Close the connection
  *  This will close all channels
  *  @return bool
@@ -194,7 +252,7 @@ uint64_t ConnectionImpl::parse(const Buffer &buffer)
 bool ConnectionImpl::close()
 {
     // leap out if already closed or closing
-    if (_closed) return false;
+    if (_closed || _state == state_closed) return false;
 
     // mark that the object is closed
     _closed = true;

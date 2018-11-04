@@ -15,11 +15,6 @@
 #pragma once
 
 /**
- *  Dependencies
- */
-#include <openssl/ssl.h>
-
-/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -82,6 +77,10 @@ public:
      */
     virtual bool onSecured(TcpConnection *connection, const SSL *ssl)
     {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+        (void) ssl;
+
         // default implementation: do not inspect anything, just allow the connection
         return true;
     }
@@ -99,6 +98,10 @@ public:
      */
     virtual uint16_t onNegotiate(TcpConnection *connection, uint16_t interval)
     {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+        (void) interval;
+
         // default implementation, suggested heartbeat is ok
         return interval;
     }
@@ -109,7 +112,11 @@ public:
      *  secure TLS connection, and the AMQP login handshake has been completed.
      *  @param  connection  The TCP connection
      */
-    virtual void onConnected(TcpConnection *connection) {}
+    virtual void onConnected(TcpConnection *connection) 
+    {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+    }
 
     /**
      *  Method that is called when the server sends a heartbeat to the client
@@ -117,20 +124,33 @@ public:
      *
      *  @see    ConnectionHandler::onHeartbeat
      */
-    virtual void onHeartbeat(TcpConnection *connection) {}
+    virtual void onHeartbeat(TcpConnection *connection) 
+    {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+    }
     
     /**
      *  Method that is called when the TCP connection ends up in an error state
      *  @param  connection  The TCP connection
      *  @param  message     Error message
      */
-    virtual void onError(TcpConnection *connection, const char *message) {}
+    virtual void onError(TcpConnection *connection, const char *message) 
+    {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+        (void) message;
+    }
     
     /**
      *  Method that is called when the TCP connection is closed
      *  @param  connection  The TCP connection
      */
-    virtual void onClosed(TcpConnection *connection) {}
+    virtual void onClosed(TcpConnection *connection) 
+    {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+    }
 
     /**
      *  Monitor a filedescriptor for readability or writability

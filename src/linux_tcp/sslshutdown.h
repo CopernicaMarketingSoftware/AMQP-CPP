@@ -20,7 +20,7 @@ namespace AMQP {
 /**
  *  Class definition
  */
-class SslShutdown : public TcpState, private Watchable
+class SslShutdown : public TcpExtState
 {
 private:
     /**
@@ -28,64 +28,7 @@ private:
      *  @var SslWrapper
      */
     SslWrapper _ssl;
-
-    /** 
-     *  Socket file descriptor
-     *  @var int
-     */
-    int _socket;
     
-    /**
-     *  Have we already notified user space of connection end?
-     *  @var bool
-     */
-    bool _finalized;
-
-
-    /**
-     *  Close the socket
-     *  @return bool
-     */
-    bool close()
-    {
-        // skip if already closed
-        if (_socket < 0) return false;
-        
-        // we're no longer interested in events
-        _handler->monitor(_connection, _socket, 0);
-        
-        // close the socket
-        ::close(_socket);
-        
-        // forget the socket
-        _socket = -1;
-        
-        // done
-        return true;
-    }
-
-    /**
-     *  Report an error
-     *  @param  monitor         object to check if connection still exists
-     *  @return TcpState*
-     */
-    TcpState *reporterror(const Monitor &monitor)
-    {
-        // close the socket
-        close();
-        
-        // if we have already told user space that connection is gone
-        if (_finalized) return new TcpClosed(this);
-        
-        // object will be finalized now
-        _finalized = true;
-        
-        // inform user space that the party is over
-        _handler->onError(_connection, "ssl shutdown error");
-        
-        // go to the final state (if not yet disconnected)
-        return monitor.valid() ? new TcpClosed(this) : nullptr;
-    }
 
     /**
      *  Proceed with the next operation after the previous operation was
@@ -93,22 +36,10 @@ private:
      *  @param  monitor         object to check if connection still exists
      *  @return TcpState*
      */
-    TcpState *proceed(const Monitor &monitor)
+    virtual TcpState *proceed(const Monitor &monitor)
     {
-        // close the socket
-        close();
-        
-        // if we have already told user space that connection is gone
-        if (_finalized) return new TcpClosed(this);
-        
-        // object will be finalized now
-        _finalized = true;
-        
-        // inform user space that the party is over
-        _handler->onClosed(_connection);
-        
-        // go to the final state (if not yet disconnected)
-        return monitor.valid() ? new TcpClosed(this) : nullptr;
+        // next state is to shutdown the connection
+        return new TcpShutdown(this);
     }
         
     /**
@@ -126,17 +57,18 @@ private:
         switch (error) {
         case SSL_ERROR_WANT_READ:
             // the operation must be repeated when readable
-            _handler->monitor(_connection, _socket, readable);
+            _parent->onIdle(this, _socket, readable);
             return this;
         
         case SSL_ERROR_WANT_WRITE:
             // wait until socket becomes writable again
-            _handler->monitor(_connection, _socket, readable | writable);
+            _parent->onIdle(this, _socket, readable | writable);
             return this;
             
         default:
             // go to the final state (if not yet disconnected)
-            return reporterror(monitor);
+            // @todo special treatment for ssl-protocol errors
+            return proceed(monitor);
         }
     }
     
@@ -144,37 +76,28 @@ private:
 public:
     /**
      *  Constructor
-     *  @param  connection  Parent TCP connection object
-     *  @param  socket      The socket filedescriptor
+     *  @param  state       Previous state
      *  @param  ssl         The SSL structure
-     *  @param  finalized   Is the user already notified of connection end (onError() has been called)
-     *  @param  handler     User-supplied handler object
      */
-    SslShutdown(TcpConnection *connection, int socket, SslWrapper &&ssl, bool finalized, TcpHandler *handler) : 
-        TcpState(connection, handler),
-        _ssl(std::move(ssl)),
-        _socket(socket),
-        _finalized(finalized)
+    SslShutdown(TcpExtState *state, SslWrapper &&ssl) : 
+        TcpExtState(state),
+        _ssl(std::move(ssl))
     {
         // wait until the socket is accessible
-        _handler->monitor(_connection, _socket, readable | writable); 
-    }   
+        _parent->onIdle(this, _socket, readable | writable); 
+    }
+    
+    /**
+     *  No copying
+     *  @param  that
+     */
+    SslShutdown(const SslShutdown &that) = delete;
     
     /**
      * Destructor
      */
-    virtual ~SslShutdown() noexcept
-    {
-        // close the socket
-        close();
-    }
+    virtual ~SslShutdown() noexcept = default;
     
-    /**
-     *  The filedescriptor of this connection
-     *  @return int
-     */
-    virtual int fileno() const override { return _socket; }
-     
     /**
      *  Process the filedescriptor in the object    
      *  @param  monitor     Object to check if connection still exists
@@ -211,6 +134,8 @@ public:
      */
     virtual TcpState *flush(const Monitor &monitor) override
     {
+        // @todo do we even need this? isn't flushing reserved for data?
+        
         // create an object to wait for the filedescriptor to becomes active
         Poll poll(_socket);
 
@@ -238,29 +163,25 @@ public:
             case SSL_ERROR_WANT_WRITE:  poll.active(true); break;
         
             // something is wrong, we proceed to the next state
-            default: return reporterror(monitor);
+            default: return proceed(monitor);
             }
         }
     }
     
     /**
-     *  Abort the shutdown operation
+     *  Abort the shutdown operation immediately
      *  @param  monitor     Monitor that can be used to check if the tcp connection is still alive
      *  @return TcpState
      */
     virtual TcpState *abort(const Monitor &monitor) override
     {
-        // if we have already told user space that connection is gone
-        if (_finalized) return new TcpClosed(this);
+        // cleanup the connection
+        // @todo this also calls onClosed()
+        cleanup();
         
-        // object will be finalized now
-        _finalized = true;
-        
-        // close the connection
-        close();
-        
-        // inform user space that the party is over
-        _handler->onError(_connection, "ssl shutdown aborted");
+        // report to user-space that the ssl shutdown was aborted
+        // @todo 
+        //_handler->onError(_connection, "ssl shutdown aborted");
         
         // go to the final state (if not yet disconnected)
         return monitor.valid() ? new TcpClosed(this) : nullptr;

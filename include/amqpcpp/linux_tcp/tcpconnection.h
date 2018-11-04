@@ -28,13 +28,22 @@ class TcpState;
  */
 class TcpConnection :
     private ConnectionHandler,
-    private Watchable
+    private Watchable,
+    private TcpParent
 {
 private:
+    /**
+     *  User-space handler object
+     *  @var    TcpHandler
+     */
+    TcpHandler *_handler;
+
     /**
      *  The state of the TCP connection - this state objecs changes based on 
      *  the state of the connection (resolving, connected or closed)
      *  @var    std::unique_ptr<TcpState>
+     * 
+     *  @todo   why is this a shared pointer?
      */
     std::shared_ptr<TcpState> _state;
 
@@ -48,13 +57,21 @@ private:
      *  Method that is called after the connection was constructed
      *  @param  connection      The connection that was attached to the handler
      */
-    virtual void onAttached(Connection *connection) override;
+    virtual void onAttached(Connection *connection) override
+    {
+        // pass on to the handler
+        _handler->onAttached(this);
+    }
 
     /**
      *  Method that is called when the connection is destructed
      *  @param  connection      The connection that was detached from the handler
      */
-    virtual void onDetached(Connection *connection) override;
+    virtual void onDetached(Connection *connection) override
+    {
+        // pass on to the handler
+        _handler->onDetached(this);
+    }
 
     /**
      *  Method that is called when the heartbeat frequency is negotiated.
@@ -76,7 +93,11 @@ private:
      *  Method that is called when the server sends a heartbeat to the client
      *  @param  connection      The connection over which the heartbeat was received
      */
-    virtual void onHeartbeat(Connection *connection) override;
+    virtual void onHeartbeat(Connection *connection) override
+    {
+        // pass on to tcp handler
+        _handler->onHeartbeat(this);
+    }
 
     /**
      *  Method called when the connection ends up in an error state
@@ -89,7 +110,13 @@ private:
      *  Method that is called when the connection is established
      *  @param  connection      The connection that can now be used
      */
-    virtual void onConnected(Connection *connection) override;
+    virtual void onConnected(Connection *connection) override
+    {
+        // @todo we may need this, because from this moment on we can pass an onClosed()
+        
+        // pass on to the handler
+        _handler->onConnected(this);
+    }
 
     /**
      *  Method that is called when the connection was closed.
@@ -98,23 +125,57 @@ private:
     virtual void onClosed(Connection *connection) override;
 
     /**
-     *  Parse a buffer that was received
+     *  Method to be called when data was received
+     *  @param  state
      *  @param  buffer
+     *  @return size_t
      */
-    uint64_t parse(const Buffer &buffer)
+    virtual size_t onReceived(TcpState *state, const Buffer &buffer) override
     {
-        // pass to the AMQP connection
+        // pass on to the connection
         return _connection.parse(buffer);
+    }
+    
+    /**
+     *  Method that is called when the connection is secured
+     *  @param  state
+     *  @param  ssl
+     *  @return bool
+     */
+    virtual bool onSecured(TcpState *state, const SSL *ssl) override
+    {
+        // pass on to user-space
+        return _handler->onSecured(this, ssl);
+    }
+    
+    /**
+     *  Method to be called when we need to monitor a different filedescriptor
+     *  @param  state
+     *  @param  fd
+     *  @param  events
+     */
+    virtual void onIdle(TcpState *state, int socket, int events) override
+    {
+        // pass on to user-space
+        return _handler->monitor(this, socket, events);
     }
 
     /**
-     *  Classes that have access to private data
+     *  Method to be called when it is detected that the connection was closed
+     *  @param  state
      */
-    friend class SslConnected;
-    friend class TcpConnected;
-    friend class TcpChannel;
-
+    virtual void onClosed(TcpState *state) override;
     
+    /**
+     *  The expected number of bytes
+     *  @return size_t
+     */
+    virtual size_t expected() override
+    {
+        // pass on to the connection
+        return _connection.expected();
+    }
+
 public:
     /**
      *  Constructor

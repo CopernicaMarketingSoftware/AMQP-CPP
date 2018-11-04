@@ -20,6 +20,7 @@
 #include "amqpcpp/linux_tcp/tcpdefines.h"
 
 // mid level includes
+#include "amqpcpp/linux_tcp/tcpparent.h"
 #include "amqpcpp/linux_tcp/tcphandler.h"
 #include "amqpcpp/linux_tcp/tcpconnection.h"
 

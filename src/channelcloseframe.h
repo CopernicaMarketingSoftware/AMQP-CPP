@@ -1,7 +1,7 @@
 /**
  *  Class describing a channel close frame
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -81,10 +81,10 @@ public:
      *  @param  failingClass    failing class id if applicable
      *  @param  failingMethod   failing method id if applicable
      */
-    ChannelCloseFrame(uint16_t channel, uint16_t code = 0, const std::string& text = "", uint16_t failingClass = 0, uint16_t failingMethod = 0) :
+    ChannelCloseFrame(uint16_t channel, uint16_t code = 0, std::string text = "", uint16_t failingClass = 0, uint16_t failingMethod = 0) :
         ChannelFrame(channel, (uint32_t)(text.length() + 7)), // sizeof code, failingclass, failingmethod (2byte + 2byte + 2byte) + text length + text length byte
         _code(code),
-        _text(text),
+        _text(std::move(text)),
         _failingClass(failingClass),
         _failingMethod(failingMethod)
     {}
@@ -92,7 +92,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~ChannelCloseFrame() {}
+    virtual ~ChannelCloseFrame() = default;
 
     /**
      *  Method id

@@ -29,7 +29,7 @@ namespace AMQP {
 /**
  *  Class definition
  */
-class SslHandshake : public TcpState, private Watchable
+class SslHandshake : public TcpExtState
 {
 private:
     /**
@@ -38,12 +38,6 @@ private:
      */
     SslWrapper _ssl;
 
-    /**
-     *  The socket file descriptor
-     *  @var int
-     */
-    int _socket;
-    
     /**
      *  The outgoing buffer
      *  @var TcpOutBuffer
@@ -61,7 +55,7 @@ private:
         if (_socket < 0) return false;
         
         // and stop monitoring it
-        _handler->monitor(_connection, _socket, 0);
+        _parent->onIdle(this, _socket, 0);
 
         // close the socket
         ::close(_socket);
@@ -81,28 +75,30 @@ private:
     TcpState *nextstate(const Monitor &monitor)
     {
         // check if the handler allows the connection
-        bool allowed = _handler->onSecured(_connection, _ssl);
+        bool allowed = _parent->onSecured(this, _ssl);
         
         // leap out if the user space function destructed the object
         if (!monitor.valid()) return nullptr;
 
         // copy the socket because we might forget it
-        auto socket = _socket;
+//        auto socket = _socket;
 
         // forget the socket member to prevent that it is closed by the destructor
         _socket = -1;
         
         // if connection is allowed, we move to the next state
-        if (allowed) return new SslConnected(_connection, socket, std::move(_ssl), std::move(_out), _handler);
+        if (allowed) return new SslConnected(this, std::move(_ssl), std::move(_out));
         
         // report that the connection is broken
-        _handler->onError(_connection, "TLS connection has been rejected");
+        // @todo do we need this?
+        //_handler->onError(_connection, "TLS connection has been rejected");
         
         // the onError method could have destructed this object
         if (!monitor.valid()) return nullptr;
         
         // shutdown the connection
-        return new SslShutdown(_connection, socket, std::move(_ssl), true, _handler);
+        // @todo the onClosed() does not have to be called
+        return new SslShutdown(this, std::move(_ssl));
     }
     
     /**
@@ -116,7 +112,8 @@ private:
         close();
         
         // we have an error - report this to the user
-        _handler->onError(_connection, "failed to setup ssl connection");
+        // @todo do we need this?
+        //_handler->onError(_connection, "failed to setup ssl connection");
         
         // done, go to the closed state (plus check if connection still exists, because
         // after the onError() call the user space program may have destructed that object)
@@ -131,7 +128,7 @@ private:
     TcpState *proceed(int events)
     {
         // tell the handler that we want to listen for certain events
-        _handler->monitor(_connection, _socket, events);
+        _parent->onIdle(this, _socket, events);
         
         // allow chaining
         return this;
@@ -143,18 +140,15 @@ public:
      * 
      *  @todo catch the exception!  
      * 
-     *  @param  connection  Parent TCP connection object
-     *  @param  socket      The socket filedescriptor
+     *  @param  state       Earlier state
      *  @param  hostname    The hostname to connect to
      *  @param  context     SSL context
      *  @param  buffer      The buffer that was already built
-     *  @param  handler     User-supplied handler object
      *  @throws std::runtime_error
      */
-    SslHandshake(TcpConnection *connection, int socket, const std::string &hostname, TcpOutBuffer &&buffer, TcpHandler *handler) : 
-        TcpState(connection, handler),
+    SslHandshake(TcpExtState *state, const std::string &hostname, TcpOutBuffer &&buffer) : 
+        TcpExtState(state),
         _ssl(SslContext(OpenSSL::TLS_client_method())),
-        _socket(socket),
         _out(std::move(buffer))
     {
         // we will be using the ssl context as a client
@@ -164,10 +158,10 @@ public:
         OpenSSL::SSL_ctrl(_ssl, SSL_CTRL_SET_TLSEXT_HOSTNAME, TLSEXT_NAMETYPE_host_name, (void *)hostname.data());
         
         // associate the ssl context with the socket filedescriptor
-        if (OpenSSL::SSL_set_fd(_ssl, socket) == 0) throw std::runtime_error("failed to associate filedescriptor with ssl socket");
+        if (OpenSSL::SSL_set_fd(_ssl, _socket) == 0) throw std::runtime_error("failed to associate filedescriptor with ssl socket");
         
         // we are going to wait until the socket becomes writable before we start the handshake
-        _handler->monitor(_connection, _socket, writable);
+        _parent->onIdle(this, _socket, writable);
     }
     
     /**
@@ -238,7 +232,7 @@ public:
         // the handshake is still busy, outgoing data must be cached
         _out.add(buffer, size); 
     }
-    
+
     /**
      *  Flush the connection, sent all buffered data to the socket
      *  @param  monitor     Object to check if connection still exists
@@ -286,7 +280,8 @@ public:
         close();
         
         // report to the user that the handshake was aborted
-        _handler->onError(_connection, "ssl handshake aborted");
+        // @todo do we need this?
+        //_handler->onError(_connection, "ssl handshake aborted");
         
         // done, go to the closed state (plus check if connection still exists, because
         // after the onError() call the user space program may have destructed that object)
