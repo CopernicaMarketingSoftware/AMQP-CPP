@@ -111,13 +111,6 @@ public:
     virtual TcpState *flush(const Monitor &monitor) { return this; }
     
     /**
-     *  Abort the operation, immediately proceed to the final state
-     *  @param  monitor     Monitor that can be used to check if the tcp connection is still alive
-     *  @return TcpState    New implementation object
-     */
-    virtual TcpState *abort(const Monitor &monitor) = 0;
-
-    /**
      *  Install max-frame size
      *  @param  heartbeat   suggested heartbeat
      */

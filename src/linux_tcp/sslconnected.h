@@ -418,24 +418,6 @@ public:
         // done
         return this;
     }
-    
-    /**
-     *  Close the connection immediately
-     *  @param  monitor     object to check if connection object is still active
-     *  @return TcpState    the new state
-     */
-    virtual TcpState *abort(const Monitor &monitor) override
-    {
-        // close the connection right now
-        if (!close(monitor)) return nullptr;
-        
-        // tell the connection that it failed (this eventually ends up in our reportError() method)
-        // @todo to we indeed need this?
-        //_connection->fail();
-        
-        // go to the final state (if not yet disconnected)
-        return monitor.valid() ? new TcpClosed(this) : nullptr;
-    }
 
     /**
      *  Send data over the connection

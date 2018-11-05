@@ -123,38 +123,16 @@ void TcpConnection::flush()
  */
 bool TcpConnection::close(bool immediate)
 {
-    // @todo what if not yet connected / still doing a lookup?
+    // @todo what if not yet connected / still doing a lookup / already disconnected?
     
     // if no immediate disconnect is needed, we can simply start the closing handshake
     if (!immediate) return _connection.close();
     
-    // a call to user-space will be made, so we need to monitor if "this" is destructed
-    Monitor monitor(this);
-
-    // pass to the underlying connection to start the amqp-closing handshake
-    _connection.close();
-    
-    // if the user-space code destructed the connection, there is nothing else to do
-    if (!monitor.valid()) return true;
-
-    // remember the old state (this is necessary because _state may be modified by user-code)
-    auto *oldstate = _state.get();
-
-    // abort the operation
-    // @todo does this call user-space stuff?
-    auto *newstate = _state->abort(monitor);
-
-    // if the state did not change, we do not have to update a member,
-    // when the newstate is nullptr, the object is (being) destructed
-    // and we do not have to do anything else either
-    if (newstate == nullptr || newstate == oldstate) return true;
-    
-    // replace it with the new implementation
-    _state.reset(newstate);
-    
     // fail the connection / report the error to user-space
-    // @todo what if channels are not even ready?
     _connection.fail("connection prematurely closed by client");
+    
+    // change the state
+    _state.reset(new TcpClosed(_state.get()));
     
     // done, we return true because the connection is closed
     return true;

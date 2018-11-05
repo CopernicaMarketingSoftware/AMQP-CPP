@@ -167,25 +167,6 @@ public:
             }
         }
     }
-    
-    /**
-     *  Abort the shutdown operation immediately
-     *  @param  monitor     Monitor that can be used to check if the tcp connection is still alive
-     *  @return TcpState
-     */
-    virtual TcpState *abort(const Monitor &monitor) override
-    {
-        // cleanup the connection
-        // @todo this also calls onClosed()
-        cleanup();
-        
-        // report to user-space that the ssl shutdown was aborted
-        // @todo 
-        //_handler->onError(_connection, "ssl shutdown aborted");
-        
-        // go to the final state (if not yet disconnected)
-        return monitor.valid() ? new TcpClosed(this) : nullptr;
-    }
 };
 
 /**

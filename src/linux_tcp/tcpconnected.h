@@ -258,24 +258,6 @@ public:
     }
     
     /**
-     *  Close the connection immediately
-     *  @param  monitor     object to check if connection object is still active
-     *  @return TcpState    the new state
-     */
-    virtual TcpState *abort(const Monitor &monitor) override
-    {
-        // close the connection right now
-        if (!close(monitor)) return nullptr;
-        
-        // fail the connection (this ends up in our reportError() method)
-        // @todo should this not happen 
-        //_connection->fail();
-        
-        // go to the final state (if not yet disconnected)
-        return monitor.valid() ? new TcpClosed(this) : nullptr;
-    }
-
-    /**
      *  When the AMQP transport layer is closed
      *  @param  monitor     Object that can be used if connection is still alive
      *  @return TcpState    New implementation object

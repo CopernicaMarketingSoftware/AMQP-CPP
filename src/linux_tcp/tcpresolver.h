@@ -243,26 +243,6 @@ public:
     }
 
     /**
-     *  Close the connection immediately
-     *  @param  monitor     object to check if connection object is still active
-     *  @return TcpState    the new state
-     */
-    virtual TcpState *abort(const Monitor &monitor) override
-    {
-        // just wait for the other thread to be ready
-        _thread.join();
-
-        // close the socket
-        if (_socket >= 0) { ::close(_socket); _socket = -1; }
-
-        // inform user space that the connection is cancelled
-        _parent->onError(this, "tcp connect aborted");
-        
-        // go to the final state (if not yet disconnected)
-        return monitor.valid() ? new TcpClosed(this) : nullptr;
-    }
-
-    /**
      *  Send data over the connection
      *  @param  buffer      buffer to send
      *  @param  size        size of the buffer

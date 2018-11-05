@@ -114,24 +114,6 @@ public:
         // move to next state
         return monitor.valid() ? new TcpClosed(this) : nullptr;
     }
-
-    /**
-     *  Abort the operation, immediately proceed to the final state
-     *  @param  monitor     Monitor that can be used to check if the tcp connection is still alive
-     *  @return TcpState    New implementation object
-     */
-    virtual TcpState *abort(const Monitor &monitor) override
-    {
-        // close the socket completely
-        cleanup();
-        
-        // report the error to user-space
-        // @todo do we have to report this?
-        //_handler->onError(_connection, "tcp shutdown aborted");
-        
-        // move to next state
-        return monitor.valid() ? new TcpClosed(this) : nullptr;
-    }
 };
 
 /**

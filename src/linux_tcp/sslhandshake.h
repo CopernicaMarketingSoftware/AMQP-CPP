@@ -268,25 +268,6 @@ public:
             }
         }
     }
-
-    /**
-     *  Close the connection immediately
-     *  @param  monitor     object to check if connection object is still active
-     *  @return TcpState    the new state
-     */
-    virtual TcpState *abort(const Monitor &monitor) override
-    {
-        // close the socket
-        close();
-        
-        // report to the user that the handshake was aborted
-        // @todo do we need this?
-        //_handler->onError(_connection, "ssl handshake aborted");
-        
-        // done, go to the closed state (plus check if connection still exists, because
-        // after the onError() call the user space program may have destructed that object)
-        return monitor.valid() ? new TcpClosed(this) : nullptr;
-    }
 };
     
 /**
