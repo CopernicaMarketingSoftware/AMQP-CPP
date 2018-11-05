@@ -54,26 +54,6 @@ private:
     Connection _connection;
     
     /**
-     *  Method that is called after the connection was constructed
-     *  @param  connection      The connection that was attached to the handler
-     */
-    virtual void onAttached(Connection *connection) override
-    {
-        // pass on to the handler
-        _handler->onAttached(this);
-    }
-
-    /**
-     *  Method that is called when the connection is destructed
-     *  @param  connection      The connection that was detached from the handler
-     */
-    virtual void onDetached(Connection *connection) override
-    {
-        // pass on to the handler
-        _handler->onDetached(this);
-    }
-
-    /**
      *  Method that is called when the heartbeat frequency is negotiated.
      *  @param  connection      The connection that suggested a heartbeat interval
      *  @param  interval        The suggested interval from the server

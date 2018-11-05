@@ -34,9 +34,6 @@ namespace AMQP {
 ConnectionImpl::ConnectionImpl(Connection *parent, ConnectionHandler *handler, const Login &login, const std::string &vhost) :
     _parent(parent), _handler(handler), _login(login), _vhost(vhost)
 {
-    // tell the handler that it is attached to this connection
-    _handler->onAttached(_parent);
-    
     // we need to send a protocol header
     send(ProtocolHeaderFrame());
 }
@@ -51,9 +48,6 @@ ConnectionImpl::~ConnectionImpl()
 
     // invalidate all channels, so they will no longer call methods on this channel object
     for (auto iter = _channels.begin(); iter != _channels.end(); iter++) iter->second->detach();
-
-    // tell the handler that it is no longer attached to this connection
-    _handler->onDetached(_parent);
 }
 
 /**

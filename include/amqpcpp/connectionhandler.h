@@ -42,38 +42,6 @@ public:
     virtual ~ConnectionHandler() = default;
     
     /**
-     *  Method that is called immediately after a connection has been attached 
-     *  to the handler. This method is called right after the connection object
-     *  was constructed. You can override this method if you want to initialize
-     *  your handler for this specific connection. This is especially useful if 
-     *  you use your handler to deal with multiple connections, and cannot use 
-     *  the constructor for initialization.
-     * 
-     *  @param  connection      The connection object that was just constructed
-     */
-    virtual void onAttached(Connection *connection)
-    {
-        // make sure compilers dont complain about unused parameters
-        (void) connection;
-    }
-    
-    /**
-     *  Method that is called right before a connection object is destructed.
-     *  This is the counterpart of the onAttached() method.
-     * 
-     *  Wacht out: the connection object that is passed to this method is in 
-     *  the process of being destructed, which makes it unsafe to call any 
-     *  methods on it.
-     *  
-     *  @param  connection      The connection that is being destructed
-     */
-    virtual void onDetached(Connection *connection)
-    {
-        // make sure compilers dont complain about unused parameters
-        (void) connection;
-    }
-
-    /**
      *  Method that is called when the heartbeat frequency is negotiated
      *  between the server and the client durion connection setup. You 
      *  normally do not have to override this method, because in the default 
