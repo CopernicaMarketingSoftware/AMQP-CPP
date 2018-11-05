@@ -58,6 +58,30 @@ std::size_t TcpConnection::queued() const
 }
 
 /**
+ *  Assign a new state
+ *  @param  monitor
+ *  @param  state
+ *  @return bool
+ */
+bool TcpConnection::assign(const Monitor &monitor, TcpState *state)
+{
+    // not possible if object is already destructed
+    if (!monitor.valid()) return false;
+    
+    // destruct the old state first (this could destruct "this")
+    _state.reset(nullptr);
+    
+    // leap out if object was destructed
+    if (!monitor.valid()) return false;
+    
+    // assign the new state
+    _state.reset(state);
+    
+    // done
+    return true;
+}
+
+/**
  *  Process the TCP connection
  *  This method should be called when the filedescriptor that is registered
  *  in the event loop becomes active. You should pass in a flag holding the
@@ -84,17 +108,7 @@ void TcpConnection::process(int fd, int flags)
 
     // in a bizarre set of circumstances, the user may have implemented the
     // handler in such a way that the connection object was destructed
-    if (!monitor.valid()) 
-    {
-        // ok, user code is weird, connection object no longer exist, get rid of the state too
-        delete newstate;
-    }
-    else
-    {
-        // replace it with the new implementation
-        // @todo destructing the existing _state may destruct the entire object
-        _state.reset(newstate);
-    }
+    if (!assign(monitor, newstate)) delete newstate;
 }
 
 /**
@@ -108,17 +122,23 @@ void TcpConnection::flush()
     // keep looping
     while (true)
     {
+        // get the old state
+        auto *oldstate = _state.get();
+        
         // flush the object
         auto *newstate = _state->flush(monitor);
         
         // done if object no longer exists
-        if (!monitor.valid()) return;
-        
-        // also done if the object is still in the same state
-        if (newstate == _state.get()) return;
+        if (newstate == nullptr || newstate == oldstate || !monitor.valid()) return;
         
         // replace the new state
-        _state.reset(newstate);
+        if (assign(monitor, newstate)) continue;
+        
+        // the "this" object was destructed
+        delete newstate;
+        
+        // leap out because there is nothing left to do
+        return;
     }
 }
 
@@ -136,8 +156,17 @@ bool TcpConnection::close(bool immediate)
     // fail the connection / report the error to user-space
     _connection.fail("connection prematurely closed by client");
     
+    // construct a monitor to check if object is still alive
+    Monitor monitor(this);
+    
+    // get rid of the old state
+    _state.reset(nullptr);
+    
+    // leap out if object was destructed
+    if (!monitor.valid()) return true;
+    
     // change the state
-    _state.reset(new TcpClosed(_state.get()));
+    _state.reset(new TcpClosed(this));
     
     // done, we return true because the connection is closed
     return true;
