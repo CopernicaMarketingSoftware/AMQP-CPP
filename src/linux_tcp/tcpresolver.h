@@ -108,7 +108,7 @@ private:
                 _error = strerror(errno);
 
                 // close socket because connect failed
-                close(_socket);
+                ::close(_socket);
                     
                 // socket no longer is valid
                 _socket = -1;

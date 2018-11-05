@@ -30,16 +30,6 @@ namespace AMQP {
  */
 class TcpShutdown : public TcpExtState
 {
-protected:
-    /**
-     *  Method to report the result to the user
-     */
-    virtual void report()
-    {
-        // report that the connection was closed
-        _parent->onClosed(this);
-    }
-
 public:
     /**
      *  Constructor
@@ -107,9 +97,6 @@ public:
     {
         // immediately close the socket
         cleanup();
-        
-        // report to the user that the operation is finished
-        report();
         
         // move to next state
         return monitor.valid() ? new TcpClosed(this) : nullptr;

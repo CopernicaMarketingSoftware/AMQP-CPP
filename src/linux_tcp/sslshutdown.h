@@ -67,7 +67,6 @@ private:
             
         default:
             // go to the final state (if not yet disconnected)
-            // @todo special treatment for ssl-protocol errors
             return proceed(monitor);
         }
     }

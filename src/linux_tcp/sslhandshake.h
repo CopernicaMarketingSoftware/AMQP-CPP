@@ -46,28 +46,6 @@ private:
     
     
     /**
-     *  Close the socket
-     *  @return bool
-     */
-    bool close()
-    {
-        // do nothing if already closed
-        if (_socket < 0) return false;
-        
-        // and stop monitoring it
-        _parent->onIdle(this, _socket, 0);
-
-        // close the socket
-        ::close(_socket);
-        
-        // forget filedescriptor
-        _socket = -1;
-        
-        // done
-        return true;
-    }
-    
-    /**
      *  Report a new state
      *  @param  monitor
      *  @return TcpState
@@ -80,24 +58,16 @@ private:
         // leap out if the user space function destructed the object
         if (!monitor.valid()) return nullptr;
 
-        // copy the socket because we might forget it
-//        auto socket = _socket;
-
-        // forget the socket member to prevent that it is closed by the destructor
-        _socket = -1;
-        
         // if connection is allowed, we move to the next state
         if (allowed) return new SslConnected(this, std::move(_ssl), std::move(_out));
         
         // report that the connection is broken
-        // @todo do we need this?
-        //_handler->onError(_connection, "TLS connection has been rejected");
+        _parent->onError(this, "TLS connection has been rejected");
         
         // the onError method could have destructed this object
         if (!monitor.valid()) return nullptr;
         
         // shutdown the connection
-        // @todo the onClosed() does not have to be called
         return new SslShutdown(this, std::move(_ssl));
     }
     
@@ -108,16 +78,14 @@ private:
      */
     TcpState *reportError(const Monitor &monitor)
     {
-        // close the socket
-        close();
-        
         // we have an error - report this to the user
-        // @todo do we need this?
-        //_handler->onError(_connection, "failed to setup ssl connection");
+        _parent->onError(this, "failed to setup ssl connection");
         
-        // done, go to the closed state (plus check if connection still exists, because
-        // after the onError() call the user space program may have destructed that object)
-        return monitor.valid() ? new TcpClosed(this) : nullptr;
+        // stop if connection is gone
+        if (!monitor.valid()) return nullptr;
+
+        // done, shutdown the tcp connection
+        return new TcpShutdown(this);
     }
     
     /**
@@ -167,21 +135,7 @@ public:
     /**
      *  Destructor
      */
-    virtual ~SslHandshake() noexcept
-    {
-        // leap out if socket is invalidated
-        if (_socket < 0) return;
-        
-        // the object got destructed without moving to a new state, this 
-        // situation should normally not occur
-        ::close(_socket);
-    }
-
-    /**
-     *  The filedescriptor of this connection
-     *  @return int
-     */
-    virtual int fileno() const override { return _socket; }
+    virtual ~SslHandshake() noexcept = default;
 
     /**
      *  Number of bytes in the outgoing buffer

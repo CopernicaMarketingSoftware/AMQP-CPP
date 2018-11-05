@@ -88,6 +88,7 @@ void TcpConnection::process(int fd, int flags)
     else
     {
         // replace it with the new implementation
+        // @todo destructing the existing _state may destruct the entire object
         _state.reset(newstate);
     }
 }
@@ -178,8 +179,8 @@ void TcpConnection::onError(Connection *connection, const char *message)
     // remember the old state (this is necessary because _state may be modified by user-code)
     auto *oldstate = _state.get();
     
-    // tell the state that an error occured at the amqp level
-    auto *newstate = _state->onAmqpError(monitor, message);
+    // tell the state that the connection should be closed asap
+    auto *newstate = _state->close();
     
     // leap out if nothing changes
     if (newstate == nullptr || newstate == oldstate) return;
@@ -200,8 +201,8 @@ void TcpConnection::onClosed(Connection *connection)
     // remember the old state (this is necessary because _state may be modified by user-code)
     auto *oldstate = _state.get();
     
-    // tell the state that the connection was closed at the amqp level
-    auto *newstate = _state->onAmqpClosed(monitor);
+    // tell the state that the connection should be closed asap
+    auto *newstate = _state->close();
     
     // leap out if nothing changes
     if (newstate == nullptr || newstate == oldstate) return;

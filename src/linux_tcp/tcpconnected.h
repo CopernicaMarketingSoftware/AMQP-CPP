@@ -58,50 +58,30 @@ private:
 
     
     /**
-     *  Start an elegant shutdown
-     * 
-     *  @todo remove this method
-     */
-    void shutdown2()
-    {
-        // we will shutdown the socket in a very elegant way, we notify the peer 
-        // that we will not be sending out more write operations
-        ::shutdown(_socket, SHUT_WR);
-        
-        // we still monitor the socket for readability to see if our close call was
-        // confirmed by the peer
-        _parent->onIdle(this, _socket, readable);
-    }
-    
-    /**
      *  Helper method to report an error
-     *  @param  monitor     Monitor to check validity of "this"
      *  @return bool        Was an error reported?
      */
-    bool reportError(const Monitor &monitor)
+    bool reportError()
     {
         // some errors are ok and do not (necessarily) mean that we're disconnected
         if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) return false;
 
-        // tell the connection that it failed
-        // @todo we should report an error, but that could be wrong, because it calls back to us
+        // tell the parent that it failed
+        _parent->onError(this, "connection lost");
 
-        // we're no longer interested in the socket (this also calls onClosed())
-        cleanup();
-        
         // done
         return true;
     }
     
     /**
-     *  Construct the next state
+     *  Construct the shutdown state
      *  @param  monitor     Object that monitors whether connection still exists
      *  @return TcpState*
      */
     TcpState *nextState(const Monitor &monitor)
     {
-        // if the object is still in a valid state, we can move to the close-state, 
-        // otherwise there is no point in moving to a next state
+        // if the object is still in a valid state, we can treat the connection
+        // as closed otherwise there is no point in moving to a next state
         return monitor.valid() ? new TcpClosed(this) : nullptr;
     }
     
@@ -129,12 +109,6 @@ public:
     virtual ~TcpConnected() noexcept = default;
 
     /**
-     *  The filedescriptor of this connection
-     *  @return int
-     */
-    virtual int fileno() const override { return _socket; }
-
-    /**
      *  Number of bytes in the outgoing buffer
      *  @return std::size_t
      */
@@ -159,7 +133,7 @@ public:
             auto result = _out.sendto(_socket);
             
             // are we in an error state?
-            if (result < 0 && reportError(monitor)) return nextState(monitor);
+            if (result < 0 && reportError()) return nextState(monitor);
             
             // if buffer is empty by now, we no longer have to check for 
             // writability, but only for readability
@@ -173,7 +147,7 @@ public:
             ssize_t result = _in.receivefrom(_socket, _parent->expected());
             
             // are we in an error state?
-            if (result < 0 && reportError(monitor)) return nextState(monitor);
+            if (result < 0 && reportError()) return nextState(monitor);
             
             // @todo should we also check for result == 0
 
@@ -256,34 +230,16 @@ public:
         // all has been sent
         return this;
     }
-    
-    /**
-     *  When the AMQP transport layer is closed
-     *  @param  monitor     Object that can be used if connection is still alive
-     *  @return TcpState    New implementation object
-     */
-    virtual TcpState *onAmqpClosed(const Monitor &monitor) override
-    {
-        // move to the tcp shutdown state
-        return new TcpShutdown(this);
-    }
 
     /**
-     *  When an error occurs in the AMQP protocol
-     *  @param  monitor     Monitor that can be used to check if the connection is still alive
-     *  @param  message     The error message
-     *  @return TcpState    New implementation object
+     *  Gracefully close the connection
+     *  @return TcpState    The next state
      */
-    virtual TcpState *onAmqpError(const Monitor &monitor, const char *message) override
+    virtual TcpState *close() override 
     {
-        // tell the user about it
-        // @todo do this somewhere else
-        //_handler->onError(_connection, message);
+        // @todo what if we're still busy receiving data?
         
-        // stop if the object was destructed
-        if (!monitor.valid()) return nullptr;
-        
-        // move to the tcp shutdown state
+        // start the tcp shutdown
         return new TcpShutdown(this);
     }
 

@@ -307,24 +307,8 @@ public:
     /**
      *  Destructor
      */
-    virtual ~SslConnected() noexcept
-    {
-        // no cleanup if socket is gone
-        if (_socket < 0) return;
-        
-        // and stop monitoring it
-        _parent->onIdle(this, _socket, 0);
-
-        // close the socket
-        ::close(_socket);
-    }
+    virtual ~SslConnected() noexcept = default;
     
-    /**
-     *  The filedescriptor of this connection
-     *  @return int
-     */
-    virtual int fileno() const override { return _socket; }
-
     /**
      *  Number of bytes in the outgoing buffer
      *  @return std::size_t
@@ -438,37 +422,11 @@ public:
     }
 
     /**
-     *  When the AMQP transport layer is closed
-     *  @param  monitor     Object that can be used if connection is still alive
-     *  @return TcpState    New implementation object
+     *  Gracefully close the connection
+     *  @return TcpState    The next state
      */
-    virtual TcpState *onAmqpClosed(const Monitor &monitor) override
-    {
-        // remember that the object is going to be closed
-        _closed = true;
-        
-        // if the previous operation is still in progress we can wait for that
-        if (_state != state_idle) return this;
-        
-        // the connection can be closed right now, move to the next state
-        return new SslShutdown(this, std::move(_ssl));
-    }
-
-    /**
-     *  When an error occurs in the AMQP protocol
-     *  @param  monitor     Monitor that can be used to check if the connection is still alive
-     *  @param  message     The error message
-     *  @return TcpState    New implementation object
-     */
-    virtual TcpState *onAmqpError(const Monitor &monitor, const char *message) override
-    {
-        // tell the user about it
-        // @todo do we need this here?
-        //_handler->onError(_connection, message);
-        
-        // stop if the object was destructed
-        if (!monitor.valid()) return nullptr;
-
+    virtual TcpState *close() override 
+    { 
         // remember that the object is going to be closed
         _closed = true;
         

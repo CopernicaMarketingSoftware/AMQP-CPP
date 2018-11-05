@@ -30,7 +30,7 @@ protected:
     int _socket;
     
     /**
-     *  Clean-up the socket
+     *  Clean-up the socket, and call the onClosed() method
      */
     void cleanup()
     {

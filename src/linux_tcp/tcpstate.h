@@ -93,6 +93,12 @@ public:
     }
 
     /**
+     *  Gracefully close the connection
+     *  @return TcpState    The next state
+     */
+    virtual TcpState *close() { return this; }
+
+    /**
      *  Flush the connection, all outgoing operations should be completed.
      * 
      *  If the state changes during the operation, the new state object should
@@ -115,21 +121,6 @@ public:
      *  @param  heartbeat   suggested heartbeat
      */
     virtual void maxframe(size_t maxframe) {}
-
-    /**
-     *  Events that can take place during the AMQP protocol
-     * 
-     *  Both events also trigger the end of a valid connection, and should
-     *  be used to tear down the TCP connection.
-     * 
-     *  @todo are these appropriate names?
-     * 
-     *  @param  monitor
-     *  @param  TcpState
-     */
-    virtual TcpState *onAmqpError(const Monitor &monitor, const char *error) { return this; }
-    virtual TcpState *onAmqpClosed(const Monitor &monitor) { return this; }
-
 };
 
 /**

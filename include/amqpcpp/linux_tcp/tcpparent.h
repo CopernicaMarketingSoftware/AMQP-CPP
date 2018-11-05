@@ -65,7 +65,7 @@ public:
     virtual void onIdle(TcpState *state, int socket, int events) = 0;
 
     /**
-     *  Method that is called when an error occurs (the connection is lost then)
+     *  Method that is called when an error occurs (the connection is lost)
      *  @param  state
      *  @param  error
      */
