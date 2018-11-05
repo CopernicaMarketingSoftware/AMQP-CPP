@@ -143,8 +143,6 @@ private:
             
         default:
 
-            // @todo report an error to all channels
-        
             // ssl level error, we have to tear down the tcp connection
             return monitor.valid() ? new TcpShutdown(this) : nullptr;
         }
