@@ -38,8 +38,6 @@ public:
     /**
      *  Method that is called immediately after a connection has been constructed. 
      *  @param  connection      The connection object that was just constructed
-     * 
-     *  @see    ConnectionHandler::onAttached
      */
     virtual void onAttached(TcpConnection *connection)
     {
@@ -48,12 +46,14 @@ public:
     }
     
     /**
-     *  Method that is called right before a connection object is destructed.
-     *  @param  connection      The connection that is being destructed
-     * 
-     *  @see    ConnectionHandler::onDetached
+     *  Method that is called when the TCP connection ends up in a connected state
+     *  This method is called after the TCP connection has been set up, but before
+     *  the (optional) secure TLS connection is ready, and before the AMQP login 
+     *  handshake has been completed. If this step has been set, the onClosed()
+     *  method will also always be called when the connection is closed.
+     *  @param  connection  The TCP connection
      */
-    virtual void onDetached(TcpConnection *connection)
+    virtual void onConnected(TcpConnection *connection) 
     {
         // make sure compilers dont complain about unused parameters
         (void) connection;
@@ -107,12 +107,11 @@ public:
     }
 
     /**
-     *  Method that is called when the AMQP connection ends up in a connected state
-     *  This method is called after the TCP connection has been set up, the (optional)
-     *  secure TLS connection, and the AMQP login handshake has been completed.
+     *  Method that is called after the AMQP login handshake has been completed
+     *  and the connection object is ready for sending out actual AMQP instructions
      *  @param  connection  The TCP connection
      */
-    virtual void onConnected(TcpConnection *connection) 
+    virtual void onReady(TcpConnection *connection) 
     {
         // make sure compilers dont complain about unused parameters
         (void) connection;
@@ -121,7 +120,6 @@ public:
     /**
      *  Method that is called when the server sends a heartbeat to the client
      *  @param  connection      The connection over which the heartbeat was received
-     *
      *  @see    ConnectionHandler::onHeartbeat
      */
     virtual void onHeartbeat(TcpConnection *connection) 
@@ -131,7 +129,11 @@ public:
     }
     
     /**
-     *  Method that is called when the TCP connection ends up in an error state
+     *  Method that is called when the connection ends up in an error state
+     *  This could either be an error at the AMQP level, but could also
+     *  be an error at the TCP of SSL level (like a broken connection).
+     *  If the connection is connected (the onConnected() method was called
+     *  before), the onClosed() method is going to be called too.
      *  @param  connection  The TCP connection
      *  @param  message     Error message
      */
@@ -143,10 +145,23 @@ public:
     }
     
     /**
-     *  Method that is called when the TCP connection is closed
+     *  Method that is called when the TCP connection is closed. This method
+     *  is always called if you have also received a call to onConnected().
      *  @param  connection  The TCP connection
      */
     virtual void onClosed(TcpConnection *connection) 
+    {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+    }
+
+    /**
+     *  Method that is called when the handler will no longer be notified.
+     *  This is the last call to your handler, and it is typically used
+     *  to clean up stuff.
+     *  @param  connection      The connection that is being destructed
+     */
+    virtual void onDetached(TcpConnection *connection)
     {
         // make sure compilers dont complain about unused parameters
         (void) connection;

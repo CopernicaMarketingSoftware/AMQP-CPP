@@ -27,7 +27,11 @@ namespace AMQP {
 TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
     _handler(handler),
     _state(new TcpResolver(this, address.hostname(), address.port(), address.secure())),
-    _connection(this, address.login(), address.vhost()) {}
+    _connection(this, address.login(), address.vhost()) 
+{
+    // tell the handler
+    _handler->onAttached(this);
+}
 
 /**
  *  Destructor
@@ -167,7 +171,7 @@ void TcpConnection::onData(Connection *connection, const char *buffer, size_t si
 }
 
 /**
- *  Method called when the connection ends up in an error state
+ *  Method called when the AMQP connection ends up in an error state
  *  @param  connection      The connection that entered the error state
  *  @param  message         Error message
  */
@@ -175,6 +179,9 @@ void TcpConnection::onError(Connection *connection, const char *message)
 {
     // monitor to check if "this" is destructed
     Monitor monitor(this);
+    
+    // tell this to the user
+    _handler->onError(this, message);
     
     // remember the old state (this is necessary because _state may be modified by user-code)
     auto *oldstate = _state.get();
@@ -209,6 +216,50 @@ void TcpConnection::onClosed(Connection *connection)
     
     // assign the new state
     _state.reset(newstate);
+}
+
+/**
+ *  Method that is called when an error occurs (the connection is lost)
+ *  @param  state
+ *  @param  error
+ *  @param  connected
+ */
+void TcpConnection::onError(TcpState *state, const char *message, bool connected)
+{
+    // if the object is still connected, we only have to report the error and
+    // we wait for the subsequent call to the onClosed() method
+    if (connected) return _handler->onError(this, message);
+    
+    // monitor to check if "this" is destructed
+    Monitor monitor(this);
+
+    // tell the handler
+    _handler->onError(this, message);
+    
+    // leap out if object was destructed
+    if (!monitor.valid()) return;
+    
+    // tell the handler that no further events will be fired
+    _handler->onDetached(this);
+}
+
+/**
+ *  Method to be called when it is detected that the connection was closed
+ *  @param  state
+ */
+void TcpConnection::onClosed(TcpState *state)
+{
+    // monitor to check if "this" is destructed
+    Monitor monitor(this);
+
+    // tell the handler
+    _handler->onClosed(this);
+    
+    // leap out if object was destructed
+    if (!monitor.valid()) return;
+    
+    // tell the handler that no further events will be fired
+    _handler->onDetached(this);
 }
 
 /**

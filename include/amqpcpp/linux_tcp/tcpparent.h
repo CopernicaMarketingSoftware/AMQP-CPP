@@ -40,14 +40,13 @@ public:
      */
     virtual ~TcpParent() = default;
 
+
     /**
-     *  Method to be called when data was received
+     *  Method that is called when the TCP connection has been established
      *  @param  state
-     *  @param  buffer
-     *  @return size_t
      */
-    virtual size_t onReceived(TcpState *state, const Buffer &buffer) = 0;
-    
+    virtual void onConnected(TcpState *state) = 0;
+
     /**
      *  Method that is called when the connection is secured
      *  @param  state
@@ -55,6 +54,14 @@ public:
      *  @return bool
      */
     virtual bool onSecured(TcpState *state, const SSL *ssl) = 0;
+
+    /**
+     *  Method to be called when data was received
+     *  @param  state
+     *  @param  buffer
+     *  @return size_t
+     */
+    virtual size_t onReceived(TcpState *state, const Buffer &buffer) = 0;
     
     /**
      *  Method to be called when we need to monitor a different filedescriptor
@@ -68,8 +75,9 @@ public:
      *  Method that is called when an error occurs (the connection is lost)
      *  @param  state
      *  @param  error
+     *  @param  connected
      */
-    virtual void onError(TcpState *state, const char *message) = 0;
+    virtual void onError(TcpState *state, const char *message, bool connected = true) = 0;
 
     /**
      *  Method to be called when it is detected that the connection was nicely closed

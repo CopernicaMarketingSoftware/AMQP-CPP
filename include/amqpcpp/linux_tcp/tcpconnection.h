@@ -42,10 +42,8 @@ private:
      *  The state of the TCP connection - this state objecs changes based on 
      *  the state of the connection (resolving, connected or closed)
      *  @var    std::unique_ptr<TcpState>
-     * 
-     *  @todo   why is this a shared pointer?
      */
-    std::shared_ptr<TcpState> _state;
+    std::unique_ptr<TcpState> _state;
 
     /**
      *  The underlying AMQP connection
@@ -92,10 +90,8 @@ private:
      */
     virtual void onConnected(Connection *connection) override
     {
-        // @todo we may need this, because from this moment on we can pass an onClosed()
-        
         // pass on to the handler
-        _handler->onConnected(this);
+        _handler->onReady(this);
     }
 
     /**
@@ -103,6 +99,28 @@ private:
      *  @param  connection      The connection that was closed and that is now unusable
      */
     virtual void onClosed(Connection *connection) override;
+    
+    /**
+     *  Method that is called when the tcp connection has been established
+     *  @param  state
+     */
+    virtual void onConnected(TcpState *state) override
+    {
+        // pass on to the handler
+        _handler->onConnected(this);
+    }
+
+    /**
+     *  Method that is called when the connection is secured
+     *  @param  state
+     *  @param  ssl
+     *  @return bool
+     */
+    virtual bool onSecured(TcpState *state, const SSL *ssl) override
+    {
+        // pass on to user-space
+        return _handler->onSecured(this, ssl);
+    }
 
     /**
      *  Method to be called when data was received
@@ -117,18 +135,6 @@ private:
     }
     
     /**
-     *  Method that is called when the connection is secured
-     *  @param  state
-     *  @param  ssl
-     *  @return bool
-     */
-    virtual bool onSecured(TcpState *state, const SSL *ssl) override
-    {
-        // pass on to user-space
-        return _handler->onSecured(this, ssl);
-    }
-    
-    /**
      *  Method to be called when we need to monitor a different filedescriptor
      *  @param  state
      *  @param  fd
@@ -139,6 +145,14 @@ private:
         // pass on to user-space
         return _handler->monitor(this, socket, events);
     }
+
+    /**
+     *  Method that is called when an error occurs (the connection is lost)
+     *  @param  state
+     *  @param  error
+     *  @param  connected
+     */
+    virtual void onError(TcpState *state, const char *message, bool connected) override;
 
     /**
      *  Method to be called when it is detected that the connection was closed
@@ -163,6 +177,12 @@ public:
      *  @param  hostname        The address to connect to
      */
     TcpConnection(TcpHandler *handler, const Address &address);
+    
+    /**
+     *  No copying
+     *  @param  that
+     */
+    TcpConnection(const TcpConnection &that) = delete;
     
     /**
      *  Destructor

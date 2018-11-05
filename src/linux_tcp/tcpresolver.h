@@ -192,6 +192,12 @@ public:
         // do we have a valid socket?
         if (_socket >= 0) 
         {
+            // report that the network-layer is connected
+            _parent->onConnected(this);
+
+            // handler callback might have destroyed connection
+            if (!monitor.valid()) return nullptr;
+            
             // if we need a secure connection, we move to the tls handshake
             // @todo catch possible exception
             if (_secure) return new SslHandshake(this, _hostname, std::move(_buffer));
@@ -202,7 +208,7 @@ public:
         else
         {
             // report error
-            _parent->onError(this, _error.data());
+            _parent->onError(this, _error.data(), false);
         
             // handler callback might have destroyed connection
             if (!monitor.valid()) return nullptr;
