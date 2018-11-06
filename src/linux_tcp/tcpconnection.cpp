@@ -112,37 +112,6 @@ void TcpConnection::process(int fd, int flags)
 }
 
 /**
- *  Flush the tcp connection
- */
-void TcpConnection::flush()
-{
-    // monitor the object for destruction
-    Monitor monitor(this);
-
-    // keep looping
-    while (true)
-    {
-        // get the old state
-        auto *oldstate = _state.get();
-        
-        // flush the object
-        auto *newstate = _state->flush(monitor);
-        
-        // done if object no longer exists
-        if (newstate == nullptr || newstate == oldstate || !monitor.valid()) return;
-        
-        // replace the new state
-        if (assign(monitor, newstate)) continue;
-        
-        // the "this" object was destructed
-        delete newstate;
-        
-        // leap out because there is nothing left to do
-        return;
-    }
-}
-
-/**
  *  Close the connection
  *  @return bool
  */

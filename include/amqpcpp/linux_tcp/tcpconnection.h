@@ -218,14 +218,6 @@ public:
     void process(int fd, int flags);
     
     /**
-     *  Flush the connection - all unsent bytes are sent to the socket rigth away
-     *  This is a blocking operation. The connection object normally only sends data
-     *  when the socket is known to be writable, but with this method you can force
-     *  the outgoing buffer to be fushed
-     */
-    void flush();
-    
-    /**
      *  Close the connection in an elegant fashion. This closes all channels and the 
      *  TCP connection. Note that the connection is not immediately closed: first all
      *  pending operations are completed, and then an AMQP closing-handshake is

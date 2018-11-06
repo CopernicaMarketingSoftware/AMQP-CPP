@@ -99,24 +99,6 @@ public:
     virtual TcpState *close() { return this; }
 
     /**
-     *  Flush the connection, all outgoing operations should be completed.
-     * 
-     *  If the state changes during the operation, the new state object should
-     *  be returned instead, or nullptr if the user has closed the connection
-     *  in the meantime. If the connection object got destructed by a user space
-     *  call, this method should return nullptr. A monitor object is pass in to
-     *  allow the flush() method to check if the connection still exists.
-     * 
-     *  If this object returns a new state object (instead of "this"), the 
-     *  connection object will immediately proceed with calling flush() on that 
-     *  new state object too.
-     * 
-     *  @param  monitor     Monitor that can be used to check if the tcp connection is still alive
-     *  @return TcpState    New implementation object
-     */
-    virtual TcpState *flush(const Monitor &monitor) { return this; }
-    
-    /**
      *  Install max-frame size
      *  @param  heartbeat   suggested heartbeat
      */

@@ -235,20 +235,6 @@ public:
     }
     
     /**
-     *  Flush state / wait for the connection to complete
-     *  @param  monitor     Object to check if connection still exists
-     *  @return             New implementation object
-     */
-    virtual TcpState *flush(const Monitor &monitor) override
-    {
-        // just wait for the other thread to be ready
-        _thread.join();
-        
-        // proceed to the next state
-        return proceed(monitor);
-    }
-
-    /**
      *  Send data over the connection
      *  @param  buffer      buffer to send
      *  @param  size        size of the buffer

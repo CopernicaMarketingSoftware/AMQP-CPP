@@ -85,7 +85,7 @@ private:
         if (!monitor.valid()) return nullptr;
 
         // done, shutdown the tcp connection
-        return new TcpShutdown(this);
+        return new TcpClosed(this);
     }
     
     /**
@@ -185,42 +185,6 @@ public:
     {
         // the handshake is still busy, outgoing data must be cached
         _out.add(buffer, size); 
-    }
-
-    /**
-     *  Flush the connection, sent all buffered data to the socket
-     *  @param  monitor     Object to check if connection still exists
-     *  @return TcpState    new tcp state
-     */
-    virtual TcpState *flush(const Monitor &monitor) override
-    {
-        // create an object to wait for the filedescriptor to becomes active
-        Poll poll(_socket);
-        
-        // keep looping
-        while (true)
-        {
-            // start the ssl handshake
-            int result = OpenSSL::SSL_do_handshake(_ssl);
-        
-            // if the connection succeeds, we can move to the ssl-connected state
-            if (result == 1) return nextstate(monitor);
-        
-            // error was returned, so we must investigate what is going on
-            auto error = OpenSSL::SSL_get_error(_ssl, result);
-            
-            // check the error
-            switch (error) {
-
-            // if openssl reports that socket readability or writability is needed,
-            // we wait for that until this situation is reached
-            case SSL_ERROR_WANT_READ:   poll.readable(true); break;
-            case SSL_ERROR_WANT_WRITE:  poll.active(true); break;
-        
-            // something is wrong, we proceed to the next state
-            default: return reportError(monitor);
-            }
-        }
     }
 };
     

@@ -18,7 +18,7 @@
  */
 #include "tcpoutbuffer.h"
 #include "tcpinbuffer.h"
-#include "tcpshutdown.h"
+#include "tcpextstate.h"
 #include "poll.h"
 
 /**
@@ -51,10 +51,10 @@ private:
     size_t _reallocate = 0;
     
     /**
-     *  Have we already made the last report to the user (about an error or closed connection?)
+     *  Did the user ask to elegantly close the connection?
      *  @var bool
      */
-    bool _finalized = false;
+    bool _closed = false;
 
     
     /**
@@ -66,19 +66,19 @@ private:
         // some errors are ok and do not (necessarily) mean that we're disconnected
         if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) return false;
 
-        // tell the parent that it failed
-        _parent->onError(this, "connection lost");
+        // tell the parent that it failed (but not if the connection was elegantly closed)
+        if (!_closed) _parent->onError(this, "connection lost");
 
         // done
         return true;
     }
     
     /**
-     *  Construct the shutdown state
+     *  Construct the final state
      *  @param  monitor     Object that monitors whether connection still exists
      *  @return TcpState*
      */
-    TcpState *nextState(const Monitor &monitor)
+    TcpState *finalState(const Monitor &monitor)
     {
         // if the object is still in a valid state, we can treat the connection
         // as closed otherwise there is no point in moving to a next state
@@ -133,7 +133,7 @@ public:
             auto result = _out.sendto(_socket);
             
             // are we in an error state?
-            if (result < 0 && reportError()) return nextState(monitor);
+            if (result < 0 && reportError()) return finalState(monitor);
             
             // if buffer is empty by now, we no longer have to check for 
             // writability, but only for readability
@@ -147,7 +147,7 @@ public:
             ssize_t result = _in.receivefrom(_socket, _parent->expected());
             
             // are we in an error state?
-            if (result < 0 && reportError()) return nextState(monitor);
+            if (result < 0 && reportError()) return finalState(monitor);
             
             // @todo should we also check for result == 0
 
@@ -205,42 +205,27 @@ public:
     }
     
     /**
-     *  Flush the connection, sent all buffered data to the socket
-     *  @param  monitor     Object to check if connection still lives
-     *  @return TcpState    new tcp state
-     */
-    virtual TcpState *flush(const Monitor &monitor) override
-    {
-        // create an object to wait for the filedescriptor to becomes active
-        Poll poll(_socket);
-
-        // keep running until the out buffer is not empty
-        while (_out)
-        {
-            // poll the socket, is it already writable?
-            if (!poll.writable(true)) return this;
-            
-            // socket is writable, send as much data as possible
-            auto *newstate = process(monitor, _socket, writable);
-            
-            // are we done
-            if (newstate != this) return newstate;
-        }
-        
-        // all has been sent
-        return this;
-    }
-
-    /**
      *  Gracefully close the connection
      *  @return TcpState    The next state
      */
     virtual TcpState *close() override 
     {
-        // @todo what if we're still busy receiving data?
+        // do nothing if already closed
+        if (_closed) return this;
+
+        // remember that the connection is closed
+        _closed = true;
+        
+        // we will shutdown the socket in a very elegant way, we notify the peer 
+        // that we will not be sending out more write operations
+        shutdown(_socket, SHUT_WR);
+        
+        // we still monitor the socket for readability to see if our close call was
+        // confirmed by the peer
+        _parent->onIdle(this, _socket, readable);
         
         // start the tcp shutdown
-        return new TcpShutdown(this);
+        return this;
     }
 
     /**

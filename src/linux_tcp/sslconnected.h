@@ -142,9 +142,11 @@ private:
             return monitor.valid() ? this : nullptr;
             
         default:
+            // report an error to user-space
+            _parent->onError(this, "ssl protocol error");
 
             // ssl level error, we have to tear down the tcp connection
-            return monitor.valid() ? new TcpShutdown(this) : nullptr;
+            return monitor.valid() ? new TcpClosed(this) : nullptr;
         }
     }
     
@@ -341,64 +343,6 @@ public:
         // closed, but instead of moving to the shutdown-state right, we call proceed()
         // because that function is a little more careful
         return proceed();
-    }
-
-    /**
-     *  Flush the connection, sent all buffered data to the socket
-     *  @param  monitor     Object to check if connection still exists
-     *  @return TcpState    new tcp state
-     */
-    virtual TcpState *flush(const Monitor &monitor) override
-    {
-        // we are not going to do this if object is busy reading
-        if (_state == state_receiving) return this;
-        
-        // create an object to wait for the filedescriptor to becomes active
-        Poll poll(_socket);
-
-        // we are going to check for errors after the openssl operations, so we make 
-        // sure that the error queue is currently completely empty
-        OpenSSL::ERR_clear_error();
-        
-        // keep looping while we have an outgoing buffer
-        while (_out)
-        {
-            // move to the idle-state
-            _state = state_idle;
-            
-            // try to send more data from the outgoing buffer
-            auto result = _out.sendto(_ssl);
-            
-            // was this a success?
-            if (result > 0)
-            {
-                // proceed to the next state
-                auto *nextstate = proceed();
-                
-                // leap out if we move to a different state
-                if (nextstate != this) return nextstate;
-            }
-            else
-            {
-                // error was returned, so we must investigate what is going on
-                auto error = OpenSSL::SSL_get_error(_ssl, result);
-
-                // get the next state given the error
-                auto *nextstate = repeat(monitor, state_sending, error);
-                
-                // leap out if we move to a different state
-                if (nextstate != this) return nextstate;
-                
-                // check the type of error, and wait now
-                switch (error) {
-                case SSL_ERROR_WANT_READ:   poll.readable(true); break;
-                case SSL_ERROR_WANT_WRITE:  poll.active(true); break;
-                }
-            }
-        }
-        
-        // done
-        return this;
     }
 
     /**

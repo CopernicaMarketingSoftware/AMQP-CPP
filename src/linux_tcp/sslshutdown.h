@@ -38,8 +38,8 @@ private:
      */
     virtual TcpState *proceed(const Monitor &monitor)
     {
-        // next state is to shutdown the connection
-        return new TcpShutdown(this);
+        // next state is to close the connection
+        return new TcpClosed(this);
     }
         
     /**
@@ -124,47 +124,6 @@ public:
             
         // the operation failed, we may have to repeat our call
         else return repeat(monitor, result);
-    }
-
-    /**
-     *  Flush the connection, sent all buffered data to the socket
-     *  @param  monitor     Object to check if connection still exists
-     *  @return TcpState    new tcp state
-     */
-    virtual TcpState *flush(const Monitor &monitor) override
-    {
-        // @todo do we even need this? isn't flushing reserved for data?
-        
-        // create an object to wait for the filedescriptor to becomes active
-        Poll poll(_socket);
-
-        // keep looping
-        while (true)
-        {
-            // close the connection
-            auto result = OpenSSL::SSL_shutdown(_ssl);
-
-            // on result==0 we need an additional call
-            while (result == 0) result = OpenSSL::SSL_shutdown(_ssl);
-                
-            // if this is a success, we can proceed with the event loop
-            if (result > 0) return proceed(monitor);
-
-            // error was returned, so we must investigate what is going on
-            auto error = OpenSSL::SSL_get_error(_ssl, result);
-            
-            // check the error
-            switch (error) {
-
-            // if openssl reports that socket readability or writability is needed,
-            // we wait for that until this situation is reached
-            case SSL_ERROR_WANT_READ:   poll.readable(true); break;
-            case SSL_ERROR_WANT_WRITE:  poll.active(true); break;
-        
-            // something is wrong, we proceed to the next state
-            default: return proceed(monitor);
-            }
-        }
     }
 };
 
