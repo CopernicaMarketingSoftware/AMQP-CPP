@@ -40,6 +40,34 @@ private:
     {
         std::cout << "connected" << std::endl;
     }
+
+    /**
+     *  Method that is called when the TCP connection ends up in a ready
+     *  @param  connection  The TCP connection
+     */
+    virtual void onReady(AMQP::TcpConnection *connection) override 
+    {
+        std::cout << "ready" << std::endl;
+    }
+
+    /**
+     *  Method that is called when the TCP connection is closed
+     *  @param  connection  The TCP connection
+     */
+    virtual void onClosed(AMQP::TcpConnection *connection) override 
+    {
+        std::cout << "closed" << std::endl;
+    }
+
+    /**
+     *  Method that is called when the TCP connection is detached
+     *  @param  connection  The TCP connection
+     */
+    virtual void onDetached(AMQP::TcpConnection *connection) override 
+    {
+        std::cout << "detached" << std::endl;
+    }
+    
     
 public:
     /**
@@ -105,7 +133,7 @@ public:
         _channel(channel), _queue(std::move(queue))
     {
         // initialize the libev structure
-        ev_timer_init(&_timer, callback, 0.005, 0.005);
+        ev_timer_init(&_timer, callback, 0.005, 1.005);
 
         // this object is the data
         _timer.data = this;
@@ -169,6 +197,8 @@ int main()
         
         // construct a timer that is going to publish stuff
         auto *timer = new MyTimer(loop, &channel, name);
+        
+        //connection.close();
     });
     
     // run the loop

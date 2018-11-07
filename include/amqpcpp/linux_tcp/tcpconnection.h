@@ -22,6 +22,7 @@ namespace AMQP {
  *  Forward declarations
  */
 class TcpState;
+class TcpChannel;
 
 /**
  *  Class definition
@@ -50,6 +51,12 @@ private:
      *  @var    Connection
      */
     Connection _connection;
+
+    /**
+     *  The channel may access out _connection
+     *  @friend
+     */
+    friend TcpChannel;
     
 
     /**
