@@ -183,25 +183,25 @@ public:
      */
     virtual bool process(ConnectionImpl *connection) override
     {
+        // the client properties
+        Table properties;
+
+        // move connection to handshake mode
+        connection->setProtocolOk(_properties, properties);
+
         // the capabilities
         Table capabilities;
         
         // we want a special treatment for authentication failures
         capabilities["authentication_failure_close"] = true;
         
-        // the peer properties
-        Table properties;
-        
         // fill the peer properties
-        properties["product"] = "Copernica AMQP library";
-        properties["version"] = "Unknown";
-        properties["platform"] = "Unknown";
-        properties["copyright"] = "Copyright 2015 - 2018 Copernica BV";
-        properties["information"] = "https://www.copernica.com";
-        properties["capabilities"] = capabilities;
-        
-        // move connection to handshake mode
-        connection->setProtocolOk();
+        if (!properties.contains("product")) properties["product"] = "Copernica AMQP library";
+        if (!properties.contains("version")) properties["version"] = "Unknown";
+        if (!properties.contains("platform")) properties["platform"] = "Unknown";
+        if (!properties.contains("copyright")) properties["copyright"] = "Copyright 2015 - 2018 Copernica BV";
+        if (!properties.contains("information")) properties["information"] = "https://www.copernica.com";
+        if (!properties.contains("capabilities")) properties["capabilities"] = capabilities;
         
         // send back a connection start ok frame
         connection->send(ConnectionStartOKFrame(properties, "PLAIN", connection->login().saslPlain(), "en_US"));

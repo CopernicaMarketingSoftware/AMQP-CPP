@@ -60,6 +60,15 @@ private:
     
 
     /**
+     *  Method that is called when the RabbitMQ server and your client application  
+     *  exchange some properties that describe their identity.
+     *  @param  connection      The connection about which information is exchanged
+     *  @param  server          Properties sent by the server
+     *  @param  client          Properties that are to be sent back
+     */
+    virtual void onProperties(Connection *connection, const Table &server, Table &client) override;
+
+    /**
      *  Method that is called when the heartbeat frequency is negotiated.
      *  @param  connection      The connection that suggested a heartbeat interval
      *  @param  interval        The suggested interval from the server

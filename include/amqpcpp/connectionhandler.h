@@ -42,15 +42,48 @@ public:
     virtual ~ConnectionHandler() = default;
     
     /**
+     *  When the connection is being set up, the client and server exchange
+     *  some information. This includes for example their name and version, 
+     *  copyright statement and the operating system name. Nothing in this 
+     *  exchange of information is very relevant for the actual AMQP protocol, 
+     *  but by overriding this method you can read out the information that 
+     *  was sent by the server, and you can decide which information you 
+     *  want to send back that describe the client. In RabbitMQ's management 
+     *  console the client-properties are visible on the "connections" tab, 
+     *  which could be helpful in certain scenarios, like debugging.
+     * 
+     *  The read-only "server" parameter contains the information sent by 
+     *  the server, while the "client" table may be filled with information
+     *  about your application. The AMQP protocol says that this table should
+     *  at least be filled with data for the "product", "version", "platform", 
+     *  "copyright" and "information" keys. However, you do not have to 
+     *  override this method, and even when you do, you do not have to ensure 
+     *  that these properties are indeed set, because the AMQP-CPP library 
+     *  takes care of filling in properties that were not explicitly set.
+     * 
+     *  @param  connection      The connection about which information is exchanged
+     *  @param  server          Properties sent by the server
+     *  @param  client          Properties that are to be sent back
+     */
+    virtual void onProperties(Connection *connection, const Table &server, Table &client)
+    {
+        // make sure compilers dont complaint about unused parameters
+        (void) connection;
+        (void) server;
+        (void) client;
+    }
+    
+    /**
      *  Method that is called when the heartbeat frequency is negotiated
      *  between the server and the client durion connection setup. You 
      *  normally do not have to override this method, because in the default 
-     *  implementation the suggested heartbeat is simply accepted by the client.
+     *  implementation the suggested heartbeat is simply rejected by the client.
      *
-     *  However, if you want to disable heartbeats, or when you want an
-     *  alternative heartbeat interval, you can override this method
-     *  to use an other interval. You should return 0 if you want to
-     *  disable heartbeats.
+     *  However, if you want to enable heartbeats you can override this 
+     *  method. You should "return interval" if you want to accept the
+     *  heartbeat interval that was suggested by the server, or you can
+     *  return an alternative value if you want a shorter or longer interval.
+     *  Return 0 if you want to disable heartbeats.
      * 
      *  If heartbeats are enabled, you yourself are responsible to send
      *  out a heartbeat every *interval* number of seconds by calling
@@ -71,7 +104,9 @@ public:
     }
 
     /**
-     *  Method that is called when data needs to be sent over the network
+     *  Method that is called by AMQP-CPP when data has to be sent over the 
+     *  network. You must implement this method and send the data over a
+     *  socket that is connected with RabbitMQ.
      *
      *  Note that the AMQP library does no buffering by itself. This means
      *  that this method should always send out all data or do the buffering
@@ -84,7 +119,8 @@ public:
     virtual void onData(Connection *connection, const char *buffer, size_t size) = 0;
 
     /**
-     *  Method that is called when the server sends a heartbeat to the client
+     *  Method that is called when the AMQP-CPP library received a heartbeat 
+     *  frame that was sent by the server to the client.
      *
      *  You do not have to do anything here, the client sends back a heartbeat
      *  frame automatically, but if you like, you can implement/override this
@@ -100,7 +136,8 @@ public:
 
     /**
      *  When the connection ends up in an error state this method is called.
-     *  This happens when data comes in that does not match the AMQP protocol
+     *  This happens when data comes in that does not match the AMQP protocol,
+     *  or when an error message was sent by the server to the client.
      *
      *  After this method is called, the connection no longer is in a valid
      *  state and can no longer be used.
@@ -126,10 +163,11 @@ public:
      * 
      *  According to the AMQP protocol, you must wait for the connection to become
      *  ready (and this onConnected method to be called) before you can start
-     *  using the Connection object. However, this AMQP library will cache all
-     *  methods that you call before the connection is ready, so in reality there
-     *  is no real reason to wait for this method to be called before you send
-     *  the first instructions.
+     *  sending instructions to RabbitMQ. However, if you prematurely do send 
+     *  instructions, this AMQP-CPP library caches all methods that you call 
+     *  before the connection is ready and flushes them the moment the connection
+     *  has been set up, so technically there is no real reason to wait for this 
+     *  method to be called before you send the first instructions.
      *
      *  @param  connection      The connection that can now be used
      */
@@ -143,7 +181,7 @@ public:
      *  Method that is called when the connection was closed.
      *
      *  This is the counter part of a call to Connection::close() and it confirms
-     *  that the connection was correctly closed.
+     *  that the connection was _correctly_ closed.
      *
      *  @param  connection      The connection that was closed and that is now unusable
      */

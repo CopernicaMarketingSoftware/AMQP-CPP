@@ -205,9 +205,20 @@ public:
 
     /**
      *  Mark the protocol as being ok
+     *  @param  server      properties sent by the server
+     *  @param  client      properties to be send back
      */
-    void setProtocolOk()
+    void setProtocolOk(const Table &server, Table &client)
     {
+        // if object is destructed
+        Monitor monitor(this);
+        
+        // check if user-space wants to set these properties
+        _handler->onProperties(_parent, server, client);
+        
+        // leap out if userspace destructed the object
+        if (!monitor.valid()) return;
+
         // move on to handshake state
         if (_state == state_protocol) _state = state_handshake;
     }

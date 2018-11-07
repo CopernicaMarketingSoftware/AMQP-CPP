@@ -86,6 +86,21 @@ public:
     }
 
     /**
+     *  Method that is called when the RabbitMQ server and your client application  
+     *  exchange some properties that describe their identity.
+     *  @param  connection      The connection about which information is exchanged
+     *  @param  server          Properties sent by the server
+     *  @param  client          Properties that are to be sent back
+     */
+    virtual void onProperties(TcpConnection *connection, const Table &server, Table &client)
+    {
+        // make sure compilers dont complaint about unused parameters
+        (void) connection;
+        (void) server;
+        (void) client;
+    }
+
+    /**
      *  Method that is called when the heartbeat frequency is negotiated
      *  between the server and the client. Applications can override this method
      *  if they want to use a different heartbeat interval (for example: return 0

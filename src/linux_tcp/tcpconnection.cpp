@@ -101,14 +101,33 @@ bool TcpConnection::close(bool immediate)
     // if no immediate disconnect is needed, we can simply start the closing handshake
     if (!immediate) return _connection.close();
     
+    // failing the connection could destruct "this"
+    Monitor monitor(this);
+    
     // fail the connection / report the error to user-space
     _connection.fail("connection prematurely closed by client");
+    
+    // stop if object was destructed
+    if (!monitor.valid()) return true;
     
     // change the state
     _state.reset(new TcpClosed(this));
     
     // done, we return true because the connection is closed
     return true;
+}
+
+/**
+ *  Method that is called when the RabbitMQ server and your client application  
+ *  exchange some properties that describe their identity.
+ *  @param  connection      The connection about which information is exchanged
+ *  @param  server          Properties sent by the server
+ *  @param  client          Properties that are to be sent back
+ */
+void TcpConnection::onProperties(Connection *connection, const Table &server, Table &client)
+{
+    // tell the handler
+    return _handler->onProperties(this, server, client);
 }
 
 /**

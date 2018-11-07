@@ -140,6 +140,16 @@ public:
     Table &set(const std::string &name, const char *value) { return set(name, LongString(std::string(value))); }
 
     /**
+     *  Is a certain field set in the table
+     *  @param  name
+     *  @return bool
+     */
+    bool contains(const std::string &name) const
+    {
+        return _fields.find(name) != _fields.end();
+    }
+
+    /**
      *  Get a field
      *
      *  If the field does not exist, an empty string field is returned
