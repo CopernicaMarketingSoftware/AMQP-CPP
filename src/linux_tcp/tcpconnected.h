@@ -135,9 +135,14 @@ public:
             // are we in an error state?
             if (result < 0 && reportError()) return finalState(monitor);
             
-            // if buffer is empty by now, we no longer have to check for 
-            // writability, but only for readability
-            if (!_out) _parent->onIdle(this, _socket, readable);
+            // if we still have a buffer, we keep on monitoring
+            if (_out) return this;
+            
+            // if we do not expect to send more data, we can close the connection for writing
+            if (_closed) shutdown(_socket, SHUT_WR);
+            
+            // check for readability (to find more data, or to be notified that connection is gone)
+            _parent->onIdle(this, _socket, readable);
         }
         
         // should we check for readability too?
@@ -185,6 +190,9 @@ public:
      */
     virtual void send(const char *buffer, size_t size) override
     {
+        // we stop sending when connection is closed
+        if (_closed) return;
+        
         // is there already a buffer of data that can not be sent?
         if (_out) return _out.add(buffer, size);
 
@@ -206,15 +214,17 @@ public:
     
     /**
      *  Gracefully close the connection
-     *  @return TcpState    The next state
      */
-    virtual TcpState *close() override 
+    virtual void close() override 
     {
         // do nothing if already closed
-        if (_closed) return this;
+        if (_closed) return;
 
         // remember that the connection is closed
         _closed = true;
+        
+        // wait until the outgoing buffer is all gone
+        if (_out) return;
         
         // we will shutdown the socket in a very elegant way, we notify the peer 
         // that we will not be sending out more write operations
@@ -223,9 +233,6 @@ public:
         // we still monitor the socket for readability to see if our close call was
         // confirmed by the peer
         _parent->onIdle(this, _socket, readable);
-        
-        // start the tcp shutdown
-        return this;
     }
 
     /**

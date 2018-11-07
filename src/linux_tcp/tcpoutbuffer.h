@@ -197,6 +197,18 @@ public:
     }
     
     /**
+     *  Clear the buffer
+     */
+    void clear()
+    {
+        // clear all buffers
+        _buffers.clear();
+        
+        // reset members
+        _skip = _size = 0;
+    }
+    
+    /**
      *  Fill an iovec buffer
      *  @param  buffers     the buffers to be filled
      *  @param  count       number of buffers available

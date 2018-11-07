@@ -119,7 +119,7 @@ private:
             _parent->onIdle(this, _socket, readable);
             
             // allow chaining
-            return monitor.valid() ? this : nullptr;
+            return this;
         
         case SSL_ERROR_WANT_WRITE:
             // remember state
@@ -129,17 +129,14 @@ private:
             _parent->onIdle(this, _socket, readable | writable);
 
             // allow chaining
-            return monitor.valid() ? this : nullptr;
+            return this;
 
         case SSL_ERROR_NONE:
             // we're ready for the next instruction from userspace
             _state = state_idle;
             
-            // turns out no error occured, an no action has to be rescheduled
-            _parent->onIdle(this, _socket, _out || _closed ? readable | writable : readable);
-
-            // allow chaining
-            return monitor.valid() ? this : nullptr;
+            // if already closed, proceed to next state
+            return proceed();
             
         default:
             // report an error to user-space
@@ -352,6 +349,9 @@ public:
      */
     virtual void send(const char *buffer, size_t size) override
     {
+        // do nothing if already busy closing
+        if (_closed) return;
+        
         // put the data in the outgoing buffer
         _out.add(buffer, size);
 
@@ -365,18 +365,17 @@ public:
 
     /**
      *  Gracefully close the connection
-     *  @return TcpState    The next state
      */
-    virtual TcpState *close() override 
+    virtual void close() override 
     { 
         // remember that the object is going to be closed
         _closed = true;
         
         // if the previous operation is still in progress we can wait for that
-        if (_state != state_idle) return this;
+        if (_state != state_idle) return;
         
-        // the connection can be closed right now, move to the next state
-        return new SslShutdown(this, std::move(_ssl));
+        // let's wait until the socket becomes writable (because then we can start the shutdown)
+        _parent->onIdle(this, _socket, readable | writable);
     }
 
     /**

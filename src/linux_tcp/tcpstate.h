@@ -93,10 +93,9 @@ public:
     }
 
     /**
-     *  Gracefully close the connection
-     *  @return TcpState    The next state
+     *  Gracefully start closing the connection
      */
-    virtual TcpState *close() { return this; }
+    virtual void close() {}
 
     /**
      *  Install max-frame size

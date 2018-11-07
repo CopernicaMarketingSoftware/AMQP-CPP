@@ -58,30 +58,6 @@ std::size_t TcpConnection::queued() const
 }
 
 /**
- *  Assign a new state
- *  @param  monitor
- *  @param  state
- *  @return bool
- */
-bool TcpConnection::assign(const Monitor &monitor, TcpState *state)
-{
-    // not possible if object is already destructed
-    if (!monitor.valid()) return false;
-    
-    // destruct the old state first (this could destruct "this")
-    _state.reset(nullptr);
-    
-    // leap out if object was destructed
-    if (!monitor.valid()) return false;
-    
-    // assign the new state
-    _state.reset(state);
-    
-    // done
-    return true;
-}
-
-/**
  *  Process the TCP connection
  *  This method should be called when the filedescriptor that is registered
  *  in the event loop becomes active. You should pass in a flag holding the
@@ -95,20 +71,23 @@ void TcpConnection::process(int fd, int flags)
     // monitor the object for destruction, because you never know what the user
     Monitor monitor(this);
         
-    // store the old state
-    auto *oldstate = _state.get();
-
     // pass on the the state, that returns a new impl
     auto *newstate = _state->process(monitor, fd, flags);
 
     // if the state did not change, we do not have to update a member,
     // when the newstate is nullptr, the object is (being) destructed
     // and we do not have to do anything else either
-    if (oldstate == newstate || newstate == nullptr) return;
+    if (newstate == nullptr || newstate == _state.get()) return;
 
-    // in a bizarre set of circumstances, the user may have implemented the
-    // handler in such a way that the connection object was destructed
-    if (!assign(monitor, newstate)) delete newstate;
+    // wrap the new state in a unique-ptr so that so that the old state
+    // is not destructed before the new one is assigned
+    std::unique_ptr<TcpState> ptr(newstate);
+    
+    // swap the two pointers (this ensures that the last operation of this
+    // method is to destruct the old state, which possible results in calls
+    // to user-space and the destruction of "this"
+    _state.swap(ptr);
+
 }
 
 /**
@@ -124,15 +103,6 @@ bool TcpConnection::close(bool immediate)
     
     // fail the connection / report the error to user-space
     _connection.fail("connection prematurely closed by client");
-    
-    // construct a monitor to check if object is still alive
-    Monitor monitor(this);
-    
-    // get rid of the old state
-    _state.reset(nullptr);
-    
-    // leap out if object was destructed
-    if (!monitor.valid()) return true;
     
     // change the state
     _state.reset(new TcpClosed(this));
@@ -181,17 +151,11 @@ void TcpConnection::onError(Connection *connection, const char *message)
     // tell this to the user
     _handler->onError(this, message);
     
-    // remember the old state (this is necessary because _state may be modified by user-code)
-    auto *oldstate = _state.get();
+    // object could be destructed by user-space
+    if (!monitor.valid()) return;
     
     // tell the state that the connection should be closed asap
-    auto *newstate = _state->close();
-    
-    // leap out if nothing changes
-    if (newstate == nullptr || newstate == oldstate) return;
-    
-    // assign the new state
-    _state.reset(newstate);
+    _state->close();
 }
 
 /**
@@ -200,20 +164,8 @@ void TcpConnection::onError(Connection *connection, const char *message)
  */
 void TcpConnection::onClosed(Connection *connection)
 {
-    // monitor to check if "this" is destructed
-    Monitor monitor(this);
-
-    // remember the old state (this is necessary because _state may be modified by user-code)
-    auto *oldstate = _state.get();
-    
     // tell the state that the connection should be closed asap
-    auto *newstate = _state->close();
-    
-    // leap out if nothing changes
-    if (newstate == nullptr || newstate == oldstate) return;
-    
-    // assign the new state
-    _state.reset(newstate);
+    _state->close();
 }
 
 /**
@@ -228,7 +180,8 @@ void TcpConnection::onError(TcpState *state, const char *message, bool connected
     // we wait for the subsequent call to the onClosed() method
     if (connected) return _handler->onError(this, message);
     
-    // monitor to check if "this" is destructed
+    // no extra onClosed() call is expected, so we have to report multiple things
+    // to user-space, we use a monitor to check if "this" is destructed in the middle
     Monitor monitor(this);
 
     // tell the handler

@@ -53,14 +53,6 @@ private:
     
 
     /**
-     *  Assign a new state
-     *  @param  monitor
-     *  @param  state
-     *  @return bool
-     */
-    bool assign(const Monitor &monitor, TcpState *state);
-
-    /**
      *  Method that is called when the heartbeat frequency is negotiated.
      *  @param  connection      The connection that suggested a heartbeat interval
      *  @param  interval        The suggested interval from the server
