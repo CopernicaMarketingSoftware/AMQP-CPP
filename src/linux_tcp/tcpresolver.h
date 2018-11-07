@@ -189,26 +189,28 @@ public:
      */
     TcpState *proceed(const Monitor &monitor)
     {
-        // do we have a valid socket?
-        if (_socket >= 0) 
+        // prevent exceptions
+        try
         {
+            // socket should be connected by now
+            if (_socket < 0) throw std::runtime_error(_error.data());
+        
             // report that the network-layer is connected
             _parent->onConnected(this);
 
             // handler callback might have destroyed connection
             if (!monitor.valid()) return nullptr;
             
-            // if we need a secure connection, we move to the tls handshake
-            // @todo catch possible exception
-            if (_secure) return new SslHandshake(this, _hostname, std::move(_buffer));
+            // if we need a secure connection, we move to the tls handshake (this could throw)
+            if (_secure) return new SslHandshake(this, std::move(_hostname), std::move(_buffer));
             
             // otherwise we have a valid regular tcp connection
-            return new TcpConnected(this, std::move(_buffer));
+            else return new TcpConnected(this, std::move(_buffer));
         }
-        else
+        catch (const std::runtime_error &error)
         {
             // report error
-            _parent->onError(this, _error.data(), false);
+            _parent->onError(this, error.what(), false);
         
             // handler callback might have destroyed connection
             if (!monitor.valid()) return nullptr;
