@@ -46,8 +46,8 @@ protected:
         // forget the socket
         _socket = -1;
         
-        // tell the handler that the connection is now closed
-        _parent->onClosed(this);
+        // tell the handler that the connection is now lost
+        _parent->onLost(this);
     }
     
     

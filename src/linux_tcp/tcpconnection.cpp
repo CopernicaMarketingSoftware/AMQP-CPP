@@ -186,6 +186,9 @@ void TcpConnection::onClosed(Connection *connection)
 {
     // tell the state that the connection should be closed asap
     _state->close();
+    
+    // report to the handler
+    _handler->onClosed(this);
 }
 
 /**
@@ -215,16 +218,16 @@ void TcpConnection::onError(TcpState *state, const char *message, bool connected
 }
 
 /**
- *  Method to be called when it is detected that the connection was closed
+ *  Method to be called when it is detected that the connection was lost
  *  @param  state
  */
-void TcpConnection::onClosed(TcpState *state)
+void TcpConnection::onLost(TcpState *state)
 {
     // monitor to check if "this" is destructed
     Monitor monitor(this);
 
     // tell the handler
-    _handler->onClosed(this);
+    _handler->onLost(this);
     
     // leap out if object was destructed
     if (!monitor.valid()) return;

@@ -172,10 +172,10 @@ private:
     virtual void onError(TcpState *state, const char *message, bool connected) override;
 
     /**
-     *  Method to be called when it is detected that the connection was closed
+     *  Method to be called when it is detected that the connection was lost
      *  @param  state
      */
-    virtual void onClosed(TcpState *state) override;
+    virtual void onLost(TcpState *state) override;
     
     /**
      *  The expected number of bytes

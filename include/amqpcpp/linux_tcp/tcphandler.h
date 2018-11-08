@@ -49,7 +49,7 @@ public:
      *  Method that is called when the TCP connection ends up in a connected state
      *  This method is called after the TCP connection has been set up, but before
      *  the (optional) secure TLS connection is ready, and before the AMQP login 
-     *  handshake has been completed. If this step has been set, the onClosed()
+     *  handshake has been completed. If this step has been set, the onLost()
      *  method will also always be called when the connection is closed.
      *  @param  connection  The TCP connection
      */
@@ -148,7 +148,7 @@ public:
      *  This could either be an error at the AMQP level, but could also
      *  be an error at the TCP of SSL level (like a broken connection).
      *  If the connection is connected (the onConnected() method was called
-     *  before), the onClosed() method is going to be called too.
+     *  before), the onLost() method is going to be called too.
      *  @param  connection  The TCP connection
      *  @param  message     Error message
      */
@@ -158,13 +158,26 @@ public:
         (void) connection;
         (void) message;
     }
-    
+
     /**
-     *  Method that is called when the TCP connection is closed. This method
-     *  is always called if you have also received a call to onConnected().
+     *  Method that is called when the AMQP protocol was gracefully ended. 
+     *  This is the counter-part of a call to connection.close(). Note that
+     *  the underlying TCP connection is still alive, and onLost() and
+     *  onDetached() (see below) are going to be called too.
      *  @param  connection  The TCP connection
      */
     virtual void onClosed(TcpConnection *connection) 
+    {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+    }
+    
+    /**
+     *  Method that is called when the TCP connection is lost or closed. This
+     *  is always called if you have also received a call to onConnected().
+     *  @param  connection  The TCP connection
+     */
+    virtual void onLost(TcpConnection *connection) 
     {
         // make sure compilers dont complain about unused parameters
         (void) connection;

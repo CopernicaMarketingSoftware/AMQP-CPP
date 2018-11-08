@@ -17,9 +17,10 @@ interface that you pass to the AMQP-CPP library and that the library will use
 for IO operations.
 
 Intercepting this network layer is however optional, the AMQP-CPP library also
-comes with a predefined Tcp module that can be used if you trust the AMQP library
-to take care of the network handling. In that case, the AMQP-CPP library does
-all the system calls to set up network connections and send and receive the data.
+comes with a predefined TCP and TLS module that can be used if you trust the AMQP 
+library to take care of the network (and optional TLS) handling. In that case, the 
+AMQP-CPP library does all the system and library calls to set up network connections 
+and send and receive the (possibly encrypted) data.
 
 This layered architecture makes the library extremely flexible and portable: it
 does not necessarily rely on operating system specific IO calls, and can be
@@ -68,14 +69,15 @@ network part required for the AMQP-CPP core library. If you use this module, you
 are required to link with `pthread` and `dl`.
 
 There are two methods to compile AMQP-CPP: CMake and Make. CMake is platform portable 
-and works on all systems, while the Makefile only works on Linux. Building of a shared 
-library is currently not supported on Windows.
+and works on all systems, while the Makefile only works on Linux. The two methods 
+create both a shared and a static version of the AMQP-CPP library. Building of a
+shared library is currently not supported on Windows. 
 
-After building there are two relevant files to include when using the library.
+After building there are two relevant files to #include when you use the library.
 
  File                | Include when?
 ---------------------|--------------------------------------------------------
- amqpcpp.h           | Always
+ amqpcpp.h           | Always needed for the core features
  amqpcpp/linux_tcp.h | If using the Linux-only TCP module
 
 On Windows you are required to define `NOMINMAX` when compiling code that includes public AMQP-CPP header files.
@@ -112,8 +114,8 @@ forget to link with the library. For gcc and clang the linker flag is -lamqpcpp.
 If you use the fullblown version of AMQP-CPP (with the TCP module), you also
 need to pass the -lpthread and -ldl linker flags, because the TCP module uses a 
 thread for running an asynchronous and non-blocking DNS hostname lookup, and it
-may dynamically look up functions from the openssl library if a secure connection
-to RabbitMQ has to be set up.
+must be linked with the "dl" library to allow dynamic lookups for functions from
+the openssl library if a secure connection to RabbitMQ has to be set up.
 
 
 HOW TO USE AMQP-CPP
@@ -122,7 +124,7 @@ HOW TO USE AMQP-CPP
 As we mentioned above, the library can be used in a network-agnostic fashion.
 It then does not do any IO by itself, and you need to pass an object to the
 library that the library can use for IO. So, before you start using the
-library, you first you need to create a class that extends from the
+library, you first need to create a class that extends from the
 ConnectionHandler base class. This is a class with a number of methods that are
 called by the library every time it wants to send out data, or when it needs to
 inform you that an error occured.
@@ -155,7 +157,7 @@ class MyConnectionHandler : public AMQP::ConnectionHandler
      *  to use.
      *  @param  connection      The connection that can now be used
      */
-    virtual void onConnected(AMQP::Connection *connection)
+    virtual void onReady(AMQP::Connection *connection)
     {
         // @todo
         //  add your own implementation, for example by creating a channel
@@ -180,17 +182,23 @@ class MyConnectionHandler : public AMQP::ConnectionHandler
     /**
      *  Method that is called when the connection was closed. This is the
      *  counter part of a call to Connection::close() and it confirms that the
-     *  connection was correctly closed.
+     *  AMQP connection was correctly closed.
      *
      *  @param  connection      The connection that was closed and that is now unusable
      */
-    virtual void onClosed(AMQP::Connection *connection) {}
+    virtual void onClosed(AMQP::Connection *connection) 
+    {
+        // @todo
+        //  add your own implementation, for example by closing down the
+        //  underlying TCP connection too
+    }
 
 
 };
 ````
-After you've implemented the ConnectionHandler class, you can start using
-the library by creating a Connection object, and one or more Channel objects:
+After you've implemented the ConnectionHandler class (which is entirely up to
+you), you can start using the library by creating a Connection object, and one 
+or more Channel objects:
 
 ````c++
 // create an instance of your own connection handler
@@ -214,13 +222,13 @@ on the heap with the C++ operator 'new'. That works just as well, and is in real
 life code probably more useful as you normally want to keep your handlers, connection
 and channel objects around for a longer time.
 
-But more importantly, you can see in the example above that we have created the
+But more importantly, you can see in the example above that we instantiated the
 channel object directly after we made the connection object, and we also
 started declaring exchanges and queues right away. However, under the hood, a handshake
 protocol is executed between the server and the client when the Connection
 object is first created. During this handshake procedure it is not permitted to send
 other instructions (like opening a channel or declaring a queue). It would therefore have been better
-if we had first waited for the connection to be ready (implement the MyConnectionHandler::onConnected() method),
+if we had first waited for the connection to be ready (implement the MyConnectionHandler::onReady() method),
 and create the channel object only then. But this is not strictly necessary.
 The methods that are called before the handshake is completed are cached by the
 AMQP library and will be executed the moment the handshake is completed and the
@@ -301,8 +309,11 @@ If you want to use this TCP module, you should not use the AMQP::Connection
 and AMQP::Channel classes that you saw above, but the alternative AMQP::TcpConnection
 and AMQP::TcpChannel classes instead. You also do not have to create your own class
 that implements the "AMQP::ConnectionHandler" interface - but a class that inherits
-from "AMQP::TcpHandler" instead. You especially need to implement the "monitor()"
-method in that class, as that is needed by the AMQP-CPP library to interact with
+from "AMQP::TcpHandler" instead. This AMQP::TcpHandler class contains a set of
+methods that you can override to intercept all sort of events that occur during the
+TCP and AMQP connection lifetime. Overriding these methods is mostly optional, because
+almost all have a default implementation. But you do need to implement the 
+"monitor()" method, as that is needed by the AMQP-CPP library to interact with
 the main event loop:
 
 ````c++
@@ -312,12 +323,56 @@ the main event loop:
 class MyTcpHandler : public AMQP::TcpHandler
 {
     /**
-     *  Method that is called by the AMQP library when the login attempt
-     *  succeeded. After this method has been called, the connection is ready
-     *  to use.
+     *  Method that is called by the AMQP library when a new connection
+     *  is associated with the handler. This is the first call to your handler
+     *  @param  connection      The connection that is attached to the handler
+     */
+    virtual void onAttached(AMQP::TcpConnection *connection) override {}
+    {
+        // @todo
+        //  add your own implementation, for example initialize things
+        //  to handle the connection.
+    }
+
+    /**
+     *  Method that is called by the AMQP library when the TCP connection 
+     *  has been established. After this method has been called, the library
+     *  still has take care of setting up the optional TLS layer and of
+     *  setting up the AMQP connection on top of the TCP layer., This method 
+     *  is always paired with a later call to onLost().
      *  @param  connection      The connection that can now be used
      */
-    virtual void onConnected(AMQP::TcpConnection *connection)
+    virtual void onConnected(AMQP::TcpConnection *connection) override
+    {
+        // @todo
+        //  add your own implementation, for example by creating a channel
+        //  instance, and start publishing or consuming
+    }
+
+    /**
+     *  Method that is called when the secure TLS connection has been established. 
+     *  This is only called for amqps:// connections. It allows you to inspect
+     *  whether the connection is secure enough for your liking (you can
+     *  for example check the server certicate). The AMQP protocol still has
+     *  to be started.
+     *  @param  connection      The connection that has been secured
+     *  @param  ssl             SSL structure from openssl library
+     *  @return bool            True if connection can be used
+     */
+    virtual bool onSecured(AMQP::TcpConnection *connection, const SSL *ssl) override
+    {
+        // @todo
+        //  add your own implementation, for example by reading out the
+        //  certificate and check if it is indeed yours
+        return true;
+    }
+
+    /**
+     *  Method that is called by the AMQP library when the login attempt
+     *  succeeded. After this the connection is ready to use.
+     *  @param  connection      The connection that can now be used
+     */
+    virtual void onReady(AMQP::TcpConnection *connection) override
     {
         // @todo
         //  add your own implementation, for example by creating a channel
@@ -327,26 +382,56 @@ class MyTcpHandler : public AMQP::TcpHandler
     /**
      *  Method that is called by the AMQP library when a fatal error occurs
      *  on the connection, for example because data received from RabbitMQ
-     *  could not be recognized.
+     *  could not be recognized, or the underlying connection is lost. This
+     *  call is normally followed by a call to onLost() (if the error occured
+     *  after the TCP connection was established) and onDetached().
      *  @param  connection      The connection on which the error occured
      *  @param  message         A human readable error message
      */
-    virtual void onError(AMQP::TcpConnection *connection, const char *message)
+    virtual void onError(AMQP::TcpConnection *connection, const char *message) override
     {
         // @todo
         //  add your own implementation, for example by reporting the error
-        //  to the user of your program, log the error, and destruct the
-        //  connection object because it is no longer in a usable state
+        //  to the user of your program and logging the error
     }
 
     /**
-     *  Method that is called when the connection was closed. This is the
-     *  counter part of a call to Connection::close() and it confirms that the
-     *  connection was correctly closed.
-     *
+     *  Method that is called when the AMQP protocol is ended. This is the
+     *  counter-part of a call to connection.close() to graceful shutdown
+     *  the connection. Note that the TCP connection is at this time still 
+     *  active, and you will also receive calls to onLost() and onDetached()
+     *  @param  connection      The connection over which the AMQP protocol ended
+     */
+    virtual void onClosed(AMQP::TcpConnection *connection) override 
+    {
+        // @todo
+        //  add your own implementation (probably not necessary, but it could
+        //  be useful if you want to do some something immediately after the
+        //  amqp connection is over, but do not want to wait for the tcp 
+        //  connection to shut down
+    }
+
+    /**
+     *  Method that is called when the TCP connection was closed or lost.
+     *  This method is always called if there was also a call to onConnected()
      *  @param  connection      The connection that was closed and that is now unusable
      */
-    virtual void onClosed(AMQP::TcpConnection *connection) {}
+    virtual void onLost(AMQP::TcpConnection *connection) override 
+    {
+        // @todo
+        //  add your own implementation (probably not necessary)
+    }
+
+    /**
+     *  Final method that is called. This signals that no further calls to your
+     *  handler will be made about the connection.
+     *  @param  connection      The connection that can be destructed
+     */
+    virtual void onDetached(AMQP::TcpConnection *connection) override 
+    {
+        // @todo
+        //  add your own implementation, like cleanup resources or exit the application
+    } 
 
     /**
      *  Method that is called by the AMQP-CPP library when it wants to interact
@@ -361,7 +446,7 @@ class MyTcpHandler : public AMQP::TcpHandler
      *  @param  fd              The filedescriptor that should be checked
      *  @param  flags           Bitwise or of AMQP::readable and/or AMQP::writable
      */
-    virtual void monitor(AMQP::TcpConnection *connection, int fd, int flags)
+    virtual void monitor(AMQP::TcpConnection *connection, int fd, int flags) override
     {
         // @todo
         //  add your own implementation, for example by adding the file

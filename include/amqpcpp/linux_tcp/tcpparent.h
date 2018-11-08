@@ -80,10 +80,10 @@ public:
     virtual void onError(TcpState *state, const char *message, bool connected = true) = 0;
 
     /**
-     *  Method to be called when it is detected that the connection was nicely closed
+     *  Method to be called when it is detected that the connection was lost
      *  @param  state
      */
-    virtual void onClosed(TcpState *state) = 0;
+    virtual void onLost(TcpState *state) = 0;
     
     /**
      *  The expected number of bytes
