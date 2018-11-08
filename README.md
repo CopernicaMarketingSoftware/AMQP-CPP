@@ -458,11 +458,11 @@ class MyTcpHandler : public AMQP::TcpHandler
 };
 ````
 
-You see that there are many methods that you can implement. The most important 
+You see that there are many methods in TcpHandler that you can implement. The most important 
 one is "monitor()". This method is used to integrate the AMQP filedescriptors in your
 application's event loop. For some popular event loops (libev, libuv, libevent), we 
 have already added example handler objects (see the next section for that). All the 
-other methods are optional to override. If often is a good idea to override the
+other methods are optional to override. It often is a good idea to override the
 onError() method to log or report errors and onDetached() for cleaning up stuff.
 AMQP-CPP has it's own buffers if you send instructions prematurely, but if you
 intend to send a lot of data over the connection, it also is a good idea to 
@@ -472,10 +472,8 @@ has been fully set up.
 Using the TCP module of the AMQP-CPP library is easier than using the
 raw AMQP::Connection and AMQP::Channel objects, because you do not have to
 create the sockets and connections yourself, and you also do not have to take
-care of buffering network data.
-
-The example that we gave above, looks slightly different if you make use of
-the TCP module:
+care of buffering network data. The example that we gave above, looks slightly 
+different if you make use of the TCP module:
 
 ````c++
 // create an instance of your own tcp handler
@@ -560,7 +558,7 @@ class MyTcpHandler : public AMQP::TcpHandler
      *  @param  ssl             SSL structure from the openssl library
      *  @return bool            true if connection is secure enough to start the AMQP protocol
      */
-    virtual bool onSecure(AMQP::TcpConnection *connection, const SSL *ssl) override
+    virtual bool onSecured(AMQP::TcpConnection *connection, const SSL *ssl) override
     {
         // @todo call functions from the openssl library to check the certificate,
         // like SSL_get_peer_certificate() or SSL_get_verify_result().
