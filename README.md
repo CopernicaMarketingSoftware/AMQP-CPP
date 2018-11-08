@@ -671,7 +671,7 @@ lasting algorithms after you've consumed a message from RabbitMQ, without having
 to worry about the connection being idle for too long.
 
 You can however choose to enable these heartbeats. If you want to enable heartbeats,
-simple implement the onNegotiate() method inside your ConnectionHandler or
+you should implement the onNegotiate() method inside your ConnectionHandler or
 TcpHandler class and have it return the interval that you find appropriate.
 
 ````c++
@@ -695,7 +695,8 @@ class MyTcpHandler : public AMQP::TcpHandler
 
         // @todo
         //  set a timer in your event loop, and make sure that you call
-        //  connection->heartbeat() every _interval_ seconds.
+        //  connection->heartbeat() every _interval_ seconds if no other
+        //  instruction was sent in that period.
 
         // return the interval that we want to use
         return interval;
@@ -703,12 +704,16 @@ class MyTcpHandler : public AMQP::TcpHandler
 };
 ````
 
-If you have enabled heartbeats, it is your own responsibility to ensure that the
+If you enable heartbeats, it is your own responsibility to ensure that the
 ```connection->heartbeat()``` method is called at least once during this period,
 or that you call one of the other channel or connection methods to send data
-over the connection.
+over the connection. Heartbeats are sent by the server too, RabbitMQ also ensures
+that _some data_ is sent over the connection during the heartbeat interval. It
+is also your responnsibility to shutdown the connection if you find out that
+the server stops sending data during this period.
 
-In the libev event loop implementation the heartbeats are enabled by default.
+If you use the AMQP::LibEvHandler event loop implementation, heartbeats are 
+enabled by default, and all these checks are automatically performed.
 
 
 CHANNELS
