@@ -4,6 +4,8 @@ AMQP-CPP
 [![Build Status](https://travis-ci.org/CopernicaMarketingSoftware/AMQP-CPP.svg?branch=master)](https://travis-ci.org/CopernicaMarketingSoftware/AMQP-CPP)
 [![Build status](https://ci.appveyor.com/api/projects/status/7xoc4y0flm0045yy/branch/master?svg=true)](https://ci.appveyor.com/project/mvdwerve/amqp-cpp/branch/master)
 
+**[Are you upgrading from AMQP-CPP 3.* to AMQP-CPP 4](#upgrading)**
+
 AMQP-CPP is a C++ library for communicating with a RabbitMQ message broker. The
 library can be used to parse incoming data from a RabbitMQ server, and to
 generate frames that can be sent to a RabbitMQ server.
@@ -1223,6 +1225,30 @@ of unacknowledged messages that you are allowed to have. RabbitMQ stops sending
 additional messages when the number of unacknowledges messages has reached this
 limit, and only sends additional messages when an earlier message gets acknowledged.
 To change the QOS, you can simple call Channel::setQos().
+
+
+UPGRADING
+=========
+
+AMQP-CPP 4.* is not always compatible with previous versions. Especially some 
+virtual methods in the ConnectionHandler and TcpHandler classes have been renamed 
+or are called during a different stage in the connection lifetime. Check 
+out this README file and the comments inside the connectionhandler.h and 
+tcphandler.h files to find out if your application has to be changed. You
+should especially check the following:
+
+- ConnectionHandler::onConnected has been renamed to ConnectionHandler::onReady
+- TcpHandler::onConnected is now called sooner: when the TCP connection is 
+  established, instead of when the AMQP connection is ready for instructions.
+- The new method TcpHandler::onReady is called when the AMQP connection is 
+  ready to be used (this is the old behavior of TcpHandler::onConnected)
+- TcpHandler::onError is no longer the last method that is called (TcpHandler::onLost 
+  could be called and TcpHandler::onDetached will be called after the error too)
+- TcpHandler::onClosed is now called to indicate the graceful end of the 
+  AMQP protocol, and not the end of TCP connection.
+- TcpHandler::onLost is called when the TCP connection is lost or closed.
+- The new method TcpHandler::onDetached is a better alternative for cleanup 
+  code instead of TcpHandler::onClosed and/or TcpHandler::onError.
 
 
 WORK IN PROGRESS
