@@ -306,7 +306,7 @@ bool ConnectionImpl::sendClose()
 /**
  *  Mark the connection as connected
  */
-void ConnectionImpl::setConnected()
+void ConnectionImpl::setReady()
 {
     // store connected state
     _state = state_connected;
@@ -316,7 +316,7 @@ void ConnectionImpl::setConnected()
     Monitor monitor(this);
 
     // inform handler
-    _handler->onConnected(_parent);
+    _handler->onReady(_parent);
     
     // the handler could have destructed us
     if (!monitor.valid()) return;

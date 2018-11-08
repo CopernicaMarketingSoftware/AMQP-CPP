@@ -4,7 +4,7 @@
  *  Message sent by the server to the client to confirm that a connection to
  *  a vhost could be established
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2018 Copernica BV
  */
 
 /**
@@ -79,8 +79,8 @@ public:
      */
     virtual bool process(ConnectionImpl *connection) override
     {
-        // all is ok, mark the connection as connected
-        connection->setConnected();
+        // all is ok, mark the connection as ready
+        connection->setReady();
         
         // done
         return true;

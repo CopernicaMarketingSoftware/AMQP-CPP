@@ -171,17 +171,19 @@ public:
      *
      *  @param  connection      The connection that can now be used
      */
-    virtual void onConnected(Connection *connection) 
+    virtual void onReady(Connection *connection) 
     { 
         // make sure compilers dont complain about unused parameters
         (void) connection; 
     }
 
     /**
-     *  Method that is called when the connection was closed.
+     *  Method that is called when the AMQP connection was closed.
      *
      *  This is the counter part of a call to Connection::close() and it confirms
-     *  that the connection was _correctly_ closed.
+     *  that the connection was _correctly_ closed. Note that this only applies
+     *  to the AMQP connection, the underlying TCP connection is not managed by
+     *  AMQP-CPP and is still active.
      *
      *  @param  connection      The connection that was closed and that is now unusable
      */

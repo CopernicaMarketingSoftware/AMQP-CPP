@@ -77,6 +77,7 @@ void TcpConnection::process(int fd, int flags)
     // if the state did not change, we do not have to update a member,
     // when the newstate is nullptr, the object is (being) destructed
     // and we do not have to do anything else either
+    // @todo what if close(true) is called that install the new TcpClosed() ????
     if (newstate == nullptr || newstate == _state.get()) return;
 
     // wrap the new state in a unique-ptr so that so that the old state

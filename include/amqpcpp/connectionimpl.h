@@ -254,9 +254,9 @@ public:
     }
 
     /**
-     *  Mark the connection as connected
+     *  Mark the connection as ready
      */
-    void setConnected();
+    void setReady();
 
     /**
      *  Retrieve the login data

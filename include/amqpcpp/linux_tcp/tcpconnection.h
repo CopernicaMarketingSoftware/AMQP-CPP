@@ -102,10 +102,10 @@ private:
     virtual void onError(Connection *connection, const char *message) override;
 
     /**
-     *  Method that is called when the connection is established
+     *  Method that is called when the AMQP connection is established
      *  @param  connection      The connection that can now be used
      */
-    virtual void onConnected(Connection *connection) override
+    virtual void onReady(Connection *connection) override
     {
         // pass on to the handler
         _handler->onReady(this);
