@@ -708,9 +708,10 @@ If you enable heartbeats, it is your own responsibility to ensure that the
 ```connection->heartbeat()``` method is called at least once during this period,
 or that you call one of the other channel or connection methods to send data
 over the connection. Heartbeats are sent by the server too, RabbitMQ also ensures
-that _some data_ is sent over the connection during the heartbeat interval. It
-is also your responnsibility to shutdown the connection if you find out that
-the server stops sending data during this period.
+that _some data_ is sent over the connection from the server to the client 
+during the heartbeat interval. It is also your responnsibility to shutdown 
+the connection if you find out that the server stops sending data during 
+this period.
 
 If you use the AMQP::LibEvHandler event loop implementation, heartbeats are 
 enabled by default, and all these checks are automatically performed.
