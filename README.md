@@ -345,8 +345,7 @@ class MyTcpHandler : public AMQP::TcpHandler
     virtual void onConnected(AMQP::TcpConnection *connection) override
     {
         // @todo
-        //  add your own implementation, for example by creating a channel
-        //  instance, and start publishing or consuming
+        //  add your own implementation (probably not needed)
     }
 
     /**
@@ -459,9 +458,16 @@ class MyTcpHandler : public AMQP::TcpHandler
 };
 ````
 
-The "monitor()" method can be used to integrate the AMQP filedescriptors in your
+You see that there are many methods that you can implement. The most important 
+one is "monitor()". This method is used to integrate the AMQP filedescriptors in your
 application's event loop. For some popular event loops (libev, libuv, libevent), we 
-have already added example handler objects (see the next section for that).
+have already added example handler objects (see the next section for that). All the 
+other methods are optional to override. If often is a good idea to override the
+onError() method to log or report errors and onDetached() for cleaning up stuff.
+AMQP-CPP has it's own buffers if you send instructions prematurely, but if you
+intend to send a lot of data over the connection, it also is a good idea to 
+implement the onReady() method and delay your calls until the AMQP connection 
+has been fully set up.
 
 Using the TCP module of the AMQP-CPP library is easier than using the
 raw AMQP::Connection and AMQP::Channel objects, because you do not have to
