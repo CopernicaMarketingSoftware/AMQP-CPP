@@ -259,7 +259,7 @@ public:
       */
     std::size_t channels() const
     {
-        // return the amount of channels this connection has
+        // return the number of channels this connection has
         return _connection.channels();
     }
 

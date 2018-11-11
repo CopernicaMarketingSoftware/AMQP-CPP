@@ -199,13 +199,18 @@ void TcpConnection::onClosed(Connection *connection)
  */
 void TcpConnection::onError(TcpState *state, const char *message, bool connected)
 {
-    // if the object is still connected, we only have to report the error and
-    // we wait for the subsequent call to the onClosed() method
-    if (connected) return _handler->onError(this, message);
-    
-    // no extra onClosed() call is expected, so we have to report multiple things
-    // to user-space, we use a monitor to check if "this" is destructed in the middle
+    // monitor to check if all operations are active
     Monitor monitor(this);
+    
+    // if there are still pending operations, they should be reported as error
+    _connection.fail(message);
+    
+    // stop if object was destructed
+    if (!monitor.valid()) return;
+
+    // if the object is still connected, we only have to report the error and
+    // we wait for the subsequent call to the onLost() method
+    if (connected) return _handler->onError(this, message);
 
     // tell the handler
     _handler->onError(this, message);
@@ -225,7 +230,7 @@ void TcpConnection::onLost(TcpState *state)
 {
     // monitor to check if "this" is destructed
     Monitor monitor(this);
-
+    
     // tell the handler
     _handler->onLost(this);
     
