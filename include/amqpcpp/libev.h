@@ -281,9 +281,6 @@ private:
             // initialize the libev structure
             ev_timer_init(&_timer, callback, timeout, timeout);
 
-            // and start it
-            ev_timer_start(_loop, &_timer);
-
             // the timer should not keep the event loop active
             ev_unref(_loop);
         }
@@ -309,11 +306,15 @@ private:
         }
         
         /**
-         *  Expose the selected heartbeat interval
+         *  Start the timer (and expose the interval)
          *  @return uint16_t
          */
-        uint16_t interval() const
+        uint16_t start()
         {
+            // start the timer
+            ev_timer_start(_loop, &_timer);
+            
+            // expose the interval
             return _interval;
         }
         
@@ -351,10 +352,7 @@ private:
                 for (auto &watcher : _watchers)
                 {
                     // do we have a match?
-                    if (watcher->fd() != fd) continue;
-                
-                    // change the events (and leap out)
-                    return watcher->events(events);
+                    if (watcher->contains(fd)) return watcher->events(events);
                 }
                 
                 // we should monitor a new filedescriptor
@@ -422,7 +420,7 @@ protected:
     virtual uint16_t onNegotiate(TcpConnection *connection, uint16_t interval) override
     {
         // lookup the wrapper
-        return lookup(connection)->interval();
+        return lookup(connection)->start();
     }
 
     /**
