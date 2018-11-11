@@ -478,9 +478,10 @@ protected:
 
     /**
      * The boost asio io_service::deadline_timer managed pointer.
+     * THIS IS DISABLED FOR NOW BECAUSE THIS BREAKS IF THERE IS MORE THAN ONE CONNECTION
      * @var class std::shared_ptr<Timer>
      */
-    std::shared_ptr<Timer> _timer;
+    //std::shared_ptr<Timer> _timer;
 
     /**
      *  Method that is called by AMQP-CPP to register a filedescriptor for readability or writability
@@ -529,6 +530,8 @@ protected:
      *  @param  interval        The suggested interval from the server
      *  @return uint16_t        The interval to use
      */
+    /* THIS IS DISABLED FOR NOW BECAUSE THIS BREAKS IF THERE IS MORE THAN ONE CONNECTION */
+    /*
     virtual uint16_t onNegotiate(TcpConnection *connection, uint16_t interval) override
     {
         // skip if no heartbeats are needed
@@ -540,6 +543,7 @@ protected:
         // we agree with the interval
         return interval;
     }
+    */
 
 public:
 
@@ -556,8 +560,8 @@ public:
      */
     explicit LibBoostAsioHandler(boost::asio::io_service &io_service) :
         _ioservice(io_service),
-        _strand(std::make_shared<boost::asio::io_service::strand>(_ioservice)),
-        _timer(std::make_shared<Timer>(_ioservice,_strand))
+        _strand(std::make_shared<boost::asio::io_service::strand>(_ioservice))
+        //_timer(std::make_shared<Timer>(_ioservice,_strand))
     {
 
     }
@@ -583,16 +587,6 @@ public:
      *  Destructor
      */
     ~LibBoostAsioHandler() override = default;
-
-    /**
-     * Make sure to stop the heartbeat timer after the connection is closed.
-     * Otherwise it will keep the service running forever.
-     */
-    void onClosed(TcpConnection* connection) override
-    {
-        (void)connection;
-        _timer.reset();
-    }
 };
 
 
