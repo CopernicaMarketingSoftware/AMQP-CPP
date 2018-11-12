@@ -252,6 +252,15 @@ public:
         // state must be connected
         return _state == state_closed;
     }
+    
+    /**
+     *  Is the connection in a usable state / not yet closed?
+     *  @return bool
+     */
+    bool usable() const
+    {
+        return (_state == state_protocol || _state == state_handshake || _state == state_connected) && !_closed;
+    }
 
     /**
      *  Mark the connection as ready

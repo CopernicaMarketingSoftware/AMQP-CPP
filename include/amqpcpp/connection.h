@@ -195,6 +195,16 @@ public:
     {
         return _implementation.expected();
     }
+    
+    /**
+     *  Is the connection in a usable state, or is it already closed or
+     *  in the process of being closed?
+     *  @return bool
+     */
+    bool usable() const
+    {
+        return _implementation.usable();
+    }
 
     /**
      *  Close the connection

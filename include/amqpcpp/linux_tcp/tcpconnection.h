@@ -237,6 +237,15 @@ public:
     bool close(bool immediate = false);
     
     /**
+     *  Is the connection in a usable state / not yet closed or being closed
+     *  @return bool
+     */
+    bool usable() const
+    {
+        return _connection.usable();
+    }
+    
+    /**
      *  The max frame size. Useful if you set up a buffer to parse incoming data: it does not have to exceed this size.
      *  @return uint32_t
      */
