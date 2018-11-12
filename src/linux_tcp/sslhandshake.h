@@ -105,9 +105,6 @@ private:
 public:
     /**
      *  Constructor
-     * 
-     *  @todo catch the exception!  
-     * 
      *  @param  state       Earlier state
      *  @param  hostname    The hostname to connect to
      *  @param  context     SSL context

@@ -230,7 +230,8 @@ public:
      *  TCP connection. Note that the connection is not immediately closed: first all
      *  pending operations are completed, and then an AMQP closing-handshake is
      *  performed. If you pass a parameter "immediate=true" the connection is 
-     *  immediately closed, without waiting for earlier commands
+     *  immediately closed, without waiting for earlier commands (and your handler's
+     *  onError() method is called about the premature close)
      *  @return bool
      */
     bool close(bool immediate = false);

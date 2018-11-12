@@ -29,7 +29,7 @@ private:
     fd_set _set;
 
     /**
-     *  The current socket // @todo what is it exactly?
+     *  The socket filedescriptor
      *  @var int
      */
     int _socket;

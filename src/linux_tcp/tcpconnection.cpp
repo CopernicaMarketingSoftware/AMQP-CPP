@@ -70,6 +70,9 @@ void TcpConnection::process(int fd, int flags)
 {
     // monitor the object for destruction, because you never know what the user
     Monitor monitor(this);
+
+    // remember the old state
+    auto *oldstate = _state.get();
         
     // pass on the the state, that returns a new impl
     auto *newstate = _state->process(monitor, fd, flags);
@@ -77,8 +80,7 @@ void TcpConnection::process(int fd, int flags)
     // if the state did not change, we do not have to update a member,
     // when the newstate is nullptr, the object is (being) destructed
     // and we do not have to do anything else either
-    // @todo what if close(true) is called that install the new TcpClosed() ????
-    if (newstate == nullptr || newstate == _state.get()) return;
+    if (newstate == nullptr || newstate == oldstate) return;
 
     // wrap the new state in a unique-ptr so that so that the old state
     // is not destructed before the new one is assigned
@@ -97,17 +99,21 @@ void TcpConnection::process(int fd, int flags)
  */
 bool TcpConnection::close(bool immediate)
 {
-    // @todo what if not yet connected / still doing a lookup / already disconnected?
-    
     // if no immediate disconnect is needed, we can simply start the closing handshake
     if (!immediate) return _connection.close();
-    
+
     // failing the connection could destruct "this"
     Monitor monitor(this);
     
     // fail the connection / report the error to user-space
-    _connection.fail("connection prematurely closed by client");
+    bool failed = _connection.fail("connection prematurely closed by client");
     
+    // stop if object was destructed
+    if (!monitor.valid()) return true;
+
+    // tell the handler that the connection was closed
+    if (failed) _handler->onError(this, "connection prematurely closed by client");
+
     // stop if object was destructed
     if (!monitor.valid()) return true;
     
@@ -203,20 +209,17 @@ void TcpConnection::onError(TcpState *state, const char *message, bool connected
     Monitor monitor(this);
     
     // if there are still pending operations, they should be reported as error
-    _connection.fail(message);
+    bool failed = _connection.fail(message);
     
     // stop if object was destructed
     if (!monitor.valid()) return;
 
+    // tell the handler
+    if (failed) _handler->onError(this, message);
+
     // if the object is still connected, we only have to report the error and
     // we wait for the subsequent call to the onLost() method
-    if (connected) return _handler->onError(this, message);
-
-    // tell the handler
-    _handler->onError(this, message);
-    
-    // leap out if object was destructed
-    if (!monitor.valid()) return;
+    if (connected || !monitor.valid()) return;
     
     // tell the handler that no further events will be fired
     _handler->onDetached(this);

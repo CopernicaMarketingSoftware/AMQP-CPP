@@ -161,7 +161,7 @@ public:
      *  called.
      * 
      *  @param  message     the message that has to be passed to all error handlers
-     *  @return bool
+     *  @return bool        false if the connection already was failed
      */
     bool fail(const char *message)
     {

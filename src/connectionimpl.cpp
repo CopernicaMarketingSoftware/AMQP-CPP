@@ -197,7 +197,7 @@ bool ConnectionImpl::fail(const Monitor &monitor, const char *message)
         // leap out if no longer valid
         if (!monitor.valid()) return false;
     }
-    
+
     // done
     return true;
 }

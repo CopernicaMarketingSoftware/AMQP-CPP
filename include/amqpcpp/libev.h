@@ -233,7 +233,6 @@ private:
             if (now >= _expire)
             {
                 // close the connection with immediate effect (this will destruct the connection)
-                // @todo do we want to report an error too?
                 _connection->close(true);
             }
             else
@@ -281,6 +280,9 @@ private:
             // initialize the libev structure
             ev_timer_init(&_timer, callback, timeout, timeout);
 
+            // start the timer (this is the time that we reserve for setting up the connection)
+            ev_timer_start(_loop, &_timer);
+
             // the timer should not keep the event loop active
             ev_unref(_loop);
         }
@@ -311,10 +313,7 @@ private:
          */
         uint16_t start()
         {
-            // start the timer
-            ev_timer_start(_loop, &_timer);
-            
-            // expose the interval
+            // expose the interval (the timer is already running, so we do not have to explicitly start it)
             return _interval;
         }
         
