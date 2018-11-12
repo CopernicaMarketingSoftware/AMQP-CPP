@@ -125,12 +125,23 @@ public:
     }
 
     /**
-     *  Is the channel connected?
+     *  Is the channel usable / not yet closed?
      *  @return bool
      */
-    bool connected()
+    bool usable() const
     {
-        return _implementation->connected();
+        return _implementation->usable();
+    }
+    
+    /**
+     *  Is the channel connected?
+     *  This method is deprecated: use Channel::usable()
+     *  @return bool
+     *  @deprecated
+     */
+    bool connected() const
+    {
+        return usable();
     }
 
     /**

@@ -71,8 +71,8 @@ void ChannelImpl::onError(const ErrorCallback &callback)
     // store callback
     _errorCallback = callback;
 
-    // if the channel is connected, all is ok
-    if (connected()) return;
+    // if the channel is usable, all is ok
+    if (usable()) return;
     
     // is the channel closing down?
     if (_state == state_closing) return callback("Channel is closing down");
@@ -246,8 +246,8 @@ Deferred &ChannelImpl::rollbackTransaction()
  */
 Deferred &ChannelImpl::close()
 {
-    // this is completely pointless if not connected
-    if (!connected()) return push(std::make_shared<Deferred>(_state == state_closing));
+    // this is completely pointless if already closed
+    if (!usable()) return push(std::make_shared<Deferred>(_state == state_closing));
     
     // send a channel close frame
     auto &handler = push(ChannelCloseFrame(_id));

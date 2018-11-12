@@ -251,10 +251,10 @@ public:
     Deferred &resume();
 
     /**
-     *  Is the channel connected?
+     *  Is the channel usable / not yet closed?
      *  @return bool
      */
-    bool connected()
+    bool usable() const
     {
         return _state == state_connected || _state == state_ready;
     }
