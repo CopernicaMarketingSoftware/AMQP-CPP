@@ -238,12 +238,20 @@ public:
     
     /**
      *  Is the connection in a usable state / not yet closed or being closed
+     *  When a connection is usable, you can send further commands over it. When it is
+     *  unusable, it may still be connected and finished queued commands.
      *  @return bool
      */
     bool usable() const
     {
         return _connection.usable();
     }
+    
+    /**
+     *  Is the connection closed and full dead? The entire TCP connection has been discarded.
+     *  @return bool
+     */
+    bool closed() const;
     
     /**
      *  The max frame size. Useful if you set up a buffer to parse incoming data: it does not have to exceed this size.

@@ -41,6 +41,12 @@ public:
      *  Destructor
      */
     virtual ~TcpClosed() noexcept = default;
+
+    /**
+     *  Is this a closed / dead state?
+     *  @return bool
+     */
+    virtual bool closed() const override { return true; }
 };
     
 /**

@@ -62,6 +62,12 @@ public:
      *  @return size_t
      */
     virtual std::size_t queued() const { return 0; }
+    
+    /**
+     *  Is this a closed / dead state?
+     *  @return bool
+     */
+    virtual bool closed() const { return false; }
 
     /**
      *  Process the filedescriptor in the object
