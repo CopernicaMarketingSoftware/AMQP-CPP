@@ -58,6 +58,15 @@ std::size_t TcpConnection::queued() const
 }
 
 /**
+ *  Is the connection closed and full dead? The entire TCP connection has been discarded.
+ *  @return bool
+ */
+bool TcpConnection::closed() const
+{
+    return _state->closed();
+}
+
+/**
  *  Process the TCP connection
  *  This method should be called when the filedescriptor that is registered
  *  in the event loop becomes active. You should pass in a flag holding the
