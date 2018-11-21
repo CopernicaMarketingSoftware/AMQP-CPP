@@ -623,7 +623,7 @@ public:
 
         // all later deferred objects should report an error, because it
         // was not possible to complete the instruction as the channel is
-        // now closed
+        // now closed (but the channel onError does not have to run)
         reportError("Channel has been closed", false);
 
         // done

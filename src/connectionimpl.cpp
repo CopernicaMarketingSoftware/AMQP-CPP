@@ -192,7 +192,7 @@ bool ConnectionImpl::fail(const Monitor &monitor, const char *message)
     while (!_channels.empty())
     {
         // report the errors
-        _channels.begin()->second->reportError(message, false);
+        _channels.begin()->second->reportError(message);
 
         // leap out if no longer valid
         if (!monitor.valid()) return false;
