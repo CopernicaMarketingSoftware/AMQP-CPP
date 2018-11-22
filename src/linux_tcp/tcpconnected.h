@@ -177,6 +177,8 @@ public:
             
             // we can remove the reallocate instruction
             _reallocate = 0;
+
+            if(_closed) return new TcpClosed(_parent);
         }
         
         // keep same object
