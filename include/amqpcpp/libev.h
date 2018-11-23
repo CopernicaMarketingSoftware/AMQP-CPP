@@ -190,6 +190,12 @@ private:
         ev_tstamp _expire;
         
         /**
+         *  Are heartbeats enabled?
+         *  @var bool
+         */
+        bool _enabled = false;
+        
+        /**
          *  Interval between heartbeats
          *  @var uint16_t
          */
@@ -216,6 +222,9 @@ private:
          */
         virtual void onExpired() override
         {
+            // do nothing if heartbeats are not enabled
+            if (!_enabled) return;
+            
             // get the current time
             ev_tstamp now = ev_now(_loop);
             
@@ -313,6 +322,9 @@ private:
          */
         uint16_t start()
         {
+            // remember that heartbeats are enabled
+            _enabled = true;
+            
             // expose the interval (the timer is already running, so we do not have to explicitly start it)
             return _interval;
         }
