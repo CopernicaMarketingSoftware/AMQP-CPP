@@ -151,8 +151,9 @@ private:
     /**
      *  Attach the connection
      *  @param  connection
+     *  @return bool
      */
-    void attach(Connection *connection);
+    bool attach(Connection *connection);
 
     /**
      *  Push a deferred result

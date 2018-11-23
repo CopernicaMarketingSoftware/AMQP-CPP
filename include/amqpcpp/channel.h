@@ -31,15 +31,14 @@ public:
      *  Construct a channel object
      * 
      *  The passed in connection pointer must remain valid for the 
-     *  lifetime of the channel.
+     *  lifetime of the channel. Watch out: this method throws an error
+     *  if the channel could not be constructed (for example because the
+     *  max number of AMQP channels has been reached)
      * 
      *  @param  connection
+     *  @throws std::runtime_error
      */
-    Channel(Connection *connection) : _implementation(new ChannelImpl()) 
-    {
-        // attach the connection to the channel
-        _implementation->attach(connection);
-    }
+    Channel(Connection *connection);
     
     /**
      *  Copy'ing of channel objects is not supported

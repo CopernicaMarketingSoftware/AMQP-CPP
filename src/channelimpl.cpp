@@ -96,8 +96,9 @@ void ChannelImpl::onError(const ErrorCallback &callback)
 /**
  *  Initialize the object with an connection
  *  @param  connection
+ *  @return bool
  */
-void ChannelImpl::attach(Connection *connection)
+bool ChannelImpl::attach(Connection *connection)
 {
     // get connection impl
     _connection = &connection->_implementation;
@@ -110,6 +111,9 @@ void ChannelImpl::attach(Connection *connection)
     {
         // this is invalid
         _state = state_closed;
+        
+        // failure
+        return false;
     }
     else 
     {
@@ -117,10 +121,13 @@ void ChannelImpl::attach(Connection *connection)
         _state = state_connected;
     
         // send the open frame
-        if (send(ChannelOpenFrame(_id))) return;
+        if (send(ChannelOpenFrame(_id))) return true;
 
-        // report an error
-        reportError("Channel could not be initialized", true);
+        // this is an error
+        _state = state_closed;
+        
+        // report failure
+        return false;
     }
 }    
 
