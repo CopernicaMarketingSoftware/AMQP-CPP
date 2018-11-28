@@ -51,9 +51,11 @@ macro (add_sources)
 endmacro()
 
 # add source files
-add_subdirectory(src)
+#add_subdirectory(src)
+aux_source_directory(src src_MAIN)
 if(AMQP-CPP_LINUX_TCP)
-    add_subdirectory(src/linux_tcp)
+    #add_subdirectory(src/linux_tcp)
+    aux_source_directory(src/linux_tcp src_LINUX_TCP)
 endif()
 
 # potentially build the examples
@@ -77,12 +79,14 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin)
 
 if(AMQP-CPP_BUILD_SHARED)
     # create shared lib
-    add_library(${PROJECT_NAME} SHARED ${SRCS})
+    #add_library(${PROJECT_NAME} SHARED ${SRCS})
+    add_library(${PROJECT_NAME} SHARED ${src_MAIN} ${src_LINUX_TCP})
     # set shared lib version
     set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${SO_VERSION})
 else()
     # create static lib
-    add_library(${PROJECT_NAME} STATIC ${SRCS})
+    #add_library(${PROJECT_NAME} STATIC ${SRCS})
+    add_library(${PROJECT_NAME} STATIC ${src_MAIN} ${src_LINUX_TCP})
 endif()
 
 # install rules
