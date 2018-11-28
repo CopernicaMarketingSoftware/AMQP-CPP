@@ -96,11 +96,12 @@ public:
 
     /**
      *  Send a ping/heartbeat to the channel to keep it alive
-     *  @return bool
+     *  @param  force       always send the heartbeat, even if the connection is not idle
+     *  @return bool        returns false if the send of the heartbeat failed
      */
-    bool heartbeat()
+    bool heartbeat(bool force=false)
     {
-        return _implementation.heartbeat();
+        return _implementation.heartbeat(force);
     }
 
     /**
