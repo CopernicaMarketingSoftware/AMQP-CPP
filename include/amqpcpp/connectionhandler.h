@@ -86,7 +86,7 @@ public:
      *  Return 0 if you want to disable heartbeats.
      * 
      *  If heartbeats are enabled, you yourself are responsible to send
-     *  out a heartbeat every *interval* number of seconds by calling
+     *  out a heartbeat every *interval / 2* number of seconds by calling
      *  the Connection::heartbeat() method.
      *
      *  @param  connection      The connection that suggested a heartbeat interval

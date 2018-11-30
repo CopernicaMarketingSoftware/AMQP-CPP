@@ -151,11 +151,9 @@ public:
             // read data from buffer
             ssize_t result = _in.receivefrom(_socket, _parent->expected());
             
-            // are we in an error state?
-            if (result < 0 && reportError()) return finalState(monitor);
+            // did we encounter end-of-file or are we in an error state?
+            if (result == 0 || (result < 0 && reportError())) return finalState(monitor);
             
-            // @todo should we also check for result == 0
-
             // we need a local copy of the buffer - because it is possible that "this"
             // object gets destructed halfway through the call to the parse() method
             TcpInBuffer buffer(std::move(_in));
