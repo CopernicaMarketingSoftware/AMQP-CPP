@@ -127,6 +127,13 @@
 #define le64toh(x) letoh64(x)
 
 /**
+ * FreeBSD handling
+ */
+#elif defined(__FreeBSD__)
+
+#include <sys/endian.h>
+
+/**
  *  Not on apple, and not on windows
  */
 #else
