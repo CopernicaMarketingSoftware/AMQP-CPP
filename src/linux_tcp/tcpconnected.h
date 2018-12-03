@@ -59,12 +59,17 @@ private:
     
     /**
      *  Helper method to report an error
+     *  This method also assumes that result <= 0 is an error, unless the operation can be retried.
+     *  @param  result      Result of the previous call to read() or write()
      *  @return bool        Was an error reported?
      */
-    bool reportError()
+    bool reportError(ssize_t result)
     {
+        // positive return values are no errors
+        if (result > 0) return false;
+        
         // some errors are ok and do not (necessarily) mean that we're disconnected
-        if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) return false;
+        if (result < 0 && (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)) return false;
 
         // tell the parent that it failed (but not if the connection was elegantly closed)
         if (!_closed) _parent->onError(this, "connection lost");
@@ -132,8 +137,8 @@ public:
             // send out the buffered data
             auto result = _out.sendto(_socket);
             
-            // are we in an error state?
-            if (result < 0 && reportError()) return finalState(monitor);
+            // are we in an error state? (0 bytes sent is weird, but not necessarily an error)
+            if (result < 0 && reportError(result)) return finalState(monitor);
             
             // if we still have a buffer, we keep on monitoring
             if (_out) return this;
@@ -152,7 +157,7 @@ public:
             ssize_t result = _in.receivefrom(_socket, _parent->expected());
             
             // did we encounter end-of-file or are we in an error state?
-            if (result == 0 || (result < 0 && reportError())) return finalState(monitor);
+            if (reportError(result)) return finalState(monitor);
             
             // we need a local copy of the buffer - because it is possible that "this"
             // object gets destructed halfway through the call to the parse() method
