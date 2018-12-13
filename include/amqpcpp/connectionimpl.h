@@ -218,10 +218,11 @@ public:
     }
 
     /**
-     *  Are we fully connected?
+     *  Are we fully connected and ready for instructions? This is true after the initial
+     *  protocol and login handshake were completed.
      *  @return bool
      */
-    bool connected() const
+    bool ready() const
     {
         // state must be connected
         return _state == state_connected;

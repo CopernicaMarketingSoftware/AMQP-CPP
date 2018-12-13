@@ -237,6 +237,15 @@ public:
     bool close(bool immediate = false);
     
     /**
+     *  Is the connection connected, meaning: it has passed the login handshake?
+     *  @return bool
+     */
+    bool ready() const
+    {
+        return _connection.ready();
+    }
+    
+    /**
      *  Is the connection in a usable state / not yet closed or being closed
      *  When a connection is usable, you can send further commands over it. When it is
      *  unusable, it may still be connected and finished queued commands.

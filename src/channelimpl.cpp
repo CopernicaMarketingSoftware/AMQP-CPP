@@ -81,7 +81,7 @@ void ChannelImpl::onError(const ErrorCallback &callback)
     if (_connection == nullptr) return callback("Channel is not linked to a connection");
     
     // if the connection is valid, this is a pure channel error
-    if (_connection->connected()) return callback("Channel is in an error state, but the connection is valid");
+    if (_connection->ready()) return callback("Channel is in an error state, but the connection is valid");
 
     // the connection is closing down
     if (_connection->closing()) return callback("Channel is in an error state, the AMQP connection is closing down");
