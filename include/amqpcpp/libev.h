@@ -20,6 +20,7 @@
  *  Dependencies
  */
 #include <ev.h>
+#include <list>
 #include "amqpcpp/linux_tcp.h"
 
 /**
@@ -173,9 +174,9 @@ private:
         
         /**
          *  IO-watchers to monitor filedescriptors
-         *  @var std::vector
+         *  @var std::list
          */
-        std::vector<std::unique_ptr<Watcher>> _watchers;
+        std::list<Watcher> _watchers;
         
         /**
          *  When should we send the next heartbeat?
@@ -220,19 +221,17 @@ private:
             // get the current time
             ev_tstamp now = ev_now(_loop);
             
-            // if the onNegotiate method was not yet called, and not heartbeat interval was negotiated
+            // if the onNegotiate method was not yet called, and no heartbeat interval was negotiated
             if (_interval == 0)
             {
-                // there is a theoretical scenario in which the onNegotiate method
-                // was overridden, and the connection is still connected
+                // there is a theoretical scenario in which the onNegotiate() method
+                // was overridden, so that the connection-timeout-timer expires, but 
+                // the connection is ready anyway -- in that case we should ignore the timeout
                 if (_connection->ready()) return;
                 
                 // the timer expired because the connection could not be set up in time,
                 // close the connection with immediate effect
                 _connection->close(true);
-                
-                // done
-                return;
             }
             else
             {
@@ -295,7 +294,7 @@ private:
             // store the object in the data "void*"
             _timer.data = this;
             
-            // initialize the libev structure
+            // initialize the libev structure, it should expire after the connection timeout
             ev_timer_init(&_timer, callback, timeout, 0.0);
 
             // start the timer (this is the time that we reserve for setting up the connection)
@@ -374,11 +373,11 @@ private:
             if (events == 0)
             {
                 // remove the io-watcher
-                _watchers.erase(std::remove_if(_watchers.begin(), _watchers.end(), [fd](const std::unique_ptr<Watcher> &watcher) -> bool {
+                _watchers.remove_if([fd](const Watcher &watcher) -> bool {
                     
                     // compare filedescriptors
-                    return watcher->contains(fd);
-                }), _watchers.end());
+                    return watcher.contains(fd);
+                });
             }
             else
             {
@@ -386,11 +385,14 @@ private:
                 for (auto &watcher : _watchers)
                 {
                     // do we have a match?
-                    if (watcher->contains(fd)) return watcher->events(events);
+                    if (watcher.contains(fd)) return watcher.events(events);
                 }
                 
+                // we need a watcher
+                Watchable *watchable = this;
+                
                 // we should monitor a new filedescriptor
-                _watchers.emplace_back(new Watcher(_loop, this, fd, events));
+                _watchers.emplace_back(_loop, watchable, fd, events);
             }
         }
     };
@@ -403,32 +405,29 @@ private:
     
     /**
      *  Each connection is wrapped
-     *  @var std::vector
+     *  @var std::list
      */
-    std::vector<std::unique_ptr<Wrapper>> _wrappers;
+    std::list<Wrapper> _wrappers;
 
     /**
      *  Lookup a connection-wrapper, when the wrapper is not found, we construct one
      *  @param  connection
      *  @return Wrapper
      */
-    Wrapper *lookup(TcpConnection *connection)
+    Wrapper &lookup(TcpConnection *connection)
     {
         // look for the appropriate connection
         for (auto &wrapper : _wrappers)
         {
             // do we have a match?
-            if (wrapper->contains(connection)) return wrapper.get();
+            if (wrapper.contains(connection)) return wrapper;
         }
         
-        // we need a new wrapper
-        auto *wrapper = new Wrapper(_loop, connection);
-
         // add to the wrappers
-        _wrappers.emplace_back(wrapper);
+        _wrappers.emplace_back(_loop, connection);
         
         // done
-        return wrapper;
+        return _wrappers.back();
     }
 
     /**
@@ -440,7 +439,7 @@ private:
     virtual void monitor(TcpConnection *connection, int fd, int flags) override final
     {
         // lookup the appropriate wrapper and start monitoring
-        lookup(connection)->monitor(fd, flags);
+        lookup(connection).monitor(fd, flags);
     }
 
 protected:
@@ -452,8 +451,8 @@ protected:
      */
     virtual uint16_t onNegotiate(TcpConnection *connection, uint16_t interval) override
     {
-        // lookup the wrapper
-        return lookup(connection)->start(interval);
+        // lookup the wrapper, and start the timer to check for activity and send heartbeats
+        return lookup(connection).start(interval);
     }
 
     /**
@@ -463,9 +462,9 @@ protected:
     virtual void onDetached(TcpConnection *connection) override
     {
         // remove from the array
-        _wrappers.erase(std::remove_if(_wrappers.begin(), _wrappers.end(), [connection](const std::unique_ptr<Wrapper> &wrapper) -> bool {
-            return wrapper->contains(connection);
-        }), _wrappers.end());
+        _wrappers.remove_if([connection](const Wrapper &wrapper) -> bool {
+            return wrapper.contains(connection);
+        });
     }
 
 public:
