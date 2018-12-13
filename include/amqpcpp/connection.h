@@ -197,6 +197,15 @@ public:
     }
     
     /**
+     *  Is the connection ready to accept instructions / has passed the login handshake?
+     *  @return bool
+     */
+    bool ready() const
+    {
+        return _implementation.ready();
+    }
+    
+    /**
      *  Is the connection in a usable state, or is it already closed or
      *  in the process of being closed?
      *  @return bool
