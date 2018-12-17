@@ -193,7 +193,7 @@ private:
         
         /**
          *  Interval between heartbeats (we should send every interval / 2 a new heartbeat)
-         *  Value zero means heartbeats are disabled.
+         *  Value zero means heartbeats are disabled, or not yet negotiated.
          *  @var uint16_t
          */
         uint16_t _interval = 0;
@@ -270,7 +270,7 @@ private:
         virtual void onActive(int fd, int events) override
         {
             // if the server is readable, we have some extra time before it expires
-            if (events & EV_READ) _expire = ev_now(_loop) + _interval;
+            if (_interval != 0 && (events & EV_READ)) _expire = ev_now(_loop) + _interval;
             
             // pass on to the connection
             _connection->process(fd, events);
