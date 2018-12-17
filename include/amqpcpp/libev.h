@@ -349,6 +349,9 @@ private:
             
             // restart the timer
             ev_timer_again(_loop, &_timer);
+            
+            // expose the accepted interval
+            return _interval;
         }
         
         /**
