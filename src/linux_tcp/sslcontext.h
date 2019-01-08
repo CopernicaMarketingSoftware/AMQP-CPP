@@ -39,6 +39,10 @@ public:
     {
         // report error
         if (_ctx == nullptr) throw std::runtime_error("failed to construct ssl context");
+
+        // set the context to accept a moving write buffer. note that SSL_CTX_set_mode is a macro
+        // that expands to SSL_CTX_ctrl, so that is the real function that is used
+        OpenSSL::SSL_CTX_set_mode(_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
     }
     
     /**

@@ -56,7 +56,8 @@ private:
     enum State {
         state_idle,
         state_sending,
-        state_receiving
+        state_receiving,
+        state_error
     } _state;
     
     /**
@@ -101,13 +102,35 @@ private:
     }
     
     /**
-     *  Method to repeat the previous call\
+     *  Method to repeat the previous call
      *  @param  monitor     monitor to check if connection object still exists
      *  @param  state       the state that we were in
      *  @param  result      result of an earlier SSL_get_error call
      *  @return TcpState*
      */
     TcpState *repeat(const Monitor &monitor, enum State state, int error)
+    {
+        // if we are able to repeat the call, we are still in the correct state
+        if (repeat(state, error)) 
+        {
+            // if the socket was closed in the meantime and we are not sending anything any more, we should initialize the shutdown sequence
+            if (_closed && _state == state_idle) return new SslShutdown(this, std::move(_ssl));
+            
+            // otherwise, we just continue as we were, since the calls should be repeated in the future
+            else return this;
+        }
+
+        // if the monitor is still valid, we should tear down the connection because we are unable to repeat the call
+        return monitor.valid() ? new TcpClosed(this) : nullptr;
+    }
+
+    /**
+     *  Method to repeat the previous call, which has then been
+     *  @param  state       the state that we were in
+     *  @param  result      result of an earlier SSL_get_error call
+     *  @return bool
+     */
+    bool repeat(enum State state, int error)
     {
         // check the error
         switch (error) {
@@ -119,7 +142,7 @@ private:
             _parent->onIdle(this, _socket, readable);
             
             // allow chaining
-            return this;
+            return true;
         
         case SSL_ERROR_WANT_WRITE:
             // remember state
@@ -128,22 +151,30 @@ private:
             // wait until socket becomes writable again
             _parent->onIdle(this, _socket, readable | writable);
 
-            // allow chaining
-            return this;
+            // we are done
+            return true;
 
+        // this case doesn't actually happen when repeat is called, since it will only be returned when
+        // the result > 0 and therefore there is no error. it is here just to be sure.
         case SSL_ERROR_NONE:
             // we're ready for the next instruction from userspace
             _state = state_idle;
             
-            // if already closed, proceed to next state
-            return proceed();
+            // if we still have an outgoing buffer we want to send out data, otherwise we just read
+            _parent->onIdle(this, _socket, _out ? readable | writable : readable);
+
+            // nothing is wrong, we are done
+            return true;
             
         default:
+            // we are now in an error state
+            _state = state_error;
+
             // report an error to user-space
             _parent->onError(this, "ssl protocol error");
 
             // ssl level error, we have to tear down the tcp connection
-            return monitor.valid() ? new TcpClosed(this) : nullptr;
+            return false;
         }
     }
     
@@ -219,10 +250,6 @@ private:
     {
         // assume default state
         _state = state_idle;
-        
-        // we are going to check for errors after the openssl operations, so we make 
-        // sure that the error queue is currently completely empty
-        OpenSSL::ERR_clear_error();
         
         // because the output buffer contains a lot of small buffers, we can do multiple 
         // operations till the buffer is empty (but only if the socket is not also
@@ -329,6 +356,9 @@ public:
         
         // same is true for read operations, they should also be repeated
         if (_state == state_receiving) return receive(monitor);
+
+        // if we are in an error state, we close the tcp connection
+        if (_state == state_error) return new TcpClosed(this);
         
         // if the socket is readable, we are going to receive data
         if (flags & readable) return receive(monitor);
@@ -352,15 +382,29 @@ public:
         // do nothing if already busy closing
         if (_closed) return;
         
+        // if we're not idle, we can just add bytes to the buffer and we're done
+        if (_state != state_idle) return _out.add(buffer, size);
+
+        // clear ssl-level error
+        OpenSSL::ERR_clear_error();
+
+        // get the result
+        int result = OpenSSL::SSL_write(_ssl, buffer, size);  
+
+        // if the result is larger than zero, we are successful
+        if (result > 0) return; 
+            
+        // check for error
+        auto error = OpenSSL::SSL_get_error(_ssl, result);
+
         // put the data in the outgoing buffer
         _out.add(buffer, size);
 
-        // if we're already busy with sending or receiving, we first have to wait
-        // for that operation to complete before we can move on
-        if (_state != state_idle) return;
-        
-        // let's wait until the socket becomes writable
-        _parent->onIdle(this, _socket, readable | writable);
+        // the operation failed, we may have to repeat our call. this may detect that
+        // ssl is in an error state, however that is ok because it will set an internal 
+        // state to the error state so that on the next calls to state-changing objects, 
+        // the tcp socket will be torn down
+        return (void) repeat(state_sending, error);
     }
 
     /**
