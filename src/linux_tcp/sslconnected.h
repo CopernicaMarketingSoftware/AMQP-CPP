@@ -404,7 +404,10 @@ public:
         // ssl is in an error state, however that is ok because it will set an internal 
         // state to the error state so that on the next calls to state-changing objects, 
         // the tcp socket will be torn down
-        return (void) repeat(state_sending, error);
+        if (repeat(state_sending, error)) return;
+
+        // the repeat call failed, so we are going to find out with a readable file descriptor
+        _parent->onIdle(this, _socket, readable);
     }
 
     /**
