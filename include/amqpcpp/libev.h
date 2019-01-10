@@ -235,6 +235,9 @@ private:
             }
             else
             {
+                // was the server idle for a too long period of time?
+                if (now >= _expire) return (void) _connection->close();
+            
                 // the connection is alive, and heartbeats are needed, should we send a new one?
                 if (now >= _next)
                 {
@@ -245,20 +248,11 @@ private:
                     _next += std::max(_interval / 2, 1);
                 }
             
-                // was the server idle for a too longer period of time?
-                if (now >= _expire)
-                {
-                    // close the connection with immediate effect (this will destruct the connection)
-                    _connection->close(true);
-                }
-                else
-                {
-                    // find the earliest thing that expires
-                    _timer.repeat = std::min(_next, _expire) - now;
-                    
-                    // restart the timer
-                    ev_timer_again(_loop, &_timer);
-                }
+                // reset the timer to trigger again later
+                _timer.repeat = std::min(_next, _expire) - now;
+                
+                // restart the timer
+                ev_timer_again(_loop, &_timer);
             }
         }
         
