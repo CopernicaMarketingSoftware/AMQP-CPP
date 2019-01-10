@@ -110,18 +110,14 @@ private:
      */
     TcpState *repeat(const Monitor &monitor, enum State state, int error)
     {
-        // if we are able to repeat the call, we are still in the correct state
-        if (repeat(state, error)) 
-        {
-            // if the socket was closed in the meantime and we are not sending anything any more, we should initialize the shutdown sequence
-            if (_closed && _state == state_idle) return new SslShutdown(this, std::move(_ssl));
-            
-            // otherwise, we just continue as we were, since the calls should be repeated in the future
-            else return this;
-        }
+        // if we are not able to repeat the call, we are in an error state and should tear down the connection
+        if (!repeat(state, error)) return monitor.valid() ? new TcpClosed(this) : nullptr;
 
-        // if the monitor is still valid, we should tear down the connection because we are unable to repeat the call
-        return monitor.valid() ? new TcpClosed(this) : nullptr;
+        // if the socket was closed in the meantime and we are not sending anything any more, we should initialize the shutdown sequence
+        if (_closed && _state == state_idle) return new SslShutdown(this, std::move(_ssl));
+        
+        // otherwise, we just continue as we were, since the calls should be repeated in the future
+        else return this;
     }
 
     /**
