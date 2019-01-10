@@ -311,6 +311,23 @@ int SSL_use_certificate_file(SSL *ssl, const char *file, int type)
 }
 
 /**
+ *  Control the SSL context
+ *  @param  ctx
+ *  @param  cmd
+ *  @param  larg
+ *  @param  parg
+ *  @return long
+ */
+long SSL_CTX_ctrl(SSL_CTX *ctx, int cmd, long larg, void *parg)
+{
+    // create a function
+    static Function<decltype(::SSL_CTX_ctrl)> func(handle, "SSL_CTX_ctrl");
+    
+    // call the openssl function
+    return func(ctx, cmd, larg, parg);
+}
+
+/**
  *  Clear the SSL error queue
  *  @return void
  */

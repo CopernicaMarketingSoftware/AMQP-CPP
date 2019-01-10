@@ -296,6 +296,9 @@ public:
         // just to be sure we do this check
         if (buffers == 0) return 0;
         
+        // make sure that the error queue is currently completely empty, so the error queue can be checked
+        OpenSSL::ERR_clear_error();
+
         // send the data
         auto result = OpenSSL::SSL_write(ssl, buffer[0].iov_base, buffer[0].iov_len);
         
