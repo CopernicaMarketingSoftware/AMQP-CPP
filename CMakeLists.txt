@@ -89,6 +89,12 @@ else()
     add_library(${PROJECT_NAME} STATIC ${src_MAIN} ${src_LINUX_TCP})
 endif()
 
+if(AMQP-CPP_LINUX_TCP)
+    find_package(OpenSSL)
+    include_directories(${OPENSSL_INCLUDE_DIR})
+    target_link_libraries(${PROJECT_NAME} OpenSSL::SSL OpenSSL::Crypto)
+endif()
+
 # install rules
 # ------------------------------------------------------------------------------------------------------
 
