@@ -192,11 +192,12 @@ private:
         ev_tstamp _expire;
         
         /**
-         *  Interval between heartbeats (we should send every interval / 2 a new heartbeat)
+         *  Timeout after which the connection is no longer considered alive.
+         *  A heartbeat must be sent every _timeout / 2 seconds.
          *  Value zero means heartbeats are disabled, or not yet negotiated.
          *  @var uint16_t
          */
-        uint16_t _interval = 0;
+        uint16_t _timeout = 0;
 
         /**
          *  Callback method that is called by libev when the timer expires
@@ -221,8 +222,8 @@ private:
             // get the current time
             ev_tstamp now = ev_now(_loop);
             
-            // if the onNegotiate method was not yet called, and no heartbeat interval was negotiated
-            if (_interval == 0)
+            // if the onNegotiate method was not yet called, and no heartbeat timeout was negotiated
+            if (_timeout == 0)
             {
                 // there is a theoretical scenario in which the onNegotiate() method
                 // was overridden, so that the connection-timeout-timer expires, but 
@@ -245,7 +246,7 @@ private:
                     _connection->heartbeat();
                     
                     // remember when we should send out the next one
-                    _next += std::max(_interval / 2, 1);
+                    _next += std::max(_timeout / 2, 1);
                 }
             
                 // reset the timer to trigger again later
@@ -264,7 +265,9 @@ private:
         virtual void onActive(int fd, int events) override
         {
             // if the server is readable, we have some extra time before it expires
-            if (_interval != 0 && (events & EV_READ)) _expire = ev_now(_loop) + _interval;
+            // the expire time is set to 1.5 * _timeout to close the connection when the
+            // third heartbeat is about to be sent
+            if (_timeout != 0 && (events & EV_READ)) _expire = ev_now(_loop) + _timeout * 1.5;
             
             // pass on to the connection
             _connection->process(fd, events);
@@ -283,7 +286,7 @@ private:
             _loop(loop),
             _next(0.0),
             _expire(ev_now(loop) + timeout),
-            _interval(0)
+            _timeout(0)
         {
             // store the object in the data "void*"
             _timer.data = this;
@@ -323,19 +326,19 @@ private:
          *  @param  interval        the heartbeat interval proposed by the server
          *  @return uint16_t        the heartbeat interval that we accepted
          */
-        uint16_t start(uint16_t interval)
+        uint16_t start(uint16_t timeout)
         {
             // we now know for sure that the connection was set up
-            _interval = interval;
+            _timeout = timeout;
             
             // if heartbeats are disabled we do not have to set it
-            if (_interval == 0) return 0;
+            if (_timeout == 0) return 0;
             
             // calculate current time
             auto now = ev_now(_loop);
             
             // we also know when the next heartbeat should be sent
-            _next = now + std::max(1, _interval / 2);
+            _next = now + std::max(_timeout / 2, 1);
 
             // find the earliest thing that expires
             // @todo does this work?
@@ -345,7 +348,7 @@ private:
             ev_timer_again(_loop, &_timer);
             
             // expose the accepted interval
-            return _interval;
+            return _timeout;
         }
         
         /**
