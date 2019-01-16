@@ -90,7 +90,7 @@ else()
 endif()
 
 if(AMQP-CPP_LINUX_TCP)
-    find_package(OpenSSL)
+    find_path(OPENSSL_INCLUDE_DIR openssl/ssl.h)
     include_directories(${OPENSSL_INCLUDE_DIR})
 endif()
 
