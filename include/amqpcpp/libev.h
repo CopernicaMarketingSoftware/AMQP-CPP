@@ -221,14 +221,23 @@ private:
         {
             // get the current time
             ev_tstamp now = ev_now(_loop);
-            
+
             // if the onNegotiate method was not yet called, and no heartbeat timeout was negotiated
             if (_timeout == 0)
             {
                 // there is a theoretical scenario in which the onNegotiate() method
                 // was overridden, so that the connection-timeout-timer expires, but 
-                // the connection is ready anyway -- in that case we should ignore the timeout
-                if (_connection->ready()) return;
+                // the connection is ready anyway -- in that case we should ignore the timeout.
+                // this also occurs when heartbeats are disabled.
+                if (_connection->ready())
+                {
+                    // we send no heartbeats, so the timer will be stopped.
+                    // restore the loop refcount
+                    ev_ref(_loop);
+
+                    // done
+                    return;
+                }
                 
                 // the timer expired because the connection could not be set up in time,
                 // close the connection with immediate effect
@@ -314,6 +323,9 @@ private:
          */
         virtual ~Wrapper()
         {
+            // the timer was already stopped
+            if (_timeout == 0) return;
+
             // restore loop refcount
             ev_ref(_loop);
 
@@ -444,15 +456,15 @@ private:
 
 protected:
     /**
-     *  Method that is called when the heartbeat frequency is negotiated between the server and the client. 
-     *  @param  connection      The connection that suggested a heartbeat interval
-     *  @param  interval        The suggested interval from the server
-     *  @return uint16_t        The interval to use
+     *  Method that is called when the heartbeat timeout is negotiated between the server and the client. 
+     *  @param  connection      The connection that suggested a heartbeat timeout
+     *  @param  timeout         The suggested timeout from the server
+     *  @return uint16_t        The timeout to use
      */
-    virtual uint16_t onNegotiate(TcpConnection *connection, uint16_t interval) override
+    virtual uint16_t onNegotiate(TcpConnection *connection, uint16_t timeout) override
     {
         // lookup the wrapper, and start the timer to check for activity and send heartbeats
-        return lookup(connection).start(interval);
+        return lookup(connection).start(timeout);
     }
 
     /**
