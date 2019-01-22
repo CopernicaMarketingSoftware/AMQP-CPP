@@ -108,6 +108,6 @@ script:
     export CC=/usr/bin/$C_COMPILER &&
     export CXX=/usr/bin/$CXX_COMPILER &&
     mkdir build.release && cd build.release &&
-    cmake ${CMAKE_OPTIONS} -DAMQP-CPP_BUILD_EXAMPLES=ON -DAMQP-CPP_LINUX_TCP=ON -GNinja .. &&
-    cmake --config Release --build . &&
+    cmake ${CMAKE_OPTIONS} -DAMQP-CPP_BUILD_EXAMPLES=ON -DAMQP-CPP_LINUX_TCP=ON --config Release -GNinja .. &&
+    cmake --build . &&
     cd .."
