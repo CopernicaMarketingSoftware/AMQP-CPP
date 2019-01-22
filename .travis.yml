@@ -94,7 +94,7 @@ install:
   # Create our container
   - docker exec -t ubuntu-test-container bash -c "apt-get update -y &&
     apt-get --no-install-recommends install -y software-properties-common cmake
-    ninja-build libboost-all-dev libev-dev libuv1-dev ninja-build openssl $COMPILER_PACKAGE &&
+    ninja-build libboost-all-dev libev-dev libuv1-dev ninja-build libssl-dev $COMPILER_PACKAGE &&
     apt-get -y clean && rm -rf /var/lib/apt/lists/*"
 
 ################
