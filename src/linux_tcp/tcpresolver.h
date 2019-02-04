@@ -138,7 +138,10 @@ private:
         }
             
         // notify the master thread by sending a byte over the pipe
-        _pipe.notify();
+        if (!_pipe.notify())
+        {
+            _error = strerror(errno);
+        }
     }
 
 public:
