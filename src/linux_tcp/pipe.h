@@ -75,14 +75,15 @@ public:
     
     /**
      *  Notify the pipe, so that the other thread wakes up
+     *  @return bool success/failure (errno is set on failure)
      */
-    void notify()
+    bool notify()
     {
         // one byte to send
         char byte = 0;
         
         // send one byte over the pipe - this will wake up the other thread
-        write(_fds[1], &byte, 1);
+        return write(_fds[1], &byte, 1) == 1;
     }
 };
 
