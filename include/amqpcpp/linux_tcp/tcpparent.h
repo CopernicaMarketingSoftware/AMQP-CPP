@@ -48,6 +48,12 @@ public:
     virtual void onConnected(TcpState *state) = 0;
 
     /**
+     *  Method that is called before performing SSL handshake
+     *  @param  state
+     */
+    virtual void onSetupSecurity(TcpState *state, SSL *ssl) = 0;
+
+    /**
      *  Method that is called when the connection is secured
      *  @param  state
      *  @param  ssl

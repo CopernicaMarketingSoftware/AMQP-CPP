@@ -24,7 +24,7 @@
 /**
  *  Set up namespace
  */
-namespace AMQP { 
+namespace AMQP {
 
 /**
  *  Class definition
@@ -118,13 +118,15 @@ public:
     {
         // we will be using the ssl context as a client
         OpenSSL::SSL_set_connect_state(_ssl);
-        
+
+        _parent->onSetupSecurity(this, _ssl);
+
         // associate domain name with the connection
         OpenSSL::SSL_ctrl(_ssl, SSL_CTRL_SET_TLSEXT_HOSTNAME, TLSEXT_NAMETYPE_host_name, (void *)hostname.data());
         
         // associate the ssl context with the socket filedescriptor
         if (OpenSSL::SSL_set_fd(_ssl, _socket) == 0) throw std::runtime_error("failed to associate filedescriptor with ssl socket");
-        
+
         // we are going to wait until the socket becomes writable before we start the handshake
         _parent->onIdle(this, _socket, writable);
     }
@@ -161,10 +163,10 @@ public:
         
         // if the connection succeeds, we can move to the ssl-connected state
         if (result == 1) return nextstate(monitor);
-        
+
         // error was returned, so we must investigate what is going on
         auto error = OpenSSL::SSL_get_error(_ssl, result);
-        
+
         // check the error
         switch (error) {
         case SSL_ERROR_WANT_READ:   return proceed(readable);

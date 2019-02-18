@@ -60,6 +60,22 @@ public:
     }
 
     /**
+     *  Method that is called after a TCP connection has been set up but before
+     *  initiating TLS handshake. This method allows you to own certificates chain
+     *  and private key to perform TLS authentication
+     *  properties, and to break up the connection if you find it not secure enough.
+     *  @param  connection      The connection for which TLS was just started
+     *  @param  ssl             Pointer to the SSL structure that can be inspected
+     *  @return bool            True to proceed / accept the connection, false to break up
+     */
+    virtual void onSetupSecurity(TcpConnection *connection, SSL *ssl)
+    {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+        (void) ssl;
+    }
+
+    /**
      *  Method that is called after a TCP connection has been set up and the initial 
      *  TLS handshake is finished too, but right before the AMQP login handshake is
      *  going to take place and the first data is going to be sent over the connection. 

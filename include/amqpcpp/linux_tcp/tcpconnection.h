@@ -127,6 +127,12 @@ private:
         _handler->onConnected(this);
     }
 
+    virtual void onSetupSecurity(TcpState *state, SSL *ssl) override
+    {
+        // pass on to user-space
+        _handler->onSetupSecurity(this, ssl);
+    }
+
     /**
      *  Method that is called when the connection is secured
      *  @param  state
