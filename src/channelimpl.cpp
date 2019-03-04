@@ -846,6 +846,7 @@ void ChannelImpl::reportError(const char *message, bool notifyhandler)
     // the connection no longer has to know that this channel exists,
     // because the channel ID is no longer in use
     if (_connection) _connection->remove(this);
+    _connection = nullptr;
 }
 
 /**
