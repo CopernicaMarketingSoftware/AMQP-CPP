@@ -329,7 +329,7 @@ class MyTcpHandler : public AMQP::TcpHandler
      *  is associated with the handler. This is the first call to your handler
      *  @param  connection      The connection that is attached to the handler
      */
-    virtual void onAttached(AMQP::TcpConnection *connection) override {}
+    virtual void onAttached(AMQP::TcpConnection *connection) override
     {
         // @todo
         //  add your own implementation, for example initialize things
