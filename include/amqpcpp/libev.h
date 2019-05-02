@@ -263,8 +263,9 @@ private:
                 // it's time for the next heartbeat
                 _connection->heartbeat();
                 
-                // remember when we should send out the next one
-                _next += std::max(_timeout / 2, 1);
+                // remember when we should send out the next one, so the next one should be 
+                // sent only after _timout/2 seconds again _from now_ (no catching up)
+                _next = now + std::max(_timeout / 2, 1);
             }
             
             // reset the timer to trigger again later
