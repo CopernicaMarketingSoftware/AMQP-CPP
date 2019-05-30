@@ -252,25 +252,6 @@ public:
         // postfix
         stream << ")";
     }
-
-    /**
-     *  Cast to table.
-     *
-     *  @note:  This function may look silly and unnecessary. We are, after all, already
-     *          a table. The whole reason we still have this function is that it is virtual
-     *          and if we do not declare a cast to table on a pointer to base (i.e. Field)
-     *          will return an empty field instead of the expected table.
-     *
-     *          Yes, clang gets this wrong and gives incorrect warnings here. See
-     *          https://llvm.org/bugs/show_bug.cgi?id=28263 for more information
-     *
-     *  @return Ourselves
-     */
-    virtual operator const Table& () const override
-    {
-        // this already is a table, so no cast is necessary
-        return *this;
-    }
 };
 
 /**
