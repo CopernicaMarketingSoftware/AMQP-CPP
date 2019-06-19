@@ -106,8 +106,11 @@ public:
      */
     bool active(bool block)
     {
+        // accommodate restrict qualifier on fd_set params
+        fd_set set2 = _set;
+
         // wait for the socket
-        if (block) return select(_socket + 1, &_set, &_set, nullptr, nullptr) > 0;
+        if (block) return select(_socket + 1, &_set, &set2, nullptr, nullptr) > 0;
 
         // we do not want to block, so we use a small timeout
         struct timeval timeout;
@@ -116,7 +119,7 @@ public:
         timeout.tv_sec = timeout.tv_usec = 0;
         
         // no timeout at all
-        return select(_socket + 1, &_set, &_set, nullptr, &timeout) > 0;
+        return select(_socket + 1, &_set, &set2, nullptr, &timeout) > 0;
     }
 };
 
@@ -124,4 +127,3 @@ public:
  *  End of namespace
  */
 }
-
