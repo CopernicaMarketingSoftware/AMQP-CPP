@@ -84,7 +84,7 @@ public:
         if (!channel) return false;
 
         // report
-        if (channel->reportSuccess()) channel->onSynchronized();
+        channel->reportSuccess();
 
         // done
         return true;

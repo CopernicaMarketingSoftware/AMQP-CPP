@@ -62,7 +62,7 @@ const std::shared_ptr<Deferred> &DeferredGet::reportSuccess() const
 void DeferredGet::complete()
 {
     // the channel is now synchronized, delayed frames may now be sent
-    _channel->onSynchronized();
+    _channel->flush();
     
     // pass on to normal implementation
     DeferredExtReceiver::complete();

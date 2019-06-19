@@ -754,7 +754,7 @@ bool ChannelImpl::send(const Frame &frame)
  *  Signal the channel that a synchronous operation was completed. After 
  *  this operation, waiting frames can be sent out.
  */
-void ChannelImpl::onSynchronized()
+void ChannelImpl::flush()
 {
     // we are no longer waiting for synchronous operations
     _synchronous = false;
