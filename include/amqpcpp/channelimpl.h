@@ -645,8 +645,17 @@ public:
         // skip if there is no oldest callback
         if (!_oldestCallback) return true;
         
-        // the last (possibly synchronous) operation was received, so we're no longer in synchronous mode
-        if (_synchronous && _queue.empty()) _synchronous = false;
+        // remember whether or not we were synchronous
+        bool synchronous = _synchronous;
+
+        // is the queue empty at this moment?
+        bool empty = _queue.empty();
+        
+        // the last (possibly synchronous) operation was received, so we're no longer in synchronous mode. this
+        // is an optimization that makes sure that the first instruction _after_ a synchronous instruction
+        // that is installed during the success callback we make later does _not_ need to be buffered, but can be
+        // sent directly
+        if (synchronous && empty) _synchronous = false;
 
         // we are going to call callbacks that could destruct the channel
         Monitor monitor(this);
@@ -660,6 +669,10 @@ public:
 
         // leap out if channel no longer exists
         if (!monitor.valid()) return false;
+
+        // if we were synchronous, but there were still messages in the queue, we process the queue now, because the synchronous
+        // operation was finished, and its callback was made, which means we're no longer in synchronous mode
+        if (synchronous && !empty) onSynchronized();
 
         // set the oldest callback
         _oldestCallback = next;

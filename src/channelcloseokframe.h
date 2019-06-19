@@ -72,7 +72,7 @@ public:
         if (!channel) return false;
 
         // report that the channel is closed
-        if (channel->reportClosed()) channel->onSynchronized();
+        channel->reportClosed();
 
         // done
         return true;
