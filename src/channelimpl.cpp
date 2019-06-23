@@ -789,6 +789,7 @@ void ChannelImpl::flush()
  */
 void ChannelImpl::reportError(const char *message, bool notifyhandler)
 {
+    auto self = shared_from_this(); //keep a strong reference
     // change state
     _state = state_closed;
     _synchronous = false;
