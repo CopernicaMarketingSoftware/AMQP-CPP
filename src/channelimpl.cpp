@@ -782,6 +782,34 @@ void ChannelImpl::flush()
     }
 }
 
+bool ChannelImpl::reportClosed()
+{
+    // change state
+    _state = state_closed;
+
+    // create a monitor, because the callbacks could destruct the current object
+    Monitor monitor(this);
+
+    // and pass on to the reportSuccess() method which will call the
+    // appropriate deferred object to report the successful operation
+    bool result = reportSuccess();
+
+    // leap out if object no longer exists
+    if(!monitor.valid()) return result;
+
+    // should detach the connection
+    if(_connection) _connection->remove(this);
+    _connection = nullptr;
+
+    // all later deferred objects should report an error, because it
+    // was not possible to complete the instruction as the channel is
+    // now closed (but the channel onError does not have to run)
+    reportError("Channel has been closed", false);
+
+    // done
+    return result;
+}
+
 /**
  *  Report an error message on a channel
  *  @param  message             the error message
@@ -789,6 +817,9 @@ void ChannelImpl::flush()
  */
 void ChannelImpl::reportError(const char *message, bool notifyhandler)
 {
+    if(_state == state_closed)
+        return;
+
     auto self = shared_from_this(); //keep a strong reference
     // change state
     _state = state_closed;
