@@ -14,6 +14,10 @@
  */
 #pragma once
 
+#ifdef __APPLE__
+#include "../table.h"
+#endif
+
 /**
  *  Set up namespace
  */

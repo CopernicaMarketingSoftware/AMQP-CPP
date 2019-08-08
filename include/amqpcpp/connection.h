@@ -9,6 +9,11 @@
  */
 #pragma once
 
+#ifdef __APPLE__
+#include "connectionimpl.h"
+#include "bytebuffer.h"
+#endif
+
 /**
  *  Set up namespace
  */

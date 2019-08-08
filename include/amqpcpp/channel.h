@@ -9,6 +9,10 @@
  */
 #pragma once
 
+#ifdef __APPLE__
+#include "envelope.h"
+#endif
+
 /**
  *  Set up namespace
  */
