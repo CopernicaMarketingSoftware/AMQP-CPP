@@ -73,7 +73,10 @@ void ChannelImpl::onError(const ErrorCallback &callback)
 
     // if the channel is usable, all is ok
     if (usable()) return;
-    
+
+    // validity check
+    if (!callback) return;
+
     // is the channel closing down?
     if (_state == state_closing) return callback("Channel is closing down");
 
