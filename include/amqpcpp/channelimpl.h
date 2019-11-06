@@ -218,7 +218,7 @@ public:
         _readyCallback = callback;
 
         // direct call if channel is already ready
-        if (_state == state_ready) callback();
+        if (_state == state_ready && callback) callback();
     }
 
     /**
