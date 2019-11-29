@@ -98,8 +98,10 @@ public:
     virtual operator int64_t () const { return 0; }
     virtual operator float () const { return 0; }
     virtual operator double () const { return 0; }
+#ifndef AMQPCPP_NO_IMPLICIT_CAST
     virtual operator const Array& () const;
     virtual operator const Table& () const;
+#endif
 
     /**
      *  Check the field type
