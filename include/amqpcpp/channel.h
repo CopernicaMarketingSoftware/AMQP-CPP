@@ -22,7 +22,7 @@ class Channel
 private:
     /**
      *  The implementation for the channel
-     *  @var    std::unique_ptr<ChannelImpl>
+     *  @var    std::shared_ptr<ChannelImpl>
      */
     std::shared_ptr<ChannelImpl> _implementation;
 
@@ -50,7 +50,7 @@ public:
      *  But movement _is_ allowed
      *  @param  channel
      */
-    Channel(Channel &&channel) : _implementation(std::move(channel._implementation)) {}
+    Channel(Channel &&channel) = default;
 
     /**
      *  Destructor
@@ -58,7 +58,19 @@ public:
     virtual ~Channel() 
     {
         // close the channel (this will eventually destruct the channel)
-        _implementation->close();
+        if (_implementation)
+            _implementation->close();
+    }
+
+    /**
+     *  Returns validity of the channel
+     *
+     *  Checks if the _implementation is valid or was moved.
+     *  @return bool
+     */
+    bool isValid() const
+    {
+        return _implementation;
     }
 
     /**
