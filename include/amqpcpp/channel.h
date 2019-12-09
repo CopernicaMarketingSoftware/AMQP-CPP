@@ -70,7 +70,7 @@ public:
      */
     bool isValid() const
     {
-        return _implementation;
+        return static_cast<bool>(_implementation);
     }
 
     /**
