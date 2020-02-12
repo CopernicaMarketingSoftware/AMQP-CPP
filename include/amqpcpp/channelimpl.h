@@ -384,7 +384,7 @@ public:
      *
      *      void myCallback(AMQP::Channel *channel, uint32_t messageCount);
      *
-     *  For example: channel.declareQueue("myqueue").onSuccess([](AMQP::Channel *channel, uint32_t messageCount) {
+     *  For example: channel.purgeQueue("myqueue").onSuccess([](AMQP::Channel *channel, uint32_t messageCount) {
      *
      *      std::cout << "Queue purged, all " << messageCount << " messages removed" << std::endl;
      *

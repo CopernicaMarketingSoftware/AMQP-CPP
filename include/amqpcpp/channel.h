@@ -332,7 +332,7 @@ public:
      *
      *      void myCallback(uint32_t messageCount);
      *
-     *  For example: channel.declareQueue("myqueue").onSuccess([](uint32_t messageCount) {
+     *  For example: channel.purgeQueue("myqueue").onSuccess([](uint32_t messageCount) {
      *
      *      std::cout << "Queue purged, all " << messageCount << " messages removed" << std::endl;
      *
