@@ -57,7 +57,7 @@ private:
      *  @friend
      */
     friend TcpChannel;
-    
+
 
     /**
      *  Method that is called when the RabbitMQ server and your client application  
@@ -237,12 +237,23 @@ public:
     bool close(bool immediate = false);
     
     /**
-     *  Is the connection connected, meaning: it has passed the login handshake?
+     *  Is the connection connected, meaning: it has passed the login handshake
+     *  and isn't closed yet?
      *  @return bool
      */
     bool ready() const
     {
         return _connection.ready();
+    }
+
+    /**
+     *  Is the connection initialized, meaning: it has passed the login handshake?
+     *  It may be closing or closed
+     *  @return bool
+     */
+    bool initialized() const
+    {
+        return _connection.initialized();
     }
     
     /**

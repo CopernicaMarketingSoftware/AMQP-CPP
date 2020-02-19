@@ -197,12 +197,21 @@ public:
     }
     
     /**
-     *  Is the connection ready to accept instructions / has passed the login handshake?
+     *  Is the connection ready to accept instructions / has passed the login handshake and not closed?
      *  @return bool
      */
     bool ready() const
     {
         return _implementation.ready();
+    }
+
+    /**
+     *  Is (or was) the connection initialized
+     *  @return bool
+     */
+    bool initialized() const
+    {
+        return _implementation.initialized();
     }
     
     /**

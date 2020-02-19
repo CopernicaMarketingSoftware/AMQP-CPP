@@ -234,7 +234,7 @@ private:
             
             // timer is no longer active, so the refcounter in the loop is restored
             ev_ref(_loop);
-            
+
             // if the onNegotiate method was not yet called, and no heartbeat timeout was negotiated
             if (_timeout == 0)
             {
@@ -243,10 +243,10 @@ private:
                 // in either case we're no longer going to run further timers.
                 _next = _expire = 0.0;
                 
-                // if we have a valid connection, user-space must have overridden the onNegotiate
+                // if we have an initialized connection, user-space must have overridden the onNegotiate
                 // method, so we keep using the connection
-                if (_connection->ready()) return;
-                
+                if (_connection->initialized()) return;
+
                 // this is a connection timeout, close the connection from our side too
                 return (void)_connection->close(true);
             }
