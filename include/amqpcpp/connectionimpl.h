@@ -219,13 +219,24 @@ public:
 
     /**
      *  Are we fully connected and ready for instructions? This is true after the initial
-     *  protocol and login handshake were completed.
+     *  protocol and login handshake were completed and the connection is not closed.
      *  @return bool
      */
     bool ready() const
     {
         // state must be connected
         return _state == state_connected;
+    }
+
+    /**
+     *  Is (or was) the connection initialized
+     *  @return bool
+     */
+    bool initialized() const
+    {
+        // We are initalized if we have passed the initialized state. So we are in
+        // a connected, closing, or closed state.
+        return _state == state_connected || _state == state_closing || _state == state_closed;
     }
 
     /**
