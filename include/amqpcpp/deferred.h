@@ -5,7 +5,7 @@
  *  possibly happen in the future that can be
  *  caught.
  *
- *  @copyright 2014 - 2018 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -177,6 +177,15 @@ protected:
     {
         // store pointer
         _next = deferred;
+    }
+    
+    /**
+     *  Remove this object from the chain of deferreds
+     */
+    void unchain()
+    {
+        // we no longer need the next pointer
+        _next = nullptr;
     }
 
     /**

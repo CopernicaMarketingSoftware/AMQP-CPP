@@ -5,7 +5,7 @@
  *  that has a private constructor so that it can not be used from outside
  *  the AMQP library
  *
- *  @copyright 2014 - 2018 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -658,8 +658,13 @@ public:
         // call the callback
         auto next = cb->reportSuccess(std::forward<Arguments>(parameters)...);
 
-        // leap out if channel no longer exists
+        // leap out if channel no longer exist
         if (!monitor.valid()) return false;
+        
+        // in case the callback-shared-pointer is still kept in scope (for example because it
+        // is stored in the list of consumers), we do want to ensure that it no longer maintains
+        // a chain of queued deferred objects
+        cb->unchain();
 
         // set the oldest callback
         _oldestCallback = next;
@@ -729,8 +734,8 @@ public:
     DeferredPublisher *publisher() const { return _publisher.get(); }
 
     /**
-     * Retrieve the deferred confirm that handles publisher confirms
-     * @return The deferred confirm object
+     *  Retrieve the deferred confirm that handles publisher confirms
+     *  @return The deferred confirm object
      */
     DeferredConfirm *confirm() const { return _confirm.get(); }
 

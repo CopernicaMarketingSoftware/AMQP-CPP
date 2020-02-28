@@ -3,7 +3,7 @@
  *
  *  Implementation for a channel
  *
- *  @copyright 2014 - 2018 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 #include "includes.h"
 #include "basicgetokframe.h"
@@ -816,6 +816,11 @@ void ChannelImpl::reportError(const char *message, bool notifyhandler)
         // leap out if channel no longer exists
         if (!monitor.valid()) return;
 
+        // in case the callback-shared-pointer is still kept in scope (for example because it
+        // is stored in the list of consumers), we do want to ensure that it no longer maintains
+        // a chain of queued deferred objects
+        cb->unchain();
+
         // set the oldest callback
         _oldestCallback = next;
     }
@@ -832,6 +837,11 @@ void ChannelImpl::reportError(const char *message, bool notifyhandler)
 
         // leap out if channel no longer exists
         if (!monitor.valid()) return;
+
+        // in case the callback-shared-pointer is still kept in scope (for example because it
+        // is stored in the list of consumers), we do want to ensure that it no longer maintains
+        // a chain of queued deferred objects
+        cb->unchain();
 
         // set the oldest callback
         _oldestCallback = next;
