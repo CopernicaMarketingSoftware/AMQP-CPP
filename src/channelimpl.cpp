@@ -855,10 +855,20 @@ void ChannelImpl::reportError(const char *message, bool notifyhandler)
 
     // leap out if object no longer exists
     if (!monitor.valid()) return;
+    
+    // done when the channel was already no longer associated with a connection
+    if (!_connection) return;
+    
+    // when we call _connection->remove(this), it is possible that the last reference
+    // to the channelimpl is also dropped and that the object immediately destructs,
+    // this is something that we want to prevent so we create an extra reference to the object here
+    auto self = shared_from_this();
 
     // the connection no longer has to know that this channel exists,
     // because the channel ID is no longer in use
-    if (_connection) _connection->remove(this);
+    _connection->remove(this);
+    
+    // remember that we're no longer associated with a connection
     _connection = nullptr;
 }
 
