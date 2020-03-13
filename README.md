@@ -95,7 +95,7 @@ would be:
 mkdir build
 cd build
 cmake .. [-DAMQP-CPP_BUILD_SHARED] [-DAMQP-CPP_LINUX_TCP]
-cmake --build .. --target install
+cmake --build . --target install
 ```
 
  Option                  | Default | Meaning
