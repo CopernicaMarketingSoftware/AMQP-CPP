@@ -22,7 +22,7 @@ class Channel
 private:
     /**
      *  The implementation for the channel
-     *  @var    std::unique_ptr<ChannelImpl>
+     *  @var    std::shared_ptr<ChannelImpl>
      */
     std::shared_ptr<ChannelImpl> _implementation;
 
@@ -58,7 +58,8 @@ public:
     virtual ~Channel() 
     {
         // close the channel (this will eventually destruct the channel)
-        _implementation->close();
+        // note that the channel may be in an invalid state in case it was moved, hence the "if"
+        if (_implementation) _implementation->close();
     }
 
     /**
