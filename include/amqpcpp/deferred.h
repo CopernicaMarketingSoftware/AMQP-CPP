@@ -290,11 +290,11 @@ public:
      */
     Deferred &onFinalize(const FinalizeCallback &callback)
     {
-        // store callback
-        _finalizeCallback = callback;
-
         // if the object is already in a failed state, we call the callback right away
         if (_failed) callback();
+
+        // otherwise we store callback until it's time for the call
+        else _finalizeCallback = callback;
 
         // allow chaining
         return *this;
