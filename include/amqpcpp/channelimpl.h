@@ -261,6 +261,15 @@ public:
     }
 
     /**
+     *  Is the channel ready / has it passed the initial handshake?
+     *  @return bool
+     */
+    bool ready() const
+    {
+        return _state == state_ready;
+    }
+
+    /**
      *  Put channel in a confirm mode (RabbitMQ specific)
      */
     DeferredConfirm &confirmSelect();

@@ -125,6 +125,15 @@ public:
     }
 
     /**
+     *  Is the channel ready / has it passed the initial handshake?
+     *  @return bool
+     */
+    bool ready() const
+    {
+        return _implementation->ready();
+    }
+
+    /**
      *  Is the channel usable / not yet closed?
      *  @return bool
      */
