@@ -5,7 +5,7 @@
  *  server, and to make the initial connection
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2018 Copernica BV
+ *  @copyright 2015 - 2020 Copernica BV
  */
 
 /**
@@ -23,6 +23,7 @@
 #include "openssl.h"
 #include "sslhandshake.h"
 #include <thread>
+#include <netinet/in.h>
 
 /**
  *  Set up namespace
