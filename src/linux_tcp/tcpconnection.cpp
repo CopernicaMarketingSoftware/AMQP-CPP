@@ -4,7 +4,7 @@
  *  Implementation file for the TCP connection
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2018 Copernica BV
+ *  @copyright 2015 - 2020 Copernica BV
  */
 
 /**
@@ -36,7 +36,16 @@ TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
 /**
  *  Destructor
  */
-TcpConnection::~TcpConnection() noexcept = default;
+TcpConnection::~TcpConnection() noexcept
+{
+    // When the object is destructed, the _state-pointer will also destruct, resulting
+    // in some final calls back to us to inform that the connection has indeed been closed.
+    // This normally results in calls back to user-space (via the _handler pointer) but
+    // since user-space is apparently no longer interested in the TcpConnection (why would
+    // it otherwise prematurely destruct the object?) we reset the handler-pointer to
+    // prevent that such calls back to userspace take place
+    _handler = nullptr;
+}
 
 /**
  *  The filedescriptor that is used for this connection
@@ -121,7 +130,7 @@ bool TcpConnection::close(bool immediate)
     if (!monitor.valid()) return true;
 
     // tell the handler that the connection was closed
-    if (failed) _handler->onError(this, "connection prematurely closed by client");
+    if (failed && _handler) _handler->onError(this, "connection prematurely closed by client");
 
     // stop if object was destructed
     if (!monitor.valid()) return true;
@@ -143,7 +152,7 @@ bool TcpConnection::close(bool immediate)
 void TcpConnection::onProperties(Connection *connection, const Table &server, Table &client)
 {
     // tell the handler
-    return _handler->onProperties(this, server, client);
+    if (_handler) _handler->onProperties(this, server, client);
 }
 
 /**
@@ -158,7 +167,7 @@ uint16_t TcpConnection::onNegotiate(Connection *connection, uint16_t interval)
     _state->maxframe(connection->maxFrame());
     
     // tell the handler
-    return _handler->onNegotiate(this, interval);
+    return _handler ? _handler->onNegotiate(this, interval) : interval;
 }
 
 /**
@@ -184,7 +193,7 @@ void TcpConnection::onError(Connection *connection, const char *message)
     Monitor monitor(this);
     
     // tell this to the user
-    _handler->onError(this, message);
+    if (_handler) _handler->onError(this, message);
     
     // object could be destructed by user-space
     if (!monitor.valid()) return;
@@ -214,6 +223,9 @@ void TcpConnection::onClosed(Connection *connection)
  */
 void TcpConnection::onError(TcpState *state, const char *message, bool connected)
 {
+    // if user-space is no longer interested in this object, the rest of the code is pointless here
+    if (_handler == nullptr) return;
+
     // monitor to check if all operations are active
     Monitor monitor(this);
     
@@ -240,6 +252,9 @@ void TcpConnection::onError(TcpState *state, const char *message, bool connected
  */
 void TcpConnection::onLost(TcpState *state)
 {
+    // if user-space is no longer interested in this object, the rest of the code is pointless here
+    if (_handler == nullptr) return;
+    
     // monitor to check if "this" is destructed
     Monitor monitor(this);
     
