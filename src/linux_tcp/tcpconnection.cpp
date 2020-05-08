@@ -38,6 +38,12 @@ TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
  */
 TcpConnection::~TcpConnection() noexcept
 {
+    // if there is still a file descriptor open, we must explicitly unwatch it, otherwise it could
+    // remain open (tcp connection is forcefully closed). since we assume the handler is in scope for
+    // the complete lifetime of the tcpconnection, we make one last call to notify it to unmonitor
+    // the file descriptor.
+    if (fileno() > 0) _handler->monitor(this, fileno(), 0);
+
     // When the object is destructed, the _state-pointer will also destruct, resulting
     // in some final calls back to us to inform that the connection has indeed been closed.
     // This normally results in calls back to user-space (via the _handler pointer) but
