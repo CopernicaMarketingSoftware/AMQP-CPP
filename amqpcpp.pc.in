@@ -7,4 +7,5 @@ Description: AMQP-CPP is a C++ library for communicating with a RabbitMQ message
 Version: @VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@
 
 Libs: -L${libdir} -lamqpcpp
+Libs.private: @PRIVATE_LIBS@
 Cflags: -I${includedir}
