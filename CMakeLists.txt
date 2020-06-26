@@ -83,6 +83,9 @@ if(AMQP-CPP_BUILD_SHARED)
     add_library(${PROJECT_NAME} SHARED ${src_MAIN} ${src_LINUX_TCP})
     # set shared lib version
     set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${SO_VERSION})
+    if (WIN32)
+        target_link_libraries(${PROJECT_NAME} PUBLIC ws2_32)
+    endif()
 else()
     # create static lib
     #add_library(${PROJECT_NAME} STATIC ${SRCS})
