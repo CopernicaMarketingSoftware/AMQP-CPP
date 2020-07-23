@@ -1091,17 +1091,17 @@ channel.confirmSelect().onSuccess([&]() {
     // from this moment onwards ack/nack confirmations are coming in
 
     channel.publish("my-exchange", "my-key", "my first message");
-    // message counter is now 1, will call onAck/onNack with deliverTag=1
+    // message counter is now 1, will call onAck/onNack with deliveryTag=1
 
     channel.publish("my-exchange", "my-key", "my second message");
-    // message counter is now 2, will call onAck/onNack with deliverTag=2
+    // message counter is now 2, will call onAck/onNack with deliveryTag=2
 
-}).onAck([&](uint64_t deliverTag, bool multiple) {
-    // deliverTag is message number
-    // multiple is set to true, if all messages UP TO deliverTag have been processed
+}).onAck([&](uint64_t deliveryTag, bool multiple) {
+    // deliveryTag is message number
+    // multiple is set to true, if all messages UP TO deliveryTag have been processed
 }).onNack([&](uint64 deliveryTag, bool multiple, bool requeue) {
-    // deliverTag is message number
-    // multiple is set to true, if all messages UP TO deliverTag have not been processed
+    // deliveryTag is message number
+    // multiple is set to true, if all messages UP TO deliveryTag have not been processed
     // requeue is to be ignored
 });
 
