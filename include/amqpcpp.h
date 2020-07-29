@@ -55,6 +55,7 @@
 #include "amqpcpp/fieldproxy.h"
 #include "amqpcpp/table.h"
 #include "amqpcpp/array.h"
+#include "amqpcpp/voidfield.h"
 
 // envelope for publishing and consuming
 #include "amqpcpp/metadata.h"

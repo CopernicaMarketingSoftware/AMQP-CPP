@@ -112,6 +112,7 @@ public:
     virtual bool isTable()   const { return false; }
     virtual bool isBoolean() const { return false; }
     virtual bool isString()  const { return false; }
+    virtual bool isVoid()    const { return false; }
 };
 
 /**
