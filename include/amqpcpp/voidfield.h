@@ -60,16 +60,6 @@ public:
     }
 
     /**
-     *  We are an integer field
-     *
-     *  @return true, because we are an integer
-     */
-    bool isInteger() const override
-    {
-        return false;
-    }
-
-    /**
      *  Get the size this field will take when
      *  encoded in the AMQP wire-frame format
      *  @return size_t
