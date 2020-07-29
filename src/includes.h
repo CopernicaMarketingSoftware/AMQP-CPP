@@ -53,10 +53,10 @@
 #include "amqpcpp/decimalfield.h"
 #include "amqpcpp/stringfield.h"
 #include "amqpcpp/booleanset.h"
+#include "amqpcpp/voidfield.h"
 #include "amqpcpp/fieldproxy.h"
 #include "amqpcpp/table.h"
 #include "amqpcpp/array.h"
-#include "amqpcpp/voidfield.h"
 
 // envelope for publishing and consuming
 #include "amqpcpp/metadata.h"

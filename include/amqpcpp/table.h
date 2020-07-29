@@ -138,6 +138,7 @@ public:
     Table &set(const std::string &name, int64_t value) { return set(name, LongLong(value)); }
     Table &set(const std::string &name, const std::string &value) { return set(name, LongString(value)); }
     Table &set(const std::string &name, const char *value) { return set(name, LongString(std::string(value))); }
+    Table &set(const std::string &name, nullptr_t) { return set(name, VoidField()); }
 
     /**
      *  Is a certain field set in the table

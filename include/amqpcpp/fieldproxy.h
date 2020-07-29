@@ -19,6 +19,7 @@
 #include "booleanset.h"
 #include "decimalfield.h"
 #include "numericfield.h"
+#include "voidfield.h"
 
 /**
  *  Set up namespace
