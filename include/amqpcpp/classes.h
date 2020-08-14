@@ -37,7 +37,7 @@ class Frame;
 class Login;
 class Monitor;
 class OutBuffer;
-class ReceivedFrame;
+class InBuffer;
 class Table;
 
 /**

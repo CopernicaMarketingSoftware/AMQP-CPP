@@ -8,7 +8,7 @@
  *  The ExtFrame is the base class for all other frames, apart from the
  *  protocol-header-frame
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -20,7 +20,7 @@
  *  Dependencies
  */
 #include "amqpcpp/frame.h"
-#include "amqpcpp/receivedframe.h"
+#include "receivedframe.h"
 
 /**
  *  Set up namespace

@@ -42,7 +42,6 @@
 #include "amqpcpp/buffer.h"
 #include "amqpcpp/bytebuffer.h"
 #include "amqpcpp/inbuffer.h"
-#include "amqpcpp/receivedframe.h"
 #include "amqpcpp/outbuffer.h"
 #include "amqpcpp/copiedbuffer.h"
 #include "amqpcpp/watchable.h"

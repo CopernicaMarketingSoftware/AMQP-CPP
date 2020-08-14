@@ -29,7 +29,6 @@ namespace AMQP {
 /**
  *  Forward declarations
  */
-class Buffer;
 class ConnectionImpl;
 
 /**

@@ -41,7 +41,7 @@
 #include "amqpcpp/endian.h"
 #include "amqpcpp/buffer.h"
 #include "amqpcpp/bytebuffer.h"
-#include "amqpcpp/receivedframe.h"
+#include "amqpcpp/inbuffer.h"
 #include "amqpcpp/outbuffer.h"
 #include "amqpcpp/watchable.h"
 #include "amqpcpp/monitor.h"
