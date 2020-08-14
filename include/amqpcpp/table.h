@@ -1,7 +1,7 @@
 /**
  *  AMQP field table
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -51,7 +51,7 @@ public:
      *
      *  @param  frame   received frame to decode
      */
-    Table(ReceivedFrame &frame);
+    Table(InBuffer &frame);
 
     /**
      *  Copy constructor

@@ -13,7 +13,7 @@ namespace AMQP {
  *  Constructor based on incoming frame
  *  @param  frame
  */
-Array::Array(ReceivedFrame &frame)
+Array::Array(InBuffer &frame)
 {
     // use this to see if we've read too many bytes.
     uint32_t charsToRead = frame.nextUint32();

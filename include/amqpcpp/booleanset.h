@@ -5,7 +5,7 @@
  *  is a utility class for setting and getting the eight
  *  booleans
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -19,7 +19,7 @@
 #include <ostream>
 #include "field.h"
 #include "outbuffer.h"
-#include "receivedframe.h"
+#include "inbuffer.h"
 
 /**
  *  Set up namespace
@@ -67,7 +67,7 @@ public:
      *  Constructor based on incoming data
      *  @param  frame
      */
-    BooleanSet(ReceivedFrame &frame)
+    BooleanSet(InBuffer &frame)
     {
         _byte = frame.nextUint8();
     }

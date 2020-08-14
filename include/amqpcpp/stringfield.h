@@ -15,7 +15,7 @@
 #include "field.h"
 #include "outbuffer.h"
 #include "numericfield.h"
-#include "receivedframe.h"
+#include "inbuffer.h"
 
 /**
  *  Set up namespace
@@ -70,7 +70,7 @@ public:
      *  Construct based on received data
      *  @param  frame
      */
-    StringField(ReceivedFrame &frame)
+    StringField(InBuffer &frame)
     {
         // get the size
         T size(frame);

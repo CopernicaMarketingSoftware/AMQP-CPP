@@ -70,7 +70,6 @@
 #include "consumedmessage.h"
 #include "bodyframe.h"
 #include "basicheaderframe.h"
-#include "framecheck.h"
 
 #define TYPE_INVALID 0
 #define END_OF_FRAME 206
@@ -85,7 +84,7 @@ namespace AMQP {
  *  @param  buffer      Binary buffer
  *  @param  max         Max size for a frame
  */
-ReceivedFrame::ReceivedFrame(const Buffer &buffer, uint32_t max) : _buffer(buffer)
+ReceivedFrame::ReceivedFrame(const Buffer &buffer, uint32_t max) : InBuffer(buffer)
 {
     // we need enough room for type, channel, the payload size, 
     // the the end-of-frame byte is not yet necessary
@@ -125,178 +124,6 @@ bool ReceivedFrame::header() const
 bool ReceivedFrame::complete() const
 {
     return _buffer.size() >= _payloadSize + 8;
-}
-
-/**
- *  Read the next uint8 from the buffer
- *  
- *  @param  char* buffer    buffer to read from
- *  @return uint8_t         value read
- */
-uint8_t ReceivedFrame::nextUint8()
-{
-    // check if there is enough size
-    FrameCheck check(this, 1);
-    
-    // get a byte
-    return _buffer.byte(_skip);
-}
-
-/**
- *  Read the next int8 from the buffer
- *  
- *  @param  char* buffer    buffer to read from
- *  @return int8_t          value read
- */
-int8_t ReceivedFrame::nextInt8()
-{
-    // check if there is enough size
-    FrameCheck check(this, 1);
-    
-    // get a byte
-    return (int8_t)_buffer.byte(_skip);
-}
-
-/**
- *  Read the next uint16_t from the buffer
- *  
- *  @return uint16_t        value read
- */
-uint16_t ReceivedFrame::nextUint16()
-{
-    // check if there is enough size
-    FrameCheck check(this, sizeof(uint16_t));
-    
-    // get two bytes, and convert to host-byte-order
-    uint16_t value;
-    _buffer.copy(_skip, sizeof(uint16_t), &value);
-    return be16toh(value);
-}
-
-/**
- *  Read the next int16_t from the buffer
- *  
- *  @return int16_t     value read
- */
-int16_t ReceivedFrame::nextInt16()
-{
-    // check if there is enough size
-    FrameCheck check(this, sizeof(int16_t));
-    
-    // get two bytes, and convert to host-byte-order
-    int16_t value;
-    _buffer.copy(_skip, sizeof(int16_t), &value);
-    return be16toh(value);
-}
-
-/**
- *  Read the next uint32_t from the buffer
- *  
- *  @return uint32_t        value read
- */
-uint32_t ReceivedFrame::nextUint32()
-{
-    // check if there is enough size
-    FrameCheck check(this, sizeof(uint32_t));
-    
-    // get four bytes, and convert to host-byte-order
-    uint32_t value;
-    _buffer.copy(_skip, sizeof(uint32_t), &value);
-    return be32toh(value);
-}
-
-/**
- *  Read the next int32_t from the buffer
- *  
- *  @return uint32_t        value read
- */
-int32_t ReceivedFrame::nextInt32()
-{
-    // check if there is enough size
-    FrameCheck check(this, sizeof(int32_t));
-    
-    // get four bytes, and convert to host-byte-order
-    int32_t value;
-    _buffer.copy(_skip, sizeof(int32_t), &value);
-    return be32toh(value);
-}
-
-/**
- *  Read the next uint64_t from the buffer
- *  
- *  @return uint64_t        value read
- */
-uint64_t ReceivedFrame::nextUint64()
-{
-    // check if there is enough size
-    FrameCheck check(this, sizeof(uint64_t));
-    
-    // get eight bytes, and convert to host-byte-order
-    uint64_t value;
-    _buffer.copy(_skip, sizeof(uint64_t), &value);
-    return be64toh(value);
-}
-
-/**
- *  Read the next uint64_t from the buffer
- *  
- *  @return uint64_t        value read
- */
-int64_t ReceivedFrame::nextInt64()
-{
-    // check if there is enough size
-    FrameCheck check(this, sizeof(int64_t));
-    
-    // get eight bytes, and convert to host-byte-order
-    int64_t value;
-    _buffer.copy(_skip, sizeof(int64_t), &value);
-    return be64toh(value);
-}
-
-/**
- *  Read a float from the buffer
- *
- *  @return float       float read from buffer. 
- */
-float ReceivedFrame::nextFloat()
-{
-    // check if there is enough size
-    FrameCheck check(this, sizeof(float));
-    
-    // get four bytes
-    float value;
-    _buffer.copy(_skip, sizeof(float), &value);
-    return value;
-}
-
-/**
- *  Read a double from the buffer
- *
- *  @return double      double read from buffer
- */
-double ReceivedFrame::nextDouble()
-{
-    // check if there is enough size
-    FrameCheck check(this, sizeof(double));
-    
-    // get eight bytes, and convert to host-byte-order
-    double value;
-    _buffer.copy(_skip, sizeof(double), &value);
-    return value;
-}
-
-/**
- *  Get a pointer to the next binary buffer of a certain size
- *  @param  size
- *  @return char*
- */
-const char * ReceivedFrame::nextData(uint32_t size)
-{
-    // check if there is enough size
-    FrameCheck check(this, size);
-    
-    // get the data
-    return _buffer.data(_skip, size);
 }
 
 /**

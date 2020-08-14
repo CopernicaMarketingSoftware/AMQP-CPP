@@ -8,7 +8,7 @@
  *  This is a class that is used internally by the AMQP library. As a user
  *  of this library, you normally do not have to instantiate it.
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -35,21 +35,9 @@ class ConnectionImpl;
 /**
  *  Class definition
  */
-class ReceivedFrame
+class ReceivedFrame : public InBuffer
 {
 private:
-    /**
-     *  The buffer we are reading from
-     *  @var    Buffer
-     */
-    const Buffer &_buffer;
-
-    /**
-     *  Number of bytes already processed
-     *  @var    uint32_t
-     */
-    uint32_t _skip = 0;
-
     /**
      *  Type of frame
      *  @var    uint8_t
@@ -188,83 +176,6 @@ public:
     }
 
     /**
-     *  Read the next uint8_t from the buffer
-     *
-     *  @return uint8_t         value read
-     */
-    uint8_t nextUint8();
-
-    /**
-     *  Read the next int8_t from the buffer
-     *
-     *  @return int8_t          value read
-     */
-    int8_t nextInt8();
-
-    /**
-     *  Read the next uint16_t from the buffer
-     *
-     *  @return uint16_t        value read
-     */
-    uint16_t nextUint16();
-
-    /**
-     *  Read the next int16_t from the buffer
-     *
-     *  @return int16_t     value read
-     */
-    int16_t nextInt16();
-
-    /**
-     *  Read the next uint32_t from the buffer
-     *
-     *  @return uint32_t        value read
-     */
-    uint32_t nextUint32();
-
-    /**
-     *  Read the next int32_t from the buffer
-     *
-     *  @return int32_t     value read
-     */
-    int32_t nextInt32();
-
-    /**
-     *  Read the next uint64_t from the buffer
-     *
-     *  @return uint64_t        value read
-     */
-    uint64_t nextUint64();
-
-    /**
-     *  Read the next int64_t from the buffer
-     *
-     *  @return int64_t     value read
-     */
-    int64_t nextInt64();
-
-    /**
-     *  Read a float from the buffer
-     *
-     *  @return float       float read from buffer.
-     */
-    float nextFloat();
-
-    /**
-     *  Read a double from the buffer
-     *
-     *  @return double      double read from buffer
-     */
-    double nextDouble();
-
-    /**
-     *  Get a pointer to the next binary buffer of a certain size
-     *  @param  size
-     *  @return char*
-     */
-    const char *nextData(uint32_t size);
-
-    /**
      *  Process the received frame
      *
      *  If this method returns false, it means that the frame was not processed,
@@ -276,13 +187,6 @@ public:
      *  @internal
      */
     bool process(ConnectionImpl *connection);
-
-
-    /**
-     *  The checker may access private data
-     */
-    friend class FrameCheck;
-
 };
 
 /**

@@ -1,7 +1,7 @@
 /**
  *  Field.cpp
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 #include "includes.h"
 
@@ -16,7 +16,7 @@ namespace AMQP {
  *  @param  frame
  *  @return Field*
  */
-Field *Field::decode(ReceivedFrame &frame)
+Field *Field::decode(InBuffer &frame)
 {
     // get the type
     uint8_t type = frame.nextUint8();

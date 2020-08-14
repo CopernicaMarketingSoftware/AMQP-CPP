@@ -9,7 +9,7 @@ namespace AMQP {
  *
  *  @param  frame   received frame to decode
  */
-Table::Table(ReceivedFrame &frame)
+Table::Table(InBuffer &frame)
 {
     // table buffer begins with the number of bytes to read
     uint32_t bytesToRead = frame.nextUint32();

@@ -139,7 +139,7 @@ public:
      *  Read incoming frame
      *  @param  frame
      */
-    MetaData(ReceivedFrame &frame) :
+    MetaData(InBuffer &frame) :
         _bools1(frame),
         _bools2(frame)
     {

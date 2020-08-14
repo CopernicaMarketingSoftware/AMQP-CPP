@@ -1,7 +1,7 @@
 /**
  *  Decimal field type for AMQP
  *
- *  @copyright 2014, 2015 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -16,7 +16,7 @@
 #include <ostream>
 #include "field.h"
 #include "outbuffer.h"
-#include "receivedframe.h"
+#include "inbuffer.h"
 
 /**
  *  Set up namespace
@@ -81,7 +81,7 @@ public:
      *  Construct based on incoming data
      *  @param  frame
      */
-    DecimalField(ReceivedFrame &frame)
+    DecimalField(InBuffer &frame)
     {
         _places = frame.nextUint8();
         _number = frame.nextUint32();

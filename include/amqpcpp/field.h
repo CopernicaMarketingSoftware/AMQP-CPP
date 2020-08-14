@@ -1,7 +1,7 @@
 /**
  *  Available field types for AMQP
  *
- *  @copyright 2014, 2015 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -22,7 +22,7 @@ namespace AMQP {
 /**
  *  Forward declarations
  */
-class ReceivedFrame;
+class InBuffer;
 class OutBuffer;
 class Array;
 class Table;
@@ -42,7 +42,7 @@ protected:
      *  @param  frame
      *  @return Field*
      */
-    static Field *decode(ReceivedFrame &frame);
+    static Field *decode(InBuffer &frame);
 
 public:
     /**

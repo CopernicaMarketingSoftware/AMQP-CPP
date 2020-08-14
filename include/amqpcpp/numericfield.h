@@ -1,7 +1,7 @@
 /**
  *  Numeric field types for AMQP
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -14,7 +14,7 @@
  */
 #include <memory>
 #include <type_traits>
-#include "receivedframe.h"
+#include "inbuffer.h"
 #include "outbuffer.h"
 #include "field.h"
 #include <ostream>
@@ -60,7 +60,7 @@ public:
      *  Parse based on incoming buffer
      *  @param  frame
      */
-    NumericField(ReceivedFrame &frame)
+    NumericField(InBuffer &frame)
     {
 // The Microsoft Visual Studio compiler thinks that there is an issue
 // with the following code, so we temporarily disable a specific warning

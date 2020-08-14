@@ -1,7 +1,7 @@
 /**
  *  AMQP field array
  *
- *  @copyright 2014, 2015 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -46,7 +46,7 @@ public:
      *
      *  @param  frame   received frame
      */
-    Array(ReceivedFrame &frame);
+    Array(InBuffer &frame);
 
     /**
      *  Copy constructor
