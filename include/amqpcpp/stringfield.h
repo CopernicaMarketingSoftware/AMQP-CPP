@@ -1,7 +1,7 @@
 /**
  *  String field types for amqp
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -43,17 +43,28 @@ public:
 
     /**
      *  Construct based on a std::string
-     *
      *  @param  value   string value
      */
     StringField(const std::string &value) : _data(value) {}
 
     /**
      *  Construct based on a std::string
-     *
      *  @param  value   string value
      */
     StringField(std::string &&value) : _data(std::move(value)) {}
+    
+    /**
+     *  Construct based on a buffer
+     *  @param  buffer  buffer value
+     *  @param  size    size of the buffer
+     */
+    StringField(const char *buffer, size_t size) : _data(buffer, size) {}
+    
+    /**
+     *  Construct based on a c-string
+     *  @param  buffer  buffer value
+     */
+    StringField(const char *buffer) : _data(buffer) {}
 
     /**
      *  Construct based on received data
@@ -85,7 +96,6 @@ public:
 
     /**
      *  Assign a new value
-     *
      *  @param  value   new value
      */
     StringField& operator=(const std::string &value)
@@ -99,13 +109,81 @@ public:
 
     /**
      *  Assign a new value
-     *
      *  @param  value   new value
      */
     StringField& operator=(std::string &&value)
     {
         // overwrite data
         _data = std::move(value);
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Assign a new value
+     *  @param  value   new value
+     */
+    StringField& operator=(const char *value)
+    {
+        // overwrite data
+        _data.assign(value);
+
+        // allow chaining
+        return *this;
+    }
+    
+    /**
+     *  Assign a new value
+     *  @param  value
+     *  @return StringField
+     */
+    StringField& assign(const std::string &value)
+    {
+        // overwrite data
+        _data = value;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Assign a new value
+     *  @param  value   new value
+     *  @return StringField
+     */
+    StringField& assign(std::string &&value)
+    {
+        // overwrite data
+        _data = std::move(value);
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Assign a new value
+     *  @param  value   new value
+     *  @return StringField
+     */
+    StringField& assign(const char *value)
+    {
+        // overwrite data
+        _data.assign(value);
+
+        // allow chaining
+        return *this;
+    }
+    
+    /**
+     *  Assign a new value
+     *  @param  value   new value
+     *  @return StringField
+     */
+    StringField& assign(const char *value, size_t size)
+    {
+        // overwrite data
+        _data.assign(value, size);
 
         // allow chaining
         return *this;

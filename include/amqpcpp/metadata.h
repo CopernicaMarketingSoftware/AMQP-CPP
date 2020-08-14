@@ -230,7 +230,6 @@ public:
 
     /**
      *  Set the various supported fields using r-value references
-     *
      *  @param  value   moveable value
      */
     void setExpiration      (std::string &&value) { _expiration       = std::move(value); _bools1.set(0,true); }
@@ -244,6 +243,37 @@ public:
     void setUserID          (std::string &&value) { _userID           = std::move(value); _bools2.set(4,true); }
     void setTypeName        (std::string &&value) { _typeName         = std::move(value); _bools2.set(5,true); }
     void setMessageID       (std::string &&value) { _messageID        = std::move(value); _bools2.set(7,true); }
+
+    /**
+     *  Set the various supported fields using data buffers
+     *  @param  value   data buffer
+     *  @param  size    size of the buffer
+     */
+    void setExpiration      (const char *value, size_t size) { _expiration.assign(value, size);      _bools1.set(0,true); }
+    void setReplyTo         (const char *value, size_t size) { _replyTo.assign(value, size);         _bools1.set(1,true); }
+    void setCorrelationID   (const char *value, size_t size) { _correlationID.assign(value, size);   _bools1.set(2,true); }
+    void setContentEncoding (const char *value, size_t size) { _contentEncoding.assign(value, size); _bools1.set(6,true); }
+    void setContentType     (const char *value, size_t size) { _contentType.assign(value, size);     _bools1.set(7,true); }
+    void setClusterID       (const char *value, size_t size) { _clusterID.assign(value, size);       _bools2.set(2,true); }
+    void setAppID           (const char *value, size_t size) { _appID.assign(value, size);           _bools2.set(3,true); }
+    void setUserID          (const char *value, size_t size) { _userID.assign(value, size);          _bools2.set(4,true); }
+    void setTypeName        (const char *value, size_t size) { _typeName.assign(value, size);        _bools2.set(5,true); }
+    void setMessageID       (const char *value, size_t size) { _messageID.assign(value, size);       _bools2.set(7,true); }
+
+    /**
+     *  Set the various supported fields using c strings
+     *  @param  value   data buffer
+     */
+    void setExpiration      (const char *value) { _expiration.assign(value);      _bools1.set(0,true); }
+    void setReplyTo         (const char *value) { _replyTo.assign(value);         _bools1.set(1,true); }
+    void setCorrelationID   (const char *value) { _correlationID.assign(value);   _bools1.set(2,true); }
+    void setContentEncoding (const char *value) { _contentEncoding.assign(value); _bools1.set(6,true); }
+    void setContentType     (const char *value) { _contentType.assign(value);     _bools1.set(7,true); }
+    void setClusterID       (const char *value) { _clusterID.assign(value);       _bools2.set(2,true); }
+    void setAppID           (const char *value) { _appID.assign(value);           _bools2.set(3,true); }
+    void setUserID          (const char *value) { _userID.assign(value);          _bools2.set(4,true); }
+    void setTypeName        (const char *value) { _typeName.assign(value);        _bools2.set(5,true); }
+    void setMessageID       (const char *value) { _messageID.assign(value);       _bools2.set(7,true); }
 
     /**
      *  Retrieve the fields
