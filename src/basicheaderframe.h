@@ -1,7 +1,7 @@
 /**
  *  Class describing an AMQP basic header frame
  *
- *  @copyright 2014 - 2018 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -66,6 +66,18 @@ protected:
         _metadata.fill(buffer);
     }
 
+    /**
+     *  Construct an empty basic header frame
+     *  @param  channel     channel we're working on
+     *  @param  metadata    the meta-data
+     *  @param  bodysize    size of the body
+     */
+    BasicHeaderFrame(uint16_t channel, const MetaData &metadata, size_t bodysize) :
+        HeaderFrame(channel, 10 + metadata.size()), // there are at least 10 bytes sent, weight (2), bodySize (8), plus the size of the meta data
+        _bodySize(bodysize),
+        _metadata(metadata)
+    {}
+
 public:
     /**
      *  Construct an empty basic header frame
@@ -76,10 +88,7 @@ public:
      *  @param  envelope    the envelope
      */
     BasicHeaderFrame(uint16_t channel, const Envelope &envelope) :
-        HeaderFrame(channel, 10 + envelope.size()), // there are at least 10 bytes sent, weight (2), bodySize (8), plus the size of the meta data
-        _bodySize(envelope.bodySize()),
-        _metadata(envelope)
-    {}
+        BasicHeaderFrame(channel, envelope, envelope.bodySize()) {}
 
     /**
      *  Constructor to parse incoming frame
