@@ -41,6 +41,12 @@ private:
      */
     ShortString _locale;
 
+    /**
+     *  The selected connection name
+     *  @var ShortString
+     */
+    ShortString _connection_name;
+
 protected:
     /**
      *  Encode a frame on a string buffer
@@ -57,6 +63,7 @@ protected:
         _mechanism.fill(buffer);
         _response.fill(buffer);
         _locale.fill(buffer);
+        _connection_name.fill(buffer);
     }
 
 public:
@@ -70,7 +77,8 @@ public:
         _properties(frame),
         _mechanism(frame),
         _response(frame),
-        _locale(frame)
+        _locale(frame),
+        _connection_name(frame)
     {}
 
     /** 
@@ -86,7 +94,8 @@ public:
         _properties(properties),
         _mechanism(mechanism),
         _response(response),
-        _locale(locale)
+        _locale(locale),
+        _connection_name(frame)
     {}
 
     /**
@@ -138,6 +147,15 @@ public:
     const std::string locale() const
     {
         return _locale;
+    }
+
+    /**
+     *  The selected connection name
+     *  @return string
+     */
+    const std::string connection_name() const
+    {
+        return _connection_name;
     }
 
     /**
