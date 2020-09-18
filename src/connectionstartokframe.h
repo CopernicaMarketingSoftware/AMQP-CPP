@@ -63,7 +63,6 @@ protected:
         _mechanism.fill(buffer);
         _response.fill(buffer);
         _locale.fill(buffer);
-        _connection_name.fill(buffer);
     }
 
 public:
@@ -77,8 +76,7 @@ public:
         _properties(frame),
         _mechanism(frame),
         _response(frame),
-        _locale(frame),
-        _connection_name(frame)
+        _locale(frame)
     {}
 
     /** 
@@ -94,8 +92,7 @@ public:
         _properties(properties),
         _mechanism(mechanism),
         _response(response),
-        _locale(locale),
-        _connection_name(frame)
+        _locale(locale)
     {}
 
     /**
