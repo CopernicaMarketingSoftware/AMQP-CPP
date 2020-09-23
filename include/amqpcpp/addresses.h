@@ -13,6 +13,11 @@
 #pragma once
 
 /**
+ *  Dependencies
+ */
+#include <cstring>
+
+/**
  *  Begin of namespace
  */
 namespace AMQP {
@@ -67,6 +72,20 @@ public:
         // no addresses found
         throw std::runtime_error("no addresses");
     }
+
+    /**
+     *  Constructor for a comma separated list
+     *  @param  buffer
+     *  @throws std::runtime_error
+     */
+    Addresses(const char *buffer) : Addresses(buffer, strlen(buffer)) {}
+
+    /**
+     *  Constructor for a comma separated list
+     *  @param  buffer
+     *  @throws std::runtime_error
+     */
+    Addresses(const std::string &buffer) : Addresses(buffer.data(), buffer.size()) {}
 
     /**
      *  Destructed
