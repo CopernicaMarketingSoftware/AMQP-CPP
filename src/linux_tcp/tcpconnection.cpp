@@ -141,6 +141,12 @@ bool TcpConnection::close(bool immediate)
     // stop if object was destructed
     if (!monitor.valid()) return true;
     
+    // tell the handler that no further events will be fired
+    _handler->onDetached(this);
+    
+    // stop if object was destructed
+    if (!monitor.valid()) return true;
+      
     // change the state
     _state.reset(new TcpClosed(this));
     

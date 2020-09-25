@@ -58,7 +58,13 @@ private:
      *  A pipe that is used to send back the socket that is connected to RabbitMQ
      *  @var Pipe
      */
-    Pipe _pipe;
+    Pipe _finished;
+    
+    /**
+     *  A pipe that is used to send to the thread that we should stop trying
+     *  @var Pipe
+     */
+    Pipe _stop;
     
     /**
      *  Possible error that occured
@@ -92,6 +98,10 @@ private:
             
             // get address info
             AddressInfo addresses(_hostname.data(), _port);
+
+            // an fdset to monitor
+            fd_set readset;
+            fd_set writeset;
     
             // iterate over the addresses
             for (size_t i = 0; i < addresses.size(); ++i)
@@ -101,12 +111,55 @@ private:
                 
                 // move on on failure
                 if (_socket < 0) continue;
-                
+
+                // turn socket into a non-blocking socket and set the close-on-exec bit
+                fcntl(_socket, F_SETFL, O_NONBLOCK | O_CLOEXEC);
+
+                // try to connect non-blocking
+                if (connect(_socket, addresses[i]->ai_addr, addresses[i]->ai_addrlen) == 0) break;
+
+                // we set the timeout to 5 seconds
+                struct timeval timeout{5,0};
+
+                // reset the fdset
+                FD_ZERO(&readset);
+                FD_ZERO(&writeset);
+
+                // set the fds to monitor
+                FD_SET(_socket, &writeset);
+                FD_SET(_stop.in(), &readset);
+
                 // connect to the socket
                 if (connect(_socket, addresses[i]->ai_addr, addresses[i]->ai_addrlen) == 0) break;
                 
+                // perform a select, wait for something to happen on one of the fds
+                int ret = select(std::max(_socket, _stop.in()) + 1, &readset, &writeset, nullptr, &timeout);
+
                 // log the error for the time being
-                _error = strerror(errno);
+                if (ret == 0) _error = "connection timed out";
+                
+                // otherwise, select might've failed
+                else if (ret < 0) _error = strerror(errno);
+
+                // one of the pipes was activated, check if it was the _stop pipe, if so we stop immediately
+                else if (FD_ISSET(_stop.in(), &readset)) return;
+
+                // otherwise the connect failed/succeeded
+                else
+                {
+                    // the error
+                    int err = 0;
+                    socklen_t len = 4;
+
+                    // get the options
+                    getsockopt(_socket, SOL_SOCKET, SO_ERROR, &err, &len);
+
+                    // if the error is zero, we break, socket is now valid
+                    if (err == 0) break;
+
+                    // set the error with the value
+                    _error = strerror(err);
+                }
 
                 // close socket because connect failed
                 ::close(_socket);
@@ -118,9 +171,6 @@ private:
             // connection succeeded, mark socket as non-blocking
             if (_socket >= 0) 
             {
-                // turn socket into a non-blocking socket and set the close-on-exec bit
-                fcntl(_socket, F_SETFL, O_NONBLOCK | O_CLOEXEC);
-                
                 // we want to enable "nodelay" on sockets (otherwise all send operations are s-l-o-w
                 int optval = 1;
                 
@@ -139,7 +189,7 @@ private:
         }
             
         // notify the master thread by sending a byte over the pipe
-        if (!_pipe.notify())
+        if (!_finished.notify())
         {
             _error = strerror(errno);
         }
@@ -160,7 +210,7 @@ public:
         _port(port)
     {
         // tell the event loop to monitor the filedescriptor of the pipe
-        parent->onIdle(this, _pipe.in(), readable);
+        parent->onIdle(this, _finished.in(), readable);
         
         // we can now start the thread (must be started after filedescriptor is monitored!)
         std::thread thread(std::bind(&TcpResolver::run, this));
@@ -174,8 +224,11 @@ public:
      */
     virtual ~TcpResolver() noexcept
     {
+        // just in case the thread is not done yet, we notify it.
+        _stop.notify();
+
         // stop monitoring the pipe filedescriptor
-        _parent->onIdle(this, _pipe.in(), 0);
+        _parent->onIdle(this, _finished.in(), 0);
 
         // wait for the thread to be ready
         _thread.join();
@@ -234,7 +287,7 @@ public:
     virtual TcpState *process(const Monitor &monitor, int fd, int flags) override
     {
         // only works if the incoming pipe is readable
-        if (fd != _pipe.in() || !(flags & readable)) return this;
+        if (fd != _finished.in() || !(flags & readable)) return this;
 
         // proceed to the next state
         return proceed(monitor);
