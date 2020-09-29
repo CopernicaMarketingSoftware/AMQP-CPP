@@ -13,6 +13,11 @@
 #pragma once
 
 /**
+ *  Includes
+ */
+#include <type_traits>
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -52,7 +57,12 @@ private:
      *  @var std::string
      */
     std::string _vhost;
-    
+
+    /**
+     *  Extra provided options after the question mark /vhost?option=value
+     *  @var std::map<std::string,std::string>
+     */
+    std::map<std::string, std::string> _options;
     
     /**
      *  The default port
@@ -113,8 +123,36 @@ public:
         // find out where the vhost is set (starts with a slash)
         const char *slash = (const char *)memchr(data, '/', last - data);
 
+        // where to start looking for the question mark, we also want to support urls where the 
+        // hostname does not have a slash.
+        const char *start = slash ? slash : data;
+
+        // we search for the ? for extra options
+        const char *qm = static_cast<const char *>(memchr(start, '?', last - start));
+
+        // if there is a questionmark, we need to parse all options
+        if (qm != nullptr && last - qm > 1) 
+        {
+            // we start at question mark now
+            start = qm;
+
+            do {
+                // find the next equals sign and start of the next parameter
+                const char *equals = (const char *)memchr(start + 1, '=', last - start - 1);
+                const char *next = (const char *)memchr(start + 1, '&', last - start - 1);
+
+                // assign it to the options if we found an equals sign
+                if (equals) _options[std::string(start + 1, equals - start - 1)] = std::string(equals + 1, (next ? next - equals : last - equals) - 1);
+            
+                // we now have a new start, the next '&...'
+                start = next;
+
+            // keep iterating as long as there are more vars
+            } while (start);
+        }
+
         // was a vhost set?
-        if (slash != nullptr && last - slash > 1) _vhost.assign(slash + 1, last - slash - 1);
+        if (slash != nullptr && last - slash > 1) _vhost.assign(slash + 1, (qm ? qm - slash : last - slash) - 1);
 
         // the hostname is everything until the slash, check is portnumber was set
         const char *colon = (const char *)memchr(data, ':', last - data);
@@ -215,6 +253,15 @@ public:
     }
 
     /**
+     *  Get access to the options
+     *  @return std::map<std::string,std::string>
+     */
+    const std::map<std::string,std::string> &options() const 
+    {
+        return _options;
+    }
+
+    /**
      *  Cast to a string
      *  @return std::string
      */
@@ -234,6 +281,19 @@ public:
 
         // do we have a special vhost?
         if (_vhost != "/") str.append(_vhost);
+
+        // iterate over all options, appending them
+        if (!_options.empty())
+        {
+            // first append a question mark
+            str.push_back('?');
+
+            // iterate over all the options
+            for (const auto &kv : _options) str.append(kv.first).append("=").append(kv.second).append("&");
+
+            // remove the extra &
+            str.erase(str.size() - 1);
+        }
 
         // done
         return str;
@@ -259,7 +319,10 @@ public:
         if (_port != that._port) return false;
 
         // and finally the vhosts, they must match too
-        return _vhost == that._vhost;
+        if (_vhost == that._vhost) return false;
+
+        // and the options as well
+        return _options == that._options;
     }
 
     /**
@@ -296,7 +359,10 @@ public:
         if (_port != that._port) return _port < that._port;
 
         // and finally compare the vhosts
-        return _vhost < that._vhost;
+        if (_vhost < that._vhost) return _vhost < that._vhost;
+
+        // and finally lexicographically compare the options
+        return _options < that._options;
     }
     
     /**
@@ -322,11 +388,63 @@ public:
         // append default vhost
         stream << "/";
 
-        // do we have a special vhost?
+        // do we have a special vhost or options?
         if (address._vhost != "/") stream << address._vhost;
+
+        // iterate over all options, appending them
+        if (!address._options.empty())
+        {
+            // first append a question mark
+            stream << '?';
+
+            // is this the first option?
+            bool first = true;
+
+            // iterate over all the options
+            for (const auto &kv : address._options) 
+            {
+                // write the pair to the stream
+                stream << (first ? "" : "&") << kv.first << "=" << kv.second;
+
+                // no longer on first option
+                first = false;
+            }
+        }
 
         // done
         return stream;
+    }
+
+    /**
+     *  Get an integer option
+     *  @param  name
+     *  @param  fallback
+     *  @return T
+     */
+    template <typename T, typename std::enable_if<std::is_integral<T>::value>::type* = nullptr>
+    T option(const char *name, T fallback) const
+    {
+        // find the const char* version of the option
+        const char *value = option(name);
+
+        // if there is a value, convert it to integral, otherwise return the fallback
+        return value ? static_cast<T>(atoll(value)) : fallback;
+    }
+
+    /**
+     *  Get a const char * option, returns nullptr if it does not exist.
+     *  @return const char *
+     */
+    const char *option(const char *name) const
+    {
+        // find the option
+        auto iter = _options.find(name);
+
+        // if not found, we return the default
+        if (iter == _options.end()) return nullptr;
+
+        // return the value in the map
+        return iter->second.c_str();
     }
 };
 
