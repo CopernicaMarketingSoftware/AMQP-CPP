@@ -123,14 +123,18 @@ public:
         // find out where the vhost is set (starts with a slash)
         const char *slash = (const char *)memchr(data, '/', last - data);
 
-        // if there is a slash, we search for the ? for extra options
-        const char *qm = static_cast<const char *>(slash ? memchr(slash, '?', last - slash) : nullptr);
+        // where to start looking for the question mark, we also want to support urls where the 
+        // hostname does not have a slash.
+        const char *start = slash ? slash : data;
+
+        // we search for the ? for extra options
+        const char *qm = static_cast<const char *>(memchr(start, '?', last - start));
 
         // if there is a questionmark, we need to parse all options
         if (qm != nullptr && last - qm > 1) 
         {
-            // we start at the question mark
-            const char *start = qm;
+            // we start at question mark now
+            start = qm;
 
             do {
                 // find the next equals sign and start of the next parameter
@@ -140,7 +144,7 @@ public:
                 // assign it to the options if we found an equals sign
                 if (equals) _options[std::string(start + 1, equals - start - 1)] = std::string(equals + 1, (next ? next - equals : last - equals) - 1);
             
-                // we now have a new start
+                // we now have a new start, the next '&...'
                 start = next;
 
             // keep iterating as long as there are more vars
@@ -276,7 +280,7 @@ public:
         str.append("/");
 
         // do we have a special vhost?
-        if (_vhost != "/" || !_options.empty()) str.append(_vhost);
+        if (_vhost != "/") str.append(_vhost);
 
         // iterate over all options, appending them
         if (!_options.empty())
@@ -385,7 +389,7 @@ public:
         stream << "/";
 
         // do we have a special vhost or options?
-        if (address._vhost != "/" || !address._options.empty()) stream << address._vhost;
+        if (address._vhost != "/") stream << address._vhost;
 
         // iterate over all options, appending them
         if (!address._options.empty())
@@ -420,14 +424,27 @@ public:
     template <typename T, typename std::enable_if<std::is_integral<T>::value>::type* = nullptr>
     T option(const char *name, T fallback) const
     {
+        // find the const char* version of the option
+        const char *value = option(name);
+
+        // if there is a value, convert it to integral, otherwise return the fallback
+        return value ? static_cast<T>(atoll(value)) : fallback;
+    }
+
+    /**
+     *  Get a const char * option, returns nullptr if it does not exist.
+     *  @return const char *
+     */
+    const char *option(const char *name) const
+    {
         // find the option
         auto iter = _options.find(name);
 
         // if not found, we return the default
-        if (iter == _options.end()) return fallback;
+        if (iter == _options.end()) return nullptr;
 
         // return the value in the map
-        return static_cast<T>(atoll(iter->second.c_str()));
+        return iter->second.c_str();
     }
 };
 
