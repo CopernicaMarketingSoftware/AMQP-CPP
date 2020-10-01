@@ -1,9 +1,9 @@
 PREFIX                  ?= /usr
 INCLUDE_DIR             = ${PREFIX}/include
 LIBRARY_DIR             = ${PREFIX}/lib
-export LIBRARY_NAME		= amqpcpp
-export SONAME			= 4.2
-export VERSION			= 4.2.0
+export LIBRARY_NAME	= amqpcpp
+export SONAME		= 4.2
+export VERSION		= 4.2.0
 
 all:
 		$(MAKE) -C src all
@@ -35,3 +35,6 @@ install:
 		ln -r -s -f $(LIBRARY_DIR)/lib$(LIBRARY_NAME).so.$(VERSION) $(LIBRARY_DIR)/lib$(LIBRARY_NAME).so.$(SONAME)
 		ln -r -s -f $(LIBRARY_DIR)/lib$(LIBRARY_NAME).so.$(VERSION) $(LIBRARY_DIR)/lib$(LIBRARY_NAME).so
 		ln -r -s -f $(LIBRARY_DIR)/lib$(LIBRARY_NAME).a.$(VERSION) $(LIBRARY_DIR)/lib$(LIBRARY_NAME).a
+		
+		
+
