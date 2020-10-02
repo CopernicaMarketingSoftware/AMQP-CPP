@@ -18,11 +18,13 @@ a user of this library, you create the socket connection and implement a certain
 interface that you pass to the AMQP-CPP library and that the library will use
 for IO operations.
 
+
 Intercepting this network layer is however optional, the AMQP-CPP library also
 comes with a predefined TCP and TLS module that can be used if you trust the AMQP 
 library to take care of the network (and optional TLS) handling. In that case, the 
 AMQP-CPP library does all the system and library calls to set up network connections 
 and send and receive the (possibly encrypted) data.
+
 
 This layered architecture makes the library extremely flexible and portable: it
 does not necessarily rely on operating system specific IO calls, and can be
@@ -30,6 +32,7 @@ easily integrated into any kind of event loop. If you want to implement the AMQP
 protocol on top of some [unusual other communication layer](https://tools.ietf.org/html/rfc1149),
 this library can be used for that - but if you want to use it with regular TCP
 connections, setting it up is just as easy.
+
 
 AMQP-CPP is fully asynchronous and does not do any blocking (system) calls, so
 it can be used in high performance applications without the need for threads.
