@@ -14,28 +14,28 @@ This library has a layered architecture, and allows you - if you like - to
 completely take care of the network layer. If you want to set up and manage the
 network connections yourself, the AMQP-CPP library will not make a connection to
 RabbitMQ by itself, nor will it create sockets and/or perform IO operations. As
-a user of this library, you create the socket connection and implement a certain
+a users of this library, you create the socket connection and implemented a certain
 interface that you pass to the AMQP-CPP library and that the library will use
 for IO operations.
 
 Intercepting this network layer is however optional, the AMQP-CPP library also
 comes with a predefined TCP and TLS module that can be used if you trust the AMQP 
-library to take care of the network (and optional TLS) handling. In that case, the 
+library to take care of this network (and optional TLS) handling. In that case, the 
 AMQP-CPP library does all the system and library calls to set up network connections 
 and send and receive the (possibly encrypted) data.
 
 This layered architecture makes the library extremely flexible and portable: it
 does not necessarily rely on operating system specific IO calls, and can be
 easily integrated into any kind of event loop. If you want to implement the AMQP
-protocol on top of some [unusual other communication layer](https://tools.ietf.org/html/rfc1149),
+protocol on top of some [unusual other communication layers](https://tools.ietf.org/html/rfc1149),
 this library can be used for that - but if you want to use it with regular TCP
 connections, setting it up is just as easy.
 
 AMQP-CPP is fully asynchronous and does not do any blocking (system) calls, so
 it can be used in high performance applications without the need for threads.
 
-The AMQP-CPP library uses C++11 features, so if you intend use it, please make
-sure that your compiler is up-to-date and supports C++11.
+The AMQP-CPP library uses C++11 features, so if you intend to  use it, please make
+sure that your compiler is up-to-date and supports the C++11.
 
 **Note for the reader:** This readme file has a peculiar structure. We start
 explaining the pure and hard core low level interface in which you have to
@@ -48,7 +48,7 @@ ABOUT
 
 This library is created and maintained by Copernica (www.copernica.com), and is
 used inside the MailerQ (www.mailerq.com) and Yothalot (www.yothalot.com) applications. 
-MailerQ is a tool for sending large volumes of email, using AMQP message queues, and Yothalot 
+MailerQ is a tool for sending the large volumes of email, using AMQP message queues, and Yothalot 
 is a big data processing map/reduce framework.
 
 Do you appreciate our work and are you looking for high quality email solutions?
