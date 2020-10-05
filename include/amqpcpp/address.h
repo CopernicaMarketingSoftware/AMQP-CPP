@@ -29,6 +29,21 @@ class Address
 {
 private:
     /**
+     *  Helper class to do case insensitive comparison
+     */
+    struct icasecmp 
+    { 
+        /**
+         *  Comparison operator <. Should exhibit SWO.
+         *  @param  lhs
+         *  @param  rhs
+         *  @return bool    lhs < rhs
+         */
+        bool operator() (const std::string& lhs, const std::string& rhs) const { return strcasecmp(lhs.c_str(), rhs.c_str()) < 0; }
+    };
+
+private:
+    /**
      *  The auth method
      *  @var bool
      */
@@ -62,7 +77,7 @@ private:
      *  Extra provided options after the question mark /vhost?option=value
      *  @var std::map<std::string,std::string>
      */
-    std::map<std::string, std::string> _options;
+    std::map<std::string, std::string, icasecmp> _options;
     
     /**
      *  The default port
@@ -256,7 +271,7 @@ public:
      *  Get access to the options
      *  @return std::map<std::string,std::string>
      */
-    const std::map<std::string,std::string> &options() const 
+    const decltype(_options) &options() const 
     {
         return _options;
     }
