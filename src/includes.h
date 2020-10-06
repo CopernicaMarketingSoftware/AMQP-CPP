@@ -76,6 +76,7 @@
 #include "amqpcpp/deferredget.h"
 #include "amqpcpp/channelimpl.h"
 #include "amqpcpp/channel.h"
+#include "amqpcpp/throttledchannel.h"
 #include "amqpcpp/login.h"
 #include "amqpcpp/address.h"
 #include "amqpcpp/connectionhandler.h"

@@ -571,6 +571,13 @@ public:
      *  @param  frame       frame to send
      *  @return bool        was frame succesfully sent?
      */
+    bool send(CopiedBuffer &&frame);
+
+    /**
+     *  Send a frame over the channel
+     *  @param  frame       frame to send
+     *  @return bool        was frame succesfully sent?
+     */
     bool send(const Frame &frame);
 
     /**
@@ -581,6 +588,12 @@ public:
     {
         return _synchronous || !_queue.empty();
     }
+
+    /**
+     *  The max payload size for frames
+     *  @return uint32_t
+     */
+    uint32_t maxPayload() const;
 
     /**
      *  Signal the channel that a synchronous operation was completed, and that any

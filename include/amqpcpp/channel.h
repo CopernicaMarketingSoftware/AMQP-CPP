@@ -597,6 +597,11 @@ public:
     {
         return _implementation->id();
     }
+
+    /**
+     *  Some internal classes may touch our implementation
+     */
+    friend class ThrottledChannel;
 };
 
 /**
