@@ -82,8 +82,6 @@ private:
      *  Thread in which the DNS lookup occurs
      *  @var std::thread
      */
-    std::thread _thread;
-
 
     /**
      *  Run the thread
@@ -201,12 +199,8 @@ public:
     {
         // tell the event loop to monitor the filedescriptor of the pipe
         parent->onIdle(this, _pipe.in(), readable);
-        
-        // we can now start the thread (must be started after filedescriptor is monitored!)
-        std::thread thread(std::bind(&TcpResolver::run, this));
-        
-        // store thread in member
-        _thread.swap(thread);
+
+        run();
     }
     
     /**
@@ -216,9 +210,6 @@ public:
     {
         // stop monitoring the pipe filedescriptor
         _parent->onIdle(this, _pipe.in(), 0);
-
-        // wait for the thread to be ready
-        _thread.join();
     }
     
     /**
