@@ -31,7 +31,7 @@ Throttle::Throttle(Channel &channel, size_t throttle) : _implementation(channel.
     // activate confirm-select mode
     auto &deferred = channel.confirmSelect()
         .onAck([this](uint64_t deliveryTag, bool multiple) { onAck(deliveryTag, multiple); })
-        .onNack([this](uint64_t deliveryTag, bool multiple, bool /* requeue*/) { onAck(deliveryTag, multiple); });
+        .onNack([this](uint64_t deliveryTag, bool multiple, bool /* requeue*/) { onNack(deliveryTag, multiple); });
 
     // we might have failed, in which case we throw
     if (!deferred) throw std::runtime_error("could not enable publisher confirms");
