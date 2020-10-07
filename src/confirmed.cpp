@@ -24,9 +24,6 @@ namespace AMQP {
  */
 void Confirmed::onAck(uint64_t deliveryTag, bool multiple) 
 {
-    // call base handler, will advance on the throttle if needed
-    Throttle::onAck(deliveryTag, multiple);
-
     // monitor the object, watching for destruction since these ack/nack handlers
     // could destruct the object
     Monitor monitor(this);
@@ -69,6 +66,12 @@ void Confirmed::onAck(uint64_t deliveryTag, bool multiple)
 
     // erase all acknowledged items
     _handlers.erase(_handlers.begin(), upper);
+
+    // call base handler, will advance on the throttle if needed. we call this _after_ we're
+    // done processing the callbacks, since one of the callbacks might close the channel, or publish
+    // more stuff. additionally, if it does destroy the channel, we are doing a lot of extra publishing
+    // for nothing. also, we call some extra handlers, and otherwise we might get onAcked after onClosed
+    Throttle::onAck(deliveryTag, multiple);
 }
 
 /**
@@ -78,9 +81,6 @@ void Confirmed::onAck(uint64_t deliveryTag, bool multiple)
  */
 void Confirmed::onNack(uint64_t deliveryTag, bool multiple)
 {
-    // call base handler, will advance on the throttle if needed
-    Throttle::onNack(deliveryTag, multiple);
-
     // monitor the object, watching for destruction since these ack/nack handlers
     // could destruct the object
     Monitor monitor(this);
@@ -123,6 +123,12 @@ void Confirmed::onNack(uint64_t deliveryTag, bool multiple)
 
     // erase all acknowledged items
     _handlers.erase(_handlers.begin(), upper);
+
+    // call base handler, will advance on the throttle if needed. we call this _after_ we're
+    // done processing the callbacks, since one of the callbacks might close the channel, or publish
+    // more stuff. additionally, if it does destroy the channel, we are doing a lot of extra publishing
+    // for nothing. also, we call some extra handlers, and otherwise we might get onAcked after onClosed
+    Throttle::onNack(deliveryTag, multiple);
 }
 
 /**
