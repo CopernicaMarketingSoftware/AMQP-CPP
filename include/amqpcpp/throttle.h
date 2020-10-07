@@ -36,7 +36,7 @@ class Channel;
  */
 class Throttle
 {
-private:
+protected:
     /**
      *  The implementation for the channel
      *  @var    std::shared_ptr<ChannelImpl>
@@ -75,18 +75,20 @@ private:
     std::set<size_t> _open;
 
     /**
-     *  Called when the deliverytag(s) are acked/nacked
-     *  @param  deliveryTag
-     *  @param  multiple
-     */
-    void onAck(uint64_t deliveryTag, bool multiple);
-
-    /**
      *  Send method for a frame
      *  @param  id
      *  @param  frame
      */
     bool send(uint64_t id, const Frame &frame);
+
+protected:
+    /**
+     *  Called when the deliverytag(s) are acked/nacked
+     *  @param  deliveryTag
+     *  @param  multiple
+     */
+    virtual void onAck(uint64_t deliveryTag, bool multiple);
+    virtual void onNack(uint64_t deliveryTag, bool multiple) { onAck(deliveryTag, multiple); }
 
 public:
     /**

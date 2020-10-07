@@ -86,6 +86,12 @@ using AckCallback           =   std::function<void(uint64_t deliveryTag, bool mu
 using NackCallback          =   std::function<void(uint64_t deliveryTag, bool multiple, bool requeue)>;
 
 /**
+ * When using a confirm wrapped channel, these callbacks are called when a message is acknowledged/nacked.
+ */
+using PublishAckCallback           =   std::function<void()>;
+using PublishNackCallback          =   std::function<void()>;
+
+/**
  *  End namespace
  */
 }
