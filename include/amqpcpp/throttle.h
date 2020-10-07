@@ -1,5 +1,5 @@
 /**
- *  ThrottledChannel.h
+ *  Throttle.h
  *  
  *  A channel wrapper that publishes more messages as soon as there is more capacity.
  *  
@@ -34,7 +34,7 @@ class Channel;
 /**
  *  Class definition
  */
-class ThrottledChannel
+class Throttle
 {
 private:
     /**
@@ -94,26 +94,26 @@ public:
      *  @param  channel 
      *  @param  throttle
      */
-    ThrottledChannel(Channel &channel, size_t throttle);
+    Throttle(Channel &channel, size_t throttle);
 
     /**
      *  Deleted copy constructor, deleted move constructor
      *  @param other
      */
-    ThrottledChannel(const ThrottledChannel &other) = delete;
-    ThrottledChannel(ThrottledChannel &&other) = delete;
+    Throttle(const Throttle &other) = delete;
+    Throttle(Throttle &&other) = delete;
 
     /**
      *  Deleted copy assignment, deleted move assignment
      *  @param  other
      */
-    ThrottledChannel &operator=(const ThrottledChannel &other) = delete;
-    ThrottledChannel &operator=(ThrottledChannel &&other) = delete;
+    Throttle &operator=(const Throttle &other) = delete;
+    Throttle &operator=(Throttle &&other) = delete;
 
     /**
      *  Virtual destructor
      */
-    virtual ~ThrottledChannel() = default;
+    virtual ~Throttle() = default;
 
     /**
      *  Publish a message to an exchange. See amqpcpp/channel.h for more details on the flags. 

@@ -1,7 +1,7 @@
 /**
- *  ThrottledChannel.cpp
+ *  Throttle.cpp
  *  
- *  Implementation for ThrottledChannel class.
+ *  Implementation for Throttle class.
  *  
  *  @author Michael van der Werve <michael.vanderwerve@mailerq.com>
  *  @copyright 2020 Copernica BV
@@ -26,7 +26,7 @@ namespace AMQP {
  *  @param  channel 
  *  @param  throttle
  */
-ThrottledChannel::ThrottledChannel(Channel &channel, size_t throttle) : _implementation(channel._implementation), _throttle(throttle)
+Throttle::Throttle(Channel &channel, size_t throttle) : _implementation(channel._implementation), _throttle(throttle)
 {
     // activate confirm-select mode
     auto &deferred = channel.confirmSelect()
@@ -42,7 +42,7 @@ ThrottledChannel::ThrottledChannel(Channel &channel, size_t throttle) : _impleme
  *  @param  deliveryTag
  *  @param  multiple
  */
-void ThrottledChannel::onAck(uint64_t deliveryTag, bool multiple)
+void Throttle::onAck(uint64_t deliveryTag, bool multiple)
 {
     // number of messages exposed
     if (multiple) _open.erase(_open.begin(), _open.upper_bound(deliveryTag));
@@ -83,7 +83,7 @@ void ThrottledChannel::onAck(uint64_t deliveryTag, bool multiple)
  *  @param  id
  *  @param  frame
  */
-bool ThrottledChannel::send(uint64_t id, const Frame &frame)
+bool Throttle::send(uint64_t id, const Frame &frame)
 {
     // if there is already a queue, we always append it
     if (!_queue.empty() || (_open.size() >= _throttle && _last != id))
@@ -116,7 +116,7 @@ bool ThrottledChannel::send(uint64_t id, const Frame &frame)
  *  @param  size        size of the message
  *  @param  flags       optional flags
  */
-bool ThrottledChannel::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
+bool Throttle::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
 {
     // @todo do not copy the entire buffer to individual frames
     
