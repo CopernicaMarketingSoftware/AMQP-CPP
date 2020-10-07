@@ -493,6 +493,8 @@ DeferredPublisher &ChannelImpl::publish(const std::string &exchange, const std::
     Monitor monitor(this);
 
     // @todo do not copy the entire buffer to individual frames
+
+    // @todo this seems utterly (conceptually) broken
     
     // make sure we have a deferred object to return
     if (!_publisher) _publisher.reset(new DeferredPublisher(this));
@@ -715,6 +717,42 @@ Deferred &ChannelImpl::recover(int flags)
 }
 
 /**
+ *  Send a buffer over the channel
+ *  @param  frame       frame to send
+ *  @return bool        was frame succesfully sent?
+ */
+bool ChannelImpl::send(CopiedBuffer &&frame)
+{
+    // skip if channel is not connected
+    if (_state == state_closed || !_connection) return false;
+
+    // if we're busy closing, we failed as well
+    if (_state == state_closing) return false;
+    
+    // are we currently in synchronous mode or are there
+    // other frames waiting for their turn to be sent?
+    if (_synchronous || !_queue.empty())
+    {
+        // we need to wait until the synchronous frame has
+        // been processed, so queue the frame until it was
+        _queue.emplace(false, std::move(frame));
+
+        // it was of course not actually sent but we pretend
+        // that it was, because no error occured
+        return true;
+    }
+
+    // send to tcp connection
+    if (!_connection->send(std::move(frame))) return false;
+    
+    // frame was sent, a copied buffer cannot be synchronous
+    _synchronous = false;
+    
+    // done
+    return true;
+}
+
+/**
  *  Send a frame over the channel
  *  @param  frame       frame to send
  *  @return bool        was the frame sent?
@@ -751,6 +789,17 @@ bool ChannelImpl::send(const Frame &frame)
     
     // done
     return true;
+}
+
+/**
+ *  The max payload size for body frames
+ *  @return uint32_t
+ */
+uint32_t ChannelImpl::maxPayload() const
+{
+    // forward to the connection
+    // @todo what if _connection == nullptr?
+    return _connection->maxPayload();
 }
 
 /**
