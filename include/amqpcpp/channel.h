@@ -601,7 +601,7 @@ public:
     /**
      *  Some internal classes may touch our implementation
      */
-    friend class ThrottledChannel;
+    friend class Throttle;
 };
 
 /**
