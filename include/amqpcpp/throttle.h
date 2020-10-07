@@ -75,6 +75,12 @@ protected:
     std::set<size_t> _open;
 
     /**
+     *  Deferred to set up on the close
+     *  @var std::shared_ptr<Deferred>
+     */
+    std::shared_ptr<Deferred> _close;
+
+    /**
      *  Send method for a frame
      *  @param  id
      *  @param  frame
@@ -158,6 +164,19 @@ public:
      *  @param  size_t
      */
     void throttle(size_t throttle) { _throttle = throttle; }
+
+    /**
+     *  Flush the throttle. This flushes it _without_ taking the throttle into account, e.g. the messages
+     *  are sent in a burst over the channel.
+     *  @param  max     optional maximum, 0 is flush all
+     */
+    size_t flush(size_t max = 0);
+
+    /**
+     *  Close the throttle channel (closes the underlying channel when all messages have been sent)
+     *  @return Deferred&
+     */
+    Deferred &close();
 };
 
 /**
