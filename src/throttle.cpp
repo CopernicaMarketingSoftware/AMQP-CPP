@@ -200,7 +200,15 @@ Deferred &Throttle::close()
     // create the deferred
     _close = std::make_shared<Deferred>(_implementation->usable());
 
-    // return the deferred
+    // if there are open messages or there is a queue, they will still get acked and we will then forward it
+    if (_open.size() > 0 || !_queue.empty()) return *_close;
+
+    // there are no open messages, we can close the channel directly.
+    _implementation->close()
+        .onSuccess([this]() { _close->reportSuccess(); })
+        .onError([this](const char *message) { _close->reportError(message); });
+
+    // return the created deferred
     return *_close;
 }
 
