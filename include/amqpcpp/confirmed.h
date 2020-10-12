@@ -45,6 +45,12 @@ private:
     virtual void onAck(uint64_t deliveryTag, bool multiple) override;
     virtual void onNack(uint64_t deliveryTag, bool multiple) override;
 
+    /**
+     *  Method that is called to report an error
+     *  @param  message
+     */
+    virtual void reportError(const char *message) override;
+
 public:
     /**
      *  Constructor

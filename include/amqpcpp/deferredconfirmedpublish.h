@@ -36,6 +36,12 @@ private:
     PublishNackCallback _nackCallback;
 
     /**
+     *  Callback to execute when message is lost (nack / error)
+     *  @var    LostCallback
+     */
+    PublishLostCallback _lostCallback;
+
+    /**
      *  Report an ack, calls the callback.
      */
     void reportAck() 
@@ -51,6 +57,25 @@ private:
     {
         // check if the callback is set 
         if (_nackCallback) _nackCallback(); 
+
+        // message is 'lost'
+        if (_lostCallback) _lostCallback();
+    }
+
+    /**
+     *  Indicate failure
+     *  @param  error           Description of the error that occured
+     */
+    void reportError(const char *error)
+    {
+        // from this moment on the object should be listed as failed
+        _failed = true;
+
+        // message is lost
+        if (_lostCallback) _lostCallback();
+
+        // execute callbacks if registered
+        if (_errorCallback) _errorCallback(error);
     }
 
     /**
@@ -95,6 +120,20 @@ public:
     {
         // store callback
         _nackCallback = callback;
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Callback that is called when a message is lost, either through RabbitMQ
+     *  rejecting it or because of a channel error
+     *  @param  callback    the callback to execute
+     */
+    DeferredConfirmedPublish &onLost(const PublishLostCallback &callback)
+    {
+        // store callback
+        _lostCallback = callback;
 
         // allow chaining
         return *this;

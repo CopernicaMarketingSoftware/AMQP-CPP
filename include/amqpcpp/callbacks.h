@@ -90,6 +90,7 @@ using NackCallback          =   std::function<void(uint64_t deliveryTag, bool mu
  */
 using PublishAckCallback           =   std::function<void()>;
 using PublishNackCallback          =   std::function<void()>;
+using PublishLostCallback          =   std::function<void()>;
 
 /**
  *  End namespace

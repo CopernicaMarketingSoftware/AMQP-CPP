@@ -35,6 +35,9 @@ Throttle::Throttle(Channel &channel, size_t throttle) : _implementation(channel.
 
     // we might have failed, in which case we throw
     if (!deferred) throw std::runtime_error("could not enable publisher confirms");
+
+    // we wrap a handling error callback that calls our member function
+    _implementation->onError([this](const char *message) { reportError(message); });  
 }
 
 /**
@@ -87,6 +90,16 @@ bool Throttle::send(uint64_t id, const Frame &frame)
 
     // and we're going to send it over the channel directly
     return _implementation->send(frame);
+}
+
+/**
+ *  Method that is called to report an error
+ *  @param  message
+ */
+void Throttle::reportError(const char *message)
+{
+    // if a callback is set, call the handler with the message
+    if (_errorCallback) _errorCallback(message);
 }
 
 /**
@@ -210,6 +223,25 @@ Deferred &Throttle::close()
 
     // return the created deferred
     return *_close;
+}
+
+/**
+ *  Install an error callback
+ *  @param  callback
+ */
+void Throttle::onError(const ErrorCallback &callback)
+{
+    // we store the callback
+    _errorCallback = callback;
+
+    // check the callback
+    if (!callback) return;
+
+    // if the channel is no longer usable, report that
+    if (!_implementation->usable()) return callback("Channel is no longer usable");
+
+    // specify that we're already closing
+    if (_close) callback("Wrapped channel is closing down");
 }
 
 /**

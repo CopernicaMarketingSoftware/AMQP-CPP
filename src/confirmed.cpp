@@ -132,6 +132,37 @@ void Confirmed::onNack(uint64_t deliveryTag, bool multiple)
 }
 
 /**
+ *  Method that is called to report an error
+ *  @param  message
+ */
+void Confirmed::reportError(const char *message)
+{
+    // monitor the object, watching for destruction since these ack/nack handlers
+    // could destruct the object
+    Monitor monitor(this);
+
+    // move the handlers out
+    auto handlers = std::move(_handlers);
+
+    // iterate over all the messages
+    // call the handlers
+    for (const auto &iter : handlers)
+    {
+        // call the handler
+        iter.second->reportError(message);
+
+        // if we were destructed in the meantime, we leap out
+        if (!monitor) return;
+    }
+
+    // if the monitor is no longer valid, leap out
+    if (!monitor) return;
+    
+    // call base class to let it handle the errors
+    Throttle::reportError(message);
+}
+
+/**
  *  Publish a message to an exchange. See amqpcpp/channel.h for more details on the flags. 
  *  Delays actual publishing depending on the publisher confirms sent by RabbitMQ.
  * 

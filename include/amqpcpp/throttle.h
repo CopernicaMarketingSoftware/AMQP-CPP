@@ -81,11 +81,23 @@ protected:
     std::shared_ptr<Deferred> _close;
 
     /**
+     *  Callback to call when an error occurred
+     *  @var ErrorCallback
+     */
+    ErrorCallback _errorCallback;
+
+    /**
      *  Send method for a frame
      *  @param  id
      *  @param  frame
      */
     bool send(uint64_t id, const Frame &frame);
+
+    /**
+     *  Method that is called to report an error
+     *  @param  message
+     */
+    virtual void reportError(const char *message);
 
 protected:
     /**
@@ -98,7 +110,10 @@ protected:
 
 public:
     /**
-     *  Constructor
+     *  Constructor. Warning: this takes control of the channel, there should be no extra
+     *  handlers set on the channel (onError) and no further publishes should be done on the
+     *  raw channel either. Doing this will cause the throttle to work incorrectly, as the
+     *  counters are not properly updated.
      *  @param  channel 
      *  @param  throttle
      */
@@ -177,6 +192,12 @@ public:
      *  @return Deferred&
      */
     Deferred &close();
+
+    /**
+     *  Install an error callback
+     *  @param  callback
+     */
+    void onError(const ErrorCallback &callback);
 };
 
 /**
