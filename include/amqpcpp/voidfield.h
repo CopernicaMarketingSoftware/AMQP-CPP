@@ -13,7 +13,7 @@
  *  Dependencies
  */
 #include <memory>
-#include "receivedframe.h"
+#include "inbuffer.h"
 #include "outbuffer.h"
 #include "field.h"
 
@@ -39,7 +39,7 @@ public:
      *  Parse based on incoming buffer
      *  @param  frame
      */
-    VoidField(ReceivedFrame &frame)
+    VoidField(InBuffer &frame)
     {
 
     }
