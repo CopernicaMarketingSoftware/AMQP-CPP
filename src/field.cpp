@@ -41,6 +41,7 @@ Field *Field::decode(InBuffer &frame)
         case 'A':   return new Array(frame);
         case 'T':   return new Timestamp(frame);
         case 'F':   return new Table(frame);
+        case 'V':   return new VoidField(frame);
         default:    return nullptr;
     }
 }
