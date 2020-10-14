@@ -36,7 +36,7 @@ void Confirmed::onAck(uint64_t deliveryTag, bool multiple)
 
         // we did not find it (this should not be possible, unless somebody explicitly called)
         // the base-class publish methods for some reason.
-        if (iter == _handlers.end()) return;
+        if (iter == _handlers.end()) return Throttle::onAck(deliveryTag, multiple);
 
         // call the ack handler
         iter->second->reportAck();
@@ -46,26 +46,30 @@ void Confirmed::onAck(uint64_t deliveryTag, bool multiple)
 
         // erase it from the map
         _handlers.erase(iter);
-
-        // we are done
-        return;
     }
 
-    // find the last element, inclusive
-    auto upper = _handlers.upper_bound(deliveryTag);
-
-    // call the handlers
-    for (auto iter = _handlers.begin(); iter != upper; iter++)
+    // do multiple at once
+    else
     {
-        // call the handler
-        iter->second->reportAck();
+        // find the last element, inclusive
+        auto upper = _handlers.upper_bound(deliveryTag);
 
-        // if we were destructed in the meantime, we leap out
-        if (!monitor) return;
+        // call the handlers
+        for (auto iter = _handlers.begin(); iter != upper; iter++)
+        {
+            // call the handler
+            iter->second->reportAck();
+
+            // if we were destructed in the meantime, we leap out
+            if (!monitor) return;
+        }
+
+        // erase all acknowledged items
+        _handlers.erase(_handlers.begin(), upper);
     }
 
-    // erase all acknowledged items
-    _handlers.erase(_handlers.begin(), upper);
+    // make sure the object is still valid
+    if (!monitor) return;
 
     // call base handler, will advance on the throttle if needed. we call this _after_ we're
     // done processing the callbacks, since one of the callbacks might close the channel, or publish
@@ -93,7 +97,7 @@ void Confirmed::onNack(uint64_t deliveryTag, bool multiple)
 
         // we did not find it (this should not be possible, unless somebody explicitly called)
         // the base-class publish methods for some reason.
-        if (iter == _handlers.end()) return;
+        if (iter == _handlers.end()) return Throttle::onNack(deliveryTag, multiple);
 
         // call the ack handler
         iter->second->reportNack();
@@ -103,27 +107,31 @@ void Confirmed::onNack(uint64_t deliveryTag, bool multiple)
 
         // erase it from the map
         _handlers.erase(iter);
-
-        // we are done
-        return;
     }
 
-    // find the last element, inclusive
-    auto upper = _handlers.upper_bound(deliveryTag);
-
-    // call the handlers
-    for (auto iter = _handlers.begin(); iter != upper; iter++)
+    // nack multiple elements
+    else
     {
-        // call the handler
-        iter->second->reportNack();
+        // find the last element, inclusive
+        auto upper = _handlers.upper_bound(deliveryTag);
 
-        // if we were destructed in the meantime, we leap out
-        if (!monitor) return;
+        // call the handlers
+        for (auto iter = _handlers.begin(); iter != upper; iter++)
+        {
+            // call the handler
+            iter->second->reportNack();
+
+            // if we were destructed in the meantime, we leap out
+            if (!monitor) return;
+        }
+
+        // erase all acknowledged items
+        _handlers.erase(_handlers.begin(), upper);
     }
 
-    // erase all acknowledged items
-    _handlers.erase(_handlers.begin(), upper);
-
+    // make sure the object is still valid
+    if (!monitor) return;
+    
     // call base handler, will advance on the throttle if needed. we call this _after_ we're
     // done processing the callbacks, since one of the callbacks might close the channel, or publish
     // more stuff. additionally, if it does destroy the channel, we are doing a lot of extra publishing
