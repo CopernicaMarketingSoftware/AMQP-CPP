@@ -141,8 +141,8 @@ protected:
         {
             auto fn = boost::bind(&Watcher::read_handler,
                                   this,
-                                  _1,
-                                  _2,
+                                  boost::placeholders::_1,
+                                  boost::placeholders::_2,
                                   PTR_FROM_THIS(Watcher),
                                   connection,
                                   fd);
@@ -159,8 +159,8 @@ protected:
         {
             auto fn = boost::bind(&Watcher::write_handler,
                                   this,
-                                  _1,
-                                  _2,
+                                  boost::placeholders::_1,
+                                  boost::placeholders::_2,
                                   PTR_FROM_THIS(Watcher),
                                   connection,
                                   fd);
@@ -346,7 +346,7 @@ protected:
         {
             const auto fn = boost::bind(&Timer::timeout,
                                   this,
-                                  _1,
+                                  boost::placeholders::_1,
                                   PTR_FROM_THIS(Timer),
                                   connection,
                                   timeout);
