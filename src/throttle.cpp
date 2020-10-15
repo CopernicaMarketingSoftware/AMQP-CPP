@@ -98,6 +98,9 @@ bool Throttle::send(uint64_t id, const Frame &frame)
  */
 void Throttle::reportError(const char *message)
 {
+    // assign empty queue
+    _queue = {};
+
     // if a callback is set, call the handler with the message
     if (_errorCallback) _errorCallback(message);
 }
