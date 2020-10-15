@@ -98,8 +98,15 @@ bool Throttle::send(uint64_t id, const Frame &frame)
  */
 void Throttle::reportError(const char *message)
 {
-    // assign empty queue
-    _queue = {};
+    // pop all elements from the queue (older compilers dont support reassign)
+    while (_queue.size()) _queue.pop();
+
+    // we can also forget all open messages, won't hear from them any more
+    _open.clear();
+
+    // reset tracking, since channel is fully broken
+    _last = 0;
+    _current = 1;
 
     // if a callback is set, call the handler with the message
     if (_errorCallback) _errorCallback(message);
