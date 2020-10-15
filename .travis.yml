@@ -31,21 +31,6 @@ matrix:
   - os: linux
     compiler: gcc
     env:
-      - COMPILER_PACKAGE=g++-5
-      - C_COMPILER=gcc-5
-      - CXX_COMPILER=g++-5
-      - CXXFLAGS=-std=c++11
-
-  - os: linux
-    compiler: gcc
-    env:
-      - COMPILER_PACKAGE=g++-6
-      - C_COMPILER=gcc-6
-      - CXX_COMPILER=g++-6
-
-  - os: linux
-    compiler: gcc
-    env:
       - COMPILER_PACKAGE=g++-7
       - C_COMPILER=gcc-7
       - CXX_COMPILER=g++-7
@@ -57,27 +42,48 @@ matrix:
       - C_COMPILER=gcc-8
       - CXX_COMPILER=g++-8
 
+  - os: linux
+    compiler: gcc
+    env:
+      - COMPILER_PACKAGE=g++-9
+      - C_COMPILER=gcc-9
+      - CXX_COMPILER=g++-9
+
+  - os: linux
+    compiler: gcc
+    env:
+      - COMPILER_PACKAGE=g++-10
+      - C_COMPILER=gcc-10
+      - CXX_COMPILER=g++-10
+
+
   ################
   # Linux / Clang
   ################
 
   - os: linux
     env:
-      - COMPILER_PACKAGE=clang-4.0
-      - C_COMPILER=clang-4.0
-      - CXX_COMPILER=clang++-4.0
+      - COMPILER_PACKAGE=clang-7
+      - C_COMPILER=clang-7
+      - CXX_COMPILER=clang++-7
 
   - os: linux
     env:
-      - COMPILER_PACKAGE=clang-5.0
-      - C_COMPILER=clang-5.0
-      - CXX_COMPILER=clang++-5.0
-      
+      - COMPILER_PACKAGE=clang-8
+      - C_COMPILER=clang-8
+      - CXX_COMPILER=clang++-8
+
   - os: linux
     env:
-      - COMPILER_PACKAGE=clang-6.0
-      - C_COMPILER=clang-6.0
-      - CXX_COMPILER=clang++-6.0
+      - COMPILER_PACKAGE=clang-9
+      - C_COMPILER=clang-9
+      - CXX_COMPILER=clang++-9
+
+  - os: linux
+    env:
+      - COMPILER_PACKAGE=clang-10
+      - C_COMPILER=clang-10
+      - CXX_COMPILER=clang++-10
 
 before_install:
 
@@ -85,7 +91,7 @@ before_install:
   - uname -a
 
   # Use an artful container - gives us access to latest compilers.
-  - docker run -d --name ubuntu-test-container -v $(pwd):/travis ubuntu:bionic tail -f /dev/null
+  - docker run -e "DEBIAN_FRONTEND=noninteractive" -d --name ubuntu-test-container -v $(pwd):/travis ubuntu:bionic tail -f /dev/null
   - docker ps
 
 
