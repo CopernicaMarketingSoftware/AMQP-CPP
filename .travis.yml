@@ -91,7 +91,7 @@ before_install:
   - uname -a
 
   # Use an artful container - gives us access to latest compilers.
-  - docker run -e "DEBIAN_FRONTEND=noninteractive" -d --name ubuntu-test-container -v $(pwd):/travis ubuntu:bionic tail -f /dev/null
+  - docker run -e "DEBIAN_FRONTEND=noninteractive" -d --name ubuntu-test-container -v $(pwd):/travis ubuntu:focal tail -f /dev/null
   - docker ps
 
 
