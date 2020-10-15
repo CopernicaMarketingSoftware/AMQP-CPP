@@ -13,7 +13,6 @@
  *  Dependencies
  */
 #include <memory>
-#include "receivedframe.h"
 #include "outbuffer.h"
 #include "field.h"
 
@@ -24,30 +23,22 @@ namespace AMQP
 {
 class VoidField : public Field
 {
-private:
-    /**
-     *  Field have no value
-     */
-    
 public:
     /**
      *  Default constructor
      */
-    VoidField() {}
+    VoidField() = default;
 
     /**
-     *  Parse based on incoming buffer
+     *  Construct based on incoming data
      *  @param  frame
      */
-    VoidField(ReceivedFrame &frame)
-    {
-
-    }
+    VoidField(InBuffer &frame) {}
 
     /**
- *  Destructor
- */
-    virtual ~VoidField() {}
+     *  Destructor
+     */
+    virtual ~VoidField() = default;
 
     /**
      *  Create a new instance of this object
@@ -74,9 +65,7 @@ public:
      *  Write encoded payload to the given buffer.
      *  @param  buffer      OutBuffer to write to
      */
-    virtual void fill(OutBuffer &buffer) const override
-    {
-    }
+    virtual void fill(OutBuffer &buffer) const override {}
 
     /**
      *  Get the type ID that is used to identify this type of
