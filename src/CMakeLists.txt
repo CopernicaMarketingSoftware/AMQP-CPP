@@ -49,7 +49,7 @@ add_sources(
     deferredconsumer.cpp
     deferredreceiver.cpp
     deferredextreceiver.cpp
-    deferredpublisher.cpp
+    deferredrecall.cpp
     deferredget.cpp
     exchangebindframe.h
     exchangebindokframe.h

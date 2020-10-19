@@ -45,7 +45,7 @@ class DeferredCancel;
 class DeferredConfirm;
 class DeferredQueue;
 class DeferredGet;
-class DeferredPublisher;
+class DeferredRecall;
 class Connection;
 class Envelope;
 class Table;
@@ -77,13 +77,13 @@ private:
 
     /**
      *  Handler that deals with incoming messages as a result of publish operations
-     *  @var    std::shared_ptr<DeferredPublisher>
+     *  @var    DeferredRecall
      */
-    std::shared_ptr<DeferredPublisher> _publisher;
+    std::shared_ptr<DeferredRecall> _recall;
 
     /**
-     * Handler that deals with publisher confirms frames
-     * @var    std::shared_ptr<DeferredConfirm>
+     *  Handler that deals with publisher confirms frames
+     *  @var    std::shared_ptr<DeferredConfirm>
      */
     std::shared_ptr<DeferredConfirm> _confirm;
 
@@ -433,9 +433,9 @@ public:
      *  @param  message     the message to send
      *  @param  size        size of the message
      *  @param  flags       optional flags
-     *  @return DeferredPublisher
+     *  @return bool
      */
-    DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags);
+    bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags);
 
     /**
      *  Set the Quality of Service (QOS) of the entire connection
@@ -470,6 +470,17 @@ public:
      *  });
      */
     DeferredConsumer& consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments);
+
+    /**
+     *  Tell that you are prepared to recall/take back messages that could not be
+     *  published. This is only meaningful if you pass the 'immediate' or 'mandatory'
+     *  flag to publish() operations.
+     * 
+     *  THis function returns a deferred handler more or less similar to the object
+     *  return by the consume() method and that can be used to install callbacks that
+     *  handle the recalled messages.
+     */
+    DeferredRecall &recall();
 
     /**
      *  Cancel a running consumer
@@ -750,10 +761,10 @@ public:
     DeferredReceiver *receiver() const { return _receiver.get(); }
     
     /**
-     *  Retrieve the deferred publisher that handles returned messages
-     *  @return The deferred publisher object
+     *  Retrieve the recalls-object that handles bounces
+     *  @return The deferred recall object
      */
-    DeferredPublisher *publisher() const { return _publisher.get(); }
+    DeferredRecall *recalls() const { return _recall.get(); }
 
     /**
      *  Retrieve the deferred confirm that handles publisher confirms

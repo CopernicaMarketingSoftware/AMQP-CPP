@@ -1,10 +1,10 @@
 /**
- *  DeferredPublisher.cpp
+ *  DeferredRecall.cpp
  *
- *  Implementation file for the DeferredPublisher class
+ *  Implementation file for the DeferredRecall class
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2018 Copernica BV
+ *  @copyright 2018 - 2020 Copernica BV
  */
 #include "includes.h"
 #include "basicreturnframe.h"
@@ -19,7 +19,7 @@ namespace AMQP {
  *
  *  @param  frame   The frame to process
  */
-void DeferredPublisher::process(BasicReturnFrame &frame)
+void DeferredRecall::process(BasicReturnFrame &frame)
 {
     // this object will handle all future frames with header and body data
     _channel->install(shared_from_this());
@@ -41,7 +41,7 @@ void DeferredPublisher::process(BasicReturnFrame &frame)
 /**
  *  Indicate that a message was done
  */
-void DeferredPublisher::complete()
+void DeferredRecall::complete()
 {
     // also monitor the channel
     Monitor monitor(_channel);

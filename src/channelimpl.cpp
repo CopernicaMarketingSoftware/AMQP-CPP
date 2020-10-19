@@ -484,9 +484,9 @@ DeferredDelete &ChannelImpl::removeQueue(const std::string &name, int flags)
  *  @param  message     the message to send
  *  @param  size        size of the message
  *  @param  flags
- *  @return DeferredPublisher
+ *  @return bool
  */
-DeferredPublisher &ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
+bool ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
 {
     // we are going to send out multiple frames, each one will trigger a call to the handler,
     // which in turn could destruct the channel object, we need to monitor that
@@ -494,22 +494,20 @@ DeferredPublisher &ChannelImpl::publish(const std::string &exchange, const std::
 
     // @todo do not copy the entire buffer to individual frames
 
-    // @todo this seems utterly (conceptually) broken
-    
-    // make sure we have a deferred object to return
-    if (!_publisher) _publisher.reset(new DeferredPublisher(this));
-
     // send the publish frame
-    if (!send(BasicPublishFrame(_id, exchange, routingKey, (flags & mandatory) != 0, (flags & immediate) != 0))) return *_publisher;
+    if (!send(BasicPublishFrame(_id, exchange, routingKey, (flags & mandatory) != 0, (flags & immediate) != 0))) return false;
 
     // channel still valid?
-    if (!monitor.valid()) return *_publisher;
+    if (!monitor.valid()) return false;
 
     // send header
-    if (!send(BasicHeaderFrame(_id, envelope))) return *_publisher;
+    if (!send(BasicHeaderFrame(_id, envelope))) return false;
+
+    // if everything has been sent by now
+    if (envelope.bodySize() == 0) return true;
 
     // channel and connection still valid?
-    if (!monitor.valid() || !_connection) return *_publisher;
+    if (!monitor.valid() || !_connection) return false;
 
     // the max payload size is the max frame size minus the bytes for headers and trailer
     uint32_t maxpayload = _connection->maxPayload();
@@ -526,10 +524,10 @@ DeferredPublisher &ChannelImpl::publish(const std::string &exchange, const std::
         uint64_t chunksize = std::min(static_cast<uint64_t>(maxpayload), bytesleft);
 
         // send out a body frame
-        if (!send(BodyFrame(_id, data + bytessent, (uint32_t)chunksize))) return *_publisher;
+        if (!send(BodyFrame(_id, data + bytessent, (uint32_t)chunksize))) return false;
 
         // channel still valid?
-        if (!monitor.valid()) return *_publisher;
+        if (!monitor.valid()) return false;
 
         // update counters
         bytessent += chunksize;
@@ -537,7 +535,7 @@ DeferredPublisher &ChannelImpl::publish(const std::string &exchange, const std::
     }
 
     // done
-    return *_publisher;
+    return true;
 }
 
 /**

@@ -1,12 +1,11 @@
 /**
- *  DeferredPublisher.h
+ *  DeferredRecall.h
  * 
- *  Class that is returned when channel::publish() is called, and that
- *  can be used to install callback methods that define how returned
- *  messages should be handled.
+ *  Class that an be used to install callback methods that define how 
+ *  returned messages should be handled.
  * 
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2018 Copernica BV
+ *  @copyright 2018 - 2020 Copernica BV
  */
 
 /**
@@ -27,7 +26,7 @@ class ChannelImpl;
 /**
  *  Class definition
  */
-class DeferredPublisher : public DeferredReceiver, public std::enable_shared_from_this<DeferredPublisher>
+class DeferredRecall : public DeferredReceiver, public std::enable_shared_from_this<DeferredRecall>
 {
 private:
     /**
@@ -94,7 +93,7 @@ public:
      *  @param  channel     the channel implementation
      *  @param  failed      are we already failed?
      */
-    DeferredPublisher(ChannelImpl *channel, bool failed = false) :
+    DeferredRecall(ChannelImpl *channel, bool failed = false) :
         DeferredReceiver(failed, channel) {}
         
 public:
@@ -102,7 +101,7 @@ public:
      *  Register a function to be called when a full message is returned
      *  @param  callback    the callback to execute
      */
-    DeferredPublisher &onReceived(const BounceCallback &callback)
+    DeferredRecall &onReceived(const BounceCallback &callback)
     {
         // store callback
         _bounceCallback = callback;
@@ -115,7 +114,7 @@ public:
      *  Alias for onReceived() (see above)
      *  @param  callback    the callback to execute
      */
-    DeferredPublisher &onMessage(const BounceCallback &callback)
+    DeferredRecall &onMessage(const BounceCallback &callback)
     {
         // store callback
         _bounceCallback = callback;
@@ -128,7 +127,7 @@ public:
      *  Alias for onReceived() (see above)
      *  @param  callback    the callback to execute
      */
-    DeferredPublisher &onReturned(const BounceCallback &callback)
+    DeferredRecall &onReturned(const BounceCallback &callback)
     {
         // store callback
         _bounceCallback = callback;
@@ -141,7 +140,7 @@ public:
      *  Alias for onReceived() (see above)
      *  @param  callback    the callback to execute
      */
-    DeferredPublisher &onBounced(const BounceCallback &callback)
+    DeferredRecall &onBounced(const BounceCallback &callback)
     {
         // store callback
         _bounceCallback = callback;
@@ -157,7 +156,7 @@ public:
      *  @param  callback    The callback to invoke
      *  @return Same object for chaining
      */
-    DeferredPublisher &onBegin(const ReturnCallback &callback)
+    DeferredRecall &onBegin(const ReturnCallback &callback)
     {
         // store callback
         _beginCallback = callback;
@@ -172,7 +171,7 @@ public:
      *  @param  callback    The callback to invoke for message headers
      *  @return Same object for chaining
      */
-    DeferredPublisher &onSize(const SizeCallback &callback)
+    DeferredRecall &onSize(const SizeCallback &callback)
     {
         // store callback
         _sizeCallback = callback;
@@ -187,7 +186,7 @@ public:
      *  @param  callback    The callback to invoke for message headers
      *  @return Same object for chaining
      */
-    DeferredPublisher &onHeaders(const HeaderCallback &callback)
+    DeferredRecall &onHeaders(const HeaderCallback &callback)
     {
         // store callback
         _headerCallback = callback;
@@ -209,7 +208,7 @@ public:
      *  @param  callback    The callback to invoke for chunks of message data
      *  @return Same object for chaining
      */
-    DeferredPublisher &onData(const DataCallback &callback)
+    DeferredRecall &onData(const DataCallback &callback)
     {
         // store callback
         _dataCallback = callback;
@@ -224,7 +223,7 @@ public:
      *  @param  callback    The callback to invoke
      *  @return Same object for chaining
      */
-    DeferredPublisher &onComplete(const ReturnedCallback &callback)
+    DeferredRecall &onComplete(const ReturnedCallback &callback)
     {
         // store callback
         _completeCallback = callback;

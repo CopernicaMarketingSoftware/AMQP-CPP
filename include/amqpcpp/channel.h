@@ -384,19 +384,10 @@ public:
      *  specify what should happen if the message could not be routed to a queue. By default,
      *  unroutable message are silently discarded.
      * 
-     *  This method returns a reference to a DeferredPublisher object. You can use this returned
-     *  object to install callbacks that are called when an undeliverable message is returned, or 
-     *  to set the callback that is called when the server confirms that the message was received. 
-     * 
-     *  To enable handling returned messages, or to enable publisher-confirms, you must not only
-     *  set the callback, but also pass in appropriate flags to enable this feature. If you do not 
-     *  pass in these flags, your callbacks will not be called. If you are not at all interested
-     *  in returned messages or publish-confirms, you can ignore the flag and the returned object.
-     * 
-     *  Watch out: the channel returns _the same_ DeferredPublisher object for all calls to the 
-     *  publish() method. This means that the callbacks that you install for the first published 
-     *  message are also used for subsequent messages _and_ it means that if you install a different 
-     *  callback for a later publish operation, it overwrites your earlier callbacks 
+     *  If you set the 'mandatory' and/or 'immediate' flag, messages that could not be handled 
+     *  are returned to the application. Make sure that you have called the recall()-method and
+     *  have set up all appropriate handlers to process these returned messages before you start
+     *  publishing.
      * 
      *  The following flags can be supplied:
      * 
@@ -410,10 +401,10 @@ public:
      *  @param  size        size of the message
      *  @param  flags       optional flags
      */
-    DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0) { return _implementation->publish(exchange, routingKey, envelope, flags); }
-    DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message.data(), message.size()), flags); }
-    DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, size), flags); }
-    DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, strlen(message)), flags); }
+    bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0) { return _implementation->publish(exchange, routingKey, envelope, flags); }
+    bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message.data(), message.size()), flags); }
+    bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, size), flags); }
+    bool publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, strlen(message)), flags); }
 
     /**
      *  Set the Quality of Service (QOS) for this channel
@@ -471,6 +462,18 @@ public:
     DeferredConsumer &consume(const std::string &queue, int flags, const Table &arguments) { return _implementation->consume(queue, std::string(), flags, arguments); }
     DeferredConsumer &consume(const std::string &queue, int flags = 0) { return _implementation->consume(queue, std::string(), flags, Table()); }
     DeferredConsumer &consume(const std::string &queue, const Table &arguments) { return _implementation->consume(queue, std::string(), 0, arguments); }
+
+    /**
+     *  Tell the messages that you are ready to recall/take back messages that messages thar are unroutable.
+     * 
+     *  When you use the publish() method in combination with the 'immediate' or 'mandatory' flag, rabbitmq
+     *  sends back unroutable messages. With this recall() method you can install a sort of pseudo-consumer
+     *  that defines how such returned-messages are processed.
+     * 
+     *  Watch out: when you call this method more than once, you always get access to the same object. You
+     *  can thus not install multiple callbacks for the same event.
+     */
+    DeferredRecall &recall() { return _implementation->recall(); }
 
     /**
      *  Cancel a running consume call

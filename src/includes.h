@@ -69,7 +69,7 @@
 #include "amqpcpp/callbacks.h"
 #include "amqpcpp/deferred.h"
 #include "amqpcpp/deferredconsumer.h"
-#include "amqpcpp/deferredpublisher.h"
+#include "amqpcpp/deferredrecall.h"
 #include "amqpcpp/deferredqueue.h"
 #include "amqpcpp/deferreddelete.h"
 #include "amqpcpp/deferredcancel.h"

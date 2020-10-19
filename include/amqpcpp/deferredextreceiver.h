@@ -4,11 +4,11 @@
  *  Extended receiver that _wants_ to receive message (because it is
  *  consuming or get'ting messages. This is the base class for both
  *  the DeferredConsumer as well as the DeferredGet classes, but not
- *  the base of the DeferredPublisher (which can also receive returned
+ *  the base of the DeferredRecall (which can also receive returned
  *  messages, but not as a result of an explicit request)
  *  
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2018 Copernica BV
+ *  @copyright 2018 - 2020 Copernica BV
  */
 
 /**

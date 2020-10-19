@@ -1,7 +1,7 @@
 /**
  *  Class describing a basic return frame
  * 
- *  @copyright 2014 - 2018 Copernica BV
+ *  @copyright 2014 - 2020 Copernica BV
  */
 
 /**
@@ -161,14 +161,14 @@ public:
         // channel does not exist
         if (!channel) return false;
         
-        // get the current publisher
-        auto publisher = channel->publisher();
+        // get the object that handles bounces
+        auto recalls = channel->recalls();
         
         // if there is no deferred publisher, we can just as well stop
-        if (publisher == nullptr) return false;
+        if (recalls == nullptr) return false;
         
         // initialize the object, because we're about to receive a message
-        publisher->process(*this);
+        recalls->process(*this);
         
         // done
         return true;

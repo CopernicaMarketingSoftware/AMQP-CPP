@@ -73,7 +73,7 @@
 #include "amqpcpp/deferredcancel.h"
 #include "amqpcpp/deferredconfirm.h"
 #include "amqpcpp/deferredget.h"
-#include "amqpcpp/deferredpublisher.h"
+#include "amqpcpp/deferredrecall.h"
 #include "amqpcpp/channelimpl.h"
 #include "amqpcpp/channel.h"
 #include "amqpcpp/throttle.h"
