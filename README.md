@@ -994,27 +994,15 @@ in almost any form:
 /**
  *  Publish a message to an exchange
  * 
- *  You have to supply the name of an exchange and a routing key. RabbitMQ will 
- *  then try to send the message to one or more queues. With the optional flags 
- *  parameter you can specify what should happen if the message could not be routed 
- *  to a queue. By default, unroutable message are silently discarded.
+ *  You have to supply the name of an exchange and a routing key. RabbitMQ will then try
+ *  to send the message to one or more queues. With the optional flags parameter you can
+ *  specify what should happen if the message could not be routed to a queue. By default,
+ *  unroutable message are silently discarded.
  * 
- *  This method returns a reference to a DeferredPublisher object. You can use 
- *  this returned object to install callbacks that are called when an undeliverable 
- *  message is returned, or to set the callback that is called when the server 
- *  confirms that the message was received. 
- * 
- *  To enable handling returned messages, or to enable publisher-confirms, you must 
- *  not only set the callback, but also pass in appropriate flags to enable this 
- *  feature. If you do not pass in these flags, your callbacks will not be called. 
- *  If you are not at all interested in returned messages or publish-confirms, you 
- *  can ignore the flag and the returned object.
- * 
- *  Watch out: the channel returns _the same_ DeferredPublisher object for all 
- *  calls to the publish() method. This means that the callbacks that you install 
- *  for the first published message are also used for subsequent messages _and_ 
- *  it means that if you install a different callback for a later publish 
- *  operation, it overwrites your earlier callbacks 
+ *  If you set the 'mandatory' and/or 'immediate' flag, messages that could not be handled 
+ *  are returned to the application. Make sure that you have called the recall()-method and
+ *  have set up all appropriate handlers to process these returned messages before you start
+ *  publishing.
  * 
  *  The following flags can be supplied:
  * 
@@ -1028,16 +1016,17 @@ in almost any form:
  *  @param  size        size of the message
  *  @param  flags       optional flags
  */
-DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0) { return _implementation->publish(exchange, routingKey, envelope, flags); }
-DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message.data(), message.size()), flags); }
-DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, size), flags); }
-DeferredPublisher &publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, strlen(message)), flags); }
+bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0) { return _implementation->publish(exchange, routingKey, envelope, flags); }
+bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message.data(), message.size()), flags); }
+bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, size), flags); }
+bool publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0) { return _implementation->publish(exchange, routingKey, Envelope(message, strlen(message)), flags); }
 ````
 
 Published messages are normally not confirmed by the server, and the RabbitMQ
 will not send a report back to inform you whether the message was successfully
 published or not. But with the flags you can instruct RabbitMQ to send back
-the message if it was undeliverable.
+the message if it was undeliverable. In you use these flags you must also install
+callbacks that will process these bounced messages.
 
 You can also use transactions to ensure that your messages get delivered.
 Let's say that you are publishing many messages in a row. If you get

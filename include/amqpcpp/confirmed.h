@@ -16,7 +16,7 @@
 /**
  *  Includes
  */
-#include "deferredconfirmedpublish.h"
+#include "deferredpublish.h"
 #include <memory>
 
 /**
@@ -35,7 +35,7 @@ private:
      *  removal will be cheaper for whole ranges.
      *  @var size_t
      */
-    std::map<size_t, std::shared_ptr<DeferredConfirmedPublish>> _handlers;
+    std::map<size_t, std::shared_ptr<DeferredPublish>> _handlers;
 
     /**
      *  Called when the deliverytag(s) are acked/nacked
@@ -90,10 +90,10 @@ public:
      *  @param  flags       optional flags
      *  @return bool
      */
-    DeferredConfirmedPublish &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0);
-    DeferredConfirmedPublish &publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0) { return publish(exchange, routingKey, Envelope(message.data(), message.size()), flags); }
-    DeferredConfirmedPublish &publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0) { return publish(exchange, routingKey, Envelope(message, size), flags); }
-    DeferredConfirmedPublish &publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0) { return publish(exchange, routingKey, Envelope(message, strlen(message)), flags); }
+    DeferredPublish &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0);
+    DeferredPublish &publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0) { return publish(exchange, routingKey, Envelope(message.data(), message.size()), flags); }
+    DeferredPublish &publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0) { return publish(exchange, routingKey, Envelope(message, size), flags); }
+    DeferredPublish &publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0) { return publish(exchange, routingKey, Envelope(message, strlen(message)), flags); }
 };
 
 /**

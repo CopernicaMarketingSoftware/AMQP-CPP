@@ -181,7 +181,7 @@ void Confirmed::reportError(const char *message)
  *  @param  size        size of the message
  *  @param  flags       optional flags
  */
-DeferredConfirmedPublish &Confirmed::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
+DeferredPublish &Confirmed::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
 {
     // copy the current identifier, this will be the ID that will come back
     auto current = _current;
@@ -190,7 +190,7 @@ DeferredConfirmedPublish &Confirmed::publish(const std::string &exchange, const 
     bool failed = !Throttle::publish(exchange, routingKey, envelope, flags);
     
     // create the open
-    auto handler = std::make_shared<DeferredConfirmedPublish>(failed);
+    auto handler = std::make_shared<DeferredPublish>(failed);
 
     // add it to the open handlers
     _handlers[current] = handler;
