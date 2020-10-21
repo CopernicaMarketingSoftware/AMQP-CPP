@@ -17,7 +17,7 @@
  *  Includes
  */
 #include "deferredpublish.h"
-#include "confirmed.h"
+#include "tagger.h"
 #include <memory>
 
 /**
@@ -28,12 +28,12 @@ namespace AMQP {
 /**
  *  Class definition
  */
-template <typename BASE=Confirmed>
+template <typename BASE=Tagger>
 class Reliable : public BASE
 {
 private:
     // make sure it is a proper channel
-    static_assert(std::is_base_of<AMQP::Confirmed, BASE>::value, "base should be derived from a confirmed channel.");
+    static_assert(std::is_base_of<Tagger, BASE>::value, "base should be derived from a confirmed channel.");
 
     /**
      *  Set of open deliverytags. We want a normal set (not unordered_set) because
@@ -218,10 +218,10 @@ public:
     virtual ~Reliable() = default;
 
     /**
-     *  Method that can be accessed to check if there are still buffered messages.
-     *  @return bool
+     *  Method to check how many messages are still unacked.
+     *  @return size_t
      */
-    virtual bool waiting() const override { return _handlers.size() > 0 || BASE::waiting(); }
+    virtual size_t unacknowledged() const override { return _handlers.size(); }
 
     /**
      *  Publish a message to an exchange. See amqpcpp/channel.h for more details on the flags. 

@@ -1,7 +1,7 @@
 /**
- *  Confirmed.cpp
+ *  Tagger.cpp
  *  
- *  Implementation for Confirmed class.
+ *  Implementation for Tagger class.
  *  
  *  @author Michael van der Werve <michael.vanderwerve@mailerq.com>
  *  @copyright 2020 Copernica BV
@@ -24,7 +24,7 @@ namespace AMQP {
  *  Constructor
  *  @param  channel 
  */
-Confirmed::Confirmed(Channel &channel) : _implementation(channel._implementation)
+Tagger::Tagger(Channel &channel) : _implementation(channel._implementation)
 {
     // activate confirm-select mode
     auto &deferred = channel.confirmSelect()
@@ -43,7 +43,7 @@ Confirmed::Confirmed(Channel &channel) : _implementation(channel._implementation
  *  @param  id
  *  @param  frame
  */
-bool Confirmed::send(uint64_t id, const Frame &frame)
+bool Tagger::send(uint64_t id, const Frame &frame)
 {
     // we're simply going to send it over the channel directly
     return _implementation->send(frame);
@@ -54,10 +54,10 @@ bool Confirmed::send(uint64_t id, const Frame &frame)
  *  @param  deliveryTag
  *  @param  multiple
  */
-void Confirmed::onAck(uint64_t deliveryTag, bool multiple)
+void Tagger::onAck(uint64_t deliveryTag, bool multiple)
 {
     // leap out if there are still messages or we shouldn't close yet
-    if (!_close || waiting()) return;
+    if (!_close || unacknowledged()) return;
 
     // close the channel, and forward the callbacks to the installed handler
     _implementation->close()
@@ -70,10 +70,10 @@ void Confirmed::onAck(uint64_t deliveryTag, bool multiple)
  *  @param  deliveryTag
  *  @param  multiple
  */
-void Confirmed::onNack(uint64_t deliveryTag, bool multiple)
+void Tagger::onNack(uint64_t deliveryTag, bool multiple)
 {
     // leap out if there are still messages or we shouldn't close yet
-    if (!_close || waiting()) return;
+    if (!_close || unacknowledged()) return;
 
     // close the channel, and forward the callbacks to the installed handler
     _implementation->close()
@@ -85,7 +85,7 @@ void Confirmed::onNack(uint64_t deliveryTag, bool multiple)
  *  Method that is called to report an error
  *  @param  message
  */
-void Confirmed::reportError(const char *message)
+void Tagger::reportError(const char *message)
 {
     // reset tracking, since channel is fully broken
     _current = 1;
@@ -106,7 +106,7 @@ void Confirmed::reportError(const char *message)
  *  @param  flags       optional flags
  *  @return uint64_t
  */
-uint64_t Confirmed::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
+uint64_t Tagger::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
 {
     // @todo do not copy the entire buffer to individual frames
 
@@ -152,7 +152,7 @@ uint64_t Confirmed::publish(const std::string &exchange, const std::string &rout
  *  Close the throttle channel (closes the underlying channel)
  *  @return Deferred&
  */
-Deferred &Confirmed::close()
+Deferred &Tagger::close()
 {
     // if this was already set to be closed, return that
     if (_close) return *_close;
@@ -161,7 +161,7 @@ Deferred &Confirmed::close()
     _close = std::make_shared<Deferred>(_implementation->usable());
 
     // if there are open messages or there is a queue, they will still get acked and we will then forward it
-    if (waiting()) return *_close;
+    if (unacknowledged()) return *_close;
 
     // there are no open messages, we can close the channel directly.
     _implementation->close()
@@ -176,7 +176,7 @@ Deferred &Confirmed::close()
  *  Install an error callback
  *  @param  callback
  */
-void Confirmed::onError(const ErrorCallback &callback)
+void Tagger::onError(const ErrorCallback &callback)
 {
     // we store the callback
     _errorCallback = callback;

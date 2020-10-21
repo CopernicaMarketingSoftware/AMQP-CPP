@@ -26,7 +26,7 @@ namespace AMQP {
  *  @param  channel 
  *  @param  throttle
  */
-Throttle::Throttle(Channel &channel, size_t throttle) : Confirmed(channel), _throttle(throttle) {}
+Throttle::Throttle(Channel &channel, size_t throttle) : Tagger(channel), _throttle(throttle) {}
 
 /**
  *  Called when the deliverytag(s) are acked
@@ -45,7 +45,7 @@ void Throttle::onAck(uint64_t deliveryTag, bool multiple)
     if (_open.size() < _throttle) flush(_throttle - _open.size());
 
     // call base handler
-    Confirmed::onAck(deliveryTag, multiple);
+    Tagger::onAck(deliveryTag, multiple);
 }
 
 /**
@@ -65,7 +65,7 @@ void Throttle::onNack(uint64_t deliveryTag, bool multiple)
     if (_open.size() < _throttle) flush(_throttle - _open.size());
 
     // call base handler
-    Confirmed::onNack(deliveryTag, multiple);
+    Tagger::onNack(deliveryTag, multiple);
 }
 
 /**
@@ -92,7 +92,7 @@ bool Throttle::send(uint64_t id, const Frame &frame)
     _open.insert(id);
 
     // we can finally actually send it
-    return Confirmed::send(id, frame);
+    return Tagger::send(id, frame);
 }
 
 /**
@@ -111,7 +111,7 @@ void Throttle::reportError(const char *message)
     _last = 0;
 
     // call base method
-    Confirmed::reportError(message);
+    Tagger::reportError(message);
 }
 
 /**
