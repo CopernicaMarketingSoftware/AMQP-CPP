@@ -590,6 +590,24 @@ DeferredConsumer& ChannelImpl::consume(const std::string &queue, const std::stri
 }
 
 /**
+ *  Tell that you are prepared to recall/take back messages that could not be
+ *  published. This is only meaningful if you pass the 'immediate' or 'mandatory'
+ *  flag to publish() operations.
+ * 
+ *  THis function returns a deferred handler more or less similar to the object
+ *  return by the consume() method and that can be used to install callbacks that
+ *  handle the recalled messages.
+ */
+DeferredRecall &ChannelImpl::recall() 
+{ 
+    // create the DeferredRecall if it does not exist
+    if (!_recall) _recall = std::make_shared<DeferredRecall>(this); 
+
+    // return the deferred handler
+    return *_recall;
+}
+
+/**
  *  Cancel a running consumer
  *  @param  tag                 the consumer tag
  *
