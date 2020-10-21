@@ -250,7 +250,7 @@ public:
      *  @param  size        size of the message
      *  @param  flags       optional flags
      */
-    DeferredPublish &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
+    DeferredPublish &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0)
     {
         // publish the entire thing, and remember if it failed at any point
         uint64_t tag = BASE::publish(exchange, routingKey, envelope, flags);
