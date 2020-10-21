@@ -26,22 +26,10 @@ namespace AMQP {
  *  @param  channel 
  *  @param  throttle
  */
-Throttle::Throttle(Channel &channel, size_t throttle) : _implementation(channel._implementation), _throttle(throttle)
-{
-    // activate confirm-select mode
-    auto &deferred = channel.confirmSelect()
-        .onAck([this](uint64_t deliveryTag, bool multiple) { onAck(deliveryTag, multiple); })
-        .onNack([this](uint64_t deliveryTag, bool multiple, bool /* requeue*/) { onNack(deliveryTag, multiple); });
-
-    // we might have failed, in which case we throw
-    if (!deferred) throw std::runtime_error("could not enable publisher confirms");
-
-    // we wrap a handling error callback that calls our member function
-    _implementation->onError([this](const char *message) { reportError(message); });  
-}
+Throttle::Throttle(Channel &channel, size_t throttle) : Confirmed(channel), _throttle(throttle) {}
 
 /**
- *  Called when the deliverytag(s) are acked/nacked
+ *  Called when the deliverytag(s) are acked
  *  @param  deliveryTag
  *  @param  multiple
  */
@@ -53,16 +41,31 @@ void Throttle::onAck(uint64_t deliveryTag, bool multiple)
     // otherwise, we remove the single element
     else _open.erase(deliveryTag);
 
-    // if there is more room now, we can flush some items
+    // if there is room, flush part of the queue
     if (_open.size() < _throttle) flush(_throttle - _open.size());
 
-    // leap out if there are still messages or we shouldn't close yet
-    if (!_open.empty() || !_close) return;
+    // call base handler
+    Confirmed::onAck(deliveryTag, multiple);
+}
 
-    // close the channel, and forward the callbacks to the installed handler
-    _implementation->close()
-        .onSuccess([this]() { _close->reportSuccess(); })
-        .onError([this](const char *message) { _close->reportError(message); });
+/**
+ *  Called when the deliverytag(s) are nacked
+ *  @param  deliveryTag
+ *  @param  multiple
+ */
+void Throttle::onNack(uint64_t deliveryTag, bool multiple)
+{
+    // number of messages exposed
+    if (multiple) _open.erase(_open.begin(), _open.upper_bound(deliveryTag));
+
+    // otherwise, we remove the single element
+    else _open.erase(deliveryTag);
+
+    // if there is room, flush part of the queue
+    if (_open.size() < _throttle) flush(_throttle - _open.size());
+
+    // call base handler
+    Confirmed::onNack(deliveryTag, multiple);
 }
 
 /**
@@ -88,8 +91,8 @@ bool Throttle::send(uint64_t id, const Frame &frame)
     // we have now send this id
     _open.insert(id);
 
-    // and we're going to send it over the channel directly
-    return _implementation->send(frame);
+    // we can finally actually send it
+    return Confirmed::send(id, frame);
 }
 
 /**
@@ -104,68 +107,11 @@ void Throttle::reportError(const char *message)
     // we can also forget all open messages, won't hear from them any more
     _open.clear();
 
-    // reset tracking, since channel is fully broken
+    // we have no last seen message any more
     _last = 0;
-    _current = 1;
 
-    // if a callback is set, call the handler with the message
-    if (_errorCallback) _errorCallback(message);
-}
-
-/**
- *  Publish a message to an exchange. See amqpcpp/channel.h for more details on the flags. 
- *  Delays actual publishing depending on the publisher confirms sent by RabbitMQ.
- * 
- *  @param  exchange    the exchange to publish to
- *  @param  routingkey  the routing key
- *  @param  envelope    the full envelope to send
- *  @param  message     the message to send
- *  @param  size        size of the message
- *  @param  flags       optional flags
- */
-bool Throttle::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
-{
-    // @todo do not copy the entire buffer to individual frames
-
-    // fail if we're closing the channel, no more publishes allowed
-    if (_close) return false;
-    
-    // send the publish frame
-    if (!send(_current, BasicPublishFrame(_implementation->id(), exchange, routingKey, (flags & mandatory) != 0, (flags & immediate) != 0))) return false;
-
-    // send header
-    if (!send(_current, BasicHeaderFrame(_implementation->id(), envelope))) return false;
-
-    // connection and channel still usable?
-    if (!_implementation->usable()) return false;
-
-    // the max payload size is the max frame size minus the bytes for headers and trailer
-    uint32_t maxpayload = _implementation->maxPayload();
-    uint64_t bytessent = 0;
-
-    // the buffer
-    const char *data = envelope.body();
-    uint64_t bytesleft = envelope.bodySize();
-
-    // split up the body in multiple frames depending on the max frame size
-    while (bytesleft > 0)
-    {
-        // size of this chunk
-        uint64_t chunksize = std::min(static_cast<uint64_t>(maxpayload), bytesleft);
-
-        // send out a body frame
-        if (!send(_current, BodyFrame(_implementation->id(), data + bytessent, (uint32_t)chunksize))) return false;
-
-        // update counters
-        bytessent += chunksize;
-        bytesleft -= chunksize;
-    }
-
-    // we're done, we move to the next deliverytag
-    ++_current;
-
-    // we succeeded
-    return true;
+    // call base method
+    Confirmed::reportError(message);
 }
 
 /**
@@ -209,49 +155,6 @@ size_t Throttle::flush(size_t max)
 
     // return number of published messages.
     return published;
-}
-
-/**
- *  Close the throttle channel (closes the underlying channel)
- *  @return Deferred&
- */
-Deferred &Throttle::close()
-{
-    // if this was already set to be closed, return that
-    if (_close) return *_close;
-
-    // create the deferred
-    _close = std::make_shared<Deferred>(_implementation->usable());
-
-    // if there are open messages or there is a queue, they will still get acked and we will then forward it
-    if (_open.size() > 0 || !_queue.empty()) return *_close;
-
-    // there are no open messages, we can close the channel directly.
-    _implementation->close()
-        .onSuccess([this]() { _close->reportSuccess(); })
-        .onError([this](const char *message) { _close->reportError(message); });
-
-    // return the created deferred
-    return *_close;
-}
-
-/**
- *  Install an error callback
- *  @param  callback
- */
-void Throttle::onError(const ErrorCallback &callback)
-{
-    // we store the callback
-    _errorCallback = callback;
-
-    // check the callback
-    if (!callback) return;
-
-    // if the channel is no longer usable, report that
-    if (!_implementation->usable()) return callback("Channel is no longer usable");
-
-    // specify that we're already closing
-    if (_close) callback("Wrapped channel is closing down");
 }
 
 /**

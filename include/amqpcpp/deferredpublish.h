@@ -82,7 +82,8 @@ private:
      *  The wrapped confirmed channel implementation may call our
      *  private members and construct us
      */
-    friend class Confirmed;
+    template <class T>
+    friend class Reliable;
 
 
 public:

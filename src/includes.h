@@ -79,6 +79,7 @@
 #include "amqpcpp/channel.h"
 #include "amqpcpp/throttle.h"
 #include "amqpcpp/confirmed.h"
+#include "amqpcpp/reliable.h"
 #include "amqpcpp/login.h"
 #include "amqpcpp/address.h"
 #include "amqpcpp/connectionhandler.h"
