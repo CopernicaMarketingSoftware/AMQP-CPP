@@ -480,7 +480,7 @@ public:
      *  return by the consume() method and that can be used to install callbacks that
      *  handle the recalled messages.
      */
-    DeferredRecall &recall() { return *_recall; }
+    DeferredRecall &recall();
 
     /**
      *  Cancel a running consumer
