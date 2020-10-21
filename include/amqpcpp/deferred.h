@@ -193,7 +193,7 @@ protected:
      *  private members and construct us
      */
     friend class ChannelImpl;
-    friend class Confirmed;
+    friend class Tagger;
 
 public:
     /**

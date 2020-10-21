@@ -20,7 +20,7 @@
 #include <queue>
 #include "copiedbuffer.h"
 #include "channelimpl.h"
-#include "confirmed.h"
+#include "tagger.h"
 
 /**
  *  Begin of namespaces
@@ -35,7 +35,7 @@ class Channel;
 /**
  *  Class definition
  */
-class Throttle : public Confirmed
+class Throttle : public Tagger
 {
 protected:
     /**
@@ -117,10 +117,10 @@ public:
     virtual ~Throttle() = default;
 
     /**
-     *  Method that can be accessed to check if there are still buffered messages.
-     *  @return bool
+     *  Method to check how many messages are still unacked.
+     *  @return size_t
      */
-    virtual bool waiting() const override { return _queue.size() > 0; }
+    virtual size_t unacknowledged() const override { return _open.size() + (_current - _last - 1); }
 
     /** 
      *  Get the throttle

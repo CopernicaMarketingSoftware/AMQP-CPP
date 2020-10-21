@@ -76,7 +76,7 @@
 #include "amqpcpp/deferredrecall.h"
 #include "amqpcpp/channelimpl.h"
 #include "amqpcpp/channel.h"
-#include "amqpcpp/confirmed.h"
+#include "amqpcpp/tagger.h"
 #include "amqpcpp/throttle.h"
 #include "amqpcpp/reliable.h"
 #include "amqpcpp/login.h"

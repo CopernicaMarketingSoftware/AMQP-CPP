@@ -1,5 +1,5 @@
 /**
- *  Confirmed.h
+ *  Tagger.h
  *  
  *  Base class that enables publisher confirms and keeps track of the sent messages.
  *  
@@ -26,7 +26,7 @@ namespace AMQP {
 /**
  *  Class definition
  */
-class Confirmed : public Watchable
+class Tagger : public Watchable
 {
 protected:
     /**
@@ -82,32 +82,32 @@ public:
      *  Constructor
      *  @param  channel
      */
-    Confirmed(AMQP::Channel &channel);
+    Tagger(AMQP::Channel &channel);
 
     /**
      *  Deleted copy constructor, deleted move constructor
      *  @param other
      */
-    Confirmed(const Confirmed &other) = delete;
-    Confirmed(Confirmed &&other) = delete;
+    Tagger(const Tagger &other) = delete;
+    Tagger(Tagger &&other) = delete;
 
     /**
      *  Deleted copy assignment, deleted move assignment
      *  @param  other
      */
-    Confirmed &operator=(const Confirmed &other) = delete;
-    Confirmed &operator=(Confirmed &&other) = delete;
+    Tagger &operator=(const Tagger &other) = delete;
+    Tagger &operator=(Tagger &&other) = delete;
 
     /**
      *  Virtual destructor
      */
-    virtual ~Confirmed() = default;
+    virtual ~Tagger() = default;
 
     /**
-     *  Method to check if there is anything still waiting
-     *  @return bool
+     *  Method to check how many messages are still unacked.
+     *  @return size_t
      */
-    virtual bool waiting() const { return false; }
+    virtual size_t unacknowledged() const { return 0; }
 
     /**
      *  Publish a message to an exchange. See amqpcpp/channel.h for more details on the flags. 
