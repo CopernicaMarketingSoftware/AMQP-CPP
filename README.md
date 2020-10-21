@@ -34,7 +34,7 @@ connections, setting it up is just as easy.
 AMQP-CPP is fully asynchronous and does not do any blocking (system) calls, so
 it can be used in high performance applications without the need for threads.
 
-The AMQP-CPP library uses C++11 features, so if you intend use it, please make
+The AMQP-CPP library uses C++11 features, so if you intend to use it, please make
 sure that your compiler is up-to-date and supports C++11.
 
 **Note for the reader:** This readme file has a peculiar structure. We start
