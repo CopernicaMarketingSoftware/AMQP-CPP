@@ -1,8 +1,7 @@
 /**
  *  Confirmed.h
  *  
- *  A channel wrapper based on AMQP::Throttle that allows message callbacks to be installed
- *  on the publishes, to be called when they are confirmed by the message broker.
+ *  Base class that enables publisher confirms and keeps track of the sent messages.
  *  
  *  @author Michael van der Werve <michael.vanderwerve@mailerq.com>
  *  @copyright 2020 Copernica BV
@@ -27,37 +26,63 @@ namespace AMQP {
 /**
  *  Class definition
  */
-class Confirmed : public Throttle, private Watchable
+class Confirmed : public Watchable
 {
-private:
+protected:
     /**
-     *  Set of open deliverytags. We want a normal set (not unordered_set) because
-     *  removal will be cheaper for whole ranges.
-     *  @var size_t
+     *  The implementation for the channel
+     *  @var    std::shared_ptr<ChannelImpl>
      */
-    std::map<size_t, std::shared_ptr<DeferredPublish>> _handlers;
+    std::shared_ptr<ChannelImpl> _implementation;
 
     /**
-     *  Called when the deliverytag(s) are acked/nacked
+     *  Current id, always starts at 1.
+     *  @var uint64_t
+     */
+    uint64_t _current = 1;
+
+    /**
+     *  Deferred to set up on the close
+     *  @var std::shared_ptr<Deferred>
+     */
+    std::shared_ptr<Deferred> _close;
+
+    /**
+     *  Callback to call when an error occurred
+     *  @var ErrorCallback
+     */
+    ErrorCallback _errorCallback;
+
+
+protected:
+    /**
+     *  Send method for a frame
+     *  @param  id
+     *  @param  frame
+     */
+    virtual bool send(uint64_t id, const Frame &frame);
+
+    /**
+     *  Method that is called to report an error.
+     *  @param  message
+     */
+    virtual void reportError(const char *message);
+
+    /**
+     *  Method that gets called on ack/nack. If these methods are overridden, make sure 
+     *  to also call the base class methods.
      *  @param  deliveryTag
      *  @param  multiple
      */
-    virtual void onAck(uint64_t deliveryTag, bool multiple) override;
-    virtual void onNack(uint64_t deliveryTag, bool multiple) override;
-
-    /**
-     *  Method that is called to report an error
-     *  @param  message
-     */
-    virtual void reportError(const char *message) override;
+    virtual void onAck(uint64_t deliveryTag, bool multiple);
+    virtual void onNack(uint64_t deliveryTag, bool multiple);
 
 public:
     /**
      *  Constructor
      *  @param  channel
-     *  @param  throttle
      */
-    Confirmed(AMQP::Channel &channel, size_t throttle) : Throttle(channel, throttle) {}
+    Confirmed(AMQP::Channel &channel);
 
     /**
      *  Deleted copy constructor, deleted move constructor
@@ -79,6 +104,12 @@ public:
     virtual ~Confirmed() = default;
 
     /**
+     *  Method to check if there is anything still waiting
+     *  @return bool
+     */
+    virtual bool waiting() const { return false; }
+
+    /**
      *  Publish a message to an exchange. See amqpcpp/channel.h for more details on the flags. 
      *  Delays actual publishing depending on the publisher confirms sent by RabbitMQ.
      * 
@@ -88,12 +119,24 @@ public:
      *  @param  message     the message to send
      *  @param  size        size of the message
      *  @param  flags       optional flags
-     *  @return bool
+     *  @return uint64_t
      */
-    DeferredPublish &publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0);
-    DeferredPublish &publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0) { return publish(exchange, routingKey, Envelope(message.data(), message.size()), flags); }
-    DeferredPublish &publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0) { return publish(exchange, routingKey, Envelope(message, size), flags); }
-    DeferredPublish &publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0) { return publish(exchange, routingKey, Envelope(message, strlen(message)), flags); }
+    uint64_t publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0);
+    uint64_t publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0) { return publish(exchange, routingKey, Envelope(message.data(), message.size()), flags); }
+    uint64_t publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0) { return publish(exchange, routingKey, Envelope(message, size), flags); }
+    uint64_t publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0) { return publish(exchange, routingKey, Envelope(message, strlen(message)), flags); }
+
+    /**
+     *  Close underlying channel
+     *  @return Deferred&
+     */
+    Deferred &close();
+
+    /**
+     *  Install an error callback
+     *  @param  callback
+     */
+    void onError(const ErrorCallback &callback);
 };
 
 /**

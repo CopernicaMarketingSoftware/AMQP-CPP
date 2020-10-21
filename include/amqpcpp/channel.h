@@ -604,7 +604,7 @@ public:
     /**
      *  Some internal classes may touch our implementation
      */
-    friend class Throttle;
+    friend class Confirmed;
 };
 
 /**

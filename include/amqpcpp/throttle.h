@@ -20,6 +20,7 @@
 #include <queue>
 #include "copiedbuffer.h"
 #include "channelimpl.h"
+#include "confirmed.h"
 
 /**
  *  Begin of namespaces
@@ -34,21 +35,9 @@ class Channel;
 /**
  *  Class definition
  */
-class Throttle
+class Throttle : public Confirmed
 {
 protected:
-    /**
-     *  The implementation for the channel
-     *  @var    std::shared_ptr<ChannelImpl>
-     */
-    std::shared_ptr<ChannelImpl> _implementation;
-
-    /**
-     *  Current id, always starts at 1.
-     *  @var uint64_t
-     */
-    uint64_t _current = 1;
-
     /**
      *  Last sent ID
      *  @var uint64_t
@@ -74,39 +63,28 @@ protected:
      */
     std::set<size_t> _open;
 
-    /**
-     *  Deferred to set up on the close
-     *  @var std::shared_ptr<Deferred>
-     */
-    std::shared_ptr<Deferred> _close;
 
-    /**
-     *  Callback to call when an error occurred
-     *  @var ErrorCallback
-     */
-    ErrorCallback _errorCallback;
-
+protected:
     /**
      *  Send method for a frame
      *  @param  id
      *  @param  frame
      */
-    bool send(uint64_t id, const Frame &frame);
+    virtual bool send(uint64_t id, const Frame &frame) override;
 
     /**
      *  Method that is called to report an error
      *  @param  message
      */
-    virtual void reportError(const char *message);
+    virtual void reportError(const char *message) override;
 
-protected:
     /**
-     *  Called when the deliverytag(s) are acked/nacked
+     *  Method that is called to report an ack/nack
      *  @param  deliveryTag
      *  @param  multiple
      */
-    virtual void onAck(uint64_t deliveryTag, bool multiple);
-    virtual void onNack(uint64_t deliveryTag, bool multiple) { onAck(deliveryTag, multiple); }
+    virtual void onAck(uint64_t deliveryTag, bool multiple) override;
+    virtual void onNack(uint64_t deliveryTag, bool multiple) override;
 
 public:
     /**
@@ -139,33 +117,10 @@ public:
     virtual ~Throttle() = default;
 
     /**
-     *  Publish a message to an exchange. See amqpcpp/channel.h for more details on the flags. 
-     *  Delays actual publishing depending on the publisher confirms sent by RabbitMQ.
-     * 
-     *  @param  exchange    the exchange to publish to
-     *  @param  routingkey  the routing key
-     *  @param  envelope    the full envelope to send
-     *  @param  message     the message to send
-     *  @param  size        size of the message
-     *  @param  flags       optional flags
+     *  Method that can be accessed to check if there are still buffered messages.
      *  @return bool
      */
-    bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags = 0);
-    bool publish(const std::string &exchange, const std::string &routingKey, const std::string &message, int flags = 0) { return publish(exchange, routingKey, Envelope(message.data(), message.size()), flags); }
-    bool publish(const std::string &exchange, const std::string &routingKey, const char *message, size_t size, int flags = 0) { return publish(exchange, routingKey, Envelope(message, size), flags); }
-    bool publish(const std::string &exchange, const std::string &routingKey, const char *message, int flags = 0) { return publish(exchange, routingKey, Envelope(message, strlen(message)), flags); }
-
-    /**
-     *  Get the number of messages that are waiting to be published
-     *  @return uint64_t
-     */
-    size_t waiting() const { return _current - _last - 1; }
-
-    /**
-     *  Number of messages already sent but unacknowledged by rabbit
-     *  @return size_t
-     */
-    size_t unacknowledged() const { return _open.size(); }
+    virtual bool waiting() const override { return _queue.size() > 0; }
 
     /** 
      *  Get the throttle
@@ -186,18 +141,6 @@ public:
      *  @param  max     optional maximum, 0 is flush all
      */
     size_t flush(size_t max = 0);
-
-    /**
-     *  Close the throttle channel (closes the underlying channel when all messages have been sent)
-     *  @return Deferred&
-     */
-    Deferred &close();
-
-    /**
-     *  Install an error callback
-     *  @param  callback
-     */
-    void onError(const ErrorCallback &callback);
 };
 
 /**

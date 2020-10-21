@@ -1,6 +1,6 @@
 CPP	        		= g++
 RM	        		= rm -f
-CPPFLAGS			= -Wall -c -I../include -std=c++11 -MD
+CPPFLAGS			= -Wall -c -I../include -std=c++11 -MD -Wno-class-conversion
 LD	        		= g++
 LD_FLAGS			= -Wall -shared
 SHARED_LIB			= lib$(LIBRARY_NAME).so.$(VERSION)

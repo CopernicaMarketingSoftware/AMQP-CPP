@@ -193,7 +193,7 @@ protected:
      *  private members and construct us
      */
     friend class ChannelImpl;
-    friend class Throttle;
+    friend class Confirmed;
 
 public:
     /**

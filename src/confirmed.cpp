@@ -11,6 +11,9 @@
  *  Includes
  */
 #include "includes.h"
+#include "basicpublishframe.h"
+#include "basicheaderframe.h"
+#include "bodyframe.h"
 
 /**
  *  Begin of namespaces
@@ -18,64 +21,48 @@
 namespace AMQP { 
 
 /**
+ *  Constructor
+ *  @param  channel 
+ */
+Confirmed::Confirmed(Channel &channel) : _implementation(channel._implementation)
+{
+    // activate confirm-select mode
+    auto &deferred = channel.confirmSelect()
+        .onAck([this](uint64_t deliveryTag, bool multiple) { onAck(deliveryTag, multiple); })
+        .onNack([this](uint64_t deliveryTag, bool multiple, bool /* requeue*/) { onNack(deliveryTag, multiple); });
+
+    // we might have failed, in which case we throw
+    if (!deferred) throw std::runtime_error("could not enable publisher confirms");
+
+    // we wrap a handling error callback that calls our member function
+    _implementation->onError([this](const char *message) { reportError(message); });  
+}
+
+/**
+ *  Send method for a frame
+ *  @param  id
+ *  @param  frame
+ */
+bool Confirmed::send(uint64_t id, const Frame &frame)
+{
+    // we're simply going to send it over the channel directly
+    return _implementation->send(frame);
+}
+
+/**
  *  Called when the deliverytag(s) are acked
  *  @param  deliveryTag
  *  @param  multiple
  */
-void Confirmed::onAck(uint64_t deliveryTag, bool multiple) 
+void Confirmed::onAck(uint64_t deliveryTag, bool multiple)
 {
-    // monitor the object, watching for destruction since these ack/nack handlers
-    // could destruct the object
-    Monitor monitor(this);
+    // leap out if there are still messages or we shouldn't close yet
+    if (!_close || waiting()) return;
 
-    // single element is simple
-    if (!multiple)
-    {
-        // find the element
-        auto iter = _handlers.find(deliveryTag);
-
-        // we did not find it (this should not be possible, unless somebody explicitly called)
-        // the base-class publish methods for some reason.
-        if (iter == _handlers.end()) return Throttle::onAck(deliveryTag, multiple);
-
-        // call the ack handler
-        iter->second->reportAck();
-
-        // if the monitor is no longer valid, we stop (we're done)
-        if (!monitor) return;
-
-        // erase it from the map
-        _handlers.erase(iter);
-    }
-
-    // do multiple at once
-    else
-    {
-        // find the last element, inclusive
-        auto upper = _handlers.upper_bound(deliveryTag);
-
-        // call the handlers
-        for (auto iter = _handlers.begin(); iter != upper; iter++)
-        {
-            // call the handler
-            iter->second->reportAck();
-
-            // if we were destructed in the meantime, we leap out
-            if (!monitor) return;
-        }
-
-        // erase all acknowledged items
-        _handlers.erase(_handlers.begin(), upper);
-    }
-
-    // make sure the object is still valid
-    if (!monitor) return;
-
-    // call base handler, will advance on the throttle if needed. we call this _after_ we're
-    // done processing the callbacks, since one of the callbacks might close the channel, or publish
-    // more stuff. additionally, if it does destroy the channel, we are doing a lot of extra publishing
-    // for nothing. also, we call some extra handlers, and otherwise we might get onAcked after onClosed
-    Throttle::onAck(deliveryTag, multiple);
+    // close the channel, and forward the callbacks to the installed handler
+    _implementation->close()
+        .onSuccess([this]() { _close->reportSuccess(); })
+        .onError([this](const char *message) { _close->reportError(message); });
 }
 
 /**
@@ -85,58 +72,13 @@ void Confirmed::onAck(uint64_t deliveryTag, bool multiple)
  */
 void Confirmed::onNack(uint64_t deliveryTag, bool multiple)
 {
-    // monitor the object, watching for destruction since these ack/nack handlers
-    // could destruct the object
-    Monitor monitor(this);
+    // leap out if there are still messages or we shouldn't close yet
+    if (!_close || waiting()) return;
 
-    // single element is simple
-    if (!multiple)
-    {
-        // find the element
-        auto iter = _handlers.find(deliveryTag);
-
-        // we did not find it (this should not be possible, unless somebody explicitly called)
-        // the base-class publish methods for some reason.
-        if (iter == _handlers.end()) return Throttle::onNack(deliveryTag, multiple);
-
-        // call the ack handler
-        iter->second->reportNack();
-
-        // if the monitor is no longer valid, we stop (we're done)
-        if (!monitor) return;
-
-        // erase it from the map
-        _handlers.erase(iter);
-    }
-
-    // nack multiple elements
-    else
-    {
-        // find the last element, inclusive
-        auto upper = _handlers.upper_bound(deliveryTag);
-
-        // call the handlers
-        for (auto iter = _handlers.begin(); iter != upper; iter++)
-        {
-            // call the handler
-            iter->second->reportNack();
-
-            // if we were destructed in the meantime, we leap out
-            if (!monitor) return;
-        }
-
-        // erase all acknowledged items
-        _handlers.erase(_handlers.begin(), upper);
-    }
-
-    // make sure the object is still valid
-    if (!monitor) return;
-    
-    // call base handler, will advance on the throttle if needed. we call this _after_ we're
-    // done processing the callbacks, since one of the callbacks might close the channel, or publish
-    // more stuff. additionally, if it does destroy the channel, we are doing a lot of extra publishing
-    // for nothing. also, we call some extra handlers, and otherwise we might get onAcked after onClosed
-    Throttle::onNack(deliveryTag, multiple);
+    // close the channel, and forward the callbacks to the installed handler
+    _implementation->close()
+        .onSuccess([this]() { _close->reportSuccess(); })
+        .onError([this](const char *message) { _close->reportError(message); });
 }
 
 /**
@@ -145,29 +87,11 @@ void Confirmed::onNack(uint64_t deliveryTag, bool multiple)
  */
 void Confirmed::reportError(const char *message)
 {
-    // monitor the object, watching for destruction since these ack/nack handlers
-    // could destruct the object
-    Monitor monitor(this);
+    // reset tracking, since channel is fully broken
+    _current = 1;
 
-    // move the handlers out
-    auto handlers = std::move(_handlers);
-
-    // iterate over all the messages
-    // call the handlers
-    for (const auto &iter : handlers)
-    {
-        // call the handler
-        iter.second->reportError(message);
-
-        // if we were destructed in the meantime, we leap out
-        if (!monitor) return;
-    }
-
-    // if the monitor is no longer valid, leap out
-    if (!monitor) return;
-    
-    // call base class to let it handle the errors
-    Throttle::reportError(message);
+    // if a callback is set, call the handler with the message
+    if (_errorCallback) _errorCallback(message);
 }
 
 /**
@@ -180,23 +104,91 @@ void Confirmed::reportError(const char *message)
  *  @param  message     the message to send
  *  @param  size        size of the message
  *  @param  flags       optional flags
+ *  @return uint64_t
  */
-DeferredPublish &Confirmed::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
+uint64_t Confirmed::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
 {
-    // copy the current identifier, this will be the ID that will come back
-    auto current = _current;
+    // @todo do not copy the entire buffer to individual frames
 
-    // publish the entire thing, and remember if it failed at any point
-    bool failed = !Throttle::publish(exchange, routingKey, envelope, flags);
+    // fail if we're closing the channel, no more publishes allowed
+    if (_close) return false;
     
-    // create the open
-    auto handler = std::make_shared<DeferredPublish>(failed);
+    // send the publish frame
+    if (!send(_current, BasicPublishFrame(_implementation->id(), exchange, routingKey, (flags & mandatory) != 0, (flags & immediate) != 0))) return false;
 
-    // add it to the open handlers
-    _handlers[current] = handler;
+    // send header
+    if (!send(_current, BasicHeaderFrame(_implementation->id(), envelope))) return false;
 
-    // return the dereferenced handler 
-    return *handler;
+    // connection and channel still usable?
+    if (!_implementation->usable()) return false;
+
+    // the max payload size is the max frame size minus the bytes for headers and trailer
+    uint32_t maxpayload = _implementation->maxPayload();
+    uint64_t bytessent = 0;
+
+    // the buffer
+    const char *data = envelope.body();
+    uint64_t bytesleft = envelope.bodySize();
+
+    // split up the body in multiple frames depending on the max frame size
+    while (bytesleft > 0)
+    {
+        // size of this chunk
+        uint64_t chunksize = std::min(static_cast<uint64_t>(maxpayload), bytesleft);
+
+        // send out a body frame
+        if (!send(_current, BodyFrame(_implementation->id(), data + bytessent, (uint32_t)chunksize))) return false;
+
+        // update counters
+        bytessent += chunksize;
+        bytesleft -= chunksize;
+    }
+
+    // we succeeded
+    return _current++;
+}
+
+/**
+ *  Close the throttle channel (closes the underlying channel)
+ *  @return Deferred&
+ */
+Deferred &Confirmed::close()
+{
+    // if this was already set to be closed, return that
+    if (_close) return *_close;
+
+    // create the deferred
+    _close = std::make_shared<Deferred>(_implementation->usable());
+
+    // if there are open messages or there is a queue, they will still get acked and we will then forward it
+    if (waiting()) return *_close;
+
+    // there are no open messages, we can close the channel directly.
+    _implementation->close()
+        .onSuccess([this]() { _close->reportSuccess(); })
+        .onError([this](const char *message) { _close->reportError(message); });
+
+    // return the created deferred
+    return *_close;
+}
+
+/**
+ *  Install an error callback
+ *  @param  callback
+ */
+void Confirmed::onError(const ErrorCallback &callback)
+{
+    // we store the callback
+    _errorCallback = callback;
+
+    // check the callback
+    if (!callback) return;
+
+    // if the channel is no longer usable, report that
+    if (!_implementation->usable()) return callback("Channel is no longer usable");
+
+    // specify that we're already closing
+    if (_close) callback("Wrapped channel is closing down");
 }
 
 /**
