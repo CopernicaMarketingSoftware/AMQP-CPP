@@ -1066,8 +1066,8 @@ PUBLISHER CONFIRMS
 
 RabbitMQ supports a lightweight method of confirming that broker received 
 and  processed a message. When you enable this, RabbitMQ sends back an 
-'ack' for each publish-operation that has been handled. For this method 
-to work, the channel needs to be put in _confirm mode_. This is done using 
+'ack' or 'nack' for each publish-operation. For this to work, the channel 
+needs to be put in _confirm mode_. This is done using the
 confirmSelect() method. When the channel is successfully put in confirm mode, 
 the server starts counting the received messages (starting from 1) and sends 
 acknowledgments for every message it processed (it can also acknowledge 
@@ -1075,7 +1075,7 @@ multiple message at once).
 
 If server is unable to process a message, it will send send negative 
 acknowledgments. Both positive and negative acknowledgments handling are 
-implemented as callbacks for that should be installed on the object that
+passed to callbacks that you can install on the object that
 is returned by the confirmSelect() method:
 
 ````c++
@@ -1131,7 +1131,7 @@ reliable.publish("my-exchange", "my-key", "my first message").onAck([]() {
 }).onNack([]() {
 
     // the message has _explicitly_ been nack'ed by RabbitMQ (in your application
-    // code you probably want to log handle this to avoid data-loss)
+    // code you probably want to log or handle this to avoid data-loss)
 
 }).onError([](const char *message) {
 
@@ -1160,14 +1160,13 @@ API.
 But it also is useful for flood prevention. RabbitMQ turns out not to be very
 good at handling big loads of publish-operations. If you publish messages faster 
 than RabbitMQ can handle, a server-side buffer builds up, and RabbitMQ gets slow 
-(which causes the buffer to build up evenm further, et cetera). With publish-confirms
+(which causes the buffer to build up even further, et cetera). With publish-confirms
 you can keep the messages in your own application, and only proceed with publishing
 them when your previous messages have been handled. With this approach you
 prevent that RabbitMQ gets overloaded. We call it throttling.
 
 You can build your own throttling mechanism using the confirmSelect() approach
-or the AMQP::Reliable class. But also here the AMQP-CPP library already has
-a utility class for you that you can use instead: AMQP::Throttle:
+or the AMQP::Reliable class. Or you use AMQP::Throttle:
 
 ````c++
 // create a channel
@@ -1188,7 +1187,7 @@ for (size_t i = 0; i < 100000; ++i)
 }
 ````
 
-The AMQP::Reliable and AMQP::Throttle classes that you wrap around a channel.
+The AMQP::Reliable and AMQP::Throttle classes both wrap around a channel.
 But what if you want to use both? You want to throttle messages, but also like
 to install your own callbacks for onAck and onLost? This is possible too:
 
@@ -1217,7 +1216,7 @@ for (size_t i = 0; i < 100000; ++i)
 }
 ````
 
-For more information, please see http://www.rabbitmq.com/confirms.html.
+For more information, see http://www.rabbitmq.com/confirms.html.
 
 CONSUMING MESSAGES
 ==================
