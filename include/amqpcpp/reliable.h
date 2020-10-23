@@ -76,12 +76,12 @@ private:
         // do multiple at once
         else
         {
-            // find the last element, inclusive
-            auto upper = _handlers.upper_bound(deliveryTag);
-
             // call the handlers
-            for (auto iter = _handlers.begin(); iter != upper; iter++)
+            for (auto iter = _handlers.begin(); iter != _handlers.end(); iter++)
             {
+                // make sure this is the right deliverytag, if we've passed it we leap out
+                if (iter->first > deliveryTag) break;
+
                 // call the handler
                 iter->second->reportAck();
 
@@ -90,7 +90,7 @@ private:
             }
 
             // erase all acknowledged items
-            _handlers.erase(_handlers.begin(), upper);
+            _handlers.erase(_handlers.begin(), _handlers.upper_bound(deliveryTag));
         }
 
         // make sure the object is still valid
@@ -134,12 +134,12 @@ private:
         // nack multiple elements
         else
         {
-            // find the last element, inclusive
-            auto upper = _handlers.upper_bound(deliveryTag);
-
             // call the handlers
-            for (auto iter = _handlers.begin(); iter != upper; iter++)
+            for (auto iter = _handlers.begin(); iter != _handlers.end(); iter++)
             {
+                // make sure this is the right deliverytag, if we've passed it we leap out
+                if (iter->first > deliveryTag) break;
+
                 // call the handler
                 iter->second->reportNack();
 
@@ -147,8 +147,8 @@ private:
                 if (!monitor) return;
             }
 
-            // erase all acknowledged items
-            _handlers.erase(_handlers.begin(), upper);
+            // erase all negatively acknowledged items
+            _handlers.erase(_handlers.begin(), _handlers.upper_bound(deliveryTag));
         }
 
         // if the object is no longer valid, return
