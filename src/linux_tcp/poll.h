@@ -12,6 +12,11 @@
 #pragma once
 
 /**
+ *  Includes
+ */
+#include <poll.h>
+
+/**
  *  Begin of namespace
  */
 namespace AMQP {
@@ -26,7 +31,7 @@ private:
      *  Set with just one filedescriptor
      *  @var fd_set
      */
-    fd_set _set;
+    pollfd _fd;
 
     /**
      *  The socket filedescriptor
@@ -39,13 +44,10 @@ public:
      *  Constructor
      *  @param  fd      the filedescriptor that we're waiting on
      */
-    Poll(int fd) : _socket(fd)
+    Poll(int fd)
     {
-        // initialize the set
-        FD_ZERO(&_set);
-        
-        // add the one socket
-        FD_SET(_socket, &_set);
+        // set the fd
+        _fd.fd = fd;
     }
     
     /**
@@ -60,66 +62,45 @@ public:
     virtual ~Poll() = default;
     
     /**
-     *  Wait until the filedescriptor becomes readable
-     *  @param  block       block until readable
+     *  Check if a file descriptor is readable.
      *  @return bool
      */
-    bool readable(bool block) 
-    {
-        // wait for the socket
-        if (block) return select(_socket + 1, &_set, nullptr, nullptr, nullptr) > 0;
-        
-        // we do not want to block, so we use a small timeout
-        struct timeval timeout;
-        
-        // no timeout at all
-        timeout.tv_sec = timeout.tv_usec = 0;
-        
-        // no timeout at all
-        return select(_socket + 1, &_set, nullptr, nullptr, &timeout) > 0;
+    bool readable() 
+    {   
+        // check for readable
+        _fd.events = POLLIN;
+        _fd.revents = 0;     
+
+        // poll the fd with no timeout
+        return poll(&_fd, 1, 0) > 0;
     }
         
     /**
      *  Wait until the filedescriptor becomes writable
-     *  @param  block       block until readable
      *  @return bool
      */
-    bool writable(bool block) 
+    bool writable() 
     {
-        // wait for the socket
-        if (block) return select(_socket + 1, nullptr, &_set, nullptr, nullptr) > 0;
+        // check for readable
+        _fd.events = POLLOUT;   
+        _fd.revents = 0;  
 
-        // we do not want to block, so we use a small timeout
-        struct timeval timeout;
-        
-        // no timeout at all
-        timeout.tv_sec = timeout.tv_usec = 0;
-        
-        // no timeout at all
-        return select(_socket + 1, nullptr, &_set, nullptr, &timeout) > 0;
+        // poll the fd with no timeout
+        return poll(&_fd, 1, 0) > 0;
     }
     
     /**
      *  Wait until a filedescriptor becomes active (readable or writable)
-     *  @param  block       block until readable
      *  @return bool
      */
-    bool active(bool block)
+    bool active()
     {
-        // accommodate restrict qualifier on fd_set params
-        fd_set set2 = _set;
+        // check for readable
+        _fd.events = POLLIN | POLLOUT;     
+        _fd.revents = 0;
 
-        // wait for the socket
-        if (block) return select(_socket + 1, &_set, &set2, nullptr, nullptr) > 0;
-
-        // we do not want to block, so we use a small timeout
-        struct timeval timeout;
-        
-        // no timeout at all
-        timeout.tv_sec = timeout.tv_usec = 0;
-        
-        // no timeout at all
-        return select(_socket + 1, &_set, &set2, nullptr, &timeout) > 0;
+        // poll the fd with no timeout
+        return poll(&_fd, 1, 0) > 0;
     }
 };
 

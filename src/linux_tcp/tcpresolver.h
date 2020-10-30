@@ -24,6 +24,7 @@
 #include "sslhandshake.h"
 #include <thread>
 #include <netinet/in.h>
+#include <poll.h>
 
 /**
  *  Set up namespace
@@ -99,8 +100,8 @@ private:
             // get address info
             AddressInfo addresses(_hostname.data(), _port);
     
-            // an fdset to monitor for writability
-            fd_set writeset;
+            // the pollfd structure, needed for poll()
+            pollfd fd;
     
             // iterate over the addresses
             for (size_t i = 0; i < addresses.size(); ++i)
@@ -117,17 +118,13 @@ private:
                 // try to connect non-blocking
                 if (connect(_socket, addresses[i]->ai_addr, addresses[i]->ai_addrlen) == 0) break;
 
-                // we set the timeout to a timeout, with 5 seconds as the default
-                struct timeval timeout{_timeout,0};
-
-                // reset the fdset
-                FD_ZERO(&writeset);
-
-                // set the fd to monitor for writing
-                FD_SET(_socket, &writeset);
-
-                // perform a select, wait for something to happen on one of the fds
-                int ret = select(_socket + 1, nullptr, &writeset, nullptr, &timeout);
+                // set the struct members
+                fd.fd = _socket;
+                fd.events = POLLOUT;
+                fd.revents = 0;
+                
+                // perform the poll, with a very long time to allow the event to occur
+                int ret = poll(&fd, 1, _timeout * 1000);
 
                 // log the error for the time being
                 if (ret == 0) _error = "connection timed out";
