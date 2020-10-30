@@ -220,8 +220,8 @@ private:
         // object to poll a socket
         Poll poll(_socket);
         
-        // wait until socket is readable, but do not block
-        return poll.readable(false);
+        // check if socket is readable
+        return poll.readable();
     }
 
     /**
@@ -233,8 +233,8 @@ private:
         // object to poll a socket
         Poll poll(_socket);
         
-        // wait until socket is writable, but do not block
-        return poll.writable(false);
+        // check if socket is writable
+        return poll.writable();
     }
     
     /**
