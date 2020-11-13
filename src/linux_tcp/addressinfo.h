@@ -10,7 +10,7 @@
 /**
  *  Dependencies
  */
-#include <sys/time.h>
+#include <random>
 
 /**
  *  Include guard
@@ -76,17 +76,14 @@ public:
         // which may break loadbalancing..
         if (randomOrder)
         {
-            // We need to seed the random number generator. Normally time is taken
-            // for this. Since we want to have randomness within a second we use
-            // more precision via timeval
-            struct timeval time; 
-            gettimeofday(&time, nullptr);
+            // create a random device for the seed of the random number generator
+            std::random_device rd;
 
-            // We seed with the precision of miliseconds. 
-            srand((time.tv_sec * 1000) + (time.tv_usec / 1000));  
+            // Create the generator
+            std::mt19937 gen(rd());
 
-            // shuffle the vector.    
-            std::random_shuffle(_v.begin(), _v.end());
+            // shuffle the vector.
+            std::shuffle(_v.begin(), _v.end(), gen);
         }
     }
 
