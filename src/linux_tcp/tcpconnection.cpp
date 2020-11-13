@@ -23,11 +23,10 @@ namespace AMQP {
  *  Constructor
  *  @param  handler         User implemented handler object
  *  @param  hostname        The address to connect to
- *  @param  random          Randomly select one of the IP addresses that belong to the hostname
  */
-TcpConnection::TcpConnection(TcpHandler *handler, const Address &address, bool random) :
+TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
     _handler(handler),
-    _state(new TcpResolver(this, address.hostname(), address.port(), address.secure(), address.option("connectTimeout", 5), random)),
+    _state(new TcpResolver(this, address.hostname(), address.port(), address.secure(), address.option("connectTimeout", 5), address.option("randomConnect", false))),
     _connection(this, address.login(), address.vhost()) 
 {
     // tell the handler
