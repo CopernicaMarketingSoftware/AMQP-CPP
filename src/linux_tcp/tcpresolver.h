@@ -85,6 +85,12 @@ private:
      */
     std::thread _thread;
 
+    /**
+     *  How should the addresses be ordered when we want to connect
+     *  @var bool
+     */
+    ConnectionOrder::Order _order;
+
 
     /**
      *  Run the thread
@@ -98,7 +104,7 @@ private:
             if (_secure && !OpenSSL::valid()) throw std::runtime_error("Secure connection cannot be established: libssl.so cannot be loaded");
             
             // get address info
-            AddressInfo addresses(_hostname.data(), _port);
+            AddressInfo addresses(_hostname.data(), _port, _order);
     
             // the pollfd structure, needed for poll()
             pollfd fd;
@@ -188,13 +194,15 @@ public:
      *  @param  portnumber  The portnumber for the lookup
      *  @param  secure      Do we need a secure tls connection when ready?
      *  @param  timeout     timeout per connection attempt
+     *  @param  order       How should we oreder the addresses of the host to connect to
      */
-    TcpResolver(TcpParent *parent, std::string hostname, uint16_t port, bool secure, int timeout) : 
+    TcpResolver(TcpParent *parent, std::string hostname, uint16_t port, bool secure, int timeout, ConnectionOrder::Order order) : 
         TcpExtState(parent), 
         _hostname(std::move(hostname)),
         _secure(secure),
         _port(port),
-        _timeout(timeout)
+        _timeout(timeout),
+        _order(order)
     {
         // tell the event loop to monitor the filedescriptor of the pipe
         parent->onIdle(this, _pipe.in(), readable);
