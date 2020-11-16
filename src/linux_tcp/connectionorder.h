@@ -47,21 +47,24 @@ public:
      *  Constructor
      *  @var  order
      */
-    ConnectionOrder (const char *order) : _order(Order::standard)
+    ConnectionOrder(const char *order) : _order(Order::standard)
     {
         // Set the orders based on the string
-        if (strcmp(order, "random") == 0) _order = Order::random;
+        if      (strcmp(order, "random") == 0) _order = Order::random;
         else if (strcmp(order, "ascending") == 0 || strcmp(order, "asc") == 0) _order = Order::ascending;
         else if (strcmp(order, "descending") == 0 || strcmp(order, "desc") == 0 ) _order = Order::descending;
-
-        // If we don't ave a match we fall back to standard, which was set as default
     }
+    
+    /**
+     *  Destructor
+     */
+    virtual ~ConnectionOrder() = default;
 
     /**
      *  Get the order
      *  @return Order
      */
-    Order order()
+    const Order &order() const
     {
         return _order;
     }

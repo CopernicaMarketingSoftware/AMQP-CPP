@@ -87,9 +87,9 @@ private:
 
     /**
      *  How should the addresses be ordered when we want to connect
-     *  @var bool
+     *  @var ConnectionOrdre
      */
-    ConnectionOrder::Order _order;
+    ConnectionOrder _order;
 
 
     /**
@@ -196,7 +196,7 @@ public:
      *  @param  timeout     timeout per connection attempt
      *  @param  order       How should we oreder the addresses of the host to connect to
      */
-    TcpResolver(TcpParent *parent, std::string hostname, uint16_t port, bool secure, int timeout, ConnectionOrder::Order order) : 
+    TcpResolver(TcpParent *parent, std::string hostname, uint16_t port, bool secure, int timeout, const ConnectionOrder &order) : 
         TcpExtState(parent), 
         _hostname(std::move(hostname)),
         _secure(secure),
