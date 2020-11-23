@@ -129,8 +129,17 @@ private:
                 fd.events = POLLOUT;
                 fd.revents = 0;
                 
-                // perform the poll, with a very long time to allow the event to occur
-                int ret = poll(&fd, 1, _timeout * 1000);
+                // the return code
+                int ret = 0;
+
+                // keep looping until we get a 'final' result
+                do
+                {
+                    // perform the poll, with a very long time to allow the event to occur
+                    ret = poll(&fd, 1, _timeout * 1000);
+
+                // we want to retry if the call was interrupted by a signal
+                } while (ret == -1 && errno == EINTR);
 
                 // log the error for the time being
                 if (ret == 0) _error = "connection timed out";
