@@ -35,7 +35,6 @@ bool valid();
  *  List of all wrapper methods that are in use inside AMQP-CPP
  */
 const SSL_METHOD *TLS_client_method();
-const SSL_METHOD *TLS_server_method();
 SSL_CTX *SSL_CTX_new(const SSL_METHOD *method);
 SSL     *SSL_new(SSL_CTX *ctx);
 int      SSL_do_handshake(SSL *ssl);
