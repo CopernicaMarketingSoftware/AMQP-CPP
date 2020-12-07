@@ -51,6 +51,7 @@ void     SSL_CTX_free(SSL_CTX *ctx);
 void     SSL_free(SSL *ssl);
 long     SSL_ctrl(SSL *ssl, int cmd, long larg, void *parg);
 long     SSL_CTX_ctrl(SSL_CTX *ctx, int cmd, long larg, void *parg);
+int      SSL_CTX_set_default_verify_paths(SSL_CTX *ctx);
 void     ERR_clear_error(void);
 
 /**
