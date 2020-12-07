@@ -72,6 +72,25 @@ const SSL_METHOD *TLS_client_method()
 }
 
 /**
+ *  Get the SSL_METHOD for incoming connections
+ *  @return SSL_METHOD *
+ */
+const SSL_METHOD *TLS_server_method()
+{
+    // create a function that loads the method
+    static Function<decltype(TLS_server_method)> func(handle, "TLS_server_method");
+    
+    // call the openssl function
+    if (func) return func();
+    
+    // older openssl libraries do not have this function, so we try to load an other function
+    static Function<decltype(TLS_server_method)> old(handle, "SSLv23_server_method");
+    
+    // call the old one
+    return old();
+}
+
+/**
  *  Create new SSL context
  *  @param  method  SSL_METHOD can be of the following types: TLS_method(), TLS_server_method(), TLS_client_method()
  *  @return         pointer to object   
@@ -325,6 +344,20 @@ long SSL_CTX_ctrl(SSL_CTX *ctx, int cmd, long larg, void *parg)
     
     // call the openssl function
     return func(ctx, cmd, larg, parg);
+}
+
+/**
+ *  Specify that the default location from which CA certificates are loaded
+ *  should be used.
+ *  @param  ctx
+ */
+int SSL_CTX_set_default_verify_paths(SSL_CTX *ctx)
+{
+    // the actual function
+    static Function<decltype(::SSL_CTX_set_default_verify_paths)> func(handle, "SSL_CTX_set_default_verify_paths");
+
+    // call actual function
+    return func(ctx);
 }
 
 /**
