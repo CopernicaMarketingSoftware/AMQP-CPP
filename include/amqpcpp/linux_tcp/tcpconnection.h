@@ -5,7 +5,7 @@
  *  IO between the client application and the RabbitMQ server.
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2018 Copernica BV
+ *  @copyright 2015 - 2021 Copernica BV
  */
 
 /**
@@ -125,6 +125,18 @@ private:
     {
         // pass on to the handler
         if (_handler) _handler->onConnected(this);
+    }
+    
+    /**
+     *  Method that is called when right before connection is being secured
+     *  @param  state
+     *  @param  ssl
+     *  @return bool
+     */
+    virtual bool onSecuring(TcpState *state, SSL *ssl) override
+    {
+        // pass on to user-space
+        return _handler && _handler->onSecuring(this, ssl);
     }
 
     /**

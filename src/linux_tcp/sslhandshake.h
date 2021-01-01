@@ -4,7 +4,7 @@
  *  Implementation of the TCP state that is responsible for setting
  *  up the STARTTLS handshake.
  *
- *  @copyright 2018 Copernica BV
+ *  @copyright 2018 - 2021 Copernica BV
  */
 
 /**
@@ -134,6 +134,9 @@ public:
         
         // associate the ssl context with the socket filedescriptor
         if (OpenSSL::SSL_set_fd(_ssl, _socket) == 0) throw std::runtime_error("failed to associate filedescriptor with ssl socket");
+        
+        // we allow userspace to make changes to the SSL structure
+        if (!_parent->onSecuring(this, _ssl)) throw std::runtime_error("failed to initialize SSL structure in user space");
         
         // we are going to wait until the socket becomes writable before we start the handshake
         _parent->onIdle(this, _socket, writable);

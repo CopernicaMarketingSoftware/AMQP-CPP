@@ -5,7 +5,7 @@
  *  an _internal_ interface that is not relevant for user-space applications.
  *
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2018 Copernica BV
+ *  @copyright 2018 - 2021 Copernica BV
  */
 
 /**
@@ -46,6 +46,14 @@ public:
      *  @param  state
      */
     virtual void onConnected(TcpState *state) = 0;
+    
+    /**
+     *  Method that is called right before a connection is secured and that allows userspac to change SSL
+     *  @param  state
+     *  @param  ssl
+     *  @return bool
+     */
+    virtual bool onSecuring(TcpState *state, SSL *ssl) = 0;
 
     /**
      *  Method that is called when the connection is secured
