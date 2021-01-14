@@ -158,7 +158,7 @@ Deferred &Tagger::close()
     if (_close) return *_close;
 
     // create the deferred
-    _close = std::make_shared<Deferred>(_implementation->usable());
+    _close = std::make_shared<Deferred>(!_implementation->usable());
 
     // if there are open messages or there is a queue, they will still get acked and we will then forward it
     if (unacknowledged()) return *_close;
