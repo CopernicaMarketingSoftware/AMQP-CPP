@@ -86,8 +86,8 @@ public:
     Connection &operator=(const Connection &connection) = delete;
     
     /**
-     *  Retrieve the login data
-     *  @return Login
+     *  Retrieve the authentication data
+     *  @return Authentication
      */
     const Authentication &authentication() const
     {
