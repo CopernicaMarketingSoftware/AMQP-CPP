@@ -32,31 +32,40 @@ public:
      * 
      *  The first parameter is a handler object. This handler class is
      *  an interface that should be implemented by the caller.
+     *
+     *  @param  handler         Connection handler
+     *  @param  auth            Authentication data
+     *  @param  vhost           Vhost to use
+     */
+    Connection(ConnectionHandler *handler, std::shared_ptr<const Authentication> auth, const std::string &vhost) : _implementation(this, handler, std::move(auth), vhost) {}
+
+    /**
+     *  Construct an AMQP object based on plain login data
      * 
      *  @param  handler         Connection handler
      *  @param  login           Login data
      *  @param  vhost           Vhost to use
      */
-    Connection(ConnectionHandler *handler, const Login &login, const std::string &vhost) : _implementation(this, handler, login, vhost) {}
+    Connection(ConnectionHandler *handler, const Login &login, const std::string &vhost) : _implementation(this, handler, std::make_shared<Login>(login), vhost) {}
 
     /**
      *  Construct with default vhost
      *  @param  handler         Connection handler
      *  @param  login           Login data
      */
-    Connection(ConnectionHandler *handler, const Login &login) : _implementation(this, handler, login, "/") {}
+    Connection(ConnectionHandler *handler, const Login &login) : _implementation(this, handler, std::make_shared<Login>(login), "/") {}
 
     /**
      *  Construct an AMQP object with default login data and default vhost
      *  @param  handler         Connection handler
      */
-    Connection(ConnectionHandler *handler, const std::string &vhost) : _implementation(this, handler, Login(), vhost) {}
+    Connection(ConnectionHandler *handler, const std::string &vhost) : _implementation(this, handler, std::make_shared<Login>(), vhost) {}
 
     /**
      *  Construct an AMQP object with default login data and default vhost
      *  @param  handler         Connection handler
      */
-    Connection(ConnectionHandler *handler) : _implementation(this, handler, Login(), "/") {}
+    Connection(ConnectionHandler *handler) : _implementation(this, handler, std::make_shared<Login>(), "/") {}
 
     /**
      *  No copy'ing, we do not support having two identical connection objects
@@ -80,9 +89,9 @@ public:
      *  Retrieve the login data
      *  @return Login
      */
-    const Login &login() const
+    const Authentication &authentication() const
     {
-        return _implementation.login();
+        return _implementation.authentication();
     }
 
     /**

@@ -14,6 +14,7 @@
 /**
  *  Dependencies
  */
+#include "authentication.h"
 #include <string>
 
 /**
@@ -24,7 +25,7 @@ namespace AMQP {
 /**
  *  Class definition
  */
-class Login
+class Login : public Authentication
 {
 private:
     /**
@@ -66,24 +67,6 @@ public:
      *  Destructor
      */
     virtual ~Login() = default;
-    
-    /**
-     *  Cast to boolean: is the login set?
-     *  @return bool
-     */
-    operator bool () const
-    {
-        return !_user.empty() || !_password.empty();
-    }
-    
-    /**
-     *  Negate operator: is it not set
-     *  @return bool
-     */
-    bool operator! () const
-    {
-        return _user.empty() && _password.empty();
-    }
 
     /**
      *  Retrieve the user name
@@ -104,10 +87,19 @@ public:
     }
 
     /**
+     *
+     *  @return string
+     */
+    std::string mechanism() const override
+    {
+        return "PLAIN";
+    }
+
+    /**
      *  String representation in SASL PLAIN mode
      *  @return string
      */
-    std::string saslPlain() const
+    std::string response() const override
     {
         // we need an initial string
         std::string result("\0", 1);
@@ -115,55 +107,67 @@ public:
         // append other elements
         return result.append(_user).append("\0",1).append(_password);
     }
-    
+
     /**
-     *  Comparison operator
-     *  @param  that
+     *  Create string from login
+     *  @return std::string
+     */
+    virtual std::string toString() const
+    {
+        return _user + ":" + _password;
+    }
+
+private:
+    /**
+     *  Is the login set?
      *  @return bool
      */
-    bool operator==(const Login &that) const
+    bool isSet() const override
     {
-        // username and password must match
-        return _user == that._user && _password == that._password;
+        return !_user.empty() || !_password.empty();
     }
 
     /**
-     *  Comparison operator
-     *  @param  that
-     *  @return bool
+     *  Compare authentication
+     *  @return bool (negative if this < that, zero if this == that, positve if this > that)
      */
-    bool operator!=(const Login &that) const
+    int compare(const Authentication& that) const override
     {
-        // the opposite of operator==
-        return !operator==(that);
-    }
-    
-    /**
-     *  Comparison operator
-     *  @param  that
-     *  @return bool
-     */
-    bool operator<(const Login &that) const
-    {
-        // compare users
-        if (_user != that._user) return _user < that._user;
-        
-        // compare passwords
-        return _password < that._password;
+        // At this point the Authentication class made sure that `that` has the
+        // same mechanism as `this`
+        const Login& that_login = dynamic_cast<const Login&>(that);
+
+        if (_user < that_login._user)
+        {
+            return -1;
+        }
+        else if (_user > that_login._user)
+        {
+            return 1;
+        }
+
+        if (_password < that_login._password)
+        {
+            return -1;
+        }
+        else if (_password > that_login._password)
+        {
+            return 1;
+        }
+
+        return 0;
     }
 
     /**
-     *  Friend function to allow writing the login to a stream
+     *  Function to allow writing the login to a stream
      *  @param  stream
-     *  @param  login
      *  @return std::ostream
      */
-    friend std::ostream &operator<<(std::ostream &stream, const Login &login)
+    std::ostream &print(std::ostream &stream)
     {
         // write username and password
-        return stream << login._user << ":" << login._password;
+        return stream << _user << ":" << _password;
     }
-
 };
 
 /**

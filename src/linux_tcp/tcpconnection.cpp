@@ -27,7 +27,7 @@ namespace AMQP {
 TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
     _handler(handler),
     _state(new TcpResolver(this, address.hostname(), address.port(), address.secure(), address.option("connectTimeout", 5), ConnectionOrder(address.option("connectionOrder")))),
-    _connection(this, address.login(), address.vhost()) 
+    _connection(this, address.authentication(), address.vhost())
 {
     // tell the handler
     _handler->onAttached(this);

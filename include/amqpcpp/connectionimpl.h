@@ -21,7 +21,7 @@
 #include "channelimpl.h"
 #include "copiedbuffer.h"
 #include "monitor.h"
-#include "login.h"
+#include "authentication.h"
 #include <unordered_map>
 #include <memory>
 #include <queue>
@@ -108,10 +108,10 @@ protected:
     uint32_t _expected = 7;
 
     /**
-     *  The login for the server (login, password)
-     *  @var    Login
+     *  The authentication for the server
+     *  @var    Authentication
      */
-    Login _login;
+    std::shared_ptr<const Authentication> _auth;
 
     /**
      *  Vhost to connect to
@@ -164,9 +164,9 @@ private:
      *
      *  @param  parent          Parent connection object
      *  @param  handler         Connection handler
-     *  @param  login           Login data
+     *  @param  auth            authentication data
      */
-    ConnectionImpl(Connection *parent, ConnectionHandler *handler, const Login &login, const std::string &vhost);
+    ConnectionImpl(Connection *parent, ConnectionHandler *handler, std::shared_ptr<const Authentication> auth, const std::string &vhost);
 
 public:
     /**
@@ -274,12 +274,12 @@ public:
     void setReady();
 
     /**
-     *  Retrieve the login data
-     *  @return Login
+     *  Retrieve the authentication data
+     *  @return Authentication
      */
-    const Login &login() const
+    const Authentication &authentication() const
     {
-        return _login;
+        return *_auth;
     }
 
     /**
