@@ -15,8 +15,6 @@
 /**
  *  Includes
  */
-#include "authentication.h"
-#include <memory>
 #include <type_traits>
 
 /**
@@ -52,10 +50,10 @@ private:
     bool _secure = false;
     
     /**
-     *  Authentication data
-     *  @var Authentication
+     *  Login data (username + password)
+     *  @var Login
      */
-    std::shared_ptr<Authentication> _auth;
+    Login _login;
 
     /**
      *  The hostname
@@ -128,18 +126,13 @@ public:
             const char *colon = (const char *)memchr(data, ':', loginsize);
 
             // assign the login
-            _auth = std::make_shared<Login>(
+            _login = Login(
                 std::string(data, colon ? colon - data : loginsize),
                 std::string(colon ? colon + 1 : "", colon ? at - colon - 1 : 0)
             );
 
             // set data to the start of the hostname
             data = at + 1;
-        }
-        else
-        {
-            // default login
-            _auth = std::make_shared<Login>();
         }
 
         // find out where the vhost is set (starts with a slash)
@@ -219,7 +212,7 @@ public:
      */
     Address(std::string host, uint16_t port, Login login, std::string vhost, bool secure = false) :
         _secure(secure),
-        _auth(std::make_shared<Login>(std::move(login))),
+        _login(std::move(login)),
         _hostname(std::move(host)),
         _port(port),
         _vhost(std::move(vhost)) {}
@@ -239,21 +232,12 @@ public:
     }
 
     /**
-     *  Expose the authentication data
-     *  @return Authentication
-     */
-    std::shared_ptr<const Authentication> authentication() const
-    {
-        return _auth;
-    }
-
-    /**
      *  Expose the login data
      *  @return Login
      */
     const Login &login() const
     {
-        return dynamic_cast<const Login&>(*_auth);
+        return _login;
     }
 
     /**
@@ -302,7 +286,7 @@ public:
         std::string str(_secure ? "amqps://" : "amqp://");
 
         // append login
-        str.append(_auth->toString()).append("@").append(_hostname);
+        str.append(_login.user()).append(":").append(_login.password()).append("@").append(_hostname);
 
         // do we need a special portnumber?
         if (_port != 5672) str.append(":").append(std::to_string(_port));
@@ -341,7 +325,7 @@ public:
         if (_secure != that._secure) return false;
 
         // logins must match
-        if (_auth != that._auth) return false;
+        if (_login != that._login) return false;
 
         // hostname must match, but are not case sensitive
         if (strcasecmp(_hostname.data(), that._hostname.data()) != 0) return false;
@@ -378,7 +362,7 @@ public:
         if (_secure != that._secure) return !_secure;
         
         // compare logins
-        if (_auth != that._auth) return _auth < that._auth;
+        if (_login != that._login) return _login < that._login;
         
         // hostname must match, but are not case sensitive
         int result = strcasecmp(_hostname.data(), that._hostname.data());
@@ -408,7 +392,7 @@ public:
         stream << (address._secure ? "amqps://" : "amqp://");
         
         // do we have a login?
-        if (*address._auth) stream << *address._auth << "@";
+        if (address._login) stream << address._login << "@";
         
         // write hostname
         stream << address._hostname;

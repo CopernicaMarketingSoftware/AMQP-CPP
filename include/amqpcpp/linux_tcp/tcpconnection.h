@@ -214,7 +214,7 @@ public:
      *  @param  hostname        The address to connect to
      */
     TcpConnection(TcpHandler *handler, const Address &address) :
-        TcpConnection(handler, address, address.authentication()) {}
+        TcpConnection(handler, address, std::make_shared<Login>(address.login())) {}
     
     /**
      *  No copying
