@@ -108,10 +108,16 @@ protected:
     uint32_t _expected = 7;
 
     /**
-     *  The authentication for the server
-     *  @var    Authentication
+     *  The authentication mechanism for the server
+     *  @var    Authentication mechanism
      */
-    std::shared_ptr<const Authentication> _auth;
+    std::string _auth_mechanism;
+
+    /**
+     *  The authentication response for the server
+     *  @var    Authentication response
+     */
+    std::string _auth_response;
 
     /**
      *  Vhost to connect to
@@ -166,7 +172,7 @@ private:
      *  @param  handler         Connection handler
      *  @param  auth            authentication data
      */
-    ConnectionImpl(Connection *parent, ConnectionHandler *handler, std::shared_ptr<const Authentication> auth, const std::string &vhost);
+    ConnectionImpl(Connection *parent, ConnectionHandler *handler, const Authentication& auth, const std::string &vhost);
 
 public:
     /**
@@ -274,12 +280,21 @@ public:
     void setReady();
 
     /**
-     *  Retrieve the authentication data
-     *  @return Authentication
+     *  Retrieve the authentication mechanism
+     *  @return string
      */
-    const Authentication &authentication() const
+    const std::string &authenticationMechanism() const
     {
-        return *_auth;
+        return _auth_mechanism;
+    }
+
+    /**
+     *  Retrieve the authentication response data
+     *  @return string
+     */
+    const std::string &authenticationResponse() const
+    {
+        return _auth_response;
     }
 
     /**

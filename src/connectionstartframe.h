@@ -204,7 +204,7 @@ public:
         if (!properties.contains("capabilities")) properties["capabilities"] = capabilities;
         
         // send back a connection start ok frame
-        connection->send(ConnectionStartOKFrame(properties, connection->authentication().mechanism(), connection->authentication().response(), "en_US"));
+        connection->send(ConnectionStartOKFrame(properties, connection->authenticationMechanism(), connection->authenticationResponse(), "en_US"));
         
         // done
         return true;

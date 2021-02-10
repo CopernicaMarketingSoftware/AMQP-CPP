@@ -106,7 +106,7 @@ int main()
     MyHandler handler(loop);
     
     // make a connection
-    AMQP::TcpConnection connection(&handler, AMQP::Address("amqp://localhost/"), std::make_shared<AMQP::ExternalAuth>());
+    AMQP::TcpConnection connection(&handler, AMQP::Address("amqp://localhost/"), AMQP::ExternalAuth());
     
     // we need a channel too
     AMQP::TcpChannel channel(&connection);

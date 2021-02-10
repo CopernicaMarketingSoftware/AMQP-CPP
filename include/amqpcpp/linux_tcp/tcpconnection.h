@@ -206,7 +206,7 @@ public:
      *  @param  hostname        The address to connect to
      *  @param  auth            The authentication to use
      */
-    TcpConnection(TcpHandler *handler, const Address &address, std::shared_ptr<const Authentication> auth);
+    TcpConnection(TcpHandler *handler, const Address &address, const Authentication& auth);
 
     /**
      *  Constructor
@@ -214,7 +214,7 @@ public:
      *  @param  hostname        The address to connect to
      */
     TcpConnection(TcpHandler *handler, const Address &address) :
-        TcpConnection(handler, address, std::make_shared<Login>(address.login())) {}
+        TcpConnection(handler, address, address.login()) {}
     
     /**
      *  No copying
