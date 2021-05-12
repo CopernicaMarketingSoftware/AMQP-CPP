@@ -60,9 +60,11 @@ void Tagger::onAck(uint64_t deliveryTag, bool multiple)
     if (!_close || unacknowledged()) return;
 
     // close the channel, and forward the callbacks to the installed handler
+    // we need to be sure the the deffered object stays alive even if the callback
+    // decides to remove us.
     _implementation->close()
-        .onSuccess([this]() { _close->reportSuccess(); })
-        .onError([this](const char *message) { _close->reportError(message); });
+        .onSuccess([this]() { auto close = _close; close->reportSuccess(); })
+        .onError([this](const char *message) { auto close = _close; close->reportError(message); });
 }
 
 /**
@@ -76,9 +78,11 @@ void Tagger::onNack(uint64_t deliveryTag, bool multiple)
     if (!_close || unacknowledged()) return;
 
     // close the channel, and forward the callbacks to the installed handler
+    // we need to be sure the the deffered object stays alive even if the callback
+    // decides to remove us.
     _implementation->close()
-        .onSuccess([this]() { _close->reportSuccess(); })
-        .onError([this](const char *message) { _close->reportError(message); });
+        .onSuccess([this]() { auto close = _close; close->reportSuccess(); })
+        .onError([this](const char *message) { auto close = _close; close->reportError(message); });
 }
 
 /**
@@ -164,9 +168,11 @@ Deferred &Tagger::close()
     if (unacknowledged()) return *_close;
 
     // there are no open messages, we can close the channel directly.
+    // we need to be sure the the deffered object stays alive even if the callback
+    // decides to remove us.
     _implementation->close()
-        .onSuccess([this]() { _close->reportSuccess(); })
-        .onError([this](const char *message) { _close->reportError(message); });
+        .onSuccess([this]() { auto close = _close; close->reportSuccess(); })
+        .onError([this](const char *message) { auto close = _close; close->reportError(message); });
 
     // return the created deferred
     return *_close;
