@@ -617,20 +617,14 @@ public:
      */
     void reportReady()
     {
-        // callbacks could destroy us, so monitor it
-        Monitor monitor(this);
-
         // if we are still in connected state we are now ready
         if (_state == state_connected) _state = state_ready;
         
-        // the last (possibly synchronous) operation was received, so we're no longer in synchronous mode
-        if (_synchronous && _queue.empty()) _synchronous = false;
+        // send out more instructions if there is a queue
+        flush();
 
         // inform handler
         if (_readyCallback) _readyCallback();
-
-        // if the monitor is still valid, we flush any waiting operations 
-        if (monitor.valid()) flush();
     }
 
     /**
