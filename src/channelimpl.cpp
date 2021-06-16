@@ -747,7 +747,7 @@ bool ChannelImpl::send(CopiedBuffer &&frame)
     
     // are we currently in synchronous mode or are there
     // other frames waiting for their turn to be sent?
-    if (_synchronous || !_queue.empty())
+    if (waiting())
     {
         // we need to wait until the synchronous frame has
         // been processed, so queue the frame until it was
@@ -786,7 +786,7 @@ bool ChannelImpl::send(const Frame &frame)
     
     // are we currently in synchronous mode or are there
     // other frames waiting for their turn to be sent?
-    if (_synchronous || !_queue.empty())
+    if (waiting())
     {
         // we need to wait until the synchronous frame has
         // been processed, so queue the frame until it was
