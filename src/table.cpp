@@ -24,11 +24,11 @@ Table::Table(InBuffer &frame)
         bytesToRead -= (uint32_t)(name.size() + 1);
 
         // get the field
-        Field *field = Field::decode(frame);
+        auto field = Field::decode(frame);
         if (!field) continue;
 
         // add field
-        _fields[name] = std::shared_ptr<Field>(field);
+        _fields[name] = std::move(field);
 
         // subtract size
         bytesToRead -= (uint32_t)field->size();

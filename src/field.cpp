@@ -14,9 +14,9 @@ namespace AMQP {
  *  Decode a field by fetching a type and full field from a frame
  *  The returned field is allocated on the heap!
  *  @param  frame
- *  @return Field*
+ *  @return std::shared_ptr<Field>
  */
-Field *Field::decode(InBuffer &frame)
+std::shared_ptr<Field> Field::decode(InBuffer &frame)
 {
     // get the type
     uint8_t type = frame.nextUint8();
@@ -24,24 +24,24 @@ Field *Field::decode(InBuffer &frame)
     // create field based on type
     switch (type)
     {
-        case 't':   return new BooleanSet(frame);
-        case 'b':   return new Octet(frame);
-        case 'B':   return new UOctet(frame);
-        case 'U':   return new Short(frame);
-        case 'u':   return new UShort(frame);
-        case 'I':   return new Long(frame);
-        case 'i':   return new ULong(frame);
-        case 'L':   return new LongLong(frame);
-        case 'l':   return new ULongLong(frame);
-        case 'f':   return new Float(frame);
-        case 'd':   return new Double(frame);
-        case 'D':   return new DecimalField(frame);
-        case 's':   return new ShortString(frame);
-        case 'S':   return new LongString(frame);
-        case 'A':   return new Array(frame);
-        case 'T':   return new Timestamp(frame);
-        case 'F':   return new Table(frame);
-        case 'V':   return new VoidField(frame);
+        case 't':   return std::make_shared<BooleanSet>(frame);
+        case 'b':   return std::make_shared<Octet>(frame);
+        case 'B':   return std::make_shared<UOctet>(frame);
+        case 'U':   return std::make_shared<Short>(frame);
+        case 'u':   return std::make_shared<UShort>(frame);
+        case 'I':   return std::make_shared<Long>(frame);
+        case 'i':   return std::make_shared<ULong>(frame);
+        case 'L':   return std::make_shared<LongLong>(frame);
+        case 'l':   return std::make_shared<ULongLong>(frame);
+        case 'f':   return std::make_shared<Float>(frame);
+        case 'd':   return std::make_shared<Double>(frame);
+        case 'D':   return std::make_shared<DecimalField>(frame);
+        case 's':   return std::make_shared<ShortString>(frame);
+        case 'S':   return std::make_shared<LongString>(frame);
+        case 'A':   return std::make_shared<Array>(frame);
+        case 'T':   return std::make_shared<Timestamp>(frame);
+        case 'F':   return std::make_shared<Table>(frame);
+        case 'V':   return std::make_shared<VoidField>(frame);
         default:    return nullptr;
     }
 }

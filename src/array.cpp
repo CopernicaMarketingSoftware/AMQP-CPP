@@ -25,14 +25,14 @@ Array::Array(InBuffer &frame)
         charsToRead -= 1;
 
         // read the field type and construct the field
-        Field *field = Field::decode(frame);
+        auto field = Field::decode(frame);
         if (!field) continue;
 
         // less bytes to read
         charsToRead -= (uint32_t)field->size();
 
         // add the additional field
-        _fields.push_back(std::shared_ptr<Field>(field));
+        _fields.push_back(std::move(field));
     }
 }
 
@@ -46,7 +46,7 @@ Array::Array(const Array &array)
     for (auto iter = array._fields.begin(); iter != array._fields.end(); iter++)
     {
         // add to this vector
-        _fields.push_back(std::shared_ptr<Field>((*iter)->clone()));
+        _fields.push_back((*iter)->clone());
     }
 }
 
@@ -93,7 +93,7 @@ void Array::pop_back()
  */
 void Array::push_back(const Field& value)
 {
-    _fields.push_back(std::shared_ptr<Field>(value.clone()));
+    _fields.push_back(value.clone());
 }
 
 /**
