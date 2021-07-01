@@ -33,7 +33,7 @@ private:
      *  We define a custom type for storing fields
      *  @typedef    FieldMap
      */
-    typedef std::map<std::string, std::shared_ptr<Field> > FieldMap;
+    typedef std::map<std::string, std::unique_ptr<Field> > FieldMap;
 
     /**
      *  Store the fields
@@ -96,9 +96,9 @@ public:
      *  Create a new instance on the heap of this object, identical to the object passed
      *  @return Field*
      */
-    virtual std::shared_ptr<Field> clone() const override
+    virtual std::unique_ptr<Field> clone() const override
     {
-        return std::make_shared<Table>(*this);
+        return std::unique_ptr<Table>(new Table(*this));
     }
 
     /**

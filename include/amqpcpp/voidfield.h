@@ -42,12 +42,12 @@ public:
 
     /**
      *  Create a new instance of this object
-     *  @return Field*
+     *  @return unique_ptr
      */
-    virtual std::shared_ptr<Field> clone() const override
+    virtual std::unique_ptr<Field> clone() const override
     {
         // create a new copy of ourselves and return it
-        return std::make_shared<VoidField>();
+        return std::unique_ptr<Field>(new VoidField);
     }
 
     /**

@@ -93,12 +93,12 @@ public:
 
     /**
      *  Create a new instance of this object
-     *  @return Field*
+     *  @return unique_ptr
      */
-    virtual std::shared_ptr<Field> clone() const override
+    virtual std::unique_ptr<Field> clone() const override
     {
         // create a new copy of ourselves and return it
-        return std::make_shared<NumericField>(_value);
+        return std::unique_ptr<Field>(new NumericField(_value));
     }
 
     /**

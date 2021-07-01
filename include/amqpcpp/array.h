@@ -32,7 +32,7 @@ private:
      *  Definition of an array as a vector
      *  @typedef
      */
-    typedef std::vector<std::shared_ptr<Field>> FieldArray;
+    typedef std::vector<std::unique_ptr<Field>> FieldArray;
 
     /**
      *  The actual fields
@@ -74,9 +74,9 @@ public:
      *  Create a new instance of this object
      *  @return Field*
      */
-    virtual std::shared_ptr<Field> clone() const override
+    virtual std::unique_ptr<Field> clone() const override
     {
-        return std::make_shared<Array>(*this);
+        return std::unique_ptr<Array>(new Array(*this));
     }
 
     /**
@@ -95,19 +95,19 @@ public:
      */
     Array set(uint8_t index, const Field &value)
     {
-        // construct a shared pointer
+        // make a copy
         auto ptr = value.clone();
 
         // should we overwrite an existing record?
         if (index >= _fields.size())
         {
             // append index
-            _fields.push_back(ptr);
+            _fields.push_back(std::move(ptr));
         }
         else
         {
             // overwrite pointer
-            _fields[index] = ptr;
+            _fields[index] = std::move(ptr);
         }
 
         // allow chaining
