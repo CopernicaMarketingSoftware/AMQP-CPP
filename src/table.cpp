@@ -67,8 +67,10 @@ Table &Table::operator=(const Table &table)
     // loop through the table records
     for (auto iter = table._fields.begin(); iter != table._fields.end(); iter++)
     {
-        // add the field
-        _fields[iter->first] = std::shared_ptr<Field>(iter->second->clone());
+        // since a map is always ordered, we know that each element will
+        // be inserted at the end of the new map, so we can simply use
+        // emplace_hint and hint at insertion at the end of the map
+        _fields.insert(_fields.end(), std::make_pair(iter->first, iter->second->clone()));
     }
 
     // done
