@@ -40,9 +40,9 @@ protected:
      *  Decode a field by fetching a type and full field from a frame
      *  The returned field is allocated on the heap!
      *  @param  frame
-     *  @return Field*
+     *  @return std::shared_ptr<Field>
      */
-    static Field *decode(InBuffer &frame);
+    static std::shared_ptr<Field> decode(InBuffer &frame);
 
 public:
     /**
