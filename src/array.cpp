@@ -32,7 +32,7 @@ Array::Array(InBuffer &frame)
         charsToRead -= (uint32_t)field->size();
 
         // add the additional field
-        _fields.push_back(move(field));
+        _fields.push_back(std::move(field));
     }
 }
 

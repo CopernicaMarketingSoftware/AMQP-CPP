@@ -28,7 +28,7 @@ Table::Table(InBuffer &frame)
         if (!field) continue;
 
         // add field
-        _fields[name] = move(field);
+        _fields[name] = std::move(field);
 
         // subtract size
         bytesToRead -= (uint32_t)field->size();
