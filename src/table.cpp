@@ -27,11 +27,11 @@ Table::Table(InBuffer &frame)
         auto field = Field::decode(frame);
         if (!field) continue;
 
-        // add field
-        _fields[name] = std::move(field);
-
         // subtract size
         bytesToRead -= (uint32_t)field->size();
+
+        // add field
+        _fields[name] = std::move(field);
     }
 }
 
