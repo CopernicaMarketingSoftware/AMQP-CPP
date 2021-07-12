@@ -674,13 +674,16 @@ public:
 
         // flush the queue, which will send the next operation if the current operation was synchronous
         flush();
-        
-        // we are going to call callbacks that could destruct the channel
-        Monitor monitor(this);
 
         // copy the callback (so that it will not be destructed during
         // the "reportSuccess" call, if the channel is destructed during the call)
         auto cb = _oldestCallback;
+
+        // the call to flush might have caused the callback to have been invoked; check once more
+        if (!cb) return false;
+
+        // we are going to call callbacks that could destruct the channel
+        Monitor monitor(this);
 
         // call the callback
         auto next = cb->reportSuccess(std::forward<Arguments>(parameters)...);
