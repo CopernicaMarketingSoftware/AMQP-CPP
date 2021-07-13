@@ -26,17 +26,11 @@ namespace AMQP {
  */
 int sslerrorprintercallback(const char *str, size_t len, void *ctx)
 {
-    // cast to ourselves
-    auto *self = static_cast<SslErrorPrinter*>(ctx);
-
-    // if this is not the first line, add a newline character
-    if (!self->_message.empty()) self->_message.push_back('\n');
-
-    // store the message
-    self->_message.append(str, len);
+    // Cast to ourselves and store the error line. OpenSSL adds a newline to every error line.
+    static_cast<SslErrorPrinter*>(ctx)->_message.append(str, len);
 
     // continue with the next message
-    return 1;
+    return 0;
 }
 
 /**
@@ -72,6 +66,9 @@ SslErrorPrinter::SslErrorPrinter(int retval)
 
         // collect all error lines
         OpenSSL::ERR_print_errors_cb(&sslerrorprintercallback, this);
+
+        // remove the last newline
+        if (!_message.empty() && _message.back() == '\n') _message.pop_back();
 
         // done
         break;
