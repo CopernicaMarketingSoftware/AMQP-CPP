@@ -30,24 +30,6 @@ namespace AMQP {
  */
 class SslErrorPrinter final
 {
-    /**
-     *  pointer to the BIO
-     *  @var unique_ptr
-     */
-    std::unique_ptr<::BIO, decltype(&::BIO_free)> _bio;
-
-    /**
-     *  pointer to the (data, size) tuple
-     *  @var ::BUF_MEM*
-     */
-    ::BUF_MEM *_bufmem = nullptr;
-
-    /**
-     *  In case of a syscall error, the static string pointing to the error
-     *  @var const char*
-     */
-    const char *_strerror = nullptr;
-
 public:
     /**
      *  Constructor
@@ -57,7 +39,7 @@ public:
     SslErrorPrinter(int retval);
 
     /**
-     *  data ptr
+     *  data ptr (guaranteed null-terminated)
      *  @return const char *
      */
     const char *data() const noexcept;
@@ -67,6 +49,22 @@ public:
      *  @return size_t
      */
     std::size_t size() const noexcept;
+
+private:
+    /**
+     *  The error message
+     *  @var std::string
+     */
+    std::string _message;
+
+    /**
+     *  Callback used for ERR_print_errors_cb
+     *  @param  str   The string
+     *  @param  len   The length
+     *  @param  ctx   The context (this ptr)
+     *  @return       always 1 to signal to OpenSSL to continue
+     */
+    friend int sslerrorprintercallback(const char *str, size_t len, void *ctx);
 };
 
 /**

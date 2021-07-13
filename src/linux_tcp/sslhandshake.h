@@ -87,10 +87,7 @@ private:
     TcpState *reportError(const Monitor &monitor, int retval)
     {
         // extract a human-readable error string
-        const SslErrorPrinter printer{retval};
-
-        // ensure it's null-terminated
-        const std::string message{printer.data(), printer.size()};
+        const SslErrorPrinter message{retval};
 
         // we have an error - report this to the user
         _parent->onError(this, message.data());

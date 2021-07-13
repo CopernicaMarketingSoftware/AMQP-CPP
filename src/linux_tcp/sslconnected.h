@@ -169,10 +169,7 @@ private:
 
             {
                 // get a human-readable error string
-                const SslErrorPrinter printer{error};
-
-                // ensure it is null-terminated
-                const std::string message{printer.data(), printer.size()};
+                const SslErrorPrinter message{error};
 
                 // report an error to user-space
                 _parent->onError(this, message.data());
