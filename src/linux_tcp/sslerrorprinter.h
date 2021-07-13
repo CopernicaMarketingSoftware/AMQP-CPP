@@ -61,7 +61,7 @@ private:
      *  @param  str   The string
      *  @param  len   The length
      *  @param  ctx   The context (this ptr)
-     *  @return       always 1 to signal to OpenSSL to continue
+     *  @return       always 0 to signal to OpenSSL to continue
      */
     friend int sslerrorprintercallback(const char *str, size_t len, void *ctx);
 };
