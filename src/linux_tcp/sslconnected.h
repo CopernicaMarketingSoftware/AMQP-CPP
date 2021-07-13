@@ -19,6 +19,7 @@
 #include "poll.h"
 #include "sslwrapper.h"
 #include "sslshutdown.h"
+#include "sslerrorprinter.h"
 
 /**
  * Set up namespace
@@ -163,14 +164,22 @@ private:
             return true;
             
         default:
+        {
             // we are now in an error state
             _state = state_error;
 
+            // get a human-readable error string
+            const SslErrorPrinter printer{error};
+
+            // ensure it is null-terminated
+            const std::string message{printer.data(), printer.size()};
+
             // report an error to user-space
-            _parent->onError(this, strerror(error).data());
+            _parent->onError(this, message.data());
 
             // ssl level error, we have to tear down the tcp connection
             return false;
+        }
         }
     }
     
@@ -304,74 +313,6 @@ private:
         // proceed with the write operation or the event loop
         return _out && isWritable() ? write(monitor) : proceed();
     }
-
-    /**
-     *  Get the error description of the returnvalue of SSL_get_error
-     *  @param[in]  returnvalue  The return value of SSL_get_error
-     *  @param      bp           Pointer to a BIO in case the error is SSL_ERROR_SSL
-     *  @return     A static string describing the error, or nullptr.
-     *              In the case of a nullptr, the passed-in BIO describes the error.
-     */
-    static const char *strerror(int returnvalue, ::BIO *bp)
-    {
-        // check the return value of the SSL_get_error function, which has a very unfortunate name.
-        switch (returnvalue)
-        {
-            // It can be a syscall error.
-            case SSL_ERROR_SYSCALL:
-
-                // The SSL_ERROR_SYSCALL with errno value of 0 indicates unexpected
-                // EOF from the peer. This will be properly reported as SSL_ERROR_SSL
-                // with reason code SSL_R_UNEXPECTED_EOF_WHILE_READING in the
-                // OpenSSL 3.0 release because it is truly a TLS protocol error to
-                // terminate the connection without a SSL_shutdown().
-                if (errno == 0) return "SSL_R_UNEXPECTED_EOF_WHILE_READING";
-
-                // Otherwise we ask the OS for a description of the error.
-                return ::strerror(errno);
-
-            // It can be an error in OpenSSL. In that case the error stack contains
-            // more information. The documentation notes: if this error occurs then
-            // no further I/O operations should be performed on the connection and
-            // SSL_shutdown() must not be called.
-            case SSL_ERROR_SSL:
-
-                // invoke the convenience function to extract the whole error stack
-                ::ERR_print_errors(bp);
-
-                // we return nullptr because the error is described by the bio
-                return nullptr;
-
-            default:
-                // we don't know what kind of error this is
-                return "unknown ssl error";
-        }
-    }
-
-    /**
-     *  Get a human-readable string from the return value of SSL_get_error in case it's an error.
-     *  @param[in]  returnvalue  The return value. Must not be a non-error.
-     *  @return     std::string describing the error.
-     */
-    static std::string strerror(int returnvalue)
-    {
-        // create a BIO so we can call our strerror overload
-        std::unique_ptr<::BIO, decltype(&::BIO_free)> bio(::BIO_new(::BIO_s_mem()), &::BIO_free);
-
-        // deduce the error message, and return it if it's not null
-        if (const char *message = strerror(returnvalue, bio.get())) return {message};
-
-        // the error is described in the BIO
-        // get the buffer memory structure
-        ::BUF_MEM *bufmem;
-
-        // get it from the bio
-        ::BIO_get_mem_ptr(bio.get(), &bufmem);
-
-        // ensure it's null-terminated by copying it to std::string
-        return {bufmem->data, bufmem->length};
-    }
-
     
 public:
     /**
