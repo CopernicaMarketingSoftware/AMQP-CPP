@@ -1,7 +1,7 @@
 /**
  *  SslErrorPrinter.h
  *
- *  Flushes the SSL error stack to a BIO.
+ *  Flushes the SSL error stack to a string.
  *  You can get at the string content via the data() and size() methods.
  *  After constructing an instance of this class, the SSL error stack
  *  is empty.
