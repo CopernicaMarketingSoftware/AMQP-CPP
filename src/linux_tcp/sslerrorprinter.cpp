@@ -71,7 +71,7 @@ SslErrorPrinter::SslErrorPrinter(int retval)
     case SSL_ERROR_SSL:
 
         // collect all error lines
-        ::ERR_print_errors_cb(&sslerrorprintercallback, this);
+        OpenSSL::ERR_print_errors_cb(&sslerrorprintercallback, this);
 
         // done
         break;

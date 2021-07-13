@@ -53,6 +53,7 @@ long     SSL_ctrl(SSL *ssl, int cmd, long larg, void *parg);
 long     SSL_CTX_ctrl(SSL_CTX *ctx, int cmd, long larg, void *parg);
 int      SSL_CTX_set_default_verify_paths(SSL_CTX *ctx);
 void     ERR_clear_error(void);
+void     ERR_print_errors_cb(int (*cb)(const char *str, size_t len, void *u), void *u);
 
 /**
  *  End of namespace
