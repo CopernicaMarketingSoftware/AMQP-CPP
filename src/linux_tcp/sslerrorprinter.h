@@ -34,7 +34,6 @@ public:
     /**
      *  Constructor
      *  @param retval return value of SSL_get_error (must be a proper error)
-     *  @throw std::bad_alloc if the BIO couldn't be allocated
      */
     SslErrorPrinter(int retval);
 
