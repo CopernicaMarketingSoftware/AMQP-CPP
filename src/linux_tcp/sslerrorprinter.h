@@ -120,4 +120,7 @@ public:
     std::size_t size() const noexcept { return _strerror ? std::strlen(_strerror) : _bufmem->length; }
 };
 
+/**
+ *  End of namespace AMQP
+ */
 }
