@@ -20,6 +20,7 @@
 #include "poll.h"
 #include "sslwrapper.h"
 #include "sslcontext.h"
+#include "sslerrorprinter.h"
 
 /**
  *  Set up namespace
@@ -80,12 +81,16 @@ private:
     /**
      *  Helper method to report an error
      *  @param  monitor
+     *  @param  retval return value of SSL_get_error
      *  @return TcpState*
      */
-    TcpState *reportError(const Monitor &monitor)
+    TcpState *reportError(const Monitor &monitor, int retval)
     {
+        // extract a human-readable error string
+        const SslErrorPrinter message{retval};
+
         // we have an error - report this to the user
-        _parent->onError(this, "failed to setup ssl connection");
+        _parent->onError(this, message.data());
         
         // stop if connection is gone
         if (!monitor.valid()) return nullptr;
@@ -182,7 +187,7 @@ public:
         switch (error) {
         case SSL_ERROR_WANT_READ:   return proceed(readable);
         case SSL_ERROR_WANT_WRITE:  return proceed(readable | writable);
-        default:                    return reportError(monitor);
+        default:                    return reportError(monitor, error);
         }
     }
 

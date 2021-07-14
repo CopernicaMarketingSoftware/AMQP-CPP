@@ -19,6 +19,7 @@
 #include "poll.h"
 #include "sslwrapper.h"
 #include "sslshutdown.h"
+#include "sslerrorprinter.h"
 
 /**
  * Set up namespace
@@ -133,17 +134,17 @@ private:
         case SSL_ERROR_WANT_READ:
             // remember state
             _state = state;
-            
+
             // the operation must be repeated when readable
             _parent->onIdle(this, _socket, readable);
-            
+
             // allow chaining
             return true;
-        
+
         case SSL_ERROR_WANT_WRITE:
             // remember state
             _state = state;
-            
+
             // wait until socket becomes writable again
             _parent->onIdle(this, _socket, readable | writable);
 
@@ -155,19 +156,24 @@ private:
         case SSL_ERROR_NONE:
             // we're ready for the next instruction from userspace
             _state = state_idle;
-            
+
             // if we still have an outgoing buffer we want to send out data, otherwise we just read
             _parent->onIdle(this, _socket, _out ? readable | writable : readable);
 
             // nothing is wrong, we are done
             return true;
-            
+
         default:
             // we are now in an error state
             _state = state_error;
 
-            // report an error to user-space
-            _parent->onError(this, "ssl protocol error");
+            {
+                // get a human-readable error string
+                const SslErrorPrinter message{error};
+
+                // report an error to user-space
+                _parent->onError(this, message.data());
+            }
 
             // ssl level error, we have to tear down the tcp connection
             return false;
@@ -304,7 +310,6 @@ private:
         // proceed with the write operation or the event loop
         return _out && isWritable() ? write(monitor) : proceed();
     }
-
     
 public:
     /**

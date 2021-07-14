@@ -355,6 +355,20 @@ void ERR_clear_error()
 }
 
 /**
+ *  Print errors via a callback
+ *  @param  cb
+ *  @param  u
+ */
+void ERR_print_errors_cb(int (*cb)(const char *str, size_t len, void *u), void *u)
+{
+    // the actual function
+    static Function<decltype(::ERR_print_errors_cb)> func(handle, "ERR_print_errors_cb");
+
+    // call the openssl function
+    func(cb, u);
+}
+
+/**
  *  End of namespace
  */
 }}
