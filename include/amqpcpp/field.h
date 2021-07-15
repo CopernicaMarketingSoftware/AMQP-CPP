@@ -40,9 +40,9 @@ protected:
      *  Decode a field by fetching a type and full field from a frame
      *  The returned field is allocated on the heap!
      *  @param  frame
-     *  @return std::shared_ptr<Field>
+     *  @return std::unique_ptr<Field>
      */
-    static std::shared_ptr<Field> decode(InBuffer &frame);
+    static std::unique_ptr<Field> decode(InBuffer &frame);
 
 public:
     /**
@@ -54,7 +54,7 @@ public:
      *  Create a new instance on the heap of this object, identical to the object passed
      *  @return Field*
      */
-    virtual std::shared_ptr<Field> clone() const = 0;
+    virtual std::unique_ptr<Field> clone() const = 0;
 
     /**
      *  Get the size this field will take when

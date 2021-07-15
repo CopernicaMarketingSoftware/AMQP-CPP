@@ -107,7 +107,7 @@ size_t Array::size() const
     size_t size = 4;
 
     // iterate over all elements
-    for (auto item : _fields)
+    for (const auto &item : _fields)
     {
         // add the size of the field type and size of element
         size += sizeof(item->typeID());
@@ -128,7 +128,7 @@ void Array::fill(OutBuffer& buffer) const
     buffer.add(static_cast<uint32_t>(size()-4));
 
     // iterate over all elements
-    for (auto item : _fields)
+    for (const auto &item : _fields)
     {
         // encode the element type and element
         buffer.add((uint8_t)item->typeID());
