@@ -97,7 +97,7 @@ if(AMQP-CPP_BUILD_SHARED)
     install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
             ARCHIVE DESTINATION lib
             LIBRARY DESTINATION lib
-            RUNTIME DESTINATION lib
+            RUNTIME DESTINATION bin
     )
 else()
     # copy static lib
