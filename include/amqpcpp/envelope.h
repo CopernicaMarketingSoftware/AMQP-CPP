@@ -64,8 +64,11 @@ public:
     Envelope(InBuffer &buffer) : MetaData(buffer)
     {
         // extract the properties
+        // @todo: is this correct? can body sizes be uint64?
         _bodySize = buffer.nextUint64();
-        _body = buffer.nextData(_bodySize);
+
+        // @todo: is casting to uint32 correct?
+        _body = buffer.nextData(static_cast<uint32_t>(_bodySize));
     }
 
     /**
@@ -122,7 +125,10 @@ public:
         
         // now the size of the message body + the actual body
         buffer.add(_bodySize);
-        buffer.add(_body, _bodySize);
+
+        // @todo: is this correct? first we write a uint64 as body size, but body sizes
+        // cannot be larger than 2^32 - 1 apparently?
+        buffer.add(_body, static_cast<uint32_t>(_bodySize));
     }
 };
 
