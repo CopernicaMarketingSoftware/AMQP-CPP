@@ -55,16 +55,6 @@ private:
      *  @var int
      */
     int _state = SSL_ERROR_NONE;
-
-    static const char *statetostring(int state)
-    {
-        switch (state) {
-        case SSL_ERROR_NONE: return "SSL_ERROR_NONE";
-        case SSL_ERROR_WANT_READ: return "SSL_ERROR_WANT_READ";
-        case SSL_ERROR_WANT_WRITE: return "SSL_ERROR_WANT_WRITE";
-        default: return "ERROR!";
-        }
-    }
     
     /**
      *  Should we close the connection after we've finished all operations?
