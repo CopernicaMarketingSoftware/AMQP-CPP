@@ -369,26 +369,6 @@ public:
         }
 
         return nextstate;
-
-        // // if we were busy with a write operation, we have to repeat that
-        // if (_state == state_sending) return write(monitor);
-        
-        // // same is true for read operations, they should also be repeated
-        // if (_state == state_receiving) return receive(monitor);
-
-        // // if we are in an error state, we close the tcp connection
-        // if (_state == state_error) return new TcpClosed(this);
-        
-        // // if the socket is readable, we are going to receive data
-        // if (flags & readable) return receive(monitor);
-        
-        // // socket is not readable (so it must be writable), do we have data to write?
-        // if (_out) return write(monitor);
-        
-        // // the only scenario in which we can end up here is the socket should be
-        // // closed, but instead of moving to the shutdown-state right, we call proceed()
-        // // because that function is a little more careful
-        // return proceed();
     }
 
     /**
