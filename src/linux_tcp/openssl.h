@@ -32,8 +32,6 @@ namespace AMQP { namespace OpenSSL {
  */
 bool valid();
 
-std::mutex &getprintmutex();
-
 /**
  *  List of all wrapper methods that are in use inside AMQP-CPP
  */
