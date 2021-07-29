@@ -3,7 +3,7 @@
  *
  * The actual tcp connection over SSL
  *
- * @copyright 2018 copernica BV
+ * @copyright 2018 - 2021 copernica BV
  */
  
 /** 
@@ -19,7 +19,6 @@
 #include "sslwrapper.h"
 #include "sslshutdown.h"
 #include "sslerrorprinter.h"
-#include <iostream>
 
 /**
  * Set up namespace
