@@ -12,8 +12,6 @@
 #include "openssl.h"
 #include "function.h"
 #include "amqpcpp/openssl.h"
-#include <iostream>
-#include <mutex>
 
 /**
  *  The handle to access openssl (the result of dlopen("openssl.so"))

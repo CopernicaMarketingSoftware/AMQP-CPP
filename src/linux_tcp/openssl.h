@@ -19,7 +19,6 @@
  */
 #include <openssl/ssl.h>
 #include <openssl/err.h>
-#include <mutex>
 
 /**
  *  Begin of namespace
