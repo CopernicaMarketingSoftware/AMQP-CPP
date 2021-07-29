@@ -96,7 +96,7 @@ int SSL_read(SSL *ssl, void *buf, int num)
 {
     // create a function
     static Function<decltype(::SSL_read)> func(handle, "SSL_read");
-
+    
     // call the openssl function
     return func(ssl, buf, num);
 }
