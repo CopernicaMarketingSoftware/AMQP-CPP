@@ -19,6 +19,7 @@
  */
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <mutex>
 
 /**
  *  Begin of namespace
@@ -30,6 +31,8 @@ namespace AMQP { namespace OpenSSL {
  *  @return bool
  */
 bool valid();
+
+std::mutex &getprintmutex();
 
 /**
  *  List of all wrapper methods that are in use inside AMQP-CPP

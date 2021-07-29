@@ -12,12 +12,16 @@
 #include "openssl.h"
 #include "function.h"
 #include "amqpcpp/openssl.h"
+#include <iostream>
+#include <mutex>
 
 /**
  *  The handle to access openssl (the result of dlopen("openssl.so"))
  *  By default we set this to RTLD_DEFAULT, so that AMQP-CPP checks the internal process space
  */
 static void *handle = RTLD_DEFAULT;
+
+static std::mutex printmutex;
 
 /**
  *  Just the AMQP namespace
@@ -38,6 +42,11 @@ void openssl(void *ptr)
  *  Begin of AMQP::OpenSSL namespace
  */
 namespace OpenSSL {
+
+std::mutex &getprintmutex()
+{
+    return printmutex;
+}
 
 /**
  *  Is the openssl library loaded?
@@ -96,9 +105,16 @@ int SSL_read(SSL *ssl, void *buf, int num)
 {
     // create a function
     static Function<decltype(::SSL_read)> func(handle, "SSL_read");
-    
+
     // call the openssl function
-    return func(ssl, buf, num);
+    int result = func(ssl, buf, num);
+
+    {
+        const std::lock_guard<std::mutex> lock(printmutex);
+        std::cerr << "SSL_read(" << ssl << ", " << buf << ", " << num << ") --> " << result << '\n';
+    }
+
+    return result;
 }
 
 /**
@@ -114,7 +130,14 @@ int SSL_write(SSL *ssl, const void *buf, int num)
     static Function<decltype(::SSL_write)> func(handle, "SSL_write");
     
     // call the openssl function
-    return func(ssl, buf, num);
+    int result = func(ssl, buf, num);
+
+    {
+        const std::lock_guard<std::mutex> lock(printmutex);
+        std::cerr << "SSL_write(" << ssl << ", " << buf << ", " << num << ") --> " << result << '\n';
+    }
+
+    return result;
 }
 
 /**
