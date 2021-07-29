@@ -40,18 +40,23 @@ private:
 
     /**
      *  The outgoing buffer
+     *  Note that we can determine whether we have pending writes based solely
+     *  on the presence of buffers stored in this object.
      *  @var TcpBuffer
      */
     TcpOutBuffer _out;
 
     /**
      *  The incoming buffer
+     *  The only way to know whether there are pending reads is by asking OpenSSL
+     *  with SSL_get_error. The return value of that function is remembered in _state.
      *  @var TcpInBuffer
      */
     TcpInBuffer _in;
     
     /**
-     *  Are we now busy with sending or receiving?
+     *  The state we're in is completely determined by what SSL_get_error returns
+     *  We remember this state in the next iteration when the socket becomes readable/writable
      *  @var int
      */
     int _state = SSL_ERROR_NONE;
@@ -252,8 +257,10 @@ private:
             // if this is a failure, we are going to repeat the operation
             if (result <= 0)
             {
+                // remember state
                 _state = OpenSSL::SSL_get_error(_ssl, result);
 
+                // check what state to return, and wait for the socket to become active
                 return repeat(monitor);
             }
 
@@ -309,35 +316,63 @@ public:
         // the socket must be the one this connection writes to
         if (fd != _socket) return this;
 
+        // the return value of this method
         TcpState *nextstate = this;
 
+        // if we were asked to close, do so now
         if (_closed) nextstate = new SslShutdown(this, std::move(_ssl));
 
+        // if the socket is readable, start reading
         if (nextstate == this && (flags & readable))
         {
+            // determine what action to take based on the state stored in a previous iteration
             switch (_state) {
+
+            // these two states may result in a successful read
             case SSL_ERROR_NONE:
             case SSL_ERROR_WANT_READ:
+
+                // try to read
                 nextstate = receive(monitor);
+
+                // done
                 break;
+
             default:
+                // apparently, we are in an error state
                 nextstate = new TcpClosed(this);
-                break;
-            }
-        }
-        if (nextstate == this /*&& (flags & writable)*/)
-        {
-            switch (_state) {
-            case SSL_ERROR_NONE:
-            case SSL_ERROR_WANT_READ:
-                if (_out) nextstate = write(monitor);
-                break;
-            default:
-                nextstate = new TcpClosed(this);
+
+                // done
                 break;
             }
         }
 
+        // if the state didn't change, and there are pending writes to do, do so now
+        if (nextstate == this)
+        {
+            // determine what action to take based on the state stored in a previous iteration
+            switch (_state) {
+
+            // these two states don't matter and are expected
+            case SSL_ERROR_NONE:
+            case SSL_ERROR_WANT_READ:
+
+                // if there are pending writes, try to do them now
+                if (_out) nextstate = write(monitor);
+
+                // done
+                break;
+
+            default:
+                // apparently, we are in an error state
+                nextstate = new TcpClosed(this);
+
+                // done
+                break;
+            }
+        }
+
+        // done
         return nextstate;
     }
 
