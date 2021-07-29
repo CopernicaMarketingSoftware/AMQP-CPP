@@ -16,7 +16,6 @@
  */
 #include "tcpoutbuffer.h"
 #include "tcpinbuffer.h"
-#include "poll.h"
 #include "sslwrapper.h"
 #include "sslshutdown.h"
 #include "sslerrorprinter.h"
