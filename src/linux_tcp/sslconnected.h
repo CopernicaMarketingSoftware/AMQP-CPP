@@ -131,17 +131,9 @@ private:
      */
     bool repeat()
     {
-        {
-            const std::lock_guard<std::mutex> lock(OpenSSL::getprintmutex());
-            std::cerr << statetostring(_state) << "\n";
-        }
-
         // check the error
         switch (_state) {
         case SSL_ERROR_WANT_READ:
-
-            // the operation must be repeated when readable
-            // _parent->onIdle(this, _socket, readable);
 
             // allow chaining
             return true;
@@ -151,18 +143,12 @@ private:
             // reset state: we can determine whether we want to do pending writes via _out
             _state = SSL_ERROR_NONE;
 
-            // wait until socket becomes writable again
-            // _parent->onIdle(this, _socket, readable | writable);
-
             // we are done
             return true;
 
         // this case doesn't actually happen when repeat is called, since it will only be returned when
         // the result > 0 and therefore there is no error. it is here just to be sure.
         case SSL_ERROR_NONE:
-
-            // if we still have an outgoing buffer we want to send out data, otherwise we just read
-            // _parent->onIdle(this, _socket, _out ? readable | writable : readable);
 
             // nothing is wrong, we are done
             return true;
@@ -334,11 +320,6 @@ public:
         // the socket must be the one this connection writes to
         if (fd != _socket) return this;
 
-        {
-            const std::lock_guard<std::mutex> lock(OpenSSL::getprintmutex());
-            std::cerr << "socket active; current state: " << statetostring(_state) << '\n';
-        }
-
         TcpState *nextstate = this;
 
         if (_closed) nextstate = new SslShutdown(this, std::move(_ssl));
@@ -378,11 +359,6 @@ public:
      */
     virtual void send(const char *buffer, size_t size) override
     {
-        {
-            const std::lock_guard<std::mutex> lock(OpenSSL::getprintmutex());
-            std::cerr << "send " << (const void*)buffer << ", size " << size << ", state = " << statetostring(_state) << '\n';
-        }
-
         // do nothing if already busy closing
         if (_closed) return;
         
@@ -409,9 +385,6 @@ public:
         // state to the error state so that on the next calls to state-changing objects, 
         // the tcp socket will be torn down
         if (repeat()) return;
-
-        // the repeat call failed, so we are going to find out with a readable file descriptor
-        // _parent->onIdle(this, _socket, readable);
     }
 
     /**
