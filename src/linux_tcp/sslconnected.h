@@ -3,7 +3,7 @@
  *
  * The actual tcp connection over SSL
  *
- * @copyright 2018 - 2021 copernica BV
+ * @copyright 2018 copernica BV
  */
  
 /** 
@@ -16,6 +16,7 @@
  */
 #include "tcpoutbuffer.h"
 #include "tcpinbuffer.h"
+#include "poll.h"
 #include "sslwrapper.h"
 #include "sslshutdown.h"
 #include "sslerrorprinter.h"
@@ -39,26 +40,26 @@ private:
 
     /**
      *  The outgoing buffer
-     *  Note that we can determine whether we have pending writes based solely
-     *  on the presence of buffers stored in this object.
      *  @var TcpBuffer
      */
     TcpOutBuffer _out;
 
     /**
      *  The incoming buffer
-     *  The only way to know whether there are pending reads is by asking OpenSSL
-     *  with SSL_get_error. The return value of that function is remembered in _state.
      *  @var TcpInBuffer
      */
     TcpInBuffer _in;
     
     /**
-     *  The state we're in is completely determined by what SSL_get_error returns
-     *  We remember this state in the next iteration when the socket becomes readable/writable
-     *  @var int
+     *  Are we now busy with sending or receiving?
+     *  @var enum
      */
-    int _state = SSL_ERROR_NONE;
+    enum State {
+        state_idle,
+        state_sending,
+        state_receiving,
+        state_error
+    } _state;
     
     /**
      *  Should we close the connection after we've finished all operations?
@@ -104,15 +105,17 @@ private:
     /**
      *  Method to repeat the previous call
      *  @param  monitor     monitor to check if connection object still exists
+     *  @param  state       the state that we were in
+     *  @param  result      result of an earlier SSL_get_error call
      *  @return TcpState*
      */
-    TcpState *repeat(const Monitor &monitor)
+    TcpState *repeat(const Monitor &monitor, enum State state, int error)
     {
         // if we are not able to repeat the call, we are in an error state and should tear down the connection
-        if (!repeat()) return monitor.valid() ? new TcpClosed(this) : nullptr;
+        if (!repeat(state, error)) return monitor.valid() ? new TcpClosed(this) : nullptr;
 
         // if the socket was closed in the meantime and we are not sending anything any more, we should initialize the shutdown sequence
-        if (_closed && _state == SSL_ERROR_NONE) return new SslShutdown(this, std::move(_ssl));
+        if (_closed && _state == state_idle) return new SslShutdown(this, std::move(_ssl));
         
         // otherwise, we just continue as we were, since the calls should be repeated in the future
         else return this;
@@ -120,21 +123,30 @@ private:
 
     /**
      *  Method to repeat the previous call, which has then been
+     *  @param  state       the state that we were in
+     *  @param  result      result of an earlier SSL_get_error call
      *  @return bool
      */
-    bool repeat()
+    bool repeat(enum State state, int error)
     {
         // check the error
-        switch (_state) {
+        switch (error) {
         case SSL_ERROR_WANT_READ:
+            // remember state
+            _state = state;
+
+            // the operation must be repeated when readable
+            _parent->onIdle(this, _socket, readable);
 
             // allow chaining
             return true;
 
         case SSL_ERROR_WANT_WRITE:
+            // remember state
+            _state = state;
 
-            // reset state: we can determine whether we want to do pending writes via _out
-            _state = SSL_ERROR_NONE;
+            // wait until socket becomes writable again
+            _parent->onIdle(this, _socket, readable | writable);
 
             // we are done
             return true;
@@ -142,14 +154,22 @@ private:
         // this case doesn't actually happen when repeat is called, since it will only be returned when
         // the result > 0 and therefore there is no error. it is here just to be sure.
         case SSL_ERROR_NONE:
+            // we're ready for the next instruction from userspace
+            _state = state_idle;
+
+            // if we still have an outgoing buffer we want to send out data, otherwise we just read
+            _parent->onIdle(this, _socket, _out ? readable | writable : readable);
 
             // nothing is wrong, we are done
             return true;
 
         default:
+            // we are now in an error state
+            _state = state_error;
+
             {
                 // get a human-readable error string
-                const SslErrorPrinter message{_state};
+                const SslErrorPrinter message{error};
 
                 // report an error to user-space
                 _parent->onError(this, message.data());
@@ -198,6 +218,32 @@ private:
     }
     
     /**
+     *  Check if the socket is readable
+     *  @return bool
+     */
+    bool isReadable() const
+    {
+        // object to poll a socket
+        Poll poll(_socket);
+        
+        // check if socket is readable
+        return poll.readable();
+    }
+
+    /**
+     *  Check if the socket is writable
+     *  @return bool
+     */
+    bool isWritable() const
+    {
+        // object to poll a socket
+        Poll poll(_socket);
+        
+        // check if socket is writable
+        return poll.writable();
+    }
+    
+    /**
      *  Perform a write operation
      *  @param  monitor         object to check the existance of the connection object
      *  @return TcpState*
@@ -205,16 +251,12 @@ private:
     TcpState *write(const Monitor &monitor)
     {
         // assume default state
-        _state = SSL_ERROR_NONE;
-
-        // we are going to check for errors after the openssl operations, so we make
-        // sure that the error queue is currently completely empty
-        OpenSSL::ERR_clear_error();
+        _state = state_idle;
         
         // because the output buffer contains a lot of small buffers, we can do multiple 
         // operations till the buffer is empty (but only if the socket is not also
         // readable, because then we want to read that data first instead of endless writes
-        while (_out)
+        do
         {
             // try to send more data from the outgoing buffer
             auto result = _out.sendto(_ssl);
@@ -223,14 +265,15 @@ private:
             if (result > 0) continue;
             
             // check for error
-            _state = OpenSSL::SSL_get_error(_ssl, result);
+            auto error = OpenSSL::SSL_get_error(_ssl, result);
 
             // the operation failed, we may have to repeat our call
-            return repeat(monitor);
+            return repeat(monitor, state_sending, error);
         }
+        while (_out && !isReadable());
         
         // proceed with the read operation or the event loop
-        return proceed();
+        return isReadable() ? receive(monitor) : proceed();
     }
 
     /**
@@ -240,38 +283,36 @@ private:
      */
     TcpState *receive(const Monitor &monitor)
     {
-        // assume default state
-        _state = SSL_ERROR_NONE;
-
         // we are going to check for errors after the openssl operations, so we make 
         // sure that the error queue is currently completely empty
         OpenSSL::ERR_clear_error();
 
         // start a loop
-        for (size_t expected = _parent->expected(); expected > 0; expected = _parent->expected())
+        do
         {
+            // assume default state
+            _state = state_idle;
+
             // read data from ssl into the buffer
-            auto result = _in.receivefrom(_ssl, expected);
+            auto result = _in.receivefrom(_ssl, _parent->expected());
             
             // if this is a failure, we are going to repeat the operation
-            if (result <= 0)
-            {
-                // remember state
-                _state = OpenSSL::SSL_get_error(_ssl, result);
-
-                // check what state to return, and wait for the socket to become active
-                return repeat(monitor);
-            }
+            if (result <= 0) return repeat(monitor, state_receiving, OpenSSL::SSL_get_error(_ssl, result));
 
             // go process the received data
             auto *nextstate = parse(monitor, result);
-            
+
             // leap out if we moved to a different state
             if (nextstate != this) return nextstate;
+
+            // the call to userspace might have turned the object in sending-state, which
+            // means that we must stop the receiving process
+            if (_state != state_idle) return this;
         }
+        while (OpenSSL::SSL_pending(_ssl) > 0);
         
         // proceed with the write operation or the event loop
-        return proceed();
+        return _out && isWritable() ? write(monitor) : proceed();
     }
     
 public:
@@ -285,11 +326,11 @@ public:
         TcpExtState(state),
         _ssl(std::move(ssl)),
         _out(std::move(buffer)),
-        _in(4096)
+        _in(4096),
+        _state(_out ? state_sending : state_idle)
     {
         // tell the handler to monitor the socket if there is an out
-        _state = SSL_ERROR_NONE;
-        _parent->onIdle(this, _socket, readable | writable);
+        _parent->onIdle(this, _socket, _state == state_sending ? readable | writable : readable); 
     }
     
     /**
@@ -314,65 +355,26 @@ public:
     {
         // the socket must be the one this connection writes to
         if (fd != _socket) return this;
+        
+        // if we were busy with a write operation, we have to repeat that
+        if (_state == state_sending) return write(monitor);
+        
+        // same is true for read operations, they should also be repeated
+        if (_state == state_receiving) return receive(monitor);
 
-        // the return value of this method
-        TcpState *nextstate = this;
-
-        // if we were asked to close, do so now
-        if (_closed) nextstate = new SslShutdown(this, std::move(_ssl));
-
-        // if the socket is readable, start reading
-        if (nextstate == this && (flags & readable))
-        {
-            // determine what action to take based on the state stored in a previous iteration
-            switch (_state) {
-
-            // these two states may result in a successful read
-            case SSL_ERROR_NONE:
-            case SSL_ERROR_WANT_READ:
-
-                // try to read
-                nextstate = receive(monitor);
-
-                // done
-                break;
-
-            default:
-                // apparently, we are in an error state
-                nextstate = new TcpClosed(this);
-
-                // done
-                break;
-            }
-        }
-
-        // if the state didn't change, and there are pending writes to do, do so now
-        if (nextstate == this)
-        {
-            // determine what action to take based on the state stored in a previous iteration
-            switch (_state) {
-
-            // these two states don't matter and are expected
-            case SSL_ERROR_NONE:
-            case SSL_ERROR_WANT_READ:
-
-                // if there are pending writes, try to do them now
-                if (_out) nextstate = write(monitor);
-
-                // done
-                break;
-
-            default:
-                // apparently, we are in an error state
-                nextstate = new TcpClosed(this);
-
-                // done
-                break;
-            }
-        }
-
-        // done
-        return nextstate;
+        // if we are in an error state, we close the tcp connection
+        if (_state == state_error) return new TcpClosed(this);
+        
+        // if the socket is readable, we are going to receive data
+        if (flags & readable) return receive(monitor);
+        
+        // socket is not readable (so it must be writable), do we have data to write?
+        if (_out) return write(monitor);
+        
+        // the only scenario in which we can end up here is the socket should be
+        // closed, but instead of moving to the shutdown-state right, we call proceed()
+        // because that function is a little more careful
+        return proceed();
     }
 
     /**
@@ -386,7 +388,7 @@ public:
         if (_closed) return;
         
         // if we're not idle, we can just add bytes to the buffer and we're done
-        if (_out) return _out.add(buffer, size);
+        if (_state != state_idle || _out) return _out.add(buffer, size);
 
         // clear ssl-level error
         OpenSSL::ERR_clear_error();
@@ -398,7 +400,7 @@ public:
         if (result > 0) return; 
             
         // check for error
-        _state = OpenSSL::SSL_get_error(_ssl, result);
+        auto error = OpenSSL::SSL_get_error(_ssl, result);
 
         // put the data in the outgoing buffer
         _out.add(buffer, size);
@@ -407,7 +409,10 @@ public:
         // ssl is in an error state, however that is ok because it will set an internal 
         // state to the error state so that on the next calls to state-changing objects, 
         // the tcp socket will be torn down
-        if (repeat()) return;
+        if (repeat(state_sending, error)) return;
+
+        // the repeat call failed, so we are going to find out with a readable file descriptor
+        _parent->onIdle(this, _socket, readable);
     }
 
     /**
@@ -419,7 +424,7 @@ public:
         _closed = true;
         
         // if the previous operation is still in progress we can wait for that
-        if (_state != SSL_ERROR_NONE || _out) return;
+        if (_state != state_idle) return;
         
         // let's wait until the socket becomes writable (because then we can start the shutdown)
         _parent->onIdle(this, _socket, readable | writable);
