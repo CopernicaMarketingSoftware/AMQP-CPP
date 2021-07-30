@@ -301,9 +301,13 @@ private:
 
             // go process the received data
             auto *nextstate = parse(monitor, result);
-            
+
             // leap out if we moved to a different state
             if (nextstate != this) return nextstate;
+
+            // the call to userspace might have turned the object in sending-state, which
+            // means that we must stop the receiving process
+            if (_state != state_idle) return this;
         }
         while (OpenSSL::SSL_pending(_ssl) > 0);
         
@@ -384,7 +388,7 @@ public:
         if (_closed) return;
         
         // if we're not idle, we can just add bytes to the buffer and we're done
-        if (_state != state_idle) return _out.add(buffer, size);
+        if (_state != state_idle || _out) return _out.add(buffer, size);
 
         // clear ssl-level error
         OpenSSL::ERR_clear_error();
