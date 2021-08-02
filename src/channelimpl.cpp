@@ -8,7 +8,6 @@
 #include "includes.h"
 #include "basicgetokframe.h"
 #include "basicreturnframe.h"
-#include "consumedmessage.h"
 #include "returnedmessage.h"
 #include "channelopenframe.h"
 #include "channelflowframe.h"

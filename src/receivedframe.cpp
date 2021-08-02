@@ -67,7 +67,6 @@
 #include "transactioncommitokframe.h"
 #include "transactionrollbackframe.h"
 #include "transactionrollbackokframe.h"
-#include "consumedmessage.h"
 #include "bodyframe.h"
 #include "basicheaderframe.h"
 
