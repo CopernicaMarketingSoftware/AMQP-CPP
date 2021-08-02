@@ -1094,7 +1094,7 @@ channel.confirmSelect().onSuccess([&]() {
     // deliveryTag is message number
     // multiple is set to true, if all messages UP TO deliveryTag have been processed
 
-}).onNack([&](uint64 deliveryTag, bool multiple, bool requeue) {
+}).onNack([&](uint64_t deliveryTag, bool multiple, bool requeue) {
 
     // deliveryTag is message number
     // multiple is set to true, if all messages UP TO deliveryTag have not been processed
