@@ -102,7 +102,7 @@ int SSL_read(SSL *ssl, void *buf, int num)
 }
 
 /**
- *  Read data from an ssl socket
+ *  Write data to an ssl socket
  *  @param  ssl     ssl structure
  *  @param  buf     buffer to write
  *  @param  num     size of buffer
