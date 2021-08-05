@@ -18,6 +18,7 @@
  *  Dependencies
  */
 #include "openssl.h"
+#include <string>
 #include <memory>
 
 /**
