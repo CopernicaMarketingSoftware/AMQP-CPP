@@ -1,18 +1,13 @@
-CPP			= g++
-CPPFLAGS		= -Wall -c -I. -O0 -flto -std=c++17 -ggdb3
-LD			= g++
+CPP				= g++
+CPPFLAGS		= -Wall -I. -O3 -flto -std=c++17 -ggdb3
 LDFLAGS			= -lamqpcpp -lcopernica_event -lcopernica_network -lev -lpthread -ldl
-RESULT			= a.out
 SOURCES			= $(wildcard *.cpp)
-OBJECTS			= $(SOURCES:%.cpp=%.o)
+PROGRAMS		= $(SOURCES:%.cpp=%)
 
-all:	${OBJECTS} ${RESULT}
-
-${RESULT}: ${OBJECTS}
-	${LD} -o $@ ${OBJECTS} ${LDFLAGS}
+all:	${PROGRAMS}
 
 clean:
-	${RM} *.obj *~* ${OBJECTS} ${RESULT}
+	${RM} *~* ${PROGRAMS}
 
-${OBJECTS}:
-	${CPP} ${CPPFLAGS} -o $@ ${@:%.o=%.cpp}
+%: %.cpp
+	${CPP} $< ${CPPFLAGS} ${LDFLAGS} -o $@

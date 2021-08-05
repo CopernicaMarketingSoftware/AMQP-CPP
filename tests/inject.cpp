@@ -2,29 +2,50 @@
 #include <amqpcpp/libev.h>
 #include <iostream>
 #include <optional>
+#include <random>
 
 #define TRACE std::cerr << __PRETTY_FUNCTION__ << " line " << __LINE__ << '\n'
 
 constexpr const char *gQueueName = "my_test_queue";
 
+std::vector<char> makeRandomMessage(const size_t size)
+{
+    std::vector<char> result;
+    result.reserve(size);
+    std::generate_n(std::back_inserter(result), size, []()
+    {
+        static std::random_device seed;
+        static std::mt19937 engine(seed());
+        static std::uniform_int_distribution<char> distribution('A', 'z');
+        return distribution(engine);
+    });
+    return result;
+}
+
 struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_from_this<MyHandler>
 {
     struct ev_loop *loop;
-    ev_timer *timer;
-    uint16_t prefetchCount;
     AMQP::TcpConnection *conn = nullptr;
     std::optional<AMQP::TcpChannel> channel;
-    std::string consumertag;
+    ev_idle idle;
+    size_t messageCount;
+    size_t messageSize;
+    size_t current = 0;
 
-    MyHandler(struct ev_loop *loop, ev_timer *timer, uint16_t prefetchCount) :
+    MyHandler(struct ev_loop *loop, size_t messageCount, size_t messageSize) :
         AMQP::LibEvHandler(loop),
         loop(loop),
-        timer(timer),
-        prefetchCount(prefetchCount)
+        messageCount(messageCount),
+        messageSize(messageSize)
     {
+        ev_idle_init(&idle, idlecallback);
+        idle.data = this;
     }
 
-    ~MyHandler() override = default;
+    ~MyHandler() override
+    {
+        ev_idle_stop(loop, &idle);
+    }
 
     void onAttached(AMQP::TcpConnection *connection) override
     {
@@ -67,27 +88,14 @@ struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_fr
         {
             if (auto self = weakself.lock()) self->conn->close();
         });
-        channel->setQos(prefetchCount);
-        channel->consume(gQueueName)
-            .onReceived([self = shared_from_this()](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered)
-            {
-                self->channel->reject(deliveryTag);
-            })
-            .onSuccess([self = shared_from_this()](const std::string &tag)
-            {
-                std::cerr << "consuming from queue now (tag: " << tag << ")\n";
-                self->consumertag = tag;
-            })
-            .onError([self = shared_from_this()](const char *message)
-            {
-                std::cerr << "failed to consume from queue: " << message << '\n';
-            });
+        std::cerr << "publishing " << messageCount << " messages each of size " << messageSize << " bytes to " << gQueueName << " ...\n";
+        ev_idle_start(loop, &idle);
     }
-    void onHeartbeat(AMQP::TcpConnection *connection) override
-    {
-        AMQP::LibEvHandler::onHeartbeat(connection);
-        TRACE;
-    }
+    // void onHeartbeat(AMQP::TcpConnection *connection) override
+    // {
+    //     AMQP::LibEvHandler::onHeartbeat(connection);
+    //     TRACE;
+    // }
     void onError(AMQP::TcpConnection *connection, const char *message) override
     {
         AMQP::LibEvHandler::onError(connection, message);
@@ -109,73 +117,48 @@ struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_fr
         TRACE;
     }
 
-    void onTimeout()
-    {
-        TRACE;
-        if (!channel) return;
-        channel->declareQueue(gQueueName, AMQP::durable)
-            .onSuccess([self = shared_from_this()](const std::string &name, uint32_t messagecount, uint32_t consumercount)
-            {
-                if (self->channel && messagecount == 0)
-                {
-                    std::cerr << "cancelling consumer\n";
-                    self->cancel();
-                }
-            })
-            .onError([self = shared_from_this()](const char *message)
-            {
-                std::cerr << "error declaring queue: " << message << '\n';
-                self->cancel();
-            });
-    }
-
-    void cancel()
-    {
-        std::cerr << "stopping timer\n";
-        ev_timer_stop(loop, timer);
-        std::cerr << "cancelling consumer\n";
-        if (consumertag.empty())
-        {
-            close();
-        }
-        else
-        {
-            channel->cancel(gQueueName).onFinalize([self = shared_from_this()]()
-            {
-                std::cerr << "consumer cancelled\n";
-                self->close();
-            });
-        }
-    }
-
     void close()
     {
         std::cerr << "closing channel\n";
         channel->close().onFinalize([self = shared_from_this()]()
         {
-            self->channel.reset();
             std::cerr << "channel closed\n";
             std::cerr << "closing connection\n";
             self->conn->close();
         });
     }
 
-    static void timercallback(struct ev_loop *loop, ev_timer *timer, int flags)
+    void onIdle()
     {
-        static_cast<MyHandler*>(timer->data)->onTimeout();
+        ev_idle_stop(loop, &idle);
+        for (size_t i = 0; i != 256; ++i, ++current)
+        {
+            if (current == messageCount)
+            {
+                channel->close().onFinalize([self = shared_from_this()]()
+                {
+                    std::cerr << "done publishing messages, closing connection\n";
+                    self->conn->close();
+                });
+                return;
+            }
+            const auto msg = makeRandomMessage(messageSize);
+            channel->publish("", gQueueName, msg.data(), msg.size());
+        }
+        ev_idle_start(loop, &idle);
     }
 
+    static void idlecallback(struct ev_loop *loop, ev_idle *idle, int flags)
+    {
+        static_cast<MyHandler*>(idle->data)->onIdle();
+    }
 };
 
 int main(const int argc, const char **argv)
 {
     const AMQP::Address address(argv[1]);
     auto *loop = ev_default_loop();
-    ev_timer timer;
-    ev_timer_init(&timer, MyHandler::timercallback, 5.0, 5.0);
-    auto handler = std::make_shared<MyHandler>(loop, &timer, static_cast<uint16_t>(std::atoi(argv[2])));
-    timer.data = handler.get();
-    ev_timer_start(loop, &timer);
+    auto handler = std::make_shared<MyHandler>(loop, std::atoi(argv[2]), std::atoi(argv[3]));
     AMQP::TcpConnection connection(handler.get(), address);
     ev_run(loop);
     return EXIT_SUCCESS;
