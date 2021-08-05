@@ -6,8 +6,6 @@
 
 #define TRACE std::cerr << __PRETTY_FUNCTION__ << " line " << __LINE__ << '\n'
 
-constexpr const char *gQueueName = "my_test_queue";
-
 std::vector<char> makeRandomMessage(const size_t size)
 {
     std::vector<char> result;
@@ -30,13 +28,15 @@ struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_fr
     ev_idle idle;
     size_t messageCount;
     size_t messageSize;
+    const char *queueName;
     size_t current = 0;
 
-    MyHandler(struct ev_loop *loop, size_t messageCount, size_t messageSize) :
+    MyHandler(struct ev_loop *loop, size_t messageCount, size_t messageSize, const char *queueName) :
         AMQP::LibEvHandler(loop),
         loop(loop),
         messageCount(messageCount),
-        messageSize(messageSize)
+        messageSize(messageSize),
+        queueName(queueName)
     {
         ev_idle_init(&idle, idlecallback);
         idle.data = this;
@@ -88,7 +88,7 @@ struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_fr
         {
             if (auto self = weakself.lock()) self->conn->close();
         });
-        std::cerr << "publishing " << messageCount << " messages each of size " << messageSize << " bytes to " << gQueueName << " ...\n";
+        std::cerr << "publishing " << messageCount << " messages each of size " << messageSize << " bytes to " << queueName << " ...\n";
         ev_idle_start(loop, &idle);
     }
     // void onHeartbeat(AMQP::TcpConnection *connection) override
@@ -100,6 +100,7 @@ struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_fr
     {
         AMQP::LibEvHandler::onError(connection, message);
         TRACE;
+        std::cerr << "connection error: " << message << '\n';
     }
     void onClosed(AMQP::TcpConnection *connection) override
     {
@@ -143,7 +144,7 @@ struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_fr
                 return;
             }
             const auto msg = makeRandomMessage(messageSize);
-            channel->publish("", gQueueName, msg.data(), msg.size());
+            channel->publish("", queueName, msg.data(), msg.size());
         }
         ev_idle_start(loop, &idle);
     }
@@ -156,9 +157,10 @@ struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_fr
 
 int main(const int argc, const char **argv)
 {
+    OPENSSL_init_ssl(0, nullptr);
     const AMQP::Address address(argv[1]);
     auto *loop = ev_default_loop();
-    auto handler = std::make_shared<MyHandler>(loop, std::atoi(argv[2]), std::atoi(argv[3]));
+    auto handler = std::make_shared<MyHandler>(loop, std::atoi(argv[2]), std::atoi(argv[3]), argv[4]);
     AMQP::TcpConnection connection(handler.get(), address);
     ev_run(loop);
     return EXIT_SUCCESS;

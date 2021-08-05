@@ -5,22 +5,22 @@
 
 #define TRACE std::cerr << __PRETTY_FUNCTION__ << " line " << __LINE__ << '\n'
 
-constexpr const char *gQueueName = "my_test_queue";
-
 struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_from_this<MyHandler>
 {
     struct ev_loop *loop;
     ev_timer *timer;
     uint16_t prefetchCount;
+    const char *queueName;
     AMQP::TcpConnection *conn = nullptr;
     std::optional<AMQP::TcpChannel> channel;
     std::string consumertag;
 
-    MyHandler(struct ev_loop *loop, ev_timer *timer, uint16_t prefetchCount) :
+    MyHandler(struct ev_loop *loop, ev_timer *timer, uint16_t prefetchCount, const char *queueName) :
         AMQP::LibEvHandler(loop),
         loop(loop),
         timer(timer),
-        prefetchCount(prefetchCount)
+        prefetchCount(prefetchCount),
+        queueName(queueName)
     {
     }
 
@@ -68,26 +68,26 @@ struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_fr
             if (auto self = weakself.lock()) self->conn->close();
         });
         channel->setQos(prefetchCount);
-        channel->consume(gQueueName)
+        channel->consume(queueName)
             .onReceived([self = shared_from_this()](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered)
             {
                 self->channel->reject(deliveryTag);
             })
             .onSuccess([self = shared_from_this()](const std::string &tag)
             {
-                std::cerr << "consuming from queue now (tag: " << tag << ")\n";
+                std::cerr << "consuming from queue \"" << self->queueName << "\" now (tag: " << tag << ")\n";
                 self->consumertag = tag;
             })
             .onError([self = shared_from_this()](const char *message)
             {
-                std::cerr << "failed to consume from queue: " << message << '\n';
+                std::cerr << "failed to consume from queue \"" << self->queueName << "\": " << message << '\n';
             });
     }
-    void onHeartbeat(AMQP::TcpConnection *connection) override
-    {
-        AMQP::LibEvHandler::onHeartbeat(connection);
-        TRACE;
-    }
+    // void onHeartbeat(AMQP::TcpConnection *connection) override
+    // {
+    //     AMQP::LibEvHandler::onHeartbeat(connection);
+    //     TRACE;
+    // }
     void onError(AMQP::TcpConnection *connection, const char *message) override
     {
         AMQP::LibEvHandler::onError(connection, message);
@@ -113,7 +113,13 @@ struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_fr
     {
         TRACE;
         if (!channel) return;
-        channel->declareQueue(gQueueName, AMQP::durable)
+
+        AMQP::Table properties;
+        properties["x-dead-letter-exchange"] = "";
+        properties["x-dead-letter-routing-key"] = "in";
+        properties["x-queue-mode"] = "lazy";
+
+        channel->declareQueue(queueName, AMQP::durable, properties)
             .onSuccess([self = shared_from_this()](const std::string &name, uint32_t messagecount, uint32_t consumercount)
             {
                 if (self->channel && messagecount == 0)
@@ -140,7 +146,7 @@ struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_fr
         }
         else
         {
-            channel->cancel(gQueueName).onFinalize([self = shared_from_this()]()
+            channel->cancel(queueName).onFinalize([self = shared_from_this()]()
             {
                 std::cerr << "consumer cancelled\n";
                 self->close();
@@ -169,11 +175,12 @@ struct MyHandler final : public AMQP::LibEvHandler, public std::enable_shared_fr
 
 int main(const int argc, const char **argv)
 {
+    OPENSSL_init_ssl(0, nullptr);
     const AMQP::Address address(argv[1]);
     auto *loop = ev_default_loop();
     ev_timer timer;
     ev_timer_init(&timer, MyHandler::timercallback, 5.0, 5.0);
-    auto handler = std::make_shared<MyHandler>(loop, &timer, static_cast<uint16_t>(std::atoi(argv[2])));
+    auto handler = std::make_shared<MyHandler>(loop, &timer, static_cast<uint16_t>(std::atoi(argv[2])), argv[3]);
     timer.data = handler.get();
     ev_timer_start(loop, &timer);
     AMQP::TcpConnection connection(handler.get(), address);
