@@ -20,6 +20,9 @@
 #include "endian.h"
 #include "frame.h"
 
+#include <ostream>
+#include <iomanip>
+
 /**
  *  Set up namespace
  */
@@ -49,6 +52,12 @@ private:
      */
     size_t _size = 0;
 
+    /**
+     *  Whether the frame is synchronous
+     *  @var bool
+     */
+    bool _synchronous = false;
+
 
 protected:
     /**
@@ -72,7 +81,8 @@ public:
      */
     CopiedBuffer(const Frame &frame) :
         _capacity(frame.totalSize()),
-        _buffer((char *)malloc(_capacity)) 
+        _buffer((char *)malloc(_capacity)),
+        _synchronous(frame.synchronous())
     {
         // tell the frame to fill this buffer
         frame.fill(*this);
@@ -94,7 +104,8 @@ public:
     CopiedBuffer(CopiedBuffer &&that) :
         _capacity(that._capacity),
         _buffer(that._buffer),
-        _size(that._size)
+        _size(that._size),
+        _synchronous(that._synchronous)
     {
         // reset the other object
         that._buffer = nullptr;
@@ -129,6 +140,27 @@ public:
     {
         // expose member
         return _size;
+    }
+
+    /**
+     *  Whether the frame is to be sent synchronously
+     *  @return bool
+     */
+    bool synchronous() const noexcept
+    {
+        // expose member
+        return _synchronous;
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const CopiedBuffer &buffer)
+    {
+        os << "<CopiedBuffer, synchronous = " << buffer._synchronous << ", size = " << buffer._size;
+        if (0 < buffer._size && buffer._size < 128)
+        {
+            os << ", content: ";
+            for (size_t i = 0; i != buffer._size; ++i) os << std::hex << std::setfill('0') << std::setw(2) << static_cast<unsigned>(buffer._buffer[i]) << ' ';
+        }
+        return os << '>';
     }
 };
 

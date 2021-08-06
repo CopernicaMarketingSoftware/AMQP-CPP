@@ -38,6 +38,8 @@
 #include "basicrejectframe.h"
 #include "basicgetframe.h"
 
+#include <iostream>
+
 /**
  *  Set up namespace
  */
@@ -748,20 +750,28 @@ bool ChannelImpl::send(CopiedBuffer &&frame)
     // other frames waiting for their turn to be sent?
     if (waiting())
     {
+        // std::cerr << "we are in synchronous mode, so we must await a server response before sending this frame of size: " << frame.size() << '\n';
+
         // we need to wait until the synchronous frame has
         // been processed, so queue the frame until it was
-        _queue.emplace(false, std::move(frame));
+        _queue.emplace(std::move(frame));
 
         // it was of course not actually sent but we pretend
         // that it was, because no error occured
         return true;
     }
 
+    // std::cerr << "we are in asynchronous mode, so we can try sending this frame of size: " << frame.size() << '\n';
+
     // send to tcp connection
     if (!_connection->send(std::move(frame))) return false;
     
-    // frame was sent, a copied buffer cannot be synchronous
-    _synchronous = false;
+    // auto wassynchronous = _synchronous;
+
+    // frame was sent, if this was a synchronous frame, we now have to wait
+    _synchronous = frame.synchronous();
+
+    // if (wassynchronous != _synchronous) std::cerr << "synchronous state change: " << std::boolalpha << wassynchronous << " -> " << _synchronous << '\n';
     
     // done
     return true;
@@ -787,20 +797,28 @@ bool ChannelImpl::send(const Frame &frame)
     // other frames waiting for their turn to be sent?
     if (waiting())
     {
+        // std::cerr << "we are in synchronous mode, so we must await a server response before sending this frame of size: " << frame.totalSize() << '\n';
+
         // we need to wait until the synchronous frame has
         // been processed, so queue the frame until it was
-        _queue.emplace(frame.synchronous(), frame);
+        _queue.emplace(frame);
 
         // it was of course not actually sent but we pretend
         // that it was, because no error occured
         return true;
     }
 
+    // std::cerr << "we are in asynchronous mode, so we can try sending this frame of size: " << frame.totalSize() << '\n';
+
     // send to tcp connection
     if (!_connection->send(frame)) return false;
+
+    // auto wassynchronous = _synchronous;
     
     // frame was sent, if this was a synchronous frame, we now have to wait
     _synchronous = frame.synchronous();
+
+    // if (wassynchronous != _synchronous) std::cerr << "synchronous state change: " << std::boolalpha << wassynchronous << " -> " << _synchronous << '\n';
     
     // done
     return true;
@@ -823,6 +841,7 @@ uint32_t ChannelImpl::maxPayload() const
  */
 void ChannelImpl::flush()
 {
+    // std::cerr << "FLUSH start\n";
     // we are no longer waiting for synchronous operations
     _synchronous = false;
 
@@ -832,21 +851,25 @@ void ChannelImpl::flush()
     // send all frames while not in synchronous mode
     while (_connection && !_synchronous && !_queue.empty())
     {
-        // retrieve the first buffer and synchronous
-        auto &pair = _queue.front();
-
-        // mark as synchronous if necessary
-        _synchronous = pair.first;
-
-        // send it over the connection
-        _connection->send(std::move(pair.second));
-
-        // the user space handler may have destructed this channel object
-        if (!monitor.valid()) return;
+        // retrieve the front item
+        auto buffer = std::move(_queue.front());
 
         // remove from the list
         _queue.pop();
+
+        // mark as synchronous if necessary
+        _synchronous = buffer.synchronous();
+
+        // std::cerr << "sending " << buffer << '\n';
+
+        // send it over the connection
+        _connection->send(std::move(buffer));
+
+        // the user space handler may have destructed this channel object
+        if (!monitor.valid()) return;
     }
+
+//     std::cerr << "FLUSH end\n";
 }
 
 /**

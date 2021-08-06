@@ -133,7 +133,7 @@ private:
      *
      *  @var std::queue
      */
-    std::queue<std::pair<bool, CopiedBuffer>> _queue;
+    std::queue<CopiedBuffer> _queue;
 
     /**
      *  Are we currently operating in synchronous mode? Meaning: do we first have
