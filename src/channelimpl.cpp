@@ -757,14 +757,14 @@ bool ChannelImpl::send(CopiedBuffer &&frame)
         return true;
     }
 
+    // is this a synchronous frame?
+    bool syncframe = frame.synchronous();
+
     // send to tcp connection
     if (!_connection->send(std::move(frame))) return false;
     
-    // auto wassynchronous = _synchronous;
-
     // frame was sent, if this was a synchronous frame, we now have to wait
-    _synchronous = frame.synchronous();
-
+    _synchronous = syncframe;
     
     // done
     return true;
