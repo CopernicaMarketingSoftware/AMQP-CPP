@@ -20,9 +20,6 @@
 #include "endian.h"
 #include "frame.h"
 
-#include <ostream>
-#include <iomanip>
-
 /**
  *  Set up namespace
  */
@@ -150,17 +147,6 @@ public:
     {
         // expose member
         return _synchronous;
-    }
-
-    friend std::ostream &operator<<(std::ostream &os, const CopiedBuffer &buffer)
-    {
-        os << "<CopiedBuffer, synchronous = " << buffer._synchronous << ", size = " << buffer._size;
-        if (0 < buffer._size && buffer._size < 128)
-        {
-            os << ", content: ";
-            for (size_t i = 0; i != buffer._size; ++i) os << std::hex << std::setfill('0') << std::setw(2) << static_cast<unsigned>(buffer._buffer[i]) << ' ';
-        }
-        return os << '>';
     }
 };
 
