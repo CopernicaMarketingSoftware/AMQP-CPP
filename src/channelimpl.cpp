@@ -750,18 +750,21 @@ bool ChannelImpl::send(CopiedBuffer &&frame)
     {
         // we need to wait until the synchronous frame has
         // been processed, so queue the frame until it was
-        _queue.emplace(false, std::move(frame));
+        _queue.emplace(std::move(frame));
 
         // it was of course not actually sent but we pretend
         // that it was, because no error occured
         return true;
     }
 
+    // is this a synchronous frame?
+    bool syncframe = frame.synchronous();
+
     // send to tcp connection
     if (!_connection->send(std::move(frame))) return false;
     
-    // frame was sent, a copied buffer cannot be synchronous
-    _synchronous = false;
+    // frame was sent, if this was a synchronous frame, we now have to wait
+    _synchronous = syncframe;
     
     // done
     return true;
@@ -789,7 +792,7 @@ bool ChannelImpl::send(const Frame &frame)
     {
         // we need to wait until the synchronous frame has
         // been processed, so queue the frame until it was
-        _queue.emplace(frame.synchronous(), frame);
+        _queue.emplace(frame);
 
         // it was of course not actually sent but we pretend
         // that it was, because no error occured
@@ -798,7 +801,7 @@ bool ChannelImpl::send(const Frame &frame)
 
     // send to tcp connection
     if (!_connection->send(frame)) return false;
-    
+
     // frame was sent, if this was a synchronous frame, we now have to wait
     _synchronous = frame.synchronous();
     
@@ -821,7 +824,7 @@ uint32_t ChannelImpl::maxPayload() const
  *  Signal the channel that a synchronous operation was completed. After 
  *  this operation, waiting frames can be sent out.
  */
-void ChannelImpl::flush()
+bool ChannelImpl::flush()
 {
     // we are no longer waiting for synchronous operations
     _synchronous = false;
@@ -832,21 +835,27 @@ void ChannelImpl::flush()
     // send all frames while not in synchronous mode
     while (_connection && !_synchronous && !_queue.empty())
     {
-        // retrieve the first buffer and synchronous
-        auto &pair = _queue.front();
-
-        // mark as synchronous if necessary
-        _synchronous = pair.first;
-
-        // send it over the connection
-        _connection->send(std::move(pair.second));
-
-        // the user space handler may have destructed this channel object
-        if (!monitor.valid()) return;
+        // retrieve the front item
+        auto buffer = std::move(_queue.front());
 
         // remove from the list
         _queue.pop();
+
+        // is this a synchronous frame?
+        bool syncframe = buffer.synchronous();
+
+        // send to tcp connection
+        if (!_connection->send(std::move(buffer))) return false;
+
+        // the user space handler may have destructed this channel object
+        if (!monitor.valid()) return true;
+
+        // frame was sent, if this was a synchronous frame, we now have to wait
+        _synchronous = syncframe;
     }
+
+    // done
+    return true;
 }
 
 /**

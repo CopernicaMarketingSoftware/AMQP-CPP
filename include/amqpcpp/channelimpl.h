@@ -133,7 +133,7 @@ private:
      *
      *  @var std::queue
      */
-    std::queue<std::pair<bool, CopiedBuffer>> _queue;
+    std::queue<CopiedBuffer> _queue;
 
     /**
      *  Are we currently operating in synchronous mode? Meaning: do we first have
@@ -609,8 +609,9 @@ public:
     /**
      *  Signal the channel that a synchronous operation was completed, and that any
      *  queued frames can be sent out.
+     *  @return false if an error on the connection level occurred, true if not
      */
-    void flush();
+    bool flush();
 
     /**
      *  Report to the handler that the channel is opened
