@@ -108,13 +108,13 @@ public:
      *  No copying, because that would be too expensive
      *  @param  that
      */
-    PassthroughBuffer(const CopiedBuffer &that) = delete;
+    PassthroughBuffer(const PassthroughBuffer &that) = delete;
 
     /**
      *  Moving is also not necessary
      *  @param  that
      */
-    PassthroughBuffer(CopiedBuffer &&that) = delete;
+    PassthroughBuffer(PassthroughBuffer &&that) = delete;
     
     /**
      *  Destructor
