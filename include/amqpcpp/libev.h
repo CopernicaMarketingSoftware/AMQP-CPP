@@ -254,9 +254,11 @@ private:
             {
                 // the server was inactive for a too long period of time, reset state
                 _next = _expire = 0.0; _timeout = 0;
-                
+
+                ev_timer_stop(_loop, &_timer);
+
                 // close the connection because server was inactive
-                return (void)_connection->close();
+                return (void)_connection->close(true);
             }
             else if (now >= _next)
             {
