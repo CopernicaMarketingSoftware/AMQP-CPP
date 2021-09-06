@@ -269,7 +269,7 @@ private:
             }
             
             // reset the timer to trigger again later
-            _timer.repeat = std::min(_next, _expire) - now;
+            ev_timer_set(&_timer, std::min(_next, _expire) - now, 0.0);
             
             // restart the timer
             ev_timer_again(_loop, &_timer);
@@ -366,7 +366,7 @@ private:
             _expire = now + _timeout * 1.5;
 
             // find the earliest thing that expires
-            _timer.repeat = std::min(_next, _expire) - now;
+            ev_timer_set(&_timer, std::min(_next, _expire) - now, 0.0);
             
             // restart the timer
             ev_timer_again(_loop, &_timer);
