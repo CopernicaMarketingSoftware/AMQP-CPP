@@ -129,7 +129,7 @@ library that the library can use for IO. So, before you start using the
 library, you first need to create a class that extends from the
 ConnectionHandler base class. This is a class with a number of methods that are
 called by the library every time it wants to send out data, or when it needs to
-inform you that an error occured.
+inform you that an error occurred.
 
 ````c++
 #include <amqpcpp.h>
@@ -170,7 +170,7 @@ class MyConnectionHandler : public AMQP::ConnectionHandler
      *  Method that is called by the AMQP library when a fatal error occurs
      *  on the connection, for example because data received from RabbitMQ
      *  could not be recognized.
-     *  @param  connection      The connection on which the error occured
+     *  @param  connection      The connection on which the error occurred
      *  @param  message         A human readable error message
      */
     virtual void onError(AMQP::Connection *connection, const char *message)
@@ -354,7 +354,7 @@ class MyTcpHandler : public AMQP::TcpHandler
      *  Method that is called when the secure TLS connection has been established. 
      *  This is only called for amqps:// connections. It allows you to inspect
      *  whether the connection is secure enough for your liking (you can
-     *  for example check the server certicate). The AMQP protocol still has
+     *  for example check the server certificate). The AMQP protocol still has
      *  to be started.
      *  @param  connection      The connection that has been secured
      *  @param  ssl             SSL structure from openssl library
@@ -384,9 +384,9 @@ class MyTcpHandler : public AMQP::TcpHandler
      *  Method that is called by the AMQP library when a fatal error occurs
      *  on the connection, for example because data received from RabbitMQ
      *  could not be recognized, or the underlying connection is lost. This
-     *  call is normally followed by a call to onLost() (if the error occured
+     *  call is normally followed by a call to onLost() (if the error occurred
      *  after the TCP connection was established) and onDetached().
-     *  @param  connection      The connection on which the error occured
+     *  @param  connection      The connection on which the error occurred
      *  @param  message         A human readable error message
      */
     virtual void onError(AMQP::TcpConnection *connection, const char *message) override
@@ -684,7 +684,7 @@ class MyTcpHandler : public AMQP::TcpHandler
      *  interval, and that is overridden to get rid of the default implementation
      *  (which vetoes the suggested heartbeat interval), and accept the interval
      *  instead.
-     *  @param  connection      The connection on which the error occured
+     *  @param  connection      The connection on which the error occurred
      *  @param  interval        The suggested interval in seconds
      */
     virtual uint16_t onNegotiate(AMQP::TcpConnection *connection, uint16_t interval)
@@ -742,7 +742,7 @@ For example, if you call the channel.declareExchange() method, the AMQP-CPP libr
 will send a message to the RabbitMQ message broker to ask it to declare the
 queue. However, because all operations in the library are asynchronous, the
 declareExchange() method can not return 'true' or 'false' to inform you whether
-the operation was succesful or not. Only after a while, after the instruction
+the operation was successful or not. Only after a while, after the instruction
 has reached the RabbitMQ server, and the confirmation from the server has been
 sent back to the client, the library can report the result of the declareExchange()
 call.
@@ -794,7 +794,7 @@ install callbacks using the Deferred::onError() and Deferred::onSuccess() method
 
 The callbacks that you install on a Deferred object, only apply to one specific
 operation. If you want to install a generic error callback for the entire channel,
-you can so so by using the Channel::onError() method. Next to the Channel::onError()
+you can do so by using the Channel::onError() method. Next to the Channel::onError()
 method, you can also install a callback to be notified when the channel is ready
 for sending the first instruction to RabbitMQ.
 
@@ -1135,7 +1135,7 @@ reliable.publish("my-exchange", "my-key", "my first message").onAck([]() {
 
 }).onError([](const char *message) {
 
-    // a channel-error occured before any ack or nack was received, and the 
+    // a channel-error occurred before any ack or nack was received, and the 
     // message is probably lost too (which you want to handle)
 
 }).onLost([]() {
