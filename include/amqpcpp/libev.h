@@ -271,9 +271,6 @@ private:
             // reset the timer to trigger again later
             ev_timer_set(&_timer, std::min(_next, _expire) - now, 0.0);
             
-            // restart the timer
-            ev_timer_again(_loop, &_timer);
-            
             // and because the timer is running again, we restore the refcounter
             ev_unref(_loop);
         }
@@ -367,9 +364,6 @@ private:
 
             // find the earliest thing that expires
             ev_timer_set(&_timer, std::min(_next, _expire) - now, 0.0);
-            
-            // restart the timer
-            ev_timer_again(_loop, &_timer);
             
             // expose the accepted interval
             return _timeout;
