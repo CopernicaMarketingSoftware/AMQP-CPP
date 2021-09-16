@@ -267,9 +267,12 @@ private:
                 // sent only after _timout/2 seconds again _from now_ (no catching up)
                 _next = now + std::max(_timeout / 2, 1);
             }
-            
+
             // reset the timer to trigger again later
             ev_timer_set(&_timer, std::min(_next, _expire) - now, 0.0);
+
+            // and start it again
+            ev_timer_start(_loop, &_timer);
             
             // and because the timer is running again, we restore the refcounter
             ev_unref(_loop);
