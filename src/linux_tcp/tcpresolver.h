@@ -120,6 +120,12 @@ private:
 
                 // turn socket into a non-blocking socket and set the close-on-exec bit
                 fcntl(_socket, F_SETFL, O_NONBLOCK | O_CLOEXEC);
+                
+                // we set the 'keepalive' option so that we automatically detect if the peer is dead
+                int keepalive = 1;
+                
+                // set the keepalive option
+                setsockopt(_socket, SOL_SOCKET, SO_KEEPALIVE, &keepalive, sizeof(keepalive));
 
                 // try to connect non-blocking
                 if (connect(_socket, addresses[i]->ai_addr, addresses[i]->ai_addrlen) == 0) break;
