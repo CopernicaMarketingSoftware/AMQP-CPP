@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
 project(amqpcpp)
 set (VERSION_MAJOR 4)
 set (VERSION_MINOR 3)
-set (VERSION_PATCH 12)
+set (VERSION_PATCH 15)
 set (SO_VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
 
 # build options
