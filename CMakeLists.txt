@@ -92,33 +92,35 @@ endif()
 # install rules
 # ------------------------------------------------------------------------------------------------------
 
+include(GNUInstallDirs)
+
 if(AMQP-CPP_BUILD_SHARED)
     # copy shared lib and its static counter part
     install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
-            ARCHIVE DESTINATION lib
-            LIBRARY DESTINATION lib
-            RUNTIME DESTINATION lib
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
 else()
     # copy static lib
     install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
-            ARCHIVE DESTINATION lib
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
 endif()
 
 # copy header files
-install(DIRECTORY include/amqpcpp/ DESTINATION include/amqpcpp
+install(DIRECTORY include/amqpcpp/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/amqpcpp"
         FILES_MATCHING PATTERN "*.h")
-install(FILES include/amqpcpp.h DESTINATION include)
+install(FILES include/amqpcpp.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-install(EXPORT ${PROJECT_NAME}Config DESTINATION cmake)
+install(EXPORT ${PROJECT_NAME}Config DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/amqpcpp")
 export(TARGETS ${PROJECT_NAME} FILE ${PROJECT_NAME}Config.cmake)
 
 set(DEST_DIR "${CMAKE_INSTALL_PREFIX}")
 set(PRIVATE_LIBS "-llibamqpcc")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/amqpcpp.pc" @ONLY)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/amqpcpp.pc" DESTINATION lib/pkgconfig)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/amqpcpp.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
 # submodule support
 # ------------------------------------------------------------------------------------------------------
