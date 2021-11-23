@@ -285,12 +285,12 @@ Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType typ
     const char *exchangeType = "";
     
     // convert the exchange type into a string
-    if      (type == ExchangeType::fanout)          exchangeType = "fanout";
-    else if (type == ExchangeType::direct)          exchangeType = "direct";
-    else if (type == ExchangeType::topic)           exchangeType = "topic";
-    else if (type == ExchangeType::headers)         exchangeType = "headers";
-    else if (type == ExchangeType::consistent_hash) exchangeType = "x-consistent-hash";
-    else if (type == ExchangeType::consistent_hash) exchangeType = "x-message-deduplication";
+    if      (type == ExchangeType::fanout)                exchangeType = "fanout";
+    else if (type == ExchangeType::direct)                exchangeType = "direct";
+    else if (type == ExchangeType::topic)                 exchangeType = "topic";
+    else if (type == ExchangeType::headers)               exchangeType = "headers";
+    else if (type == ExchangeType::consistent_hash)       exchangeType = "x-consistent-hash";
+    else if (type == ExchangeType::message_deduplication) exchangeType = "x-message-deduplication";
 
     // the boolean options
     bool passive = (flags & AMQP::passive) != 0;
