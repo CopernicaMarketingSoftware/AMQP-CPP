@@ -290,6 +290,7 @@ Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType typ
     else if (type == ExchangeType::topic)           exchangeType = "topic";
     else if (type == ExchangeType::headers)         exchangeType = "headers";
     else if (type == ExchangeType::consistent_hash) exchangeType = "x-consistent-hash";
+    else if (type == ExchangeType::consistent_hash) exchangeType = "x-message-deduplication";
 
     // the boolean options
     bool passive = (flags & AMQP::passive) != 0;
