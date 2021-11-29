@@ -531,10 +531,10 @@ protected:
      *  @param  interval        The suggested interval from the server
      *  @return uint16_t        The interval to use
      */
-    /* THIS IS DISABLED FOR NOW BECAUSE THIS BREAKS IF THERE IS MORE THAN ONE CONNECTION */
-    /*
     virtual uint16_t onNegotiate(TcpConnection *connection, uint16_t interval) override
     {
+        /* THIS IS DISABLED FOR NOW BECAUSE THIS BREAKS IF THERE IS MORE THAN ONE CONNECTION */
+        /*
         // skip if no heartbeats are needed
         if (interval == 0) return 0;
 
@@ -543,8 +543,13 @@ protected:
 
         // we agree with the interval
         return interval;
+        */
+
+        (void)connection;
+        (void)interval;
+
+        return 0;
     }
-    */
 
 public:
 
