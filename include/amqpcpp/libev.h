@@ -460,19 +460,19 @@ private:
         return _wrappers.back();
     }
 
+protected:
     /**
      *  Method that is called by AMQP-CPP to register a filedescriptor for readability or writability
      *  @param  connection  The TCP connection object that is reporting
      *  @param  fd          The filedescriptor to be monitored
      *  @param  flags       Should the object be monitored for readability or writability?
      */
-    virtual void monitor(TcpConnection *connection, int fd, int flags) override final
+    virtual void monitor(TcpConnection *connection, int fd, int flags) override
     {
         // lookup the appropriate wrapper and start monitoring
         lookup(connection).monitor(fd, flags);
     }
 
-protected:
     /**
      *  Method that is called when the heartbeat timeout is negotiated between the server and the client. 
      *  @param  connection      The connection that suggested a heartbeat timeout
