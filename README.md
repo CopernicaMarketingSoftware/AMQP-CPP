@@ -1133,16 +1133,16 @@ reliable.publish("my-exchange", "my-key", "my first message").onAck([]() {
     // the message has _explicitly_ been nack'ed by RabbitMQ (in your application
     // code you probably want to log or handle this to avoid data-loss)
 
-}).onError([](const char *message) {
-
-    // a channel-error occurred before any ack or nack was received, and the 
-    // message is probably lost too (which you want to handle)
-
 }).onLost([]() {
 
     // because the implementation for onNack() and onError() will be the same
     // in many applications, you can also choose to install a onLost() handler,
     // which is called when the message has either been nack'ed, or lost.
+
+}).onError([](const char *message) {
+
+    // a channel-error occurred before any ack or nack was received, and the 
+    // message is probably lost (which you might want to handle)
 
 });
 
