@@ -77,9 +77,9 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    void onReady(const SuccessCallback &callback)
+    void onReady(SuccessCallback&&callback)
     {
-        _implementation->onReady(callback);
+        _implementation->onReady(std::move(callback));
     }
 
     /**
@@ -90,9 +90,9 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    void onError(const ErrorCallback &callback)
+    void onError(ErrorCallback&&callback)
     {
-        _implementation->onError(callback);
+        _implementation->onError(std::move(callback));
     }
 
     /**

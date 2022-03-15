@@ -935,7 +935,7 @@ auto callback = [](const std::string &name, int msgcount, int consumercount) {
 };
 
 // declare the queue, and install the callback that is called on success
-channel.declareQueue("myQueue").onSuccess(callback);
+channel.declareQueue("myQueue").onSuccess(std::move(callback));
 ````
 
 Just like many others methods in the Channel class, the declareQueue() method

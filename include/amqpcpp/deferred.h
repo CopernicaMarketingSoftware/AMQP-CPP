@@ -243,10 +243,10 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    Deferred &onSuccess(const SuccessCallback &callback)
+    Deferred &onSuccess(SuccessCallback&&callback)
     {
         // store callback
-        _successCallback = callback;
+        _successCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -262,10 +262,10 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    Deferred &onError(const ErrorCallback &callback)
+    Deferred &onError(ErrorCallback&&callback)
     {
         // store callback
-        _errorCallback = callback;
+        _errorCallback = std::move(callback);
 
         // if the object is already in a failed state, we call the callback right away
         if (_failed) callback("Frame could not be sent");
@@ -289,13 +289,13 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    Deferred &onFinalize(const FinalizeCallback &callback)
+    Deferred &onFinalize(FinalizeCallback&&callback)
     {
         // if the object is already in a failed state, we call the callback right away
         if (_failed) callback();
 
         // otherwise we store callback until it's time for the call
-        else _finalizeCallback = callback;
+        else _finalizeCallback = std::move(callback);
 
         // allow chaining
         return *this;

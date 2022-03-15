@@ -65,10 +65,10 @@ ChannelImpl::~ChannelImpl()
  *
  *  @param  callback    the callback to execute
  */
-void ChannelImpl::onError(const ErrorCallback &callback)
+void ChannelImpl::onError(ErrorCallback&&callback)
 {
     // store callback
-    _errorCallback = callback;
+    _errorCallback = std::move(callback);
 
     // if the channel is usable, all is ok
     if (usable()) return;
