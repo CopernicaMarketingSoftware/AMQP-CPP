@@ -243,7 +243,8 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    Deferred &onSuccess(SuccessCallback&&callback)
+    inline Deferred &onSuccess(const SuccessCallback& callback) { return onSuccess(SuccessCallback(callback)); }
+    Deferred &onSuccess(SuccessCallback&& callback)
     {
         // store callback
         _successCallback = std::move(callback);
@@ -262,7 +263,8 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    Deferred &onError(ErrorCallback&&callback)
+    inline Deferred &onError(const ErrorCallback& callback) { return onError(ErrorCallback(callback)); }
+    Deferred &onError(ErrorCallback&& callback)
     {
         // store callback
         _errorCallback = std::move(callback);
@@ -289,7 +291,8 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    Deferred &onFinalize(FinalizeCallback&&callback)
+    inline Deferred &onFinalize(const FinalizeCallback& callback) { return onFinalize(FinalizeCallback(callback)); }
+    Deferred &onFinalize(FinalizeCallback&& callback)
     {
         // if the object is already in a failed state, we call the callback right away
         if (_failed) callback();

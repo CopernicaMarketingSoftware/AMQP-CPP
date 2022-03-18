@@ -182,7 +182,7 @@ Deferred &Tagger::close()
  *  Install an error callback
  *  @param  callback
  */
-void Tagger::onError(ErrorCallback&&callback)
+void Tagger::onError(ErrorCallback&& callback)
 {
     // we store the callback
     _errorCallback = std::move(callback);

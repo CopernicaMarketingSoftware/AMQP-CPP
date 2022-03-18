@@ -76,7 +76,8 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    DeferredQueue &onSuccess(QueueCallback&&callback)
+    inline DeferredQueue &onSuccess(const QueueCallback& callback) { return onSuccess(QueueCallback(callback)); }
+    DeferredQueue &onSuccess(QueueCallback&& callback)
     {
         // store callback
         _queueCallback = std::move(callback);
@@ -89,7 +90,8 @@ public:
      *  Register the function that is called when the queue is declared
      *  @param  callback
      */
-    DeferredQueue &onSuccess(SuccessCallback&&callback)
+    inline DeferredQueue &onSuccess(const SuccessCallback& callback) { return onSuccess(SuccessCallback(callback)); }
+    DeferredQueue &onSuccess(SuccessCallback&& callback)
     {
         // call base
         Deferred::onSuccess(std::move(callback));

@@ -76,7 +76,8 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    DeferredDelete &onSuccess(DeleteCallback&&callback)
+    inline DeferredDelete &onSuccess(const DeleteCallback& callback) { return onSuccess(DeleteCallback(callback)); }
+    DeferredDelete &onSuccess(DeleteCallback&& callback)
     {
         // store callback
         _deleteCallback = std::move(callback);
@@ -89,7 +90,8 @@ public:
      *  Register the function that is called when the queue is deleted or purged
      *  @param  callback
      */
-    DeferredDelete &onSuccess(SuccessCallback&&callback)
+    inline DeferredDelete &onSuccess(const SuccessCallback& callback) { return onSuccess(SuccessCallback(callback)); }
+    DeferredDelete &onSuccess(SuccessCallback&& callback)
     {
         // call base
         Deferred::onSuccess(std::move(callback));

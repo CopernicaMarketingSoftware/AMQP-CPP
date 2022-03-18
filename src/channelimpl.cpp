@@ -65,7 +65,7 @@ ChannelImpl::~ChannelImpl()
  *
  *  @param  callback    the callback to execute
  */
-void ChannelImpl::onError(ErrorCallback&&callback)
+void ChannelImpl::onError(ErrorCallback&& callback)
 {
     // store callback
     _errorCallback = std::move(callback);

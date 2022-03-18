@@ -74,7 +74,8 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    DeferredCancel &onSuccess(CancelCallback&&callback)
+    inline DeferredCancel &onSuccess(const CancelCallback& callback) { return onSuccess(CancelCallback(callback)); }
+    DeferredCancel &onSuccess(CancelCallback&& callback)
     {
         // store callback
         _cancelCallback = std::move(callback);
@@ -87,7 +88,8 @@ public:
      *  Register the function that is called when the cancel operation succeeded
      *  @param  callback
      */
-    DeferredCancel &onSuccess(SuccessCallback&&callback)
+    inline DeferredCancel &onSuccess(const SuccessCallback& callback) { return onSuccess(SuccessCallback(callback)); }
+    DeferredCancel &onSuccess(SuccessCallback&& callback)
     {
         // call base
         Deferred::onSuccess(std::move(callback));
