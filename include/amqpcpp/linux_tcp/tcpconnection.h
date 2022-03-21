@@ -205,7 +205,7 @@ public:
      *  @param  handler         User implemented handler object
      *  @param  hostname        The address to connect to
      */
-    TcpConnection(TcpHandler *handler, const Address &address);
+    TcpConnection(TcpHandler *handler, const Address &address, SSL_CTX *ctx = nullptr);
     
     /**
      *  No copying

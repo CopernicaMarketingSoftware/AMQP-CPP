@@ -24,9 +24,9 @@ namespace AMQP {
  *  @param  handler         User implemented handler object
  *  @param  hostname        The address to connect to
  */
-TcpConnection::TcpConnection(TcpHandler *handler, const Address &address) :
+TcpConnection::TcpConnection(TcpHandler *handler, const Address &address, SSL_CTX* ctx) :
     _handler(handler),
-    _state(new TcpResolver(this, address.hostname(), address.port(), address.secure(), address.option("connectTimeout", 5), ConnectionOrder(address.option("connectionOrder")))),
+    _state(new TcpResolver(this, address.hostname(), address.port(), address.secure(), address.option("connectTimeout", 5), ConnectionOrder(address.option("connectionOrder")), ctx)),
     _connection(this, address.login(), address.vhost()) 
 {
     // tell the handler

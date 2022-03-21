@@ -122,14 +122,15 @@ public:
      *  @param  buffer      The buffer that was already built
      *  @throws std::runtime_error
      */
-    SslHandshake(TcpExtState *state, const std::string &hostname, TcpOutBuffer &&buffer) : 
+    SslHandshake(TcpExtState *state, const std::string &hostname, TcpOutBuffer &&buffer, SSL_CTX* ctx) :
         TcpExtState(state),
-        _ctx(OpenSSL::TLS_client_method()),
+        _ctx(ctx ? SslContext(ctx) : SslContext(OpenSSL::TLS_client_method())),
         _ssl(_ctx),
         _out(std::move(buffer))
     {
-        // use the default directories for verifying certificates
-        OpenSSL::SSL_CTX_set_default_verify_paths(_ctx);
+        // set the context to accept a moving write buffer. note that SSL_CTX_set_mode is a macro
+        // that expands to SSL_CTX_ctrl, so that is the real function that is used
+        OpenSSL::SSL_set_mode(_ssl, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
 
         // we will be using the ssl context as a client
         OpenSSL::SSL_set_connect_state(_ssl);
