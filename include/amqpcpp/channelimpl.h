@@ -219,7 +219,7 @@ public:
         _readyCallback = std::move(callback);
 
         // direct call if channel is already ready
-        if (_state == state_ready && callback) callback();
+        if (_state == state_ready && _readyCallback) _readyCallback();
     }
 
     /**

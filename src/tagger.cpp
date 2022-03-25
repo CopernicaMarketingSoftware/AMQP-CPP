@@ -188,13 +188,13 @@ void Tagger::onError(ErrorCallback&& callback)
     _errorCallback = std::move(callback);
 
     // check the callback
-    if (!callback) return;
+    if (!_errorCallback) return;
 
     // if the channel is no longer usable, report that
-    if (!_implementation->usable()) return callback("Channel is no longer usable");
+    if (!_implementation->usable()) return _errorCallback("Channel is no longer usable");
 
     // specify that we're already closing
-    if (_close) callback("Wrapped channel is closing down");
+    if (_close) _errorCallback("Wrapped channel is closing down");
 }
 
 /**

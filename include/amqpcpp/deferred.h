@@ -270,7 +270,7 @@ public:
         _errorCallback = std::move(callback);
 
         // if the object is already in a failed state, we call the callback right away
-        if (_failed) callback("Frame could not be sent");
+        if (_failed) _errorCallback("Frame could not be sent");
 
         // allow chaining
         return *this;
