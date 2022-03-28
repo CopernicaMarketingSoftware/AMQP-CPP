@@ -122,9 +122,13 @@ public:
      *  @param  buffer      The buffer that was already built
      *  @throws std::runtime_error
      */
-    SslHandshake(TcpExtState *state, const std::string &hostname, TcpOutBuffer &&buffer, SSL_CTX* ctx) :
+    SslHandshake(TcpExtState *state, const std::string &hostname, TcpOutBuffer &&buffer) :
         TcpExtState(state),
-        _ctx(ctx ? SslContext(ctx) : SslContext(OpenSSL::TLS_client_method())),
+        _ctx([&] {
+            // allow userspace to provide SSL context, create default one if it didn't
+            auto context = _parent->onSecuring(this);
+            return context ? SslContext(context) : SslContext(OpenSSL::TLS_client_method());
+        }()),
         _ssl(_ctx),
         _out(std::move(buffer))
     {

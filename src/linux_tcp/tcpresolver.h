@@ -91,11 +91,6 @@ private:
      */
     ConnectionOrder _order;
 
-    /**
-     * Preconfigured SSL_CTX to use instead of creating a new one.
-     * @var SSL_CTX
-     */
-    SSL_CTX* _ctx;
 
     /**
      *  Run the thread
@@ -216,14 +211,13 @@ public:
      *  @param  timeout     timeout per connection attempt
      *  @param  order       How should we oreder the addresses of the host to connect to
      */
-    TcpResolver(TcpParent *parent, std::string hostname, uint16_t port, bool secure, int timeout, const ConnectionOrder &order, SSL_CTX* ctx) : 
+    TcpResolver(TcpParent *parent, std::string hostname, uint16_t port, bool secure, int timeout, const ConnectionOrder &order) : 
         TcpExtState(parent), 
         _hostname(std::move(hostname)),
         _secure(secure),
         _port(port),
         _timeout(timeout),
-        _order(order),
-        _ctx(ctx)
+        _order(order)
     {
         // tell the event loop to monitor the filedescriptor of the pipe
         parent->onIdle(this, _pipe.in(), readable);
@@ -272,7 +266,7 @@ public:
             if (!monitor.valid()) return nullptr;
             
             // if we need a secure connection, we move to the tls handshake (this could throw)
-            if (_secure) return new SslHandshake(this, std::move(_hostname), std::move(_buffer), _ctx);
+            if (_secure) return new SslHandshake(this, std::move(_hostname), std::move(_buffer));
             
             // otherwise we have a valid regular tcp connection
             else return new TcpConnected(this, std::move(_buffer));
