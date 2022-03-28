@@ -76,10 +76,11 @@ public:
      *  confirmed mode
      *  @param  callback
      */
-    DeferredConfirm &onSuccess(const SuccessCallback &callback)
+    inline DeferredConfirm &onSuccess(const SuccessCallback& callback) { return onSuccess(SuccessCallback(callback)); }
+    DeferredConfirm &onSuccess(SuccessCallback&& callback)
     {
         // call base
-        Deferred::onSuccess(callback);
+        Deferred::onSuccess(std::move(callback));
 
         // allow chaining
         return *this;
@@ -89,10 +90,11 @@ public:
      *  Callback that is called when the broker confirmed message publication
      *  @param  callback    the callback to execute
      */
-    DeferredConfirm &onAck(const AckCallback &callback)
+    inline DeferredConfirm &onAck(const AckCallback& callback) { return onAck(AckCallback(callback)); }
+    DeferredConfirm &onAck(AckCallback&& callback)
     {
         // store callback
-        _ackCallback = callback;
+        _ackCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -102,10 +104,11 @@ public:
      *  Callback that is called when the broker denied message publication
      *  @param  callback    the callback to execute
      */
-    DeferredConfirm &onNack(const NackCallback &callback)
+    inline DeferredConfirm &onNack(const NackCallback& callback) { return onNack(NackCallback(callback)); }
+    DeferredConfirm &onNack(NackCallback&& callback)
     {
         // store callback
-        _nackCallback = callback;
+        _nackCallback = std::move(callback);
 
         // allow chaining
         return *this;

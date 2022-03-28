@@ -65,34 +65,34 @@ ChannelImpl::~ChannelImpl()
  *
  *  @param  callback    the callback to execute
  */
-void ChannelImpl::onError(const ErrorCallback &callback)
+void ChannelImpl::onError(ErrorCallback&& callback)
 {
     // store callback
-    _errorCallback = callback;
+    _errorCallback = std::move(callback);
 
     // if the channel is usable, all is ok
     if (usable()) return;
 
     // validity check
-    if (!callback) return;
+    if (!_errorCallback) return;
 
     // is the channel closing down?
-    if (_state == state_closing) return callback("Channel is closing down");
+    if (_state == state_closing) return _errorCallback("Channel is closing down");
 
     // the channel is closed, but what is the connection doing?
-    if (_connection == nullptr) return callback("Channel is not linked to a connection");
+    if (_connection == nullptr) return _errorCallback("Channel is not linked to a connection");
     
     // if the connection is valid, this is a pure channel error
-    if (_connection->ready()) return callback("Channel is in an error state, but the connection is valid");
+    if (_connection->ready()) return _errorCallback("Channel is in an error state, but the connection is valid");
 
     // the connection is closing down
-    if (_connection->closing()) return callback("Channel is in an error state, the AMQP connection is closing down");
+    if (_connection->closing()) return _errorCallback("Channel is in an error state, the AMQP connection is closing down");
 
     // the connection is already closed
-    if (_connection->closed()) return callback("Channel is in an error state, the AMQP connection has been closed");
+    if (_connection->closed()) return _errorCallback("Channel is in an error state, the AMQP connection has been closed");
    
     // direct call if channel is already in error state
-    callback("Channel is in error state, something went wrong with the AMQP connection");
+    _errorCallback("Channel is in error state, something went wrong with the AMQP connection");
 }
 
 /**

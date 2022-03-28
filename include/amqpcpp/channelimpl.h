@@ -212,13 +212,14 @@ public:
      *  Callback that is called when the channel was succesfully created.
      *  @param  callback    the callback to execute
      */
-    void onReady(const SuccessCallback &callback)
+    inline void onReady(const SuccessCallback& callback) { return onReady(SuccessCallback(callback)); }
+    void onReady(SuccessCallback&& callback)
     {
         // store callback
-        _readyCallback = callback;
+        _readyCallback = std::move(callback);
 
         // direct call if channel is already ready
-        if (_state == state_ready && callback) callback();
+        if (_state == state_ready && _readyCallback) _readyCallback();
     }
 
     /**
@@ -229,7 +230,8 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    void onError(const ErrorCallback &callback);
+    inline void onError(const ErrorCallback& callback) { return onError(ErrorCallback(callback)); }
+    void onError(ErrorCallback&& callback);
 
     /**
      *  Pause deliveries on a channel

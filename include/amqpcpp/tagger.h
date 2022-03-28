@@ -136,7 +136,8 @@ public:
      *  Install an error callback
      *  @param  callback
      */
-    void onError(const ErrorCallback &callback);
+    inline void onError(const ErrorCallback& callback) { return onError(ErrorCallback(callback)); }
+    void onError(ErrorCallback&& callback);
 };
 
 /**

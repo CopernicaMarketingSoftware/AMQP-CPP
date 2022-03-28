@@ -104,10 +104,11 @@ public:
      *  Callback that is called when the broker confirmed message publication
      *  @param  callback    the callback to execute
      */
-    DeferredPublish &onAck(const PublishAckCallback &callback)
+    inline DeferredPublish &onAck(const PublishAckCallback& callback) { return onAck(PublishAckCallback(callback)); }
+    DeferredPublish &onAck(PublishAckCallback&& callback)
     {
         // store callback
-        _ackCallback = callback;
+        _ackCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -117,10 +118,11 @@ public:
      *  Callback that is called when the broker denied message publication
      *  @param  callback    the callback to execute
      */
-    DeferredPublish &onNack(const PublishNackCallback &callback)
+    inline DeferredPublish &onNack(const PublishNackCallback& callback) { return onNack(PublishNackCallback(callback)); }
+    DeferredPublish &onNack(PublishNackCallback&& callback)
     {
         // store callback
-        _nackCallback = callback;
+        _nackCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -131,10 +133,11 @@ public:
      *  rejecting it or because of a channel error
      *  @param  callback    the callback to execute
      */
-    DeferredPublish &onLost(const PublishLostCallback &callback)
+    inline DeferredPublish &onLost(const PublishLostCallback& callback) { return onLost(PublishLostCallback(callback)); }
+    DeferredPublish &onLost(PublishLostCallback&& callback)
     {
         // store callback
-        _lostCallback = callback;
+        _lostCallback = std::move(callback);
 
         // allow chaining
         return *this;

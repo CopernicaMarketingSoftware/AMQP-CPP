@@ -95,10 +95,11 @@ public:
      *  This fuction is also available as onReceived() and onMessage() because I always forget which name I gave to it
      *  @param  callback
      */
-    DeferredGet &onSuccess(const MessageCallback &callback)
+    inline DeferredGet &onSuccess(const MessageCallback& callback) { return onSuccess(MessageCallback(callback)); }
+    DeferredGet &onSuccess(MessageCallback&& callback)
     {
         // store the callback
-        _messageCallback = callback;
+        _messageCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -108,10 +109,11 @@ public:
      *  Register a function to be called when an error occurs. This should be defined, otherwise the base methods are used.
      *  @param  callback
      */
-    DeferredGet &onError(const ErrorCallback &callback)
+    inline DeferredGet &onError(const ErrorCallback& callback) { return onError(ErrorCallback(callback)); }
+    DeferredGet &onError(ErrorCallback&& callback)
     {
         // store the callback
-        _errorCallback = callback;
+        _errorCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -122,10 +124,11 @@ public:
      *  This fuction is also available as onSuccess() and onMessage() because I always forget which name I gave to it
      *  @param  callback    the callback to execute
      */
-    DeferredGet &onReceived(const MessageCallback &callback)
+    inline DeferredGet &onReceived(const MessageCallback& callback) { return onReceived(MessageCallback(callback)); }
+    DeferredGet &onReceived(MessageCallback&& callback)
     {
         // store callback
-        _messageCallback = callback;
+        _messageCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -136,10 +139,11 @@ public:
      *  This fuction is also available as onSuccess() and onReceived() because I always forget which name I gave to it
      *  @param  callback    the callback to execute
      */
-    DeferredGet &onMessage(const MessageCallback &callback)
+    inline DeferredGet &onMessage(const MessageCallback& callback) { return onMessage(MessageCallback(callback)); }
+    DeferredGet &onMessage(MessageCallback&& callback)
     {
         // store callback
-        _messageCallback = callback;
+        _messageCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -149,10 +153,11 @@ public:
      *  Register a function to be called if no message could be fetched
      *  @param  callback    the callback to execute
      */
-    DeferredGet &onEmpty(const EmptyCallback &callback)
+    inline DeferredGet &onEmpty(const EmptyCallback& callback) { return onEmpty(EmptyCallback(callback)); }
+    DeferredGet &onEmpty(EmptyCallback&& callback)
     {
         // store callback
-        _emptyCallback = callback;
+        _emptyCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -162,10 +167,11 @@ public:
      *  Register a function to be called when queue size information is known
      *  @param  callback    the callback to execute
      */
-    DeferredGet &onCount(const CountCallback &callback)
+    inline DeferredGet &onCount(const CountCallback& callback) { return onCount(CountCallback(callback)); }
+    DeferredGet &onCount(CountCallback&& callback)
     {
         // store callback
-        _countCallback = callback;
+        _countCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -177,10 +183,11 @@ public:
      *  @param  callback    The callback to invoke
      *  @return Same object for chaining
      */
-    DeferredGet &onBegin(const StartCallback &callback)
+    inline DeferredGet &onBegin(const StartCallback& callback) { return onBegin(StartCallback(callback)); }
+    DeferredGet &onBegin(StartCallback&& callback)
     {
         // store callback
-        _startCallback = callback;
+        _startCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -192,10 +199,11 @@ public:
      *  @param  callback    The callback to invoke
      *  @return Same object for chaining
      */
-    DeferredGet &onStart(const StartCallback &callback)
+    inline DeferredGet &onStart(const StartCallback& callback) { return onStart(StartCallback(callback)); }
+    DeferredGet &onStart(StartCallback&& callback)
     {
         // store callback
-        _startCallback = callback;
+        _startCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -207,10 +215,11 @@ public:
      *  @param  callback    The callback to invoke for message headers
      *  @return Same object for chaining
      */
-    DeferredGet &onSize(const SizeCallback &callback)
+    inline DeferredGet &onSize(const SizeCallback& callback) { return onSize(SizeCallback(callback)); }
+    DeferredGet &onSize(SizeCallback&& callback)
     {
         // store callback
-        _sizeCallback = callback;
+        _sizeCallback = std::move(callback);
         
         // allow chaining
         return *this;
@@ -222,10 +231,11 @@ public:
      *  @param  callback    The callback to invoke for message headers
      *  @return Same object for chaining
      */
-    DeferredGet &onHeaders(const HeaderCallback &callback)
+    inline DeferredGet &onHeaders(const HeaderCallback& callback) { return onHeaders(HeaderCallback(callback)); }
+    DeferredGet &onHeaders(HeaderCallback&& callback)
     {
         // store callback
-        _headerCallback = callback;
+        _headerCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -244,10 +254,11 @@ public:
      *  @param  callback    The callback to invoke for chunks of message data
      *  @return Same object for chaining
      */
-    DeferredGet &onData(const DataCallback &callback)
+    inline DeferredGet &onData(const DataCallback& callback) { return onData(DataCallback(callback)); }
+    DeferredGet &onData(DataCallback&& callback)
     {
         // store callback
-        _dataCallback = callback;
+        _dataCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -259,10 +270,11 @@ public:
      *  @param  callback    The callback to invoke
      *  @return Same object for chaining
      */
-    DeferredGet &onComplete(const DeliveredCallback &callback)
+    inline DeferredGet &onComplete(const DeliveredCallback& callback) { return onComplete(DeliveredCallback(callback)); }
+    DeferredGet &onComplete(DeliveredCallback&& callback)
     {
         // store callback
-        _deliveredCallback = callback;
+        _deliveredCallback = std::move(callback);
 
         // allow chaining
         return *this;
@@ -274,10 +286,11 @@ public:
      *  @param  callback    The callback to invoke
      *  @return Same object for chaining
      */
-    DeferredGet &onDelivered(const DeliveredCallback &callback)
+    inline DeferredGet &onDelivered(const DeliveredCallback& callback) { return onDelivered(DeliveredCallback(callback)); }
+    DeferredGet &onDelivered(DeliveredCallback&& callback)
     {
         // store callback
-        _deliveredCallback = callback;
+        _deliveredCallback = std::move(callback);
 
         // allow chaining
         return *this;

@@ -76,10 +76,11 @@ public:
      *  times will remove the old callback.
      *
      *  @param  callback    the callback to execute
-     */
-    void onReady(const SuccessCallback &callback)
+     */         
+    inline void onReady(const SuccessCallback& callback) { return onReady(SuccessCallback(callback)); }
+    void onReady(SuccessCallback&& callback)
     {
-        _implementation->onReady(callback);
+        _implementation->onReady(std::move(callback));
     }
 
     /**
@@ -90,9 +91,10 @@ public:
      *
      *  @param  callback    the callback to execute
      */
-    void onError(const ErrorCallback &callback)
+    inline void onError(const ErrorCallback& callback) { return onError(ErrorCallback(callback)); }
+    void onError(ErrorCallback&& callback)
     {
-        _implementation->onError(callback);
+        _implementation->onError(std::move(callback));
     }
 
     /**
