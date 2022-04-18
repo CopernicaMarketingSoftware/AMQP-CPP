@@ -78,7 +78,7 @@ public:
     }
 
     /**
-     *  Constructor
+     *  Constructor with PLAIN authentication mechanism
      *  @param  user
      *  @param  password
      */
