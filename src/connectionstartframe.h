@@ -204,7 +204,7 @@ public:
         if (!properties.contains("capabilities")) properties["capabilities"] = capabilities;
         
         // send back a connection start ok frame
-        connection->send(ConnectionStartOKFrame(properties, "PLAIN", connection->login().saslPlain(), "en_US"));
+        connection->send(ConnectionStartOKFrame(properties, connection->login().mechanism(), connection->login().response(), "en_US"));
         
         // done
         return true;
