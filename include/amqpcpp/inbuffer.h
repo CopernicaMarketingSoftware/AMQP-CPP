@@ -47,9 +47,9 @@ protected:
 
     /**
      *  Number of bytes already processed
-     *  @var    uint32_t
+     *  @var    size_t
      */
-    uint32_t _skip = 0;
+    size_t _skip = 0;
 
 public:
     /**
