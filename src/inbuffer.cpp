@@ -166,7 +166,7 @@ double InBuffer::nextDouble()
  *  @param  size
  *  @return char*
  */
-const char *InBuffer::nextData(uint32_t size)
+const char *InBuffer::nextData(size_t size)
 {
     // check if there is enough size
     BufferCheck check(this, size);

@@ -128,7 +128,7 @@ public:
      *  @param  size
      *  @return char*
      */
-    const char *nextData(uint32_t size);
+    const char *nextData(size_t size);
 
     /**
      *  The checker may access private data
