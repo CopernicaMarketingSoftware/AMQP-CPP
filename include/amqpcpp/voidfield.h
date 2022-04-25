@@ -33,7 +33,7 @@ public:
      *  Construct based on incoming data
      *  @param  frame
      */
-    VoidField(InBuffer &frame) {}
+    VoidField(InBuffer &frame) { (void)frame; }
 
     /**
      *  Destructor
@@ -65,7 +65,7 @@ public:
      *  Write encoded payload to the given buffer.
      *  @param  buffer      OutBuffer to write to
      */
-    virtual void fill(OutBuffer &buffer) const override {}
+    virtual void fill(OutBuffer &buffer) const override { (void)buffer; }
 
     /**
      *  Get the type ID that is used to identify this type of
