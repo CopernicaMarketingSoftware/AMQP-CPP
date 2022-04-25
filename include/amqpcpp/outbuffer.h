@@ -50,7 +50,7 @@ public:
      *  @param  string  char* to the string
      *  @param  size    size of string
      */
-    void add(const char *string, uint32_t size)
+    void add(const char *string, size_t size)
     {
         // append data
         append(string, size);
