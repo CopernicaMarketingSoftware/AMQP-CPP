@@ -100,7 +100,7 @@ cmake --build . --target install
 
  Option                  | Default | Meaning
 -------------------------|---------|-----------------------------------------------------------------------
- AMQP-CPP_BUILD_SHARED   | OFF     | Static lib(ON) or shared lib(OFF)? Shared is not supported on Windows.
+ AMQP-CPP_BUILD_SHARED   | OFF     | Static lib(OFF) or shared lib(ON)? Shared is not supported on Windows.
  AMQP-CPP_LINUX_TCP      | OFF     | Should the Linux-only TCP module be built?
 
 ## Using make
