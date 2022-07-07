@@ -134,6 +134,13 @@
 #include <sys/endian.h>
 
 /**
+ * QNX Neutrino handling
+ */
+#elif defined(__QNXNTO__)
+
+#include <net/netbyte.h>
+
+/**
  *  Not on apple, and not on windows
  */
 #else
