@@ -528,7 +528,7 @@ application's event loop. For some popular event loops (libev, libuv, libevent),
 have already added example handler objects (see the next section for that). All the 
 other methods are optional to override. It often is a good idea to override the
 `onError()` method to log or report errors and `onDetached()` for cleaning up stuff.
-AMQP-CPP has it's own buffers if you send instructions prematurely, but if you
+AMQP-CPP has its own buffers if you send instructions prematurely, but if you
 intend to send a lot of data over the connection, it also is a good idea to 
 implement the `onReady()` method and delay your calls until the AMQP connection 
 has been fully set up.
@@ -579,11 +579,10 @@ AMQP::TcpConnection connection(&myHandler, address);
 There are two things to take care of if you want to create a secure connection: 
 (1) you must link your application with the `-lssl` flag (or use `dlopen()`), and (2) 
 you must initialize the openssl library by calling `OPENSSL_init_ssl()`. This 
-initializating must take place before you let you application connect to RabbitMQ. 
+initialization must take place before you connect to RabbitMQ. 
 This is necessary because AMQP-CPP needs access to the openssl library to set up 
-secure connections. It can only access this library if you have linked your 
-application with this library, or if you have loaded this library at runtime 
-using `dlopen()`). 
+secure connections. It can only access this library if you have linked it to your 
+application, or if you have loaded this library at runtime using `dlopen()`. 
 
 Linking openssl is the normal thing to do. You just have to add the `-lssl` flag
 to your linker. If you however do not want to link your application with openssl, 
