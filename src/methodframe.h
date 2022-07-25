@@ -95,6 +95,9 @@ public:
      */
     virtual bool process(ConnectionImpl *connection) override
     {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+
         // this is an exception
         throw ProtocolException("unimplemented frame type " + std::to_string(type()) + " class " + std::to_string(classID()) + " method " + std::to_string(methodID()));
     }
