@@ -238,7 +238,7 @@ public:
         _parent->onIdle(this, _pipe.in(), 0);
 
         // wait for the thread to be ready
-        _thread.join();
+        if (_thread.joinable()) _thread.join();
     }
     
     /**
@@ -249,6 +249,7 @@ public:
     
     /**
      *  Proceed to the next state
+     *  @param  monitor         object that checks if the connection still exists
      *  @return TcpState *
      */
     TcpState *proceed(const Monitor &monitor)
@@ -256,6 +257,12 @@ public:
         // prevent exceptions
         try
         {
+            // the other thread must be ready by now, so we join it, which also guarantees us
+            // that the memory of the two threads have been synchronized (without this call
+            // it is possible that the memory of the threads have not been synchronized, and
+            // _socket has not yet been set)
+            _thread.join();
+            
             // socket should be connected by now
             if (_socket < 0) throw std::runtime_error(_error.data());
         
