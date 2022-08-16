@@ -389,7 +389,7 @@ bool ConnectionImpl::send(const Frame &frame)
 
     // if the frame is bigger than we allow on the connection
     // it is impossible to send out this frame successfully
-    if (frame.totalSize() > _maxFrame) return false;
+    if (_maxFrame > 0 && frame.totalSize() > _maxFrame) return false;
 
     // are we still setting up the connection?
     if ((_state == state_connected && _queue.empty()) || frame.partOfHandshake())
