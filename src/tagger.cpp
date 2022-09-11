@@ -39,6 +39,15 @@ Tagger::Tagger(Channel &channel) : _implementation(channel._implementation)
 }
 
 /**
+ *  Destructor
+ */
+Tagger::~Tagger()
+{
+    // restore the error-callback
+    _implementation->onError(nullptr);
+}
+
+/**
  *  Send method for a frame
  *  @param  id
  *  @param  frame

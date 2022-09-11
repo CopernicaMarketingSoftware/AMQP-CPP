@@ -1,11 +1,15 @@
 /**
  *  Reliable.h
  *  
- *  A channel wrapper based on AMQP::Throttle that allows message callbacks to be installed
- *  on the publishes, to be called when they are confirmed by the message broker.
+ *  A channel wrapper based on AMQP::Tagger that allows message callbacks to be installed
+ *  on the publish-confirms, to be called when they a confirmation is received from RabbitMQ.
+ * 
+ *  You can also change the base class and use Reliable<Throttle> if you not only
+ *  want to be notified about the publish-confirms, but want to use it for automatic
+ *  throttling at the same time.
  *  
  *  @author Michael van der Werve <michael.vanderwerve@mailerq.com>
- *  @copyright 2020 Copernica BV
+ *  @copyright 2020 - 2022 Copernica BV
  */
 
 /**

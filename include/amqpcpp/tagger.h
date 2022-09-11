@@ -1,7 +1,14 @@
 /**
  *  Tagger.h
  *  
- *  Base class that enables publisher confirms and keeps track of the sent messages.
+ *  Base class that enables publisher confirms and keeps track of the sent 
+ *  messages. You can wrap this class around a AMQP::Channel object and use
+ *  this object for publishing instead. This is a base class that you cannot
+ *  use directly. You should instead use:
+ * 
+ *  - Throttle: to throttle traffic to prevent flooding RabbitMQ
+ *  - Reliable<Tagger>: to be notified about publish-confirms via callbacks
+ *  - Reliable<Throttle>: to have throttle + notifications via callbacks
  *  
  *  @author Michael van der Werve <michael.vanderwerve@mailerq.com>
  *  @copyright 2020 Copernica BV
@@ -101,7 +108,7 @@ public:
     /**
      *  Virtual destructor
      */
-    virtual ~Tagger() = default;
+    virtual ~Tagger();
 
     /**
      *  Method to check how many messages are still unacked.
