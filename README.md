@@ -1374,10 +1374,18 @@ auto messageCb = [&channel](const AMQP::Message &message, uint64_t deliveryTag, 
     channel.ack(deliveryTag);
 };
 
+// callback that is called when the consumer is cancelled by RabbitMQ (this only happens in
+// rare situations, for example when someone removes the queue that you are consuming from)
+auto cancelledCb = [](const std::string &consumertag) {
+
+    std::cout << "consume operation cancelled by the RabbitMQ server" << std::endl;
+};
+
 // start consuming from the queue, and install the callbacks
 channel.consume("my-queue")
     .onReceived(messageCb)
     .onSuccess(startCb)
+    .onCancelled(cancelledCb)
     .onError(errorCb);
 
 ````
@@ -1400,7 +1408,10 @@ This method is very simple and takes in its simplest form only one parameter: th
 
 Consuming messages is a continuous process. RabbitMQ keeps sending messages, until
 you stop the consumer, which can be done by calling the `Channel::cancel()` method.
-If you close the channel, or the entire TCP connection, consuming also stops.
+If you close the channel, or the entire TCP connection, the consumer also stops.
+In some (rare) situations, the consume operation can also be cancelled by the RabbitMQ
+server. This for example happens when a queue is removed or becomes unavailable. To
+handle this scenario you can install a "onCancelled" callback.
 
 RabbitMQ throttles the number of messages that are delivered to you, to prevent
 that your application is flooded with messages from the queue, and to spread out
