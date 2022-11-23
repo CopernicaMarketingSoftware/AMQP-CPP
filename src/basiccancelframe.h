@@ -1,7 +1,7 @@
 /**
  *  Class describing a basic cancel frame
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2022 Copernica BV
  */
 
 /**
@@ -105,6 +105,26 @@ public:
     bool noWait() const
     {
         return _noWait.get(0);
+    }
+
+    /**
+     *  Process the frame
+     *  @param  connection      The connection over which it was received
+     *  @return bool            Was it succesfully processed?
+     */
+    virtual bool process(ConnectionImpl *connection) override
+    {
+        // we need the appropriate channel
+        auto channel = connection->channel(this->channel());
+
+        // channel does not exist
+        if (!channel) return false;
+
+        // report
+        channel->reportCancelled(consumerTag());
+
+        // done
+        return true;
     }
 };
 

@@ -3,7 +3,7 @@
  *
  *  Deferred callback for consumers
  *
- *  @copyright 2014 - 2018 Copernica BV
+ *  @copyright 2014 - 2022 Copernica BV
  */
 
 /**
@@ -39,6 +39,12 @@ private:
     ConsumeCallback _consumeCallback;
 
     /**
+     *  Callback to excute when the server has cancelled the consumer
+     *  @var    CancelCallback
+     */
+    CancelCallback _cancelCallback;
+
+    /**
      *  Process a delivery frame
      *
      *  @param  frame   The frame to process
@@ -51,6 +57,16 @@ private:
      *  @return Deferred
      */
     virtual const std::shared_ptr<Deferred> &reportSuccess(const std::string &name) override;
+
+    /**
+     *  Report that the server has cancelled this consumer
+     *  @param  namae           The consumer tag
+     */
+    void reportCancelled(const std::string &name)
+    {
+        // report
+        if (_cancelCallback) _cancelCallback(name);
+    }
 
     /**
      *  Get reference to self to prevent that object falls out of scope
@@ -279,6 +295,22 @@ public:
     {
         // store callback
         _deliveredCallback = std::move(callback);
+
+        // allow chaining
+        return *this;
+    }
+    
+    /**
+     *  Register a funtion to be called when the server cancelled the consumer
+     *
+     *  @param  callback    The callback to invoke
+     *  @return Same object for chaining
+     */
+    inline DeferredConsumer &onCancelled(const CancelCallback& callback) { return onCancelled(CancelCallback(callback)); }
+    DeferredConsumer &onCancelled(CancelCallback&& callback)
+    {
+        // store callback
+        _cancelCallback = std::move(callback);
 
         // allow chaining
         return *this;

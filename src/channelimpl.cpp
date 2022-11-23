@@ -3,7 +3,7 @@
  *
  *  Implementation for a channel
  *
- *  @copyright 2014 - 2020 Copernica BV
+ *  @copyright 2014 - 2022 Copernica BV
  */
 #include "includes.h"
 #include "basicgetokframe.h"
@@ -944,6 +944,29 @@ void ChannelImpl::reportError(const char *message, bool notifyhandler)
     
     // remember that we're no longer associated with a connection
     _connection = nullptr;
+}
+
+/**
+ *  Report that a consumer was cancelled by the server (for example because the 
+ *  queue was removed or the node on which the queue was stored was terminated)
+ *  @param  tag                 the consumer tag
+ */
+void ChannelImpl::reportCancelled(const std::string &tag)
+{
+    // look in the map
+    auto iter = _consumers.find(tag);
+    
+    // check if there is not even such a consumer
+    if (iter == _consumers.end()) return;
+    
+    // the actual consumer (this is a shared pointer)
+    auto consumer = iter->second;
+    
+    // remove from the map
+    _consumers.erase(iter);
+    
+    // report that the consumer was cancelled
+    consumer->reportCancelled(tag);
 }
 
 /**

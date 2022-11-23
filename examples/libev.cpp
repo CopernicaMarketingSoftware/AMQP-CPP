@@ -4,7 +4,7 @@
  *  Test program to check AMQP functionality based on LibEV
  * 
  *  @author Emiel Bruijntjes <emiel.bruijntjes@copernica.com>
- *  @copyright 2015 - 2018 Copernica BV
+ *  @copyright 2015 - 2022 Copernica BV
  */
 
 /**
@@ -180,10 +180,10 @@ int main()
     AMQP::TcpChannel channel(&connection);
 
     // create a temporary queue
-    channel.declareQueue(AMQP::exclusive).onSuccess([&connection, &channel, loop](const std::string &name, uint32_t messagecount, uint32_t consumercount) {
+    channel.declareQueue(AMQP::exclusive).onSuccess([&connection, &channel, loop](const std::string &queuename, uint32_t messagecount, uint32_t consumercount) {
         
         // report the name of the temporary queue
-        std::cout << "declared queue " << name << std::endl;
+        std::cout << "declared queue " << queuename << std::endl;
         
         // close the channel
         //channel.close().onSuccess([&connection, &channel]() {
@@ -196,7 +196,32 @@ int main()
         //});
         
         // construct a timer that is going to publish stuff
-        auto *timer = new MyTimer(loop, &channel, name);
+        auto *timer = new MyTimer(loop, &channel, queuename);
+        
+        // start a consumer
+        channel.consume(queuename).onSuccess([](const std::string &tag) {
+            
+            // the consumer is ready
+            std::cout << "started consuming with tag " << tag << std::endl;
+            
+        }).onCancelled([](const std::string &tag) {
+            
+            // the consumer was cancelled by the server
+            std::cout << "consumer " << tag << " was cancelled" << std::endl;
+
+        }).onReceived([&channel, queuename](const AMQP::Message &message, uint64_t deliveryTag, bool redelivered) {
+            
+            std::cout << "received " << deliveryTag << std::endl;
+            
+            // we remove the queue -- to see if this indeed causes the onCancelled method to be called
+            if (deliveryTag > 3) channel.removeQueue(queuename);
+            
+            // ack the message
+            channel.ack(deliveryTag);
+            
+        });
+        
+        
         
         //connection.close();
     });

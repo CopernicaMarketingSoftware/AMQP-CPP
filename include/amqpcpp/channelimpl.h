@@ -5,7 +5,7 @@
  *  that has a private constructor so that it can not be used from outside
  *  the AMQP library
  *
- *  @copyright 2014 - 2020 Copernica BV
+ *  @copyright 2014 - 2022 Copernica BV
  */
 
 /**
@@ -711,6 +711,13 @@ public:
         // we are still valid
         return true;
     }
+
+    /**
+     *  Report that a consumer was cancelled by the server (for example because the 
+     *  queue was removed or the node on which the queue was stored was terminated)
+     *  @param  tag                 the consumer tag
+     */
+    void reportCancelled(const std::string &tag);
 
     /**
      *  Report an error message on a channel

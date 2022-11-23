@@ -5,7 +5,7 @@
  *  is opened. It contains the initial connection properties, and the protocol
  *  number.
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2022 Copernica BV
  */
 
 /**
@@ -194,6 +194,10 @@ public:
         
         // we want a special treatment for authentication failures
         capabilities["authentication_failure_close"] = true;
+        
+        // when the server cancels a consumer (for example because a queue is delete, or the node on which the 
+        // queue lives dies, we want to receive a notification that the consumer is no longer alive)
+        capabilities["consumer_cancel_notify"] = true;
         
         // fill the peer properties
         if (!properties.contains("product")) properties["product"] = "Copernica AMQP library";
