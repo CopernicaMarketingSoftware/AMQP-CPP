@@ -295,6 +295,9 @@ However, this is not strictly necessary. Methods called during a handshake
 are cached by the AMQP library, and will be executed the moment the handshake 
 is completed and the connection becomes ready for use.
 
+And the last but not least: even though `ConnectionHandler` methods are not
+marked `noexcept` explicitly, you are not expected to throw from them, and
+the behaviour is undefined if you do so.
 
 PARSING INCOMING DATA
 =====================
