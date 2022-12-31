@@ -252,6 +252,10 @@ class MyConnectionHandler : public AMQP::ConnectionHandler
 };
 ````
 
+Even though `ConnectionHandler` methods are not marked `noexcept` explicitly, 
+you are not expected to throw from them, and the behaviour is undefined if you 
+do so.
+
 After you've implemented the `ConnectionHandler` class the way you like, 
 you can start using the library by creating a `Connection` object, and one 
 or more `Channel` objects:
@@ -295,9 +299,6 @@ However, this is not strictly necessary. Methods called during a handshake
 are cached by the AMQP library, and will be executed the moment the handshake 
 is completed and the connection becomes ready for use.
 
-And the last but not least: even though `ConnectionHandler` methods are not
-marked `noexcept` explicitly, you are not expected to throw from them, and
-the behaviour is undefined if you do so.
 
 PARSING INCOMING DATA
 =====================
