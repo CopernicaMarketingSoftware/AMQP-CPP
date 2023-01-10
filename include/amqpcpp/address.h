@@ -333,8 +333,8 @@ public:
         // portnumber must match
         if (_port != that._port) return false;
 
-        // and finally the vhosts, they must match too
-        if (_vhost == that._vhost) return false;
+        // and the vhosts, they must match too
+        if (_vhost != that._vhost) return false;
 
         // and the options as well
         return _options == that._options;
