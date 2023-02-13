@@ -1,7 +1,7 @@
 /**
  *  Class describing a basic publish frame
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -69,7 +69,7 @@ public:
      *  @param  mandatory       indicate mandatory routing       @default = false
      *  @param  immediate       request immediate delivery       @default = false
      */
-    BasicPublishFrame(uint16_t channel, const std::string& exchange = "", const std::string& routingKey = "", bool mandatory = false, bool immediate = false) :
+    BasicPublishFrame(uint16_t channel, const std::string_view &exchange = "", const std::string_view &routingKey = "", bool mandatory = false, bool immediate = false) :
         BasicFrame(channel, (uint32_t)(exchange.length() + routingKey.length() + 5)), // 1 extra per string (for the size), 1 for bools, 2 for deprecated field
         _exchange(exchange),
         _routingKey(routingKey),

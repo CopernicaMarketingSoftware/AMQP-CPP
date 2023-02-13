@@ -3,7 +3,7 @@
  *
  *  Implementation for a channel
  *
- *  @copyright 2014 - 2022 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 #include "includes.h"
 #include "basicgetokframe.h"
@@ -279,7 +279,7 @@ Deferred &ChannelImpl::close()
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType type, int flags, const Table &arguments)
+Deferred &ChannelImpl::declareExchange(const std::string_view &name, ExchangeType type, int flags, const Table &arguments)
 {
     // convert exchange type
     const char *exchangeType = "";
@@ -314,7 +314,7 @@ Deferred &ChannelImpl::declareExchange(const std::string &name, ExchangeType typ
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred &ChannelImpl::bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, const Table &arguments)
+Deferred &ChannelImpl::bindExchange(const std::string_view &source, const std::string_view &target, const std::string_view &routingkey, const Table &arguments)
 {
     // send exchange bind frame
     return push(ExchangeBindFrame(_id, target, source, routingkey, false, arguments));
@@ -331,7 +331,7 @@ Deferred &ChannelImpl::bindExchange(const std::string &source, const std::string
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred &ChannelImpl::unbindExchange(const std::string &source, const std::string &target, const std::string &routingkey, const Table &arguments)
+Deferred &ChannelImpl::unbindExchange(const std::string_view &source, const std::string_view &target, const std::string_view &routingkey, const Table &arguments)
 {
     // send exchange unbind frame
     return push(ExchangeUnbindFrame(_id, target, source, routingkey, false, arguments));
@@ -346,7 +346,7 @@ Deferred &ChannelImpl::unbindExchange(const std::string &source, const std::stri
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred &ChannelImpl::removeExchange(const std::string &name, int flags)
+Deferred &ChannelImpl::removeExchange(const std::string_view &name, int flags)
 {
     // send delete exchange frame
     return push(ExchangeDeleteFrame(_id, name, (flags & ifunused) != 0, false));
@@ -361,7 +361,7 @@ Deferred &ChannelImpl::removeExchange(const std::string &name, int flags)
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-DeferredQueue &ChannelImpl::declareQueue(const std::string &name, int flags, const Table &arguments)
+DeferredQueue &ChannelImpl::declareQueue(const std::string_view &name, int flags, const Table &arguments)
 {
     // the frame to send
     QueueDeclareFrame frame(_id, name, (flags & passive) != 0, (flags & durable) != 0, (flags & exclusive) != 0, (flags & autodelete) != 0, false, arguments);
@@ -387,7 +387,7 @@ DeferredQueue &ChannelImpl::declareQueue(const std::string &name, int flags, con
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred &ChannelImpl::bindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, const Table &arguments)
+Deferred &ChannelImpl::bindQueue(const std::string_view &exchangeName, const std::string_view &queueName, const std::string_view &routingkey, const Table &arguments)
 {
     // send the bind queue frame
     return push(QueueBindFrame(_id, queueName, exchangeName, routingkey, false, arguments));
@@ -404,7 +404,7 @@ Deferred &ChannelImpl::bindQueue(const std::string &exchangeName, const std::str
  *  This function returns a deferred handler. Callbacks can be installed
  *  using onSuccess(), onError() and onFinalize() methods.
  */
-Deferred &ChannelImpl::unbindQueue(const std::string &exchange, const std::string &queue, const std::string &routingkey, const Table &arguments)
+Deferred &ChannelImpl::unbindQueue(const std::string_view &exchange, const std::string_view &queue, const std::string_view &routingkey, const Table &arguments)
 {
     // send the unbind queue frame
     return push(QueueUnbindFrame(_id, queue, exchange, routingkey, arguments));
@@ -427,7 +427,7 @@ Deferred &ChannelImpl::unbindQueue(const std::string &exchange, const std::strin
  *
  *  });
  */
-DeferredDelete &ChannelImpl::purgeQueue(const std::string &name)
+DeferredDelete &ChannelImpl::purgeQueue(const std::string_view &name)
 {
     // the frame to send
     QueuePurgeFrame frame(_id, name, false);
@@ -460,7 +460,7 @@ DeferredDelete &ChannelImpl::purgeQueue(const std::string &name)
  *
  *  });
  */
-DeferredDelete &ChannelImpl::removeQueue(const std::string &name, int flags)
+DeferredDelete &ChannelImpl::removeQueue(const std::string_view &name, int flags)
 {
     // the frame to send
     QueueDeleteFrame frame(_id, name, (flags & ifunused) != 0, (flags & ifempty) != 0, false);
@@ -486,7 +486,7 @@ DeferredDelete &ChannelImpl::removeQueue(const std::string &name, int flags)
  *  @param  flags
  *  @return bool
  */
-bool ChannelImpl::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
+bool ChannelImpl::publish(const std::string_view &exchange, const std::string_view &routingKey, const Envelope &envelope, int flags)
 {
     // we are going to send out multiple frames, each one will trigger a call to the handler,
     // which in turn could destruct the channel object, we need to monitor that
@@ -574,7 +574,7 @@ Deferred &ChannelImpl::setQos(uint16_t prefetchCount, bool global)
  *
  *  });
  */
-DeferredConsumer& ChannelImpl::consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments)
+DeferredConsumer& ChannelImpl::consume(const std::string_view &queue, const std::string_view &tag, int flags, const Table &arguments)
 {
     // the frame to send
     BasicConsumeFrame frame(_id, queue, tag, (flags & nolocal) != 0, (flags & noack) != 0, (flags & exclusive) != 0, false, arguments);
@@ -624,7 +624,7 @@ DeferredRecall &ChannelImpl::recall()
  *
  *  });
  */
-DeferredCancel &ChannelImpl::cancel(const std::string &tag)
+DeferredCancel &ChannelImpl::cancel(const std::string_view &tag)
 {
     // the cancel frame to send
     BasicCancelFrame frame(_id, tag, false);
@@ -671,7 +671,7 @@ DeferredCancel &ChannelImpl::cancel(const std::string &tag)
  * 
  *  });
  */
-DeferredGet &ChannelImpl::get(const std::string &queue, int flags)
+DeferredGet &ChannelImpl::get(const std::string_view &queue, int flags)
 {
     // the get frame to send
     BasicGetFrame frame(_id, queue, (flags & noack) != 0);

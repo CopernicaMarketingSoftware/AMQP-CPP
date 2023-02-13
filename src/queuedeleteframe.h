@@ -1,7 +1,7 @@
 /**
  *  Class describing an AMQP queue delete frame
  *  
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -68,7 +68,7 @@ public:
      *  @param   ifEmpty     delete only if empty
      *  @param   noWait      do not wait on response
      */
-    QueueDeleteFrame(uint16_t channel, const std::string& name, bool ifUnused = false, bool ifEmpty = false, bool noWait = false) :
+    QueueDeleteFrame(uint16_t channel, const std::string_view &name, bool ifUnused = false, bool ifEmpty = false, bool noWait = false) :
         QueueFrame(channel, (uint32_t)(name.length() + 4)), // 1 for string length, 1 for bools, 2 for deprecated field
         _name(name),
         _bools(ifUnused, ifEmpty, noWait)

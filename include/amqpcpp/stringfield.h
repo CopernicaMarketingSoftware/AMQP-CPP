@@ -1,7 +1,7 @@
 /**
  *  String field types for amqp
  *
- *  @copyright 2014 - 2020 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -46,6 +46,12 @@ public:
      *  @param  value   string value
      */
     StringField(const std::string &value) : _data(value) {}
+
+    /**
+     *  Construct based on a std::string
+     *  @param  value   string value
+     */
+    StringField(const std::string_view &value) : _data(value) {}
 
     /**
      *  Construct based on a std::string

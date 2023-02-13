@@ -1,7 +1,7 @@
 /**
  *  Class describing an AMQP exchange declare frame
  * 
- *  @copyright 2014 - 2018 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -82,7 +82,7 @@ public:
      *  @param  noWait      do not wait on response
      *  @param  arguments   additional arguments
      */
-    ExchangeDeclareFrame(uint16_t channel, const std::string& name, const char *type, bool passive, bool durable, bool autodelete, bool internal, bool nowait, const Table& arguments) :
+    ExchangeDeclareFrame(uint16_t channel, const std::string_view& name, const char *type, bool passive, bool durable, bool autodelete, bool internal, bool nowait, const Table& arguments) :
         ExchangeFrame(channel, (uint32_t)(name.length() + strlen(type) + arguments.size() + 5)), // size of name, type and arguments + 1 (all booleans are stored in 1 byte) + 2 (deprecated short) + 2 (string sizes)
         _name(name),
         _type(type),

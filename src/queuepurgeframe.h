@@ -1,7 +1,7 @@
 /**
  *  Class describing an AMQP queue purge frame
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -64,7 +64,7 @@ public:
      *
      *  @return  newly created Queuepurgeframe
      */
-    QueuePurgeFrame(uint16_t channel, const std::string& name, bool noWait = false) :
+    QueuePurgeFrame(uint16_t channel, const std::string_view &name, bool noWait = false) :
         QueueFrame(channel, (uint32_t)(name.length() + 4)), // 1 extra for string length, 1 for bool, 2 for deprecated field
         _name(name),
         _noWait(noWait)

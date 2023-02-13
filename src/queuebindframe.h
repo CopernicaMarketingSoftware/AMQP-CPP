@@ -1,7 +1,7 @@
 /**
  *  Class describing an AMQP queue bind frame
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -86,7 +86,7 @@ public:
      *  @param   Bool noWait         do not wait for a response
      *  @param   Table arguments     additional arguments
      */
-    QueueBindFrame(uint16_t channel, const std::string& name, const std::string& exchange, const std::string& routingKey = "", bool noWait = false, const Table& arguments = {}) :
+    QueueBindFrame(uint16_t channel, const std::string_view &name, const std::string_view &exchange, const std::string_view &routingKey = "", bool noWait = false, const Table& arguments = {}) :
         QueueFrame(channel, (uint32_t)(name.length() + exchange.length() + routingKey.length() + arguments.size() + 6) ), // 3 extra per string, 1 for bools, 2 for deprecated field
         _name(name),
         _exchange(exchange),

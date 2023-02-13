@@ -5,7 +5,7 @@
  *  that has a private constructor so that it can not be used from outside
  *  the AMQP library
  *
- *  @copyright 2014 - 2022 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -308,7 +308,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &declareExchange(const std::string &name, ExchangeType type, int flags, const Table &arguments);
+    Deferred &declareExchange(const std::string_view &name, ExchangeType type, int flags, const Table &arguments);
 
     /**
      *  bind two exchanges
@@ -321,7 +321,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &bindExchange(const std::string &source, const std::string &target, const std::string &routingkey, const Table &arguments);
+    Deferred &bindExchange(const std::string_view &source, const std::string_view &target, const std::string_view &routingkey, const Table &arguments);
 
     /**
      *  unbind two exchanges
@@ -334,7 +334,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &unbindExchange(const std::string &source, const std::string &target, const std::string &routingkey, const Table &arguments);
+    Deferred &unbindExchange(const std::string_view &source, const std::string_view &target, const std::string_view &routingkey, const Table &arguments);
 
     /**
      *  remove an exchange
@@ -345,7 +345,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &removeExchange(const std::string &name, int flags);
+    Deferred &removeExchange(const std::string_view &name, int flags);
 
     /**
      *  declare a queue
@@ -356,7 +356,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    DeferredQueue &declareQueue(const std::string &name, int flags, const Table &arguments);
+    DeferredQueue &declareQueue(const std::string_view &name, int flags, const Table &arguments);
 
     /**
      *  Bind a queue to an exchange
@@ -369,7 +369,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &bindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, const Table &arguments);
+    Deferred &bindQueue(const std::string_view &exchangeName, const std::string_view &queueName, const std::string_view &routingkey, const Table &arguments);
 
     /**
      *  Unbind a queue from an exchange
@@ -382,7 +382,7 @@ public:
      *  This function returns a deferred handler. Callbacks can be installed
      *  using onSuccess(), onError() and onFinalize() methods.
      */
-    Deferred &unbindQueue(const std::string &exchangeName, const std::string &queueName, const std::string &routingkey, const Table &arguments);
+    Deferred &unbindQueue(const std::string_view &exchangeName, const std::string_view &queueName, const std::string_view &routingkey, const Table &arguments);
 
     /**
      *  Purge a queue
@@ -401,7 +401,7 @@ public:
      *
      *  });
      */
-    DeferredDelete &purgeQueue(const std::string &name);
+    DeferredDelete &purgeQueue(const std::string_view &name);
 
     /**
      *  Remove a queue
@@ -421,7 +421,7 @@ public:
      *
      *  });
      */
-    DeferredDelete &removeQueue(const std::string &name, int flags);
+    DeferredDelete &removeQueue(const std::string_view &name, int flags);
 
     /**
      *  Publish a message to an exchange
@@ -437,7 +437,7 @@ public:
      *  @param  flags       optional flags
      *  @return bool
      */
-    bool publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags);
+    bool publish(const std::string_view &exchange, const std::string_view &routingKey, const Envelope &envelope, int flags);
 
     /**
      *  Set the Quality of Service (QOS) of the entire connection
@@ -471,7 +471,7 @@ public:
      *
      *  });
      */
-    DeferredConsumer& consume(const std::string &queue, const std::string &tag, int flags, const Table &arguments);
+    DeferredConsumer& consume(const std::string_view &queue, const std::string_view &tag, int flags, const Table &arguments);
 
     /**
      *  Tell that you are prepared to recall/take back messages that could not be
@@ -501,7 +501,7 @@ public:
      *
      *  });
      */
-    DeferredCancel &cancel(const std::string &tag);
+    DeferredCancel &cancel(const std::string_view &tag);
 
     /**
      *  Retrieve a single message from RabbitMQ
@@ -535,7 +535,7 @@ public:
      *
      *  });
      */
-    DeferredGet &get(const std::string &queue, int flags = 0);
+    DeferredGet &get(const std::string_view &queue, int flags = 0);
 
     /**
      *  Acknowledge a message

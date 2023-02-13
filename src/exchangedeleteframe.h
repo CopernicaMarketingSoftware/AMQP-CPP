@@ -1,7 +1,7 @@
 /**
  *  Class describing an AMQP exchange delete frame
  *  
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -72,7 +72,7 @@ public:
      *  @param  bool ifUnused   Delete only if frame is not used
      *  @param  bool noWait     Do not wait for a response
      */
-    ExchangeDeleteFrame(uint16_t channel, const std::string& name, bool ifUnused = false, bool noWait = false) :
+    ExchangeDeleteFrame(uint16_t channel, const std::string_view &name, bool ifUnused = false, bool noWait = false) :
         ExchangeFrame(channel, (uint32_t)(name.length() + 4)), // length of the name, 1 byte for encoding this length, 1 for bools, 2 for deprecated short
         _name(name),
         _bools(ifUnused, noWait)

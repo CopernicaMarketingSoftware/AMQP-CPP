@@ -1,7 +1,7 @@
 /**
  *  Class describing an AMQP queue bind frame
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -79,7 +79,7 @@ public:
      *  @param   routingKey  the routingKey
      *  @param   arguments   additional arguments, implementation dependant.
      */
-    QueueUnbindFrame(uint16_t channel, const std::string& name, const std::string& exchange, const std::string& routingKey = "", const Table& arguments = {} ) :
+    QueueUnbindFrame(uint16_t channel, const std::string_view &name, const std::string_view &exchange, const std::string_view &routingKey = "", const Table& arguments = {} ) :
         QueueFrame(channel, (uint32_t)(name.length() + exchange.length() + routingKey.length() + arguments.size() + 5) ), // 1 per string, 2 for deprecated field
         _name(name),
         _exchange(exchange),

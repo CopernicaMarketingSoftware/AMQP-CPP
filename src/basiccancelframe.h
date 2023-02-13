@@ -1,7 +1,7 @@
 /**
  *  Class describing a basic cancel frame
  * 
- *  @copyright 2014 - 2022 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -58,7 +58,7 @@ public:
      *  @param  consumerTag     consumertag specified by client of provided by server
      *  @param  noWait          whether to wait for a response.
      */
-    BasicCancelFrame(uint16_t channel, const std::string& consumerTag, bool noWait = false) : 
+    BasicCancelFrame(uint16_t channel, const std::string_view &consumerTag, bool noWait = false) : 
         BasicFrame(channel, (uint32_t)(consumerTag.size() + 2)),    // 1 for extra string size, 1 for bool
         _consumerTag(consumerTag),
         _noWait(noWait) {}

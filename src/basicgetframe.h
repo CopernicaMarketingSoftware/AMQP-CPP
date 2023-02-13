@@ -1,7 +1,7 @@
 /**
  *  Class describing a basic get frame
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -58,7 +58,7 @@ public:
      *  @param  queue        name of the queue
      *  @param  noAck        whether server expects acknowledgements for messages     
      */
-    BasicGetFrame(uint16_t channel, const std::string& queue, bool noAck = false) :
+    BasicGetFrame(uint16_t channel, const std::string_view &queue, bool noAck = false) :
         BasicFrame(channel, (uint32_t)(queue.length() + 4)), // 1 for bool, 1 for string size, 2 for deprecated field
         _queue(queue),
         _noAck(noAck)

@@ -1,7 +1,7 @@
 /**
  *  Exchangebindframe.h
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -94,7 +94,7 @@ public:
      *  @param  noWait
      *  @param  arguments
      */
-    ExchangeBindFrame(uint16_t channel, const std::string &destination, const std::string &source, const std::string &routingKey, bool noWait, const Table &arguments) :
+    ExchangeBindFrame(uint16_t channel, const std::string_view &destination, const std::string_view &source, const std::string_view &routingKey, bool noWait, const Table &arguments) :
         ExchangeFrame(channel, (uint32_t)(destination.length() + source.length() + routingKey.length() + arguments.size() + 6)), // 1 for each string, 1 for booleanset, 2 for deprecated field
         _destination(destination),
         _source(source),

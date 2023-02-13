@@ -1,7 +1,7 @@
 /**
  *  Class describing an AMQP queue declare frame
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -79,7 +79,7 @@ public:
      *  @param  Bool noWait         whether to wait for a return value
      *  @param  Table arguments     additional arguments, implementation dependent
      */
-    QueueDeclareFrame(uint16_t channel, const std::string& name = "", bool passive = false, bool durable = false, bool exclusive = false, bool autoDelete = false, bool noWait = false, const Table& arguments = {}) :
+    QueueDeclareFrame(uint16_t channel, const std::string_view &name = "", bool passive = false, bool durable = false, bool exclusive = false, bool autoDelete = false, bool noWait = false, const Table& arguments = {}) :
         QueueFrame(channel, (uint32_t)(name.length() + arguments.size() + 4 ) ), // 1 extra for string size, 1 for bools, 2 for deprecated value
         _name(name),
         _bools(passive, durable, exclusive, autoDelete, noWait),

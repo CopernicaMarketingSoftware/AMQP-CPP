@@ -1,7 +1,7 @@
 /**
  *  Class describing a basic consume frame
  * 
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -85,7 +85,7 @@ public:
      *  @param  noWait          don't wait for a response
      *  @param  filter          additional arguments
      */
-    BasicConsumeFrame(uint16_t channel, const std::string& queueName, const std::string& consumerTag, bool noLocal = false, bool noAck = false, bool exclusive = false, bool noWait = false, const Table& filter = {}) :
+    BasicConsumeFrame(uint16_t channel, const std::string_view &queueName, const std::string_view &consumerTag, bool noLocal = false, bool noAck = false, bool exclusive = false, bool noWait = false, const Table& filter = {}) :
         BasicFrame(channel, (uint32_t)(queueName.length() + consumerTag.length() + 5 + filter.size())), // size of vars, +1 for each shortstring size, +1 for bools, +2 for deprecated value
         _queueName(queueName),
         _consumerTag(consumerTag),
