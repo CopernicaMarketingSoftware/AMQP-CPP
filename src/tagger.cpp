@@ -4,7 +4,7 @@
  *  Implementation for Tagger class.
  *  
  *  @author Michael van der Werve <michael.vanderwerve@mailerq.com>
- *  @copyright 2020 Copernica BV
+ *  @copyright 2020 - 2023 Copernica BV
  */
 
 /**
@@ -33,6 +33,9 @@ Tagger::Tagger(Channel &channel) : _implementation(channel._implementation)
 
     // we might have failed, in which case we throw
     if (!deferred) throw std::runtime_error("could not enable publisher confirms");
+
+    // remember the original callback
+    _errorCallback = _implementation->onError();
 
     // we wrap a handling error callback that calls our member function
     _implementation->onError([this](const char *message) { reportError(message); });  

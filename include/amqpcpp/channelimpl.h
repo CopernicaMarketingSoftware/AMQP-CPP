@@ -207,6 +207,14 @@ public:
         // connection is gone
         _connection = nullptr;
     }
+    
+    /**
+     *  Expose the currently installed callbacks
+     *  @return ErrorCallback
+     */
+    const ErrorCallback &onError() const { return _errorCallback; }
+    const SuccessCallback &onReady() const { return _readyCallback; }
+    
 
     /**
      *  Callback that is called when the channel was succesfully created.
