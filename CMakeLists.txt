@@ -25,7 +25,8 @@ option(AMQP-CPP_LINUX_TCP "Build linux sockets implementation." OFF)
 option(AMQP-CPP_BUILD_EXAMPLES "Build amqpcpp examples" OFF)
 
 # ensure c++11 on all compilers
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 17
+)
 
 # add source files
 # ------------------------------------------------------------------------------------------------------
