@@ -112,7 +112,6 @@ install(DIRECTORY include/amqpcpp/ DESTINATION include/amqpcpp
         FILES_MATCHING PATTERN "*.h")
 install(FILES include/amqpcpp.h DESTINATION include)
 
-math(EXPR AMQPCPP_VERSION "${VERSION_MAJOR} << 16 | ${VERSION_MINOR} << 8 | ${VERSION_PATCH}" OUTPUT_FORMAT HEXADECIMAL)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/version_template.h ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/version.h DESTINATION include/amqpcpp)
 
