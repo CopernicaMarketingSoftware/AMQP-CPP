@@ -131,7 +131,7 @@ void Tagger::reportError(const char *message)
  *  @param  flags       optional flags
  *  @return uint64_t
  */
-uint64_t Tagger::publish(const std::string &exchange, const std::string &routingKey, const Envelope &envelope, int flags)
+uint64_t Tagger::publish(const std::string_view &exchange, const std::string_view &routingKey, const Envelope &envelope, int flags)
 {
     // @todo do not copy the entire buffer to individual frames
 
