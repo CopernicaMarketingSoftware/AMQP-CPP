@@ -4,7 +4,7 @@
  *  With every published message a set of meta data is passed to. This class
  *  holds all that meta data.
  *
- *  @copyright 2014 - 2017 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -127,14 +127,12 @@ protected:
     ShortString _clusterID;
 
 
+public:
     /**
-     *  Protected constructor to ensure that this class can only be constructed
-     *  in a derived class
+     *  Constructor for empty meta data. Can be useful when user-space wants to preserve all meta-data
      */
     MetaData() {}
 
-
-public:
     /**
      *  Read incoming frame
      *  @param  frame
