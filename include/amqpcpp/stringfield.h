@@ -194,6 +194,19 @@ public:
         // allow chaining
         return *this;
     }
+    
+    /**
+     *  Make the field empty
+     *  @return StringField
+     */
+    StringField &clear()
+    {
+        // clear internal dta
+        _data.clear();
+        
+        // allow chaining
+        return *this;
+    }
 
     /**
      *  Get the size this field will take when

@@ -1,7 +1,7 @@
 /**
  *  AMQP field table
  *
- *  @copyright 2014 - 2020 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -140,6 +140,16 @@ public:
     Table &set(const std::string &name, const std::string &value) { return set(name, LongString(value)); }
     Table &set(const std::string &name, const char *value) { return set(name, LongString(std::string(value))); }
     Table &set(const std::string &name, std::nullptr_t) { return set(name, VoidField()); }
+
+    /**
+     *  Clear the entire table
+     *  @return Table
+     */
+    Table &clear()
+    {
+        _fields.clear();
+        return *this;
+    }
 
     /**
      *  Is a certain field set in the table

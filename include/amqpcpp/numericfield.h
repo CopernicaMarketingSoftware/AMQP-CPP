@@ -1,7 +1,7 @@
 /**
  *  Numeric field types for AMQP
  *
- *  @copyright 2014 - 2020 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
 
 /**
@@ -112,6 +112,16 @@ public:
         _value = value;
         return *this;
     };
+    
+    /**
+     *  Clear the field
+     *  @return NumericField
+     */
+    NumericField& clear()
+    {
+        _value = 0;
+        return *this;
+    }
 
     /**
      *  Get the value
