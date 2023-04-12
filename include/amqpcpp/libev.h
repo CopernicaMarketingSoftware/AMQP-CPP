@@ -93,11 +93,15 @@ private:
          *  @param  object          The object being watched
          *  @param  fd              The filedescriptor being watched
          *  @param  events          The events that should be monitored
+         *  @param  priority        The priority for the watcher
          */
-        Watcher(struct ev_loop *loop, Watchable *object, int fd, int events) : _loop(loop)
+        Watcher(struct ev_loop *loop, Watchable *object, int fd, int events, int priority) : _loop(loop)
         {
             // initialize the libev structure
             ev_io_init(&_io, callback, fd, events);
+            
+            // install a priority
+            ev_set_priority(&_io, priority);
 
             // store the object in the data "void*"
             _io.data = object;
@@ -300,8 +304,9 @@ private:
          *  @param  loop            The current event loop
          *  @param  connection      The TCP connection
          *  @param  timeout         Connect timeout
+         *  @param  priority        The priority (high priorities are invoked earlier
          */
-        Wrapper(struct ev_loop *loop, AMQP::TcpConnection *connection, uint16_t timeout = 60) : 
+        Wrapper(struct ev_loop *loop, AMQP::TcpConnection *connection, uint16_t timeout, int priority) : 
             _connection(connection),
             _loop(loop),
             _next(0.0),
@@ -313,6 +318,9 @@ private:
             
             // initialize the libev structure, it should expire after the connection timeout
             ev_timer_init(&_timer, callback, timeout, 0.0);
+
+            // set a priority
+            ev_set_priority(&_timer, priority);
 
             // start the timer (this is the time that we reserve for setting up the connection)
             ev_timer_start(_loop, &_timer);
@@ -422,7 +430,7 @@ private:
                 Watchable *watchable = this;
                 
                 // we should monitor a new filedescriptor
-                _watchers.emplace_back(_loop, watchable, fd, events);
+                _watchers.emplace_back(_loop, watchable, fd, events, ev_priority(&_timer));
             }
         }
     };
@@ -438,6 +446,12 @@ private:
      *  @var std::list
      */
     std::list<Wrapper> _wrappers;
+    
+    /**
+     *  The priority that watchers should have (higher prio means libev gives more prio to this eveht)
+     *  @var int
+     */
+    int _priority;
 
     /**
      *  Lookup a connection-wrapper, when the wrapper is not found, we construct one
@@ -454,7 +468,7 @@ private:
         }
         
         // add to the wrappers
-        _wrappers.emplace_back(_loop, connection);
+        _wrappers.emplace_back(_loop, connection, 60, _priority);
         
         // done
         return _wrappers.back();
@@ -500,9 +514,10 @@ protected:
 public:
     /**
      *  Constructor
-     *  @param  loop    The event loop to wrap
+     *  @param  loop        The event loop to wrap
+     *  @param  priority    The libev priority (higher priorities are invoked earlier)
      */
-    LibEvHandler(struct ev_loop *loop) : _loop(loop) {}
+    LibEvHandler(struct ev_loop *loop, int priority = 0) : _loop(loop), _priority(priority) {}
 
     /**
      *  Destructor
