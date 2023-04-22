@@ -41,13 +41,13 @@ public:
     PlatformName()
     {
         // all information
-        struct utsname sysinfo;
+        struct utsname info;
 
         // retrieve system info
-        if (uname(&sysinfo) != 0) return;
+        if (uname(&info) != 0) return;
         
         // add all info
-        _value.append(sysinfo.sysname).append(" ").append(sysinfo.version).append(" ").append(sysinfo.release).append(" running on ").append(sysinfo.nodename);
+        _value.append(info.sysname).append(" ").append(info.nodename).append(" ").append(info.release).append(" ").append(info.version);
     }
     
     /**

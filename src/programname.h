@@ -45,7 +45,17 @@ public:
     /**
      *  Constructor
      */
-    ProgramName() : _valid(readlink("/proc/self/exe", _path, PATH_MAX) == 0) {}
+    ProgramName()
+    {
+        // read the link target
+        auto size = readlink("/proc/self/exe", _path, PATH_MAX);
+        
+        // -1 is returned on error, otherwise the size
+        _valid = size >= 0;
+        
+        // set trailing null byte
+        _path[size == PATH_MAX ? PATH_MAX-1 : size] = '\0';
+    }
     
     /**
      *  Destructor
@@ -61,11 +71,8 @@ public:
         // empty string when not valid
         if (!_valid) return "";
         
-        // locate the last slash
-        auto *slash = strrchr(_path, '/');
-        
-        // if not found return entire path, otherwise just the program name
-        return slash ? slash + 1 : _path;
+        // return path to executable
+        return _path;
     }
 };
 

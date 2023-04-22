@@ -15,6 +15,18 @@
 #include "platformname.h"
 
 /**
+ *  Cause we want to print out version string that is passed to compiled with -D
+ *  flag. Why 2 macros? https://www.guyrutenberg.com/2008/12/20/expanding-macros-into-string-constants-in-c/
+ */
+#define STR_EXPAND(s) #s
+#define STR(s) STR_EXPAND(s)
+
+/**
+ *  The version and distro names
+ */
+#define VERSION_NAME    STR(VERSION)
+
+/**
  *  Set up namespace
  */
 namespace AMQP {
@@ -207,7 +219,7 @@ public:
         
         // fill the peer properties
         if (!properties.contains("product")) properties["product"] = ProgramName();
-        if (!properties.contains("version")) properties["version"] = "Unknown";
+        if (!properties.contains("version")) properties["version"] = "AMQP-CPP " VERSION_NAME;
         if (!properties.contains("platform")) properties["platform"] = PlatformName();
         if (!properties.contains("copyright")) properties["copyright"] = "Copernica AMQP-CPP library :: Copyright 2015-2023 Copernica BV";
         if (!properties.contains("information")) properties["information"] = "https://github.com/CopernicaMarketingSoftware/AMQP-CPP";
