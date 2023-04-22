@@ -5,8 +5,14 @@
  *  is opened. It contains the initial connection properties, and the protocol
  *  number.
  * 
- *  @copyright 2014 - 2022 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
+
+/**
+ *  Dependencies
+ */
+#include "programname.h"
+#include "platformname.h"
 
 /**
  *  Set up namespace
@@ -200,11 +206,11 @@ public:
         capabilities["consumer_cancel_notify"] = true;
         
         // fill the peer properties
-        if (!properties.contains("product")) properties["product"] = "Copernica AMQP library";
+        if (!properties.contains("product")) properties["product"] = ProgramName();
         if (!properties.contains("version")) properties["version"] = "Unknown";
-        if (!properties.contains("platform")) properties["platform"] = "Unknown";
-        if (!properties.contains("copyright")) properties["copyright"] = "Copyright 2015 - 2018 Copernica BV";
-        if (!properties.contains("information")) properties["information"] = "https://www.copernica.com";
+        if (!properties.contains("platform")) properties["platform"] = PlatformName();
+        if (!properties.contains("copyright")) properties["copyright"] = "Copernica AMQP-CPP library :: Copyright 2015-2023 Copernica BV";
+        if (!properties.contains("information")) properties["information"] = "https://github.com/CopernicaMarketingSoftware/AMQP-CPP";
         if (!properties.contains("capabilities")) properties["capabilities"] = capabilities;
         
         // send back a connection start ok frame
@@ -213,6 +219,7 @@ public:
         // done
         return true;
     }
+
 };
 
 /**
