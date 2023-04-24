@@ -11,8 +11,10 @@
 /**
  *  Dependencies
  */
+#ifndef _WIN32
 #include "programname.h"
 #include "platformname.h"
+#endif
 
 /**
  *  Cause we want to print out version string that is passed to compiled with -D
@@ -218,13 +220,21 @@ public:
         capabilities["consumer_cancel_notify"] = true;
         
         // fill the peer properties
-        if (!properties.contains("product")) properties["product"] = ProgramName();
         if (!properties.contains("version")) properties["version"] = "AMQP-CPP " VERSION_NAME;
-        if (!properties.contains("platform")) properties["platform"] = PlatformName();
         if (!properties.contains("copyright")) properties["copyright"] = "Copernica AMQP-CPP library :: Copyright 2015-2023 Copernica BV";
         if (!properties.contains("information")) properties["information"] = "https://github.com/CopernicaMarketingSoftware/AMQP-CPP";
         if (!properties.contains("capabilities")) properties["capabilities"] = capabilities;
-        
+
+#ifdef _WIN32
+        // i don't know that much about win32, so let's use hardcoded string
+        if (!properties.contains("product")) properties["product"] = "application based on AMQP-CPP";
+        if (!properties.contains("platform")) properties["platform"] = "windows";
+#else
+        // on unix-like systems I know how to retrieve application and platform info
+        if (!properties.contains("product")) properties["product"] = ProgramName();
+        if (!properties.contains("platform")) properties["platform"] = PlatformName();
+#endif
+
         // send back a connection start ok frame
         connection->send(ConnectionStartOKFrame(properties, "PLAIN", connection->login().saslPlain(), "en_US"));
         
