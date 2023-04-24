@@ -11,7 +11,7 @@
 /**
  *  Dependencies
  */
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(_WIN64)
 #include "programname.h"
 #include "platformname.h"
 #endif
@@ -225,7 +225,7 @@ public:
         if (!properties.contains("information")) properties["information"] = "https://github.com/CopernicaMarketingSoftware/AMQP-CPP";
         if (!properties.contains("capabilities")) properties["capabilities"] = capabilities;
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(_WIN64)
         // i don't know that much about win32, so let's use hardcoded string
         if (!properties.contains("product")) properties["product"] = "application based on AMQP-CPP";
         if (!properties.contains("platform")) properties["platform"] = "windows";

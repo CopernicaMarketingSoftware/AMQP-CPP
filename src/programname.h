@@ -15,8 +15,8 @@
 /**
  *  Dependencies
  */
-#include <unistd.h>
 #include <limits.h>
+#include <unistd.h>
 
 /**
  *  Begin of namespace
