@@ -5,8 +5,28 @@
  *  is opened. It contains the initial connection properties, and the protocol
  *  number.
  * 
- *  @copyright 2014 - 2022 Copernica BV
+ *  @copyright 2014 - 2023 Copernica BV
  */
+
+/**
+ *  Dependencies
+ */
+#if !defined(_WIN32) && !defined(_WIN64)
+#include "programname.h"
+#include "platformname.h"
+#endif
+
+/**
+ *  Cause we want to print out version string that is passed to compiled with -D
+ *  flag. Why 2 macros? https://www.guyrutenberg.com/2008/12/20/expanding-macros-into-string-constants-in-c/
+ */
+#define STR_EXPAND(s) #s
+#define STR(s) STR_EXPAND(s)
+
+/**
+ *  The version and distro names
+ */
+#define VERSION_NAME    STR(VERSION)
 
 /**
  *  Set up namespace
@@ -200,19 +220,28 @@ public:
         capabilities["consumer_cancel_notify"] = true;
         
         // fill the peer properties
-        if (!properties.contains("product")) properties["product"] = "Copernica AMQP library";
-        if (!properties.contains("version")) properties["version"] = "Unknown";
-        if (!properties.contains("platform")) properties["platform"] = "Unknown";
-        if (!properties.contains("copyright")) properties["copyright"] = "Copyright 2015 - 2018 Copernica BV";
-        if (!properties.contains("information")) properties["information"] = "https://www.copernica.com";
+        if (!properties.contains("version")) properties["version"] = "AMQP-CPP " VERSION_NAME;
+        if (!properties.contains("copyright")) properties["copyright"] = "Copernica AMQP-CPP library :: Copyright 2015-2023 Copernica BV";
+        if (!properties.contains("information")) properties["information"] = "https://github.com/CopernicaMarketingSoftware/AMQP-CPP";
         if (!properties.contains("capabilities")) properties["capabilities"] = capabilities;
-        
+
+#if defined(_WIN32) || defined(_WIN64)
+        // i don't know that much about win32, so let's use hardcoded string
+        if (!properties.contains("product")) properties["product"] = "application based on AMQP-CPP";
+        if (!properties.contains("platform")) properties["platform"] = "windows";
+#else
+        // on unix-like systems I know how to retrieve application and platform info
+        if (!properties.contains("product")) properties["product"] = ProgramName();
+        if (!properties.contains("platform")) properties["platform"] = PlatformName();
+#endif
+
         // send back a connection start ok frame
         connection->send(ConnectionStartOKFrame(properties, "PLAIN", connection->login().saslPlain(), "en_US"));
         
         // done
         return true;
     }
+
 };
 
 /**
