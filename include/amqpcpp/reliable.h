@@ -94,7 +94,8 @@ private:
                 // get the handler
                 auto handler = iter->second;
                 
-                // remove it from the map
+                // remove it from the map (before we make a call to userspace, so that user space
+                // can add even more handlers, without invalidating iterators)
                 _handlers.erase(iter);
 
                 // call the ack handler
@@ -130,34 +131,39 @@ private:
             // the base-class publish methods for some reason.
             if (iter == _handlers.end()) return BASE::onNack(deliveryTag, multiple);
 
-            // call the ack handler
-            iter->second->reportNack();
+            // get the handler (we store it first so that we can remove it)
+            auto handler = iter->second;
 
-            // if the monitor is no longer valid, we stop (we're done)
-            if (!monitor) return;
-
-            // erase it from the map
+            // erase it from the map (we remove it before the call, because the callback might update
+            // the _handlers and invalidate the iterator)
             _handlers.erase(iter);
+
+            // call the ack handler
+            handler->reportNack();
         }
 
         // nack multiple elements
         else
         {
-            // call the handlers
-            for (auto iter = _handlers.begin(); iter != _handlers.end(); iter++)
+            // keep looping for as long as the object is in a valid state
+            while (monitor && !_handlers.empty())
             {
+                // get the first handler
+                auto iter = _handlers.begin();
+                
                 // make sure this is the right deliverytag, if we've passed it we leap out
                 if (iter->first > deliveryTag) break;
 
-                // call the handler
-                iter->second->reportNack();
+                // get the handler
+                auto handler = iter->second;
+                
+                // remove it from the map (before we make a call to userspace, so that user space
+                // can add even more handlers, without invalidating iterators)
+                _handlers.erase(iter);
 
-                // if we were destructed in the meantime, we leap out
-                if (!monitor) return;
+                // call the ack handler
+                handler->reportNack();
             }
-
-            // erase all negatively acknowledged items
-            _handlers.erase(_handlers.begin(), _handlers.upper_bound(deliveryTag));
         }
 
         // if the object is no longer valid, return
