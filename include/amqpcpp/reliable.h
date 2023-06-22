@@ -67,34 +67,39 @@ private:
             // the base-class publish methods for some reason.
             if (iter == _handlers.end()) return BASE::onAck(deliveryTag, multiple);
 
-            // call the ack handler
-            iter->second->reportAck();
+            // get the handler (we store it first so that we can remove it)
+            auto handler = iter->second;
 
-            // if the monitor is no longer valid, we stop (we're done)
-            if (!monitor) return;
-
-            // erase it from the map
+            // erase it from the map (we remove it before the call, because the callback might update
+            // the _handlers and invalidate the iterator)
             _handlers.erase(iter);
+
+            // call the ack handler
+            handler->reportAck();
+
         }
 
         // do multiple at once
         else
         {
-            // call the handlers
-            for (auto iter = _handlers.begin(); iter != _handlers.end(); iter++)
+            // keep looping for as long as the object is in a valid state
+            while (monitor && !_handlers.empty())
             {
+                // get the first handler
+                auto iter = _handlers.begin();
+                
                 // make sure this is the right deliverytag, if we've passed it we leap out
                 if (iter->first > deliveryTag) break;
 
-                // call the handler
-                iter->second->reportAck();
+                // get the handler
+                auto handler = iter->second;
+                
+                // remove it from the map
+                _handlers.erase(iter);
 
-                // if we were destructed in the meantime, we leap out
-                if (!monitor) return;
+                // call the ack handler
+                handler->reportAck();
             }
-
-            // erase all acknowledged items
-            _handlers.erase(_handlers.begin(), _handlers.upper_bound(deliveryTag));
         }
 
         // make sure the object is still valid
