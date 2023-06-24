@@ -233,7 +233,7 @@ public:
         // on unix-like systems I know how to retrieve application and platform info
         if (!properties.contains("product")) properties["product"] = ProgramName();
         if (!properties.contains("platform")) properties["platform"] = PlatformName();
-        if (!properties.contains("connection_name")) properties["product"] = ProgramName();
+        if (!properties.contains("connection_name")) properties["connection_name"] = ProgramName();
 #endif
 
         // send back a connection start ok frame
