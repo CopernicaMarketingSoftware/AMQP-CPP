@@ -66,7 +66,7 @@ protected:
         state_handshake,            // busy with the handshake to open the connection
         state_connected,            // connection is set up and ready for communication
         state_closing,              // connection is busy closing (we have sent the close frame)
-        state_closed                // connection is closed
+        state_closed,               // connection is closed
     } _state = state_protocol;
 
     /**
@@ -426,6 +426,25 @@ public:
 
         // inform the handler
         _handler->onClosed(_parent);
+    }
+
+    /**
+     *  Report that the connection is blocked
+     *  @param  reason
+     */
+    void reportBlocked(const char *reason)
+    {
+        // inform the handler
+        _handler->onBlocked(_parent, reason);
+    }
+
+    /**
+     *  Report that the connection is unblocked
+     */
+    void reportUnblocked()
+    {
+        // inform the handler
+        _handler->onUnblocked(_parent);
     }
 
     /**

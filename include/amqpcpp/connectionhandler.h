@@ -192,6 +192,39 @@ public:
         // make sure compilers dont complain about unused parameters
         (void) connection; 
     }
+
+    /**
+     *  Method that is called when the AMQP connection was blocked.
+     * 
+     *  This method is called, when the server connection gets blocked for the first
+     *  time due to the broker running low on a resource (memory or disk). For
+     *  example, when a RabbitMQ node detects that it is low on RAM, it sends a
+     *  notification to all connected publishing clients supporting this feature.
+     *  If before the connections are unblocked the node also starts running low on
+     *  disk space, another notification will not be sent.
+     *
+     *  @param  connection      The connection that was blocked
+     *  @param  reason          Why was the connection blocked
+     */
+    virtual void onBlocked(Connection *connection, const char *reason) 
+    {
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+    }
+
+    /**
+     *  Method that is called when the AMQP connection is no longer blocked.
+     * 
+     *  This method is called when all resource alarms have cleared and the
+     *  connection is fully unblocked.
+     *
+     *  @param  connection      The connection that is no longer blocked
+     */
+    virtual void onUnblocked(Connection *connection) 
+    { 
+        // make sure compilers dont complain about unused parameters
+        (void) connection;
+    }
 };
 
 /**

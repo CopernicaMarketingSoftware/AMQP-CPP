@@ -116,7 +116,28 @@ private:
      *  @param  connection      The connection that was closed and that is now unusable
      */
     virtual void onClosed(Connection *connection) override;
-    
+
+    /**
+     *  Method that is called when the AMQP connection was blocked.
+     *  @param  connection      The connection that was blocked
+     *  @param  reason          Why was the connection blocked
+     */
+    virtual void onBlocked(Connection *connection, const char *reason) override
+    {
+        // pass to user space
+        if (_handler) _handler->onBlocked(this, reason);
+    }
+
+    /**
+     *  Method that is called when the AMQP connection is no longer blocked.
+     *  @param  connection      The connection that is no longer blocked
+     */
+    virtual void onUnblocked(Connection *connection) 
+    { 
+        // pass to user space
+        if (_handler) _handler->onUnblocked(this);
+    }
+
     /**
      *  Method that is called when the tcp connection has been established
      *  @param  state

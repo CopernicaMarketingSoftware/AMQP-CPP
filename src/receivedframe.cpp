@@ -19,6 +19,8 @@
 #include "connectiontuneframe.h"
 #include "connectioncloseokframe.h"
 #include "connectioncloseframe.h"
+#include "connectionblockframe.h"
+#include "connectionunblockframe.h"
 #include "channelopenframe.h"
 #include "channelopenokframe.h"
 #include "channelflowframe.h"
@@ -195,6 +197,8 @@ bool ReceivedFrame::processConnectionFrame(ConnectionImpl *connection)
         case 41:    return ConnectionOpenOKFrame(*this).process(connection);
         case 50:    return ConnectionCloseFrame(*this).process(connection);
         case 51:    return ConnectionCloseOKFrame(*this).process(connection);
+        case 60:    return ConnectionBlockFrame(*this).process(connection);
+        case 61:    return ConnectionUnblockFrame(*this).process(connection);
     }
 
     // this is a problem

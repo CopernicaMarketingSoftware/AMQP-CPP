@@ -219,6 +219,9 @@ public:
         // queue lives dies, we want to receive a notification that the consumer is no longer alive)
         capabilities["consumer_cancel_notify"] = true;
         
+        // when the rabbitmq server reaches its max capacity, it can send a notification to us, we want them
+        capabilities["connection.blocked"] = true;
+        
         // fill the peer properties
         if (!properties.contains("version")) properties["version"] = "AMQP-CPP " VERSION_NAME;
         if (!properties.contains("copyright")) properties["copyright"] = "Copernica AMQP-CPP library :: Copyright 2015-2023 Copernica BV";
