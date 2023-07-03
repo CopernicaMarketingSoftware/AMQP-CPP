@@ -204,9 +204,10 @@ public:
      *  disk space, another notification will not be sent.
      *
      *  @param  connection      The connection that was blocked
+     *  @param  reason          Why was the connection blocked
      */
-    virtual void onBlocked(Connection *connection) 
-    { 
+    virtual void onBlocked(Connection *connection, const char *reason) 
+    {
         // make sure compilers dont complain about unused parameters
         (void) connection;
     }

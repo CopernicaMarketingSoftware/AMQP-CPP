@@ -94,7 +94,7 @@ public:
     virtual bool process(ConnectionImpl *connection) override
     {
         // report that it is blocked
-        connection->reportBlocked();
+        connection->reportBlocked(this->reason().c_str());
         
         // done
         return true;

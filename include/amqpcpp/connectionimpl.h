@@ -430,11 +430,12 @@ public:
 
     /**
      *  Report that the connection is blocked
+     *  @param  reason
      */
-    void reportBlocked()
+    void reportBlocked(const char *reason)
     {
         // inform the handler
-        _handler->onBlocked(_parent);
+        _handler->onBlocked(_parent, reason);
     }
 
     /**
