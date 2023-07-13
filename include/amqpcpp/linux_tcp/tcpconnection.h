@@ -132,7 +132,7 @@ private:
      *  Method that is called when the AMQP connection is no longer blocked.
      *  @param  connection      The connection that is no longer blocked
      */
-    virtual void onUnblocked(Connection *connection) 
+    virtual void onUnblocked(Connection *connection) override
     { 
         // pass to user space
         if (_handler) _handler->onUnblocked(this);
