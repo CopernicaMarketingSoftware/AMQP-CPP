@@ -167,11 +167,29 @@ private:
     uv_loop_t *_loop;
 
     /**
+     *  timer
+     *  @var uv_timer_t*
+     */
+    uv_timer_t *_timer;
+
+    /**
      *  All I/O watchers that are active, indexed by their filedescriptor
      *  @var std::map<int,Watcher>
      */
     std::map<int,std::unique_ptr<Watcher>> _watchers;
 
+    /**
+     *  timer callback
+     *  @param  handle  Internal timer handle
+     */
+    static void timer_cb(uv_timer_t* handle)
+    {
+        // retrieving the connection
+        TcpConnection* conn = static_cast<TcpConnection*>(handle->data);
+
+        // telliing the connection to send a heartbeat to the broker
+        conn->heartbeat();
+    }
 
     /**
      *  Method that is called by AMQP-CPP to register a filedescriptor for readability or writability
@@ -205,6 +223,30 @@ private:
         }
     }
 
+    /**
+     *  Method that is called when the server sends a heartbeat to the client
+     *  @param  connection  The connection over which the heartbeat was received
+     *  @param  interval    agreed interval by the broker  
+     *  @see    ConnectionHandler::onHeartbeat
+     */
+    uint16_t onNegotiate(TcpConnection *connection, uint16_t interval) override
+    {
+        if(interval < 60) interval = 60;
+
+        // initialization of the timer
+        _timer = new uv_timer_t();
+        uv_timer_init(_loop, _timer);
+
+        // passing connection to be recieved at the callback
+        _timer->data = connection;
+
+        // starting the timer with callback
+        uv_timer_start(_timer, timer_cb, 0, interval*1000);
+
+        // returning the agreed heartbeat interval to the broker
+        return interval;
+    }    
+
 public:
     /**
      *  Constructor
@@ -215,7 +257,18 @@ public:
     /**
      *  Destructor
      */
-    virtual ~LibUvHandler() = default;
+    ~LibUvHandler() 
+    {
+        // stopping the timer
+        uv_timer_stop(_timer);
+
+        // closing the timer handle
+        uv_close(reinterpret_cast<uv_handle_t*>(_timer), [](uv_handle_t* handle){
+
+            // freeing the memory after callback
+            delete reinterpret_cast<uv_timer_t*>(handle);
+        });        
+    };
 };
 
 /**
