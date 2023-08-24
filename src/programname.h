@@ -18,6 +18,7 @@
 #include <limits.h>
 #if defined(_WIN32) || defined(_WIN64)
 #include "Windows.h"
+#define PATH_MAX MAX_PATH
 #else
 #include <unistd.h>
 #endif
