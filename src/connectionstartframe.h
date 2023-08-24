@@ -11,8 +11,8 @@
 /**
  *  Dependencies
  */
-#if !defined(_WIN32) && !defined(_WIN64)
 #include "programname.h"
+#if !defined(_WIN32) && !defined(_WIN64)
 #include "platformname.h"
 #endif
 
