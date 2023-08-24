@@ -227,9 +227,9 @@ public:
         if (!properties.contains("copyright")) properties["copyright"] = "Copernica AMQP-CPP library :: Copyright 2015-2023 Copernica BV";
         if (!properties.contains("information")) properties["information"] = "https://github.com/CopernicaMarketingSoftware/AMQP-CPP";
         if (!properties.contains("capabilities")) properties["capabilities"] = capabilities;
-
         if (!properties.contains("product")) properties["product"] = ProgramName();;
         if (!properties.contains("connection_name")) properties["connection_name"] = ProgramName();
+
 #if defined(_WIN32) || defined(_WIN64)
         // i don't know that much about win32, so let's use hardcoded string
         if (!properties.contains("platform")) properties["platform"] = "windows";
