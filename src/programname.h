@@ -16,7 +16,11 @@
  *  Dependencies
  */
 #include <limits.h>
+#if defined(_WIN32) || defined(_WIN64)
+#include "Windows.h"
+#else
 #include <unistd.h>
+#endif
 
 /**
  *  Begin of namespace
@@ -47,6 +51,9 @@ public:
      */
     ProgramName()
     {
+#if defined(_WIN32) || defined(_WIN64)
+		GetModuleFileNameA(NULL, _path, MAX_PATH);
+#else
         // read the link target
         auto size = readlink("/proc/self/exe", _path, PATH_MAX);
         
@@ -55,6 +62,7 @@ public:
         
         // set trailing null byte
         _path[size == PATH_MAX ? PATH_MAX-1 : size] = '\0';
+#endif
     }
     
     /**
