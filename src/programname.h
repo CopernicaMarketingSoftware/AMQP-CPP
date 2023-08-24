@@ -18,6 +18,7 @@
 #include <limits.h>
 #if defined(_WIN32) || defined(_WIN64)
 #include "Windows.h"
+#define PATH_MAX MAX_PATH
 #else
 #include <unistd.h>
 #endif
@@ -52,7 +53,14 @@ public:
     ProgramName()
     {
 #if defined(_WIN32) || defined(_WIN64)
-		GetModuleFileNameA(NULL, _path, MAX_PATH);
+        // the the 
+        auto size = GetModuleFileNameA(NULL, _path, PATH_MAX);
+        
+        // -1 is returned on error, otherwise the size
+        _valid = size >= 0;
+        
+        // set trailing null byte
+        _path[size == PATH_MAX ? PATH_MAX-1 : size] = '\0';
 #else
         // read the link target
         auto size = readlink("/proc/self/exe", _path, PATH_MAX);
