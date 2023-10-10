@@ -92,6 +92,10 @@ else()
     add_library(${PROJECT_NAME} STATIC ${src_MAIN} ${src_LINUX_TCP})
 endif()
 
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PUBLIC ws2_32)
+endif()
+
 # install rules
 # ------------------------------------------------------------------------------------------------------
 
