@@ -84,8 +84,12 @@ if(AMQP-CPP_BUILD_SHARED)
     # create shared lib
     #add_library(${PROJECT_NAME} SHARED ${SRCS})
     add_library(${PROJECT_NAME} SHARED ${src_MAIN} ${src_LINUX_TCP})
-    # set shared lib version
-    set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION ${SO_VERSION})
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        # set shared lib version
+        SOVERSION ${SO_VERSION}
+        # export symbols for Visual Studio as a workaround
+        WINDOWS_EXPORT_ALL_SYMBOLS ON
+    )
 else()
     # create static lib
     #add_library(${PROJECT_NAME} STATIC ${SRCS})
@@ -99,24 +103,17 @@ endif()
 # install rules
 # ------------------------------------------------------------------------------------------------------
 
-if(AMQP-CPP_BUILD_SHARED)
-    # copy shared lib and its static counter part
-    install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
-            ARCHIVE DESTINATION lib
-            LIBRARY DESTINATION lib
-            RUNTIME DESTINATION lib
-    )
-else()
-    # copy static lib
-    install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
-            ARCHIVE DESTINATION lib
-    )
-endif()
+include(GNUInstallDirs)
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Config
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
 
 # copy header files
-install(DIRECTORY include/amqpcpp/ DESTINATION include/amqpcpp
+install(DIRECTORY include/amqpcpp/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/amqpcpp
         FILES_MATCHING PATTERN "*.h")
-install(FILES include/amqpcpp.h DESTINATION include)
+install(FILES include/amqpcpp.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 install(EXPORT ${PROJECT_NAME}Config DESTINATION cmake)
 export(TARGETS ${PROJECT_NAME} FILE ${PROJECT_NAME}Config.cmake)
@@ -125,7 +122,7 @@ set(DEST_DIR "${CMAKE_INSTALL_PREFIX}")
 set(PRIVATE_LIBS "-llibamqpcc")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/amqpcpp.pc.in"
                "${CMAKE_CURRENT_BINARY_DIR}/amqpcpp.pc" @ONLY)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/amqpcpp.pc" DESTINATION lib/pkgconfig)
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/amqpcpp.pc" DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
 # submodule support
 # ------------------------------------------------------------------------------------------------------
