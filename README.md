@@ -120,9 +120,10 @@ On Windows you are required to define `NOMINMAX` when compiling code that includ
 
 ## Using cmake
 
-The CMake file supports both building and installing. You can choose not to use 
-the install functionality, and instead manually use the build output at `build/bin/`. Keep
-in mind that the TCP module is only supported for Linux. An example install method 
+The CMake file supports building, packaging, and installing. You can choose not to use
+the install functionality, and instead manually use the build output at `build/bin/`.
+You can also choose to generate packages for your system with the target `package` and install those.
+Keep in mind that the TCP module is only supported for Linux. An example install method
 would be:
 
 ```bash
