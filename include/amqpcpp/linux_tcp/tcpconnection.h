@@ -225,8 +225,17 @@ public:
      *  Constructor
      *  @param  handler         User implemented handler object
      *  @param  hostname        The address to connect to
+     *  @param  auth            The authentication to use
      */
-    TcpConnection(TcpHandler *handler, const Address &address);
+    TcpConnection(TcpHandler *handler, const Address &address, const Authentication& auth);
+
+    /**
+     *  Constructor
+     *  @param  handler         User implemented handler object
+     *  @param  hostname        The address to connect to
+     */
+    TcpConnection(TcpHandler *handler, const Address &address) :
+        TcpConnection(handler, address, address.login()) {}
     
     /**
      *  No copying

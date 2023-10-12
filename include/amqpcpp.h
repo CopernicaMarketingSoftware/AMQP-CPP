@@ -80,6 +80,7 @@
 #include "amqpcpp/throttle.h"
 #include "amqpcpp/reliable.h"
 #include "amqpcpp/login.h"
+#include "amqpcpp/externalauth.h"
 #include "amqpcpp/address.h"
 #include "amqpcpp/connectionhandler.h"
 #include "amqpcpp/connectionimpl.h"
