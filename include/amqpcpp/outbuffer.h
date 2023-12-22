@@ -171,8 +171,11 @@ public:
      */
     void add(float value)
     {
+        // copy into the buffer
+        int32_t v = htobe64(reinterpret_cast<int32_t&>(value));
+
         // append the data
-        append(&value, sizeof(value));
+        append(&v, sizeof(v));
     }
 
     /**
@@ -181,8 +184,11 @@ public:
      */
     void add(double value)
     {
+        // copy into the buffer
+        int64_t v = htobe64(reinterpret_cast<int64_t&>(value));
+
         // append the data
-        append(&value, sizeof(value));
+        append(&v, sizeof(v));
     }
 };
 

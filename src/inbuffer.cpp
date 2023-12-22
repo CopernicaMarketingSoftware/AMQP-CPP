@@ -141,9 +141,10 @@ float InBuffer::nextFloat()
     BufferCheck check(this, sizeof(float));
     
     // get four bytes
-    float value;
+    uint32_t value;
     _buffer.copy(_skip, sizeof(float), &value);
-    return value;
+    value = be32toh(value);
+    return reinterpret_cast<float&>(value);
 }
 
 /**
@@ -156,9 +157,10 @@ double InBuffer::nextDouble()
     BufferCheck check(this, sizeof(double));
     
     // get eight bytes, and convert to host-byte-order
-    double value;
+    uint64_t value;
     _buffer.copy(_skip, sizeof(double), &value);
-    return value;
+    value = be64toh(value);
+    return reinterpret_cast<double&>(value);
 }
 
 /**
