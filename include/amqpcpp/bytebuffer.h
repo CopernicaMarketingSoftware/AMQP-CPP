@@ -13,6 +13,11 @@
  */
 #pragma once
 
+
+#ifdef __APPLE__
+#include "buffer.h"
+#endif
+
 /**
  *  Open namespace
  */

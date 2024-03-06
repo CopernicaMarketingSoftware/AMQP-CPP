@@ -12,6 +12,10 @@
  */
 #pragma once
 
+#ifdef __APPLE__
+#include "../channel.h"
+#endif
+
 /**
  *  Set up namespace
  */
