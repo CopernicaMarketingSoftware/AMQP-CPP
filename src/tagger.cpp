@@ -4,7 +4,7 @@
  *  Implementation for Tagger class.
  *  
  *  @author Michael van der Werve <michael.vanderwerve@mailerq.com>
- *  @copyright 2020 - 2023 Copernica BV
+ *  @copyright 2020 - 2024 Copernica BV
  */
 
 /**
@@ -80,12 +80,15 @@ void Tagger::onAck(uint64_t deliveryTag, bool multiple)
     // leap out if there are still messages or we shouldn't close yet
     if (!_close || unacknowledged()) return;
 
+    // we make a local copy to keep the object in scope even when 'this' is deleted
+    auto close = _close;
+
     // close the channel, and forward the callbacks to the installed handler
     // we need to be sure the the deffered object stays alive even if the callback
     // decides to remove us.
     _implementation->close()
-        .onSuccess([this]() { auto close = _close; close->reportSuccess(); })
-        .onError([this](const char *message) { auto close = _close; close->reportError(message); });
+        .onSuccess([close]() { close->reportSuccess(); })
+        .onError([close](const char *message) { close->reportError(message); });
 }
 
 /**
@@ -98,12 +101,15 @@ void Tagger::onNack(uint64_t deliveryTag, bool multiple)
     // leap out if there are still messages or we shouldn't close yet
     if (!_close || unacknowledged()) return;
 
+    // we make a local copy to keep the object in scope even when 'this' is deleted
+    auto close = _close;
+
     // close the channel, and forward the callbacks to the installed handler
     // we need to be sure the the deffered object stays alive even if the callback
     // decides to remove us.
     _implementation->close()
-        .onSuccess([this]() { auto close = _close; close->reportSuccess(); })
-        .onError([this](const char *message) { auto close = _close; close->reportError(message); });
+        .onSuccess([close]() { close->reportSuccess(); })
+        .onError([close](const char *message) { close->reportError(message); });
 }
 
 /**
@@ -182,8 +188,8 @@ Deferred &Tagger::close()
     // if this was already set to be closed, return that
     if (_close) return *_close;
 
-    // create the deferred
-    _close = std::make_shared<Deferred>(!_implementation->usable());
+    // create the deferred (we make a local copy to keep the object in scope even when 'this is deleted)
+    auto close = _close = std::make_shared<Deferred>(!_implementation->usable());
 
     // if there are open messages or there is a queue, they will still get acked and we will then forward it
     if (unacknowledged()) return *_close;
@@ -192,8 +198,8 @@ Deferred &Tagger::close()
     // we need to be sure the the deffered object stays alive even if the callback
     // decides to remove us.
     _implementation->close()
-        .onSuccess([this]() { auto close = _close; close->reportSuccess(); })
-        .onError([this](const char *message) { auto close = _close; close->reportError(message); });
+        .onSuccess([close]() { close->reportSuccess(); })
+        .onError([close](const char *message) { close->reportError(message); });
 
     // return the created deferred
     return *_close;
