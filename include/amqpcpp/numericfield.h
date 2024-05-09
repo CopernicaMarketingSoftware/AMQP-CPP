@@ -25,6 +25,58 @@
 namespace AMQP {
 
 /**
+ *  Begin namespace Details
+ */
+namespace Details {
+
+/**
+ *  Helper function that always returns false -- but dependent on a template type T
+ *  @return false
+ */
+template <class T> constexpr bool alwaysFalse() { return false; }
+
+/**
+ *  Metafunction for mapping numeric types to methods of InBuffer
+ *  @tparam  T  one of the numeric types
+ */
+template <class T> struct NumberConvert
+{
+    // depending on the type T, call the right method of the provided `frame`
+    static T apply(InBuffer &frame)
+    {
+        // the default implementation is to generate a compile error
+        static_assert(alwaysFalse<T>(), "missing template specialization for this type");
+    }
+};
+
+/**
+ *  Signed variants
+ */
+template <> struct NumberConvert<int8_t>  { static int8_t   apply(InBuffer &frame) { return frame.nextInt8();  } };
+template <> struct NumberConvert<int16_t> { static int16_t  apply(InBuffer &frame) { return frame.nextInt16(); } };
+template <> struct NumberConvert<int32_t> { static int32_t  apply(InBuffer &frame) { return frame.nextInt32(); } };
+template <> struct NumberConvert<int64_t> { static int64_t  apply(InBuffer &frame) { return frame.nextInt64(); } };
+
+/**
+ *  Unsigned variants
+ */
+template <> struct NumberConvert<uint8_t>  { static uint8_t  apply(InBuffer &frame) { return frame.nextUint8();  } };
+template <> struct NumberConvert<uint16_t> { static uint16_t apply(InBuffer &frame) { return frame.nextUint16(); } };
+template <> struct NumberConvert<uint32_t> { static uint32_t apply(InBuffer &frame) { return frame.nextUint32(); } };
+template <> struct NumberConvert<uint64_t> { static uint64_t apply(InBuffer &frame) { return frame.nextUint64(); } };
+
+/**
+ *  Floating-point variants
+ */
+template <> struct NumberConvert<float>  { static float  apply(InBuffer &frame) { return frame.nextFloat();  } };
+template <> struct NumberConvert<double> { static double apply(InBuffer &frame) { return frame.nextDouble(); } };
+
+/**
+ *  End of namespace Details
+ */
+}
+
+/**
  *  Template for numeric field types
  */
 template<
@@ -60,31 +112,7 @@ public:
      *  Parse based on incoming buffer
      *  @param  frame
      */
-    NumericField(InBuffer &frame)
-    {
-// The Microsoft Visual Studio compiler thinks that there is an issue
-// with the following code, so we temporarily disable a specific warning
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4244)
-#endif
-
-        if      (std::is_same<int8_t,   typename std::remove_cv<T>::type>::value) _value = frame.nextInt8();
-        else if (std::is_same<int16_t,  typename std::remove_cv<T>::type>::value) _value = frame.nextInt16();
-        else if (std::is_same<int32_t,  typename std::remove_cv<T>::type>::value) _value = frame.nextInt32();
-        else if (std::is_same<int64_t,  typename std::remove_cv<T>::type>::value) _value = frame.nextInt64();
-        else if (std::is_same<uint8_t,  typename std::remove_cv<T>::type>::value) _value = frame.nextUint8();
-        else if (std::is_same<uint16_t, typename std::remove_cv<T>::type>::value) _value = frame.nextUint16();
-        else if (std::is_same<uint32_t, typename std::remove_cv<T>::type>::value) _value = frame.nextUint32();
-        else if (std::is_same<uint64_t, typename std::remove_cv<T>::type>::value) _value = frame.nextUint64();
-        else if (std::is_same<float,    typename std::remove_cv<T>::type>::value) _value = frame.nextFloat();
-        else if (std::is_same<double,   typename std::remove_cv<T>::type>::value) _value = frame.nextDouble();
-
-// re-enable the warning
-#if defined(_MSC_VER)
-#pragma warning( pop )
-#endif
-    }
+    NumericField(InBuffer &frame) : _value(Details::NumberConvert<T>::apply(frame)) {}
 
     /**
      *  Destructor
