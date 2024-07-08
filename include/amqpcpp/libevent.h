@@ -141,6 +141,22 @@ private:
 
 
     /**
+     *  Method that is called when the heartbeat frequency is negotiated
+     *  @param  connection      The connection that suggested a heartbeat interval
+     *  @param  interval        The suggested interval from the server
+     *  @return uint16_t        The interval to use
+     */
+    virtual uint16_t onNegotiate(TcpConnection *connection, uint16_t interval) override
+    {
+        // call base (in the highly theoretical case that the base class does something meaningful)
+        auto response = TcpHandler::onNegotiate(connection, interval);
+        
+        // because the LibEvHandler has not yet implemented timers for ensuring that we send
+        // some data every couple of seconds, we disabled timeouts
+        return 0;
+    }
+
+    /**
      *  Method that is called by AMQP-CPP to register a filedescriptor for readability or writability
      *  @param  connection  The TCP connection object that is reporting
      *  @param  fd          The filedescriptor to be monitored
