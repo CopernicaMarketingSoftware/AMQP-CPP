@@ -218,25 +218,6 @@ public:
         // postfix
         stream << ")";
     }
-
-    /**
-     *  Cast to array.
-     *
-     *  @note:  This function may look silly and unnecessary. We are, after all, already
-     *          an array. The whole reason we still have this function is that it is virtual
-     *          and if we do not declare a cast to array on a pointer to base (i.e. Field)
-     *          will return an empty field instead of the expected array.
-     *
-     *          Yes, clang gets this wrong and gives incorrect warnings here. See
-     *          https://llvm.org/bugs/show_bug.cgi?id=28263 for more information
-     *
-     *  @return Ourselves
-     */
-    virtual operator const Array& () const override
-    {
-        // this already is an array, so no cast is necessary
-        return *this;
-    }
 };
 
 /**
