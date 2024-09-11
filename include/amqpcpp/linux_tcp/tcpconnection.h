@@ -13,6 +13,13 @@
  */
 #pragma once
 
+#ifdef __APPLE__
+#include "../connectionhandler.h"
+#include "../watchable.h"
+#include "../connection.h"
+#include "../address.h"
+#endif
+
 /**
  *  Set up namespace
  */
