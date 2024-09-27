@@ -149,6 +149,17 @@ private:
     }
     
     /**
+     *  Method that is called to get a user-provided SSL context
+     *  @param  state
+     *  @return SSL_CTX*
+     */
+    virtual SSL_CTX *onSecuring(TcpState *state) override
+    {
+        // pass on to user-space
+        if (_handler) return _handler->onSecuring(this);
+    }
+
+    /**
      *  Method that is called when right before connection is being secured
      *  @param  state
      *  @param  ssl
