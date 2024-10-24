@@ -2,7 +2,7 @@
  *  Field proxy. Returned by the table. Can be casted to the
  *  relevant native type (std::string or numeric)
  *
- *  @copyright 2014 Copernica BV
+ *  @copyright 2014 - 2024 Copernica BV
  */
 
 /**
@@ -198,6 +198,22 @@ public:
      *  @return FieldProxy
      */
     FieldProxy &operator=(const std::string &value)
+    {
+        // in theory we should make a distinction between short and long string,
+        // but in practive only long strings are accepted
+        _source->set(_index, LongString(value));
+
+        // allow chaining
+        return *this;
+    }
+
+    /**
+     *  Assign a string value
+     *
+     *  @param  value
+     *  @return FieldProxy
+     */
+    FieldProxy &operator=(const std::string_view &value)
     {
         // in theory we should make a distinction between short and long string,
         // but in practive only long strings are accepted
