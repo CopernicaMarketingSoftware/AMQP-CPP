@@ -9,8 +9,13 @@
 # - AMQP-CPP_LINUX_TCP (default OFF)
 #       ON:  Build posix handler implementation
 #       OFF: Don't build posix handler implementation
+#
+# - AMQP-CPP_BUILD_DOCS (default OFF)
+#       ON:  Build docs
+#       OFF: Don't build docs
+#
 
-cmake_minimum_required(VERSION 3.4 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
 
 # project name
 project(amqpcpp)
@@ -23,6 +28,7 @@ set (SO_VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
 option(AMQP-CPP_BUILD_SHARED "Build shared library. If off, build will be static." OFF)
 option(AMQP-CPP_LINUX_TCP "Build linux sockets implementation." OFF)
 option(AMQP-CPP_BUILD_EXAMPLES "Build amqpcpp examples" OFF)
+option(AMQP-CPP_BUILD_DOCS "Build documentation" OFF)
 
 # pass version number to source files as macro
 add_compile_definitions(VERSION=${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
@@ -136,4 +142,10 @@ if(AMQP-CPP_LINUX_TCP)
     # Find OpenSSL and provide include dirs
     find_package(OpenSSL REQUIRED)
     target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
+endif()
+
+if(AMQP-CPP_BUILD_DOCS)
+    find_package(Doxygen REQUIRED)
+
+    doxygen_add_docs(docs ${src_MAIN} ${src_LINUX_TCP} include)
 endif()
