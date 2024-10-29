@@ -15,6 +15,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/connect.hpp>
 #include <boost/asio/signal_set.hpp>
+#include <boost/asio/ssl.hpp>
 
 #include <amqpcpp.h>
 #include <amqpcpp/libboostasio.h>
@@ -35,16 +36,20 @@ int main()
         io_context.stop();
     });
 
-    const AMQP::Address address("amqp://guest:guest@localhost/");
+    const AMQP::Address address("amqps://guest:guest@localhost/");
 
     boost::asio::ip::tcp::resolver resolver(io_context);
     boost::asio::ip::tcp::resolver::results_type endpoints = resolver.resolve(address.hostname(), address.secure() ? "amqps" : "amqp");
 
-    boost::asio::ip::tcp::socket socket(io_context);
-    boost::asio::connect(socket, endpoints);
+    boost::asio::ssl::context ssl_context(boost::asio::ssl::context::sslv23);
+    boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket(io_context, ssl_context);
+    boost::asio::connect(ssl_socket.lowest_layer(), endpoints);
+
+    ssl_socket.set_verify_mode(boost::asio::ssl::verify_none);
+    ssl_socket.handshake(ssl_socket.client);
 
     // make a connection
-    AMQP::LibBoostAsioConnection connection(std::move(socket), address.login(), address.vhost());
+    AMQP::LibBoostAsioConnection connection(std::move(ssl_socket), address.login(), address.vhost());
 
     // we need a channel too
     AMQP::LibBoostAsioChannel channel(&connection);
@@ -60,6 +65,7 @@ int main()
     });
 
     // run the handler
+    // at the moment, one will need SIGINT to stop.  In time, should add signal handling through boost API.
     return io_context.run();
 }
 
