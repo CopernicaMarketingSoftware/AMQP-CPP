@@ -172,7 +172,7 @@ public:
     void add(float value)
     {
         // copy into the buffer
-        int32_t v = htobe64(reinterpret_cast<int32_t&>(value));
+        int32_t v = htobe32(reinterpret_cast<int32_t&>(value));
 
         // append the data
         append(&v, sizeof(v));
