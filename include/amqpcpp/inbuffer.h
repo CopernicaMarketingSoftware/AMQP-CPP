@@ -124,6 +124,31 @@ public:
     double nextDouble();
 
     /**
+     *  Read a numeric from the buffer
+     *  @return double      double read from buffer
+     */
+    template <typename T, std::enable_if_t<sizeof(T) == 1, bool> = true>
+    T nextNumeric()
+    {
+        return static_cast<T>(nextUint8());
+    }
+    template <typename T, std::enable_if_t<sizeof(T) == 2, bool> = true>
+    T nextNumeric()
+    {
+        return static_cast<T>(nextUint16());
+    }
+    template <typename T, std::enable_if_t<sizeof(T) == 4, bool> = true>
+    T nextNumeric()
+    {
+        return static_cast<T>(nextUint32());
+    }
+    template <typename T, std::enable_if_t<sizeof(T) == 8, bool> = true>
+    T nextNumeric()
+    {
+        return static_cast<T>(nextUint64());
+    }
+
+    /**
      *  Get a pointer to the next binary buffer of a certain size
      *  @param  size
      *  @return char*
