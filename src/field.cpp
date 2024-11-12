@@ -60,6 +60,7 @@ Field::operator const std::string& () const
     return empty;
 }
 
+#ifndef AMQPCPP_NO_IMPLICIT_CAST
 /**
  *  Cast to array
  *  @return Array
@@ -85,6 +86,7 @@ Field::operator const Table& () const
     // return it
     return empty;
 }
+#endif
 
 /**
  *  End of namespace
