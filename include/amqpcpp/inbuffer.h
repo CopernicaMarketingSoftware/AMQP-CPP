@@ -51,6 +51,23 @@ protected:
      */
     size_t _skip = 0;
 
+    template <typename T, std::enable_if_t<(sizeof(T) == 1) || (static_cast<uint8_t>(0x1234) == 0x12), bool> = true>
+    const T& be_to_h(const T& value)
+    {
+        return value;
+    }
+
+    template <typename T, std::enable_if_t<(sizeof(T) > 1) && (static_cast<uint8_t>(0x1234) == 0x34), bool> = true>
+    T be_to_h(const T& value)
+    {
+        size_t c = sizeof(T);
+        const uint8_t(&i)[sizeof(T)] = reinterpret_cast<const uint8_t(&)[sizeof(T)]> (value);
+        uint8_t o[sizeof(T)] = {};
+        for (auto& v : i)
+            o[--c] = v;
+        return reinterpret_cast<const T&>(o);
+    }
+
 public:
     /**
      *  Constructor
@@ -130,22 +147,26 @@ public:
     template <typename T, std::enable_if_t<sizeof(T) == 1, bool> = true>
     T nextNumeric()
     {
-        return static_cast<T>(nextUint8());
+        auto val = nextUint8();
+        return reinterpret_cast<const T&>(val);
     }
     template <typename T, std::enable_if_t<sizeof(T) == 2, bool> = true>
     T nextNumeric()
     {
-        return static_cast<T>(nextUint16());
+        auto val = nextUint16();
+        return reinterpret_cast<const T&>(val);
     }
     template <typename T, std::enable_if_t<sizeof(T) == 4, bool> = true>
     T nextNumeric()
     {
-        return static_cast<T>(nextUint32());
+        auto val = nextUint32();
+        return reinterpret_cast<const T&>(val);
     }
     template <typename T, std::enable_if_t<sizeof(T) == 8, bool> = true>
     T nextNumeric()
     {
-        return static_cast<T>(nextUint64());
+        auto val = nextUint64();
+        return reinterpret_cast<const T&>(val);
     }
 
     /**
