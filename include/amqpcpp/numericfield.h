@@ -60,31 +60,7 @@ public:
      *  Parse based on incoming buffer
      *  @param  frame
      */
-    NumericField(InBuffer &frame)
-    {
-// The Microsoft Visual Studio compiler thinks that there is an issue
-// with the following code, so we temporarily disable a specific warning
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4244)
-#endif
-
-        if      (std::is_same<int8_t,   typename std::remove_cv<T>::type>::value) _value = frame.nextInt8();
-        else if (std::is_same<int16_t,  typename std::remove_cv<T>::type>::value) _value = frame.nextInt16();
-        else if (std::is_same<int32_t,  typename std::remove_cv<T>::type>::value) _value = frame.nextInt32();
-        else if (std::is_same<int64_t,  typename std::remove_cv<T>::type>::value) _value = frame.nextInt64();
-        else if (std::is_same<uint8_t,  typename std::remove_cv<T>::type>::value) _value = frame.nextUint8();
-        else if (std::is_same<uint16_t, typename std::remove_cv<T>::type>::value) _value = frame.nextUint16();
-        else if (std::is_same<uint32_t, typename std::remove_cv<T>::type>::value) _value = frame.nextUint32();
-        else if (std::is_same<uint64_t, typename std::remove_cv<T>::type>::value) _value = frame.nextUint64();
-        else if (std::is_same<float,    typename std::remove_cv<T>::type>::value) _value = frame.nextFloat();
-        else if (std::is_same<double,   typename std::remove_cv<T>::type>::value) _value = frame.nextDouble();
-
-// re-enable the warning
-#if defined(_MSC_VER)
-#pragma warning( pop )
-#endif
-    }
+    NumericField(InBuffer& frame) : _value{ frame.nextNumeric<T>() } {}
 
     /**
      *  Destructor
@@ -156,6 +132,16 @@ public:
     bool isInteger() const override
     {
         return std::is_integral<T>::value;
+    }
+
+    /**
+     *  We are an floating_point field
+     *
+     *  @return true, because we are an floating_point
+     */
+    bool isFloat() const override
+    {
+        return std::is_floating_point<T>::value;
     }
 
     /**

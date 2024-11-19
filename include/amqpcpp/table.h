@@ -137,6 +137,8 @@ public:
     Table &set(const std::string &name, int32_t value) { return set(name, Long(value)); }
     Table &set(const std::string &name, uint64_t value) { return set(name, ULongLong(value)); }
     Table &set(const std::string &name, int64_t value) { return set(name, LongLong(value)); }
+    Table &set(const std::string &name, float value) { return set(name, Float(value)); }
+    Table &set(const std::string &name, double value) { return set(name, Double(value)); }
     Table &set(const std::string &name, const std::string &value) { return set(name, LongString(value)); }
     Table &set(const std::string &name, const std::string_view &value) { return set(name, LongString(value)); }
     Table &set(const std::string &name, const char *value) { return set(name, LongString(std::string(value))); }

@@ -38,7 +38,7 @@
 #include "amqpcpp/classes.h"
 
 // utility classes
-#include "amqpcpp/endian.h"
+//#include "amqpcpp/endian.h"
 #include "amqpcpp/buffer.h"
 #include "amqpcpp/bytebuffer.h"
 #include "amqpcpp/inbuffer.h"

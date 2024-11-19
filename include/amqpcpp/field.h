@@ -107,6 +107,7 @@ public:
      *  @return Is the field a specific type?
      */
     virtual bool isInteger() const { return false; }
+    virtual bool isFloat()   const { return false; }
     virtual bool isDecimal() const { return false; }
     virtual bool isArray()   const { return false; }
     virtual bool isTable()   const { return false; }
