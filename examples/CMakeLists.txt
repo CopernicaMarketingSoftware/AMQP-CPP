@@ -30,3 +30,14 @@ add_executable(amqpcpp_libuv_example libuv.cpp)
 add_dependencies(amqpcpp_libuv_example amqpcpp)
 
 target_link_libraries(amqpcpp_libuv_example amqpcpp uv pthread dl ssl)
+
+
+###################################
+# Libuv + external authentication
+###################################
+
+add_executable(amqpcpp_libuv_external_example libuv_external.cpp)
+
+add_dependencies(amqpcpp_libuv_external_example amqpcpp)
+
+target_link_libraries(amqpcpp_libuv_external_example amqpcpp uv pthread dl ssl crypto)

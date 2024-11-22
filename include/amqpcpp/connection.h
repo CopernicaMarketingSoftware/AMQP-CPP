@@ -28,23 +28,23 @@ private:
 
 public:
     /**
-     *  Construct an AMQP object based on full login data
+     *  Construct an AMQP object based on authentication data
      * 
      *  The first parameter is a handler object. This handler class is
      *  an interface that should be implemented by the caller.
-     * 
+     *
      *  @param  handler         Connection handler
-     *  @param  login           Login data
+     *  @param  auth            Authentication data
      *  @param  vhost           Vhost to use
      */
-    Connection(ConnectionHandler *handler, const Login &login, const std::string &vhost) : _implementation(this, handler, login, vhost) {}
+    Connection(ConnectionHandler *handler, const Authentication &auth, const std::string &vhost) : _implementation(this, handler, auth, vhost) {}
 
     /**
      *  Construct with default vhost
      *  @param  handler         Connection handler
-     *  @param  login           Login data
+     *  @param  auth            Authentication data
      */
-    Connection(ConnectionHandler *handler, const Login &login) : _implementation(this, handler, login, "/") {}
+    Connection(ConnectionHandler *handler, const Authentication &auth) : _implementation(this, handler, auth, "/") {}
 
     /**
      *  Construct an AMQP object with default login data and default vhost
@@ -77,12 +77,21 @@ public:
     Connection &operator=(const Connection &connection) = delete;
     
     /**
-     *  Retrieve the login data
-     *  @return Login
+     *  Retrieve the authentication mechanism
+     *  @return string
      */
-    const Login &login() const
+    const std::string &authenticationMechanism() const
     {
-        return _implementation.login();
+        return _implementation.authenticationMechanism();
+    }
+
+    /**
+     *  Retrieve the authentication response data
+     *  @return string
+     */
+    const std::string &authenticationResponse() const
+    {
+        return _implementation.authenticationResponse();
     }
 
     /**

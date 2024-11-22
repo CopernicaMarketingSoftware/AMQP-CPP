@@ -14,6 +14,7 @@
 /**
  *  Dependencies
  */
+#include "authentication.h"
 #include <string>
 
 /**
@@ -24,7 +25,7 @@ namespace AMQP {
 /**
  *  Class definition
  */
-class Login
+class Login : public Authentication
 {
 private:
     /**
@@ -104,10 +105,19 @@ public:
     }
 
     /**
+     *
+     *  @return string
+     */
+    std::string mechanism() const override
+    {
+        return "PLAIN";
+    }
+
+    /**
      *  String representation in SASL PLAIN mode
      *  @return string
      */
-    std::string saslPlain() const
+    std::string response() const override
     {
         // we need an initial string
         std::string result("\0", 1);
