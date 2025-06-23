@@ -43,6 +43,7 @@ std::unique_ptr<Field> Field::decode(InBuffer &frame)
         case 'T':   return std::unique_ptr<Field>(new Timestamp(frame));
         case 'F':   return std::unique_ptr<Field>(new Table(frame));
         case 'V':   return std::unique_ptr<Field>(new VoidField(frame));
+        case 'x':   return std::unique_ptr<Field>(new LongString(frame));
         default:    return nullptr;
     }
 }
