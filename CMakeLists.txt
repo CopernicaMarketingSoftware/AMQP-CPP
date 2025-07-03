@@ -137,3 +137,49 @@ if(AMQP-CPP_LINUX_TCP)
     find_package(OpenSSL REQUIRED)
     target_include_directories(${PROJECT_NAME} PRIVATE ${OPENSSL_INCLUDE_DIR})
 endif()
+
+# software packaging
+# ------------------------------------------------------------------------------------------------------
+
+# if unix use deb and rpm generators, else default to .tar.gz
+if (UNIX)
+    set(CPACK_GENERATOR DEB RPM)
+endif (UNIX)
+
+# general cpack settings
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C++ library for communicating with a RabbitMQ message broker")
+set(CPACK_PACKAGE_VENDOR "Coppernica Marketing Software")
+set(CPACK_PACKAGE_CONTACT "Copernica <info@copernica.com>")
+set(CPACK_PACKAGE_DESCRIPTION
+    "AMQP-CPP is a C++ library for communicating with a RabbitMQ message broker. The
+    library can be used to parse incoming data from a RabbitMQ server, and to
+    generate frames that can be sent to a RabbitMQ server."
+)
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/CopernicaMarketingSoftware/AMQP-CPP")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH})
+set(CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
+    OWNER_READ
+    OWNER_WRITE
+    OWNER_EXECUTE
+    GROUP_READ
+    GROUP_EXECUTE
+    WORLD_READ
+    WORLD_EXECUTE
+)
+set(CPACK_STRIP_FILES ON)
+
+# deb generator related
+set(CPACK_DEBIAN_PACKAGE_NAME "amqpcpp-dev")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION TRUE)
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/debian/triggers")
+
+# rpm generator related
+set(CPACK_RPM_PACKAGE_NAME "amqpcpp-devel")
+set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION})
+set(CPACK_RPM_PACKAGE_LICENSE "ASL 2.0")
+
+# create package target
+include(CPack)
