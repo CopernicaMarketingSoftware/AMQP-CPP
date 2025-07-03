@@ -62,6 +62,20 @@ public:
     /**
      *  Method that is called after a TCP connection has been set up, and right before
      *  the SSL handshake is going to be performed to secure the connection (only for
+     *  amqps:// connections). If a user space implementation returns a pointer to an
+     *  existing OpenSSL SSL_CTX here, that context will be used to create new SSL
+     *  sessions from. Otherwise, if nullptr is returned, a default SSL_CTX is created.
+     *  @param  connection  The TCP connection
+     *  @return SSL_CTX *   A user-provided, pre-configured SSL_CTX, will not be freed.
+     */
+    virtual SSL_CTX *onSecuring(TcpConnection *connection)
+    {
+        return nullptr;
+    }
+
+    /**
+     *  Method that is called after a TCP connection has been set up, and right before
+     *  the SSL handshake is going to be performed to secure the connection (only for
      *  amqps:// connections). This method can be overridden in user space to load
      *  client side certificates.
      *  @param  connection      The connection for which TLS was just started

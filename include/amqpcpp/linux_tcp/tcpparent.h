@@ -46,7 +46,14 @@ public:
      *  @param  state
      */
     virtual void onConnected(TcpState *state) = 0;
-    
+
+    /**
+     *  Method that is called to get a user-provided SSL context
+     *  @param  state
+     *  @return SSL_CTX*
+     */
+    virtual SSL_CTX *onSecuring(TcpState *state) = 0;
+
     /**
      *  Method that is called right before a connection is secured and that allows userspac to change SSL
      *  @param  state
