@@ -52,8 +52,8 @@ uint16_t InBuffer::nextUint16()
     
     // get two bytes, and convert to host-byte-order
     uint16_t value;
-    _buffer.copy(_skip, sizeof(uint16_t), &value);
-    return be16toh(value);
+    _buffer.copy(_skip, sizeof(value), &value);
+    return be_to_h(value);
 }
 
 /**
@@ -67,8 +67,8 @@ int16_t InBuffer::nextInt16()
     
     // get two bytes, and convert to host-byte-order
     int16_t value;
-    _buffer.copy(_skip, sizeof(int16_t), &value);
-    return be16toh(value);
+    _buffer.copy(_skip, sizeof(value), &value);
+    return be_to_h(value);
 }
 
 /**
@@ -82,8 +82,8 @@ uint32_t InBuffer::nextUint32()
     
     // get four bytes, and convert to host-byte-order
     uint32_t value;
-    _buffer.copy(_skip, sizeof(uint32_t), &value);
-    return be32toh(value);
+    _buffer.copy(_skip, sizeof(value), &value);
+    return be_to_h(value);
 }
 
 /**
@@ -97,8 +97,8 @@ int32_t InBuffer::nextInt32()
     
     // get four bytes, and convert to host-byte-order
     int32_t value;
-    _buffer.copy(_skip, sizeof(int32_t), &value);
-    return be32toh(value);
+    _buffer.copy(_skip, sizeof(value), &value);
+    return be_to_h(value);
 }
 
 /**
@@ -112,8 +112,8 @@ uint64_t InBuffer::nextUint64()
     
     // get eight bytes, and convert to host-byte-order
     uint64_t value;
-    _buffer.copy(_skip, sizeof(uint64_t), &value);
-    return be64toh(value);
+    _buffer.copy(_skip, sizeof(value), &value);
+    return be_to_h(value);
 }
 
 /**
@@ -127,8 +127,8 @@ int64_t InBuffer::nextInt64()
     
     // get eight bytes, and convert to host-byte-order
     int64_t value;
-    _buffer.copy(_skip, sizeof(int64_t), &value);
-    return be64toh(value);
+    _buffer.copy(_skip, sizeof(value), &value);
+    return be_to_h(value);
 }
 
 /**
@@ -142,8 +142,8 @@ float InBuffer::nextFloat()
     
     // get four bytes
     float value;
-    _buffer.copy(_skip, sizeof(float), &value);
-    return value;
+    _buffer.copy(_skip, sizeof(value), &value);
+    return be_to_h(value);
 }
 
 /**
@@ -157,8 +157,8 @@ double InBuffer::nextDouble()
     
     // get eight bytes, and convert to host-byte-order
     double value;
-    _buffer.copy(_skip, sizeof(double), &value);
-    return value;
+    _buffer.copy(_skip, sizeof(value), &value);
+    return be_to_h(value);
 }
 
 /**
