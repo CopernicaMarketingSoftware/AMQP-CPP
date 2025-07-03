@@ -131,7 +131,7 @@ target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC
     $<INSTALL_INTERFACE:include/>
 )
 
-if(AMQP-CPP_LINUX_TCP)
+if(AMQP-CPP_LINUX_TCP OR AMQP-CPP_BUILD_EXAMPLES)
     target_link_libraries(${PROJECT_NAME} ${CMAKE_DL_LIBS})
     # Find OpenSSL and provide include dirs
     find_package(OpenSSL REQUIRED)
