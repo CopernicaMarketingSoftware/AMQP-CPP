@@ -115,6 +115,9 @@ install(DIRECTORY include/amqpcpp/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/amqpc
         FILES_MATCHING PATTERN "*.h")
 install(FILES include/amqpcpp.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/version_template.h ${CMAKE_CURRENT_BINARY_DIR}/version.h)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/version.h DESTINATION include/amqpcpp)
+
 install(EXPORT ${PROJECT_NAME}Config DESTINATION cmake)
 export(TARGETS ${PROJECT_NAME} FILE ${PROJECT_NAME}Config.cmake)
 
