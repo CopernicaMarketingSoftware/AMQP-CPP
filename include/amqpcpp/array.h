@@ -219,6 +219,7 @@ public:
         stream << ")";
     }
 
+#ifndef AMQPCPP_NO_IMPLICIT_CAST
     /**
      *  Cast to array.
      *
@@ -230,6 +231,8 @@ public:
      *          Yes, clang gets this wrong and gives incorrect warnings here. See
      *          https://llvm.org/bugs/show_bug.cgi?id=28263 for more information
      *
+     *          If you still want to avoid this warning but lose the functionality define AMQPCPP_NO_IMPLICIT_CAST before including amqpcpp.h
+     *
      *  @return Ourselves
      */
     virtual operator const Array& () const override
@@ -237,6 +240,7 @@ public:
         // this already is an array, so no cast is necessary
         return *this;
     }
+#endif
 };
 
 /**
